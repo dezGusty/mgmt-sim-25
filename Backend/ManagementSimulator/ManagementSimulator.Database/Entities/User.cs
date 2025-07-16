@@ -32,5 +32,8 @@ namespace ManagementSimulator.Database.Entities
         public UserRole Role { get; set; } = UserRole.InvalidRole;
 
         public string PasswordHash { get; set; }
+
+        public string FullName => $"{FirstName} {LastName}";
+
     }
 }

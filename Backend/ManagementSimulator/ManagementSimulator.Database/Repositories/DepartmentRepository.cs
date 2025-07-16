@@ -13,7 +13,7 @@ namespace ManagementSimulator.Database.Repositories
     public class DepartmentRepository: BaseRepository<Department>, IDeparmentRepository
     {
         private readonly MGMTSimulatorDbContext _databaseContext;
-        public DepartmentRepository(MGMTSimulatorDbContext databaseContext) :base(databaseContext)
+        public DepartmentRepository(MGMTSimulatorDbContext databaseContext): base(databaseContext)
         {
             _databaseContext = databaseContext;
         }

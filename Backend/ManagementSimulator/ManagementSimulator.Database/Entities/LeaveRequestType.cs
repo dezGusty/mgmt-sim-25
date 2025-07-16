@@ -14,6 +14,8 @@ namespace ManagementSimulator.Database.Entities
 
         // fields
         [MaxLength(100)]
-        public string Description { get; set; } 
+        public string? Description { get; set; } 
+
+        // Should we have a Name field??
     }
 }
