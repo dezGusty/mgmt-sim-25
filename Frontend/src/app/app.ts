@@ -1,18 +1,13 @@
 import { Component, signal } from '@angular/core';
-import { StatsCardsComponent } from './stats-cards.component';
-import { AddRequestsComponent } from './add-requests.component';
-
-
+import { StatsCards } from './components/stats-cards/stats-cards';
+import { AddRequests } from './components/add-requests/add-requests';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [StatsCardsComponent, AddRequestsComponent],
+  imports: [StatsCards, AddRequests],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('Frontend');
-
-
 }
