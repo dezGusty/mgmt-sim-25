@@ -3,6 +3,18 @@
   "WorkspaceRootPath": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}|ManagementSimulator\\ManagementSimulator.API.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}|ManagementSimulator\\ManagementSimulator.API.csproj|solutionrelative:managementsimulator\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.infrastructure\\config\\connectionstrings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|solutionrelative:managementsimulator.infrastructure\\config\\connectionstrings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\context\\mgmtsimulatordbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|solutionrelative:managementsimulator.database\\context\\mgmtsimulatordbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\migrations\\20250716064040_initial-create.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|solutionrelative:managementsimulator.database\\migrations\\20250716064040_initial-create.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -13,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\managementsimulator.database.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|solutionrelative:managementsimulator.database\\managementsimulator.database.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\context\\mgmtsimulatordbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|solutionrelative:managementsimulator.database\\context\\mgmtsimulatordbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\context\\mgmtsimulatordbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -45,14 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.infrastructure\\config\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|solutionrelative:managementsimulator.infrastructure\\config\\appconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}|ManagementSimulator\\ManagementSimulator.API.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}|ManagementSimulator\\ManagementSimulator.API.csproj|solutionrelative:managementsimulator\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.infrastructure\\config\\connectionstrings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D3CDC847-F34E-4D2B-8BDE-1FE2645EE629}|ManagementSimulator.Infrastructure\\ManagementSimulator.Infrastructure.csproj|solutionrelative:managementsimulator.infrastructure\\config\\connectionstrings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{58FD3F5C-0E58-41EB-B58D-D739CAAF1EAF}|ManagementSimulator.Database\\ManagementSimulator.Database.csproj|d:\\faculty\\practicasiemens\\mgmt-sim-25\\backend\\managementsimulator\\managementsimulator.database\\enums\\requeststatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -98,63 +98,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "20250716064040_Initial-Create.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Migrations\\20250716064040_Initial-Create.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\Migrations\\20250716064040_Initial-Create.cs",
               "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Migrations\\20250716064040_Initial-Create.cs",
               "RelativeToolTip": "ManagementSimulator.Database\\Migrations\\20250716064040_Initial-Create.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA0AAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-16T06:40:40.899Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "JobTitle.cs",
-              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\JobTitle.cs",
-              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\JobTitle.cs",
-              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\JobTitle.cs",
-              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\JobTitle.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAABIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T10:33:33.351Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "LeaveRequest.cs",
-              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
-              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
-              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
-              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAgwCIAAAAzAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T10:34:06.111Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "LeaveRequestType.cs",
-              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
-              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
-              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
-              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-15T10:34:18.187Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
               "Title": "User.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\User.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\User.cs",
@@ -167,7 +128,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "MGMTSimulatorDbContextFactory.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Context\\MGMTSimulatorDbContextFactory.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\Context\\MGMTSimulatorDbContextFactory.cs",
@@ -180,7 +141,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "ManagementSimulator.Database.csproj",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\ManagementSimulator.Database.csproj",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\ManagementSimulator.Database.csproj",
@@ -194,6 +155,71 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "ConnectionStrings.cs",
+              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
+              "RelativeDocumentMoniker": "ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
+              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
+              "RelativeToolTip": "ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-16T06:27:51.939Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator\\appsettings.json",
+              "RelativeDocumentMoniker": "ManagementSimulator\\appsettings.json",
+              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator\\appsettings.json*",
+              "RelativeToolTip": "ManagementSimulator\\appsettings.json*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-15T09:48:50.009Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "LeaveRequestType.cs",
+              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
+              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
+              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
+              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\LeaveRequestType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T10:34:18.187Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "LeaveRequest.cs",
+              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
+              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
+              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
+              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\LeaveRequest.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAgwCIAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T10:34:06.111Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "JobTitle.cs",
+              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\JobTitle.cs",
+              "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\JobTitle.cs",
+              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\JobTitle.cs",
+              "RelativeToolTip": "ManagementSimulator.Database\\Entities\\JobTitle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-15T10:33:33.351Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "ManagementSimulator.Core.csproj",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Core\\ManagementSimulator.Core.csproj",
               "RelativeDocumentMoniker": "ManagementSimulator.Core\\ManagementSimulator.Core.csproj",
@@ -206,7 +232,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "MGMTSimulatorDbContext.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Context\\MGMTSimulatorDbContext.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\Context\\MGMTSimulatorDbContext.cs",
@@ -219,7 +245,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "Department.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Database\\Entities\\Department.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Database\\Entities\\Department.cs",
@@ -232,7 +258,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "AppConfig.cs",
               "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Infrastructure\\Config\\AppConfig.cs",
               "RelativeDocumentMoniker": "ManagementSimulator.Infrastructure\\Config\\AppConfig.cs",
@@ -241,32 +267,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-15T09:55:29.139Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator\\appsettings.json",
-              "RelativeDocumentMoniker": "ManagementSimulator\\appsettings.json",
-              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator\\appsettings.json",
-              "RelativeToolTip": "ManagementSimulator\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-15T09:48:50.009Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "ConnectionStrings.cs",
-              "DocumentMoniker": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
-              "RelativeDocumentMoniker": "ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
-              "ToolTip": "D:\\faculty\\practicaSiemens\\mgmt-sim-25\\Backend\\ManagementSimulator\\ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
-              "RelativeToolTip": "ManagementSimulator.Infrastructure\\Config\\ConnectionStrings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABDAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-16T06:27:51.939Z",
               "EditorCaption": ""
             },
             {

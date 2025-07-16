@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories
 {
-    internal class DepartmentRepository
+    public class DepartmentRepository
     {
     }
 }

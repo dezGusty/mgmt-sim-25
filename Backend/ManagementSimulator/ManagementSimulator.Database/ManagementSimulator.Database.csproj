@@ -12,9 +12,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Repositories\Intefaces\" />
-	</ItemGroup>
-	<ItemGroup>
 		<ProjectReference Include="..\ManagementSimulator.Infrastructure\ManagementSimulator.Infrastructure.csproj" />
 	</ItemGroup>
 </Project>
