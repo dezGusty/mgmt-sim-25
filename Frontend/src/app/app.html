@@ -3,15 +3,29 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center gap-2">
-          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-8 h-8 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path d="M12 6v6l4 2"></path>
             <circle cx="12" cy="12" r="10"></circle>
           </svg>
           <h1 class="text-xl font-bold text-gray-900">Leave Management</h1>
         </div>
         <div class="flex gap-2">
-          <button class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <button
+            class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
               <circle cx="9" cy="7" r="4"></circle>
               <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M9 21v-2a4 4 0 0 1 3-3.87"></path>
@@ -24,33 +38,64 @@
   </nav>
 
   <div class="max-w-7xl mx-auto p-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
+    >
       <div>
         <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-8 h-8 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <circle cx="9" cy="7" r="4"></circle>
             <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M9 21v-2a4 4 0 0 1 3-3.87"></path>
           </svg>
           Leave Management Dashboard
         </h2>
-        <p class="text-gray-600 mt-1">Manage employee leave requests and approvals</p>
+        <p class="text-gray-600 mt-1">
+          Manage employee leave requests and approvals
+        </p>
       </div>
-      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M12 4v16m8-8H4"></path>
-        </svg>
-        Add New Request
+      <button
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+        (click)="showAddRequestForm = true"
+      >
+        + Add New Request
       </button>
     </div>
+
+    <app-add-request-form
+      *ngIf="showAddRequestForm"
+      (close)="showAddRequestForm = false"
+    />
 
     <app-stats-cards />
 
     <div class="flex flex-wrap gap-2 mb-6">
-      <button class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm">All</button>
-      <button class="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-800 font-medium text-sm border border-yellow-200">Pending</button>
-      <button class="flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-800 font-medium text-sm border border-green-200">Approved</button>
-      <button class="flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-800 font-medium text-sm border border-red-200">Rejected</button>
+      <button
+        class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm"
+      >
+        All
+      </button>
+      <button
+        class="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-800 font-medium text-sm border border-yellow-200"
+      >
+        Pending
+      </button>
+      <button
+        class="flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-800 font-medium text-sm border border-green-200"
+      >
+        Approved
+      </button>
+      <button
+        class="flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-800 font-medium text-sm border border-red-200"
+      >
+        Rejected
+      </button>
     </div>
 
     <app-add-requests />

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgFor, NgClass, NgIf } from '@angular/common';
-import { RequestDetailComponent } from '../../request-detail.component';
+import { RequestDetail } from '../request-detail/request-detail';
 
 interface LeaveRequest {
   id: string;
@@ -11,12 +11,13 @@ interface LeaveRequest {
   days: number;
   reason: string;
   submitted: string;
+  comment?: string;
 }
 
 @Component({
   selector: 'app-add-requests',
   standalone: true,
-  imports: [NgFor, NgClass, NgIf, RequestDetailComponent],
+  imports: [NgFor, NgClass, NgIf, RequestDetail],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
@@ -31,6 +32,7 @@ export class AddRequests {
       days: 5,
       reason: 'Vacation',
       submitted: 'Jun 1, 2024',
+      comment: '',
     },
     {
       id: '2',
@@ -41,6 +43,7 @@ export class AddRequests {
       days: 3,
       reason: 'Medical leave',
       submitted: 'Jun 15, 2024',
+      comment: 'Get well soon!',
     },
     {
       id: '3',
@@ -51,6 +54,7 @@ export class AddRequests {
       days: 5,
       reason: 'Family event',
       submitted: 'Jun 25, 2024',
+      comment: 'Not enough leave days.',
     },
     {
       id: '4',
@@ -61,6 +65,7 @@ export class AddRequests {
       days: 3,
       reason: 'Conference',
       submitted: 'May 1, 2024',
+      comment: 'Enjoy the conference!',
     },
   ];
 
@@ -74,11 +79,21 @@ export class AddRequests {
     this.selectedRequest = null;
   }
 
-  onApprove(id: string) {
+  onApprove(data: { id: string; comment?: string }) {
+    const req = this.requests.find((r) => r.id === data.id);
+    if (req) {
+      req.status = 'Approved';
+      req.comment = data.comment;
+    }
     this.closeDetails();
   }
 
-  onReject(id: string) {
+  onReject(data: { id: string; comment?: string }) {
+    const req = this.requests.find((r) => r.id === data.id);
+    if (req) {
+      req.status = 'Rejected';
+      req.comment = data.comment;
+    }
     this.closeDetails();
   }
 }
