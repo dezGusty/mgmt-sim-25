@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgFor, NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { RequestDetail } from '../request-detail/request-detail';
 
 interface LeaveRequest {
@@ -17,7 +17,7 @@ interface LeaveRequest {
 @Component({
   selector: 'app-add-requests',
   standalone: true,
-  imports: [NgFor, NgClass, NgIf, RequestDetail],
+  imports: [CommonModule, NgClass, RequestDetail],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })

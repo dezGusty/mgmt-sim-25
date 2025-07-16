@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface LeaveRequest {
@@ -17,7 +17,7 @@ interface LeaveRequest {
 @Component({
   selector: 'app-request-detail',
   standalone: true,
-  imports: [NgClass, NgIf, FormsModule],
+  imports: [NgClass, CommonModule, FormsModule],
   templateUrl: './request-detail.html',
   styleUrl: './request-detail.css',
 })
