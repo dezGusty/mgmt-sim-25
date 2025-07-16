@@ -17,4 +17,8 @@
     <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ManagementSimulator.Database\ManagementSimulator.Database.csproj" />
+  </ItemGroup>
+
 </Project>

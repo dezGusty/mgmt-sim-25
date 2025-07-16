@@ -15,6 +15,9 @@ namespace ManagementSimulator.Database.Entities
         public int JobTitleId { get; set; }
         public JobTitle Title { get; set; }
 
+        public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
+        public ICollection<LeaveRequest> ReviewedRequests { get; set; } = new List<LeaveRequest>();
+
 
         // fields
         [Required,MaxLength(50),EmailAddress]
