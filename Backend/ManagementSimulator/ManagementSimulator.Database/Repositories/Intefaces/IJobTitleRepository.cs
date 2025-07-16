@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories.Intefaces
 {
-    public interface IJobTitleRepository
+    public interface IJobTitleRepository: IBaseRepostory<JobTitle>
     {
-        Task<List<Department>> GetAllDepartmentsAsync();
-        Task<Department?> GetDepartmentByIdAsync(int id);
-        Task<Department?> AddDepartmentAsync(Department department);
-        Task<Department?> UpdateDepartmentAsync(Department department);
-        Task<bool> DeleteDepartmentAsync(int id);
+        Task<List<JobTitle>> GetAllJobTitlesAsync();
+        Task<JobTitle?> GetJobTitleByIdAsync(int id);
+        Task<JobTitle?> AddJobTitleAsync(JobTitle jobTitle);
+        Task<JobTitle?> UpdateJobTitleAsync(JobTitle jobTitle);
+        Task<bool> DeleteJobTitleAsync(int id);
     }
 }
