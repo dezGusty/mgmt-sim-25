@@ -61,10 +61,10 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<T>().HasQueryFilter(e => EF.Property<DateTime?>(e, "DeletedAt") == null);
         }
 
-        DbSet<Department> Departments { get; set; }
-        DbSet<JobTitle> JobTitles { get; set; }
-        DbSet<LeaveRequest> LeaveRequests { get; set; }
-        DbSet<LeaveRequestType> LeaveRequestTypes { get; set; }
-        DbSet<User> Users { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<JobTitle> JobTitles { get; set; }
+        public DbSet<LeaveRequest> LeaveRequests { get; set; }
+        public DbSet<LeaveRequestType> LeaveRequestTypes { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
