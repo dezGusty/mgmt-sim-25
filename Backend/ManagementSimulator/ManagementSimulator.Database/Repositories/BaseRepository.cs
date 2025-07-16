@@ -19,6 +19,8 @@ namespace ManagementSimulator.Database.Repositories
             return await GetRecords(includeDeletedEntities).ToListAsync();
         }
 
+
+
         public Task<T?> GetFirstOrDefaultAsync(int primaryKey, bool includeDeletedEntities = false)
         {
             var records = GetRecords(includeDeletedEntities);
@@ -61,6 +63,29 @@ namespace ManagementSimulator.Database.Repositories
                 result = result.Where(r => r.DeletedAt == null);
             }
             return result;
+        }
+
+        public async Task<T> AddAsync(T entity)
+        {
+            Insert(entity);
+            await SaveChangesAsync();
+            return entity;
+        }
+        public async Task<T?> UpdateAsync(T entity)
+        {
+            Update(entity);
+            await SaveChangesAsync();
+            return entity;
+        }
+        public async Task<bool> DeleteAsync(int primaryKey)
+        {
+            var entity = await GetFirstOrDefaultAsync(primaryKey);
+            if (entity is null)
+            {
+                return false;
+            }
+            SoftDelete(entity);
+            return true;
         }
     }
 }

@@ -17,43 +17,5 @@ namespace ManagementSimulator.Database.Repositories
         {
             _databaseContext = databaseContext;
         }
-
-        public Task<List<Department>> GetAllDepartmentsAsync()
-        {
-            return GetAllAsync(includeDeletedEntities: false);
-        }
-
-        public Task<Department?> GetDepartmentByIdAsync(int id)
-        {
-            return _databaseContext.Departments
-                .FirstOrDefaultAsync(department => department.Id == id);
-        }
-
-        public async Task<Department?> AddDepartmentAsync(Department department)
-        {
-            Insert(department);
-            await SaveChangesAsync();
-            return department;
-        }
-
-        public async Task<Department?> UpdateDepartmentAsync(Department department)
-        {
-            Update(department);
-            await SaveChangesAsync();
-            return department;
-        }
-
-        public async Task<bool> DeleteDepartmentAsync(int id)
-        {
-            Department? department = await GetDepartmentByIdAsync(id);
-
-            if (department is null)
-            {
-                return false;
-            }
-            SoftDelete(department);
-            return true;
-        }
-
     }
 }
