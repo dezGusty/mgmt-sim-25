@@ -15,9 +15,9 @@ namespace ManagementSimulator.Database.Entities
 
         //fields
         [Required, MaxLength(30)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [MaxLength(150)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }

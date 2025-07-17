@@ -11,14 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\Requests\" />
-    <Folder Include="Dtos\Responses\" />
-    <Folder Include="Mapping\" />
-    <Folder Include="Services\Interfaces\"/>
-	  
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ManagementSimulator.Database\ManagementSimulator.Database.csproj" />
   </ItemGroup>
 

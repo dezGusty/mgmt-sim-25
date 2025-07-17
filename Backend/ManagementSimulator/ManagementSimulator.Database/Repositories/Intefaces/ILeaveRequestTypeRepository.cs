@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories.Intefaces
 {
-    internal interface ILeaveRequestTypeRepository
+    public interface ILeaveRequestTypeRepository: IBaseRepostory<Entities.LeaveRequestType>
     {
     }
 }
