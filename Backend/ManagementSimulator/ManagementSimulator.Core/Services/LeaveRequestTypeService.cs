@@ -1,7 +1,9 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequestType;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Infrastructure.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +21,7 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
         }
 
-        public async Task<List<LeaveRequestTypeResponseDto>> GetAllAsync()
+        public async Task<List<LeaveRequestTypeResponseDto>> GetAllLeaveRequestTypesAsync()
         {
             var leaveRequestTypes = await _leaveRequestTypeRepository.GetAllAsync();
             return leaveRequestTypes.Select(l => new LeaveRequestTypeResponseDto
@@ -30,11 +32,15 @@ namespace ManagementSimulator.Core.Services
             }).ToList();
         }
 
-        public async Task<LeaveRequestTypeResponseDto?> GetByIdAsync(int id)
+        public async Task<LeaveRequestTypeResponseDto?> GetLeaveRequestTypeByIdAsync(int id)
         {
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
             
-            if (leaveRequestType == null) return null;
+            if (leaveRequestType == null)
+            {
+                throw new EntryNotFoundException(nameof(LeaveRequestType), id);
+            }
+
             return new LeaveRequestTypeResponseDto
             {
                 Id = leaveRequestType.Id,
@@ -43,16 +49,24 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<LeaveRequestTypeResponseDto?> UpdateAsync(UpdateLeaveRequestTypeRequestDto dto)
+        public async Task<LeaveRequestTypeResponseDto?> UpdateLeaveRequestTypeAsync(UpdateLeaveRequestTypeRequestDto dto)
         {
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.Id);
             
-            if (leaveRequestType == null) return null;
+            if (leaveRequestType == null)
+            {
+                throw new EntryNotFoundException(nameof(LeaveRequestType), dto.Id);
+            }
+
+            if(_leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
+            {
+                throw new UniqueConstraintViolationException(nameof(LeaveRequestType), nameof(LeaveRequestType.Description));
+            }
+
             leaveRequestType.Description = dto.Description;
             leaveRequestType.ModifiedAt = DateTime.UtcNow;
 
             var updatedLeaveRequestType = await _leaveRequestTypeRepository.UpdateAsync(leaveRequestType);
-            if (updatedLeaveRequestType == null) return null;
 
             return new LeaveRequestTypeResponseDto
             {
@@ -63,11 +77,37 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteLeaveRequestTypeAsync(int id)
         {
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
-            if (leaveRequestType == null) return false;
+
+            if (leaveRequestType == null)
+            { 
+                throw new EntryNotFoundException(nameof(LeaveRequestType), id);
+            }
+
             return await _leaveRequestTypeRepository.DeleteAsync(leaveRequestType.Id);
+        }
+
+        public async Task<LeaveRequestTypeResponseDto> AddLeaveRequestTypeAsync(CreateLeaveRequestTypeRequestDto dto)
+        {
+            if(await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
+            {
+                throw new UniqueConstraintViolationException(nameof(LeaveRequestType),nameof(LeaveRequestType.Description));
+            }
+
+            var leaveRequestType = new LeaveRequestType
+            {
+                Description = dto.Description,
+            };
+
+            await _leaveRequestTypeRepository.AddAsync(leaveRequestType);
+
+            return new LeaveRequestTypeResponseDto
+            {
+                Id = leaveRequestType.Id,
+                Description = leaveRequestType.Description ?? string.Empty,
+            };
         }
     }
 }

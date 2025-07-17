@@ -29,6 +29,10 @@ namespace ManagementSimulator.Infrastructure.Middleware
             {
                 await HandleExceptionAsync(context, uniqueEx, HttpStatusCode.Conflict);
             }
+            catch (EntryNotFoundException notFoundEx)
+            {
+                await HandleExceptionAsync(context, notFoundEx, HttpStatusCode.NotFound);
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex, HttpStatusCode.InternalServerError);

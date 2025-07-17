@@ -64,7 +64,7 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(lr => lr.User)
                 .WithMany(u => u.LeaveRequests)
-                .HasForeignKey(lr => lr.UserdId)
+                .HasForeignKey(lr => lr.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<LeaveRequest>()
