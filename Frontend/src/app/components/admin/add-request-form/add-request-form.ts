@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-add-request-form',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './add-request-form.html',
   styleUrl: './add-request-form.css',
