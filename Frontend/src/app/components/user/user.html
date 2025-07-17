@@ -55,16 +55,19 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Card pentru submit request -->
+      <!-- Submit request Card -->
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Submit Request</h3>
         <p class="text-gray-600 mb-4">Create a new leave request</p>
-        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+        <button 
+          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          (click)="toggleRequestForm()"
+        >
           New Request
         </button>
       </div>
 
-      <!-- Card pentru my requests -->
+      <!-- My Requests Card -->
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">My Requests</h3>
         <p class="text-gray-600 mb-4">View your submitted requests</p>
@@ -73,7 +76,7 @@
         </button>
       </div>
 
-      <!-- Card pentru status -->
+      <!-- Leave Balance Card -->
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Leave Balance</h3>
         <p class="text-gray-600 mb-4">Check your remaining days</p>
@@ -82,5 +85,11 @@
         </button>
       </div>
     </div>
+    
+    <!-- Leave request form that appears when showRequestForm is true -->
+    <app-user-request-form
+      *ngIf="showRequestForm"
+      (close)="toggleRequestForm()"
+    ></app-user-request-form>
   </div>
 </div>
