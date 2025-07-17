@@ -1,4 +1,5 @@
-﻿using ManagementSimulator.Database.Repositories;
+﻿using ManagementSimulator.Database.Context;
+using ManagementSimulator.Database.Repositories;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,11 +14,12 @@ namespace ManagementSimulator.Database
     {
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
+            services.AddDbContext<MGMTSimulatorDbContext>();
             services.AddScoped<IDeparmentRepository, DepartmentRepository>();
-            services.AddScoped<IJobTitleRepository, JobTitleRepository>();
-            services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
-            services.AddScoped<ILeaveRequestTypeRepository, LeaveRequestTypeRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            //services.AddScoped<IJobTitleRepository, JobTitleRepository>();
+            //services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+            //services.AddScoped<ILeaveRequestTypeRepository, LeaveRequestTypeRepository>();
+            //services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }

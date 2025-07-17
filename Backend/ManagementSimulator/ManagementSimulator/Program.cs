@@ -1,4 +1,6 @@
+using ManagementSimulator.Core;
 using ManagementSimulator.Database;
+using ManagementSimulator.Infrastructure.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,15 +9,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-// builder.Services.AddServices();
+builder.Services.AddServices();
 builder.Services.AddRepositories();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+AppConfig.Init(app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

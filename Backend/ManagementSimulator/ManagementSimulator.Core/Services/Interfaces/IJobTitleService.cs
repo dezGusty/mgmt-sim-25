@@ -2,8 +2,6 @@
 using ManagementSimulator.Core.Dtos.Requests.JobTitle;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Responses;
-using ManagementSimulator.Core.Dtos.Responses.Departments;
-using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
