@@ -9,6 +9,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IJobTitleRepository: IBaseRepostory<JobTitle>
     {
-       
+        Task<JobTitle?> GetJobTitleByNameAsync(string name);
     }
 }

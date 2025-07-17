@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ManagementSimulator.Database.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories.Intefaces
 {
-    internal interface ILeaveRequestTypeRepository
+    public interface ILeaveRequestTypeRepository : IBaseRepostory<LeaveRequestType>
     {
+        public Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description);
     }
 }

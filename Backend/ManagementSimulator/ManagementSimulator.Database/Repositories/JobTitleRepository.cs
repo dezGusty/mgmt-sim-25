@@ -13,10 +13,15 @@ namespace ManagementSimulator.Database.Repositories
     public class JobTitleRepository : BaseRepository<JobTitle>, IJobTitleRepository
     {
 
-        private readonly MGMTSimulatorDbContext _databaseContext;
+        private readonly MGMTSimulatorDbContext _dbContext;
         public JobTitleRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
         {
-            _databaseContext = databaseContext;
+            _dbContext = databaseContext;
+        }
+
+        public async Task<JobTitle?> GetJobTitleByNameAsync(string name)
+        {
+            return await _dbContext.JobTitles.FirstOrDefaultAsync(jt => jt.Name == name);
         }
     }
 }

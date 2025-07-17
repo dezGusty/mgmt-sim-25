@@ -69,12 +69,14 @@ namespace ManagementSimulator.Database.Repositories
             await SaveChangesAsync();
             return entity;
         }
+
         public async Task<T?> UpdateAsync(T entity)
         {
             Update(entity);
             await SaveChangesAsync();
             return entity;
         }
+
         public async Task<bool> DeleteAsync(int primaryKey)
         {
             var entity = await GetFirstOrDefaultAsync(primaryKey);
