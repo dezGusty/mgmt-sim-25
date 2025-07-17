@@ -16,9 +16,9 @@ namespace ManagementSimulator.Database
         {
             services.AddDbContext<MGMTSimulatorDbContext>();
             services.AddScoped<IDeparmentRepository, DepartmentRepository>();
-            //services.AddScoped<IJobTitleRepository, JobTitleRepository>();
+            services.AddScoped<IJobTitleRepository, JobTitleRepository>();
             //services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
-            //services.AddScoped<ILeaveRequestTypeRepository, LeaveRequestTypeRepository>();
+            services.AddScoped<ILeaveRequestTypeRepository, LeaveRequestTypeRepository>();
             //services.AddScoped<IUserRepository, UserRepository>();
 
             return services;

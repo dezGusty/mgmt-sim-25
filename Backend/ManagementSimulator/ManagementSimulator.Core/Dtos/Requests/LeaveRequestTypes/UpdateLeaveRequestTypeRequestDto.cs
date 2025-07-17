@@ -8,7 +8,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequestType
 {
     public class UpdateLeaveRequestTypeRequestDto
     {
-        public int Id { get; set; }
         public string Description { get; set; } = string.Empty;
     }
 }

@@ -9,7 +9,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<List<DepartmentResponseDto>> GetAllDepartmentsAsync();
         Task<DepartmentResponseDto?> GetDepartmentByIdAsync(int id);
         Task<DepartmentResponseDto> AddDepartmentAsync(CreateDepartmentRequestDto request);
-        Task<DepartmentResponseDto?> UpdateDepartmentAsync(UpdateDepartmentRequestDto request);
+        Task<DepartmentResponseDto?> UpdateDepartmentAsync(int id, UpdateDepartmentRequestDto request);
         Task<bool> DeleteDepartmentAsync(int id);
     }
 }

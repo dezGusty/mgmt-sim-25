@@ -60,9 +60,9 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<DepartmentResponseDto?> UpdateDepartmentAsync(UpdateDepartmentRequestDto request)
+        public async Task<DepartmentResponseDto?> UpdateDepartmentAsync(int id, UpdateDepartmentRequestDto request)
         {
-            var existing = await _repository.GetFirstOrDefaultAsync(request.Id);
+            var existing = await _repository.GetFirstOrDefaultAsync(id);
             if (existing == null)
                 return null;
 

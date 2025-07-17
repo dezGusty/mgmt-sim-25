@@ -2,6 +2,8 @@
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Database.Entities;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,9 +45,28 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<LeaveRequestTypeResponseDto?> UpdateAsync(UpdateLeaveRequestTypeRequestDto dto)
+
+
+        public async Task<LeaveRequestTypeResponseDto> AddAsync(CreateLeaveRequestTypeRequestDto dto)
         {
-            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.Id);
+            var newLeaveRequestType = new LeaveRequestType
+            {
+                Description = dto.Description ?? string.Empty
+            };
+
+            await _leaveRequestTypeRepository.AddAsync(newLeaveRequestType);
+
+            return new LeaveRequestTypeResponseDto
+            {
+                Id = newLeaveRequestType.Id,
+                Description = newLeaveRequestType.Description
+            };
+        }
+
+
+        public async Task<LeaveRequestTypeResponseDto?> UpdateAsync(int id,UpdateLeaveRequestTypeRequestDto dto)
+        {
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
             
             if (leaveRequestType == null) return null;
             leaveRequestType.Description = dto.Description;
@@ -59,7 +80,6 @@ namespace ManagementSimulator.Core.Services
                 Id = updatedLeaveRequestType.Id,
                 Description = updatedLeaveRequestType.Description ?? string.Empty,
                 ModifiedAt = updatedLeaveRequestType.ModifiedAt,
-                // Other characteristics can be added here 
             };
         }
 

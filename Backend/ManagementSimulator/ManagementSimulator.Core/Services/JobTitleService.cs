@@ -58,9 +58,9 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<JobTitleResponseDto?> UpdateJobTitleAsync(UpdateJobTitleRequestDto request)
+        public async Task<JobTitleResponseDto?> UpdateJobTitleAsync(int id, UpdateJobTitleRequestDto request)
         {
-            var jobTitle = await _repository.GetFirstOrDefaultAsync(request.Id);
+            var jobTitle = await _repository.GetFirstOrDefaultAsync(id);
             if (jobTitle == null)
                 return null;
             jobTitle.Name = request.Name;

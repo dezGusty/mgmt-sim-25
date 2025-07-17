@@ -12,9 +12,10 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IJobTitleService
     {
+        Task<List<JobTitleResponseDto>> GetAllJobTitlesAsync();
         Task<JobTitleResponseDto?> GetJobTitleByIdAsync(int id);
         Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request);
-        Task<JobTitleResponseDto?> UpdateJobTitleAsync(UpdateJobTitleRequestDto request);
+        Task<JobTitleResponseDto?> UpdateJobTitleAsync(int id,UpdateJobTitleRequestDto request);
         Task<bool> DeleteJobTitleAsync(int id);
     }
 }
