@@ -18,5 +18,10 @@ namespace ManagementSimulator.Database.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
     }
 }

@@ -9,6 +9,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IDeparmentRepository : IBaseRepostory<Department>
     {
-        
+        public Task<Department?> GetDepartmentByNameAsync(string name);
     }
 }
