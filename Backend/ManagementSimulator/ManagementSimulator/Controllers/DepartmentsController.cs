@@ -62,18 +62,19 @@ namespace ManagementSimulator.API.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddDepartmentAsync([FromBody] CreateDepartmentRequestDto dto)
         {
             try
             {
                 var department = await _departmentService.AddDepartmentAsync(dto);
-                return Ok(department);
+                return CreatedAtAction(nameof(GetDepartmentByIdAsync), new { id = department.Id }, department);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the department.");
+                _logger.LogError(ex, "Error creating department");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the department.");
             }
         }
 
@@ -121,5 +122,4 @@ namespace ManagementSimulator.API.Controllers
             }
         }
     }
-
 }
