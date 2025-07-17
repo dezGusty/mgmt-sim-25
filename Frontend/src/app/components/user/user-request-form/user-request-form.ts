@@ -11,30 +11,25 @@ import { FormsModule } from '@angular/forms';
 export class UserRequestForm {
   @Output() close = new EventEmitter<void>();
   
-  // Model pentru formular
   fromDate = '';
   toDate = '';
   reason = '';
-  type = 'annual'; // Tipul de concediu (annual, medical, unpaid, etc.)
+  type = 'annual';
   isSubmitting = false;
   
-  // Metoda pentru închiderea formularului
   closeForm() {
     this.close.emit();
   }
   
-  // Metoda pentru trimiterea formularului
   submitForm() {
     this.isSubmitting = true;
     
-    // Aici ar veni logica de trimitere către server
-    // Simulăm o cerere asincronă
+    // Here would be the logic to send the request to the server
+    // Simulating an asynchronous request
     setTimeout(() => {
       this.isSubmitting = false;
-      // După trimitere, închidem formularul
       this.closeForm();
       
-      // În aplicația reală, aici am salva datele și am actualiza UI-ul
     }, 1000);
   }
 }
