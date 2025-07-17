@@ -7,9 +7,14 @@ import { Router } from '@angular/router';
   styleUrl: './login.css',
 })
 export class Login {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   goBack() {
     this.router.navigate(['/']);
   }
+
+  forgotPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
+
 }

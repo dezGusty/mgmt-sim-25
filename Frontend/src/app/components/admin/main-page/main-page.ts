@@ -14,9 +14,9 @@ import { Router } from '@angular/router';
 export class AdminMainPage {
   showAddRequestForm = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   goBack() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 }

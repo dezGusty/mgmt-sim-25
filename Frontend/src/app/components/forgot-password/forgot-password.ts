@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.html',
-  styleUrl: './user.css',
+  selector: 'app-forgot-password',
+  imports: [],
+  templateUrl: './forgot-password.html',
+  styleUrl: './forgot-password.css'
 })
-export class User {
+export class ForgotPassword {
   constructor(private router: Router) { }
 
   goBack() {
