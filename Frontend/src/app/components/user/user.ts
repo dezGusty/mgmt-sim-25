@@ -7,9 +7,9 @@ import { Router } from '@angular/router';
   styleUrl: './user.css',
 })
 export class User {
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
   goBack() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 }

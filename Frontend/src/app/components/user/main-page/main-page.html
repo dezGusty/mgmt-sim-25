@@ -19,13 +19,7 @@
           <button
             class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm"
           >
-            Admin
-          </button>
-          <button
-            (click)="goBack()"
-            class="text-gray-600 hover:text-gray-800 text-sm"
-          >
-            ← Home
+            User
           </button>
         </div>
       </div>
@@ -50,9 +44,7 @@
           </svg>
           Leave Management Dashboard
         </h2>
-        <p class="text-gray-600 mt-1">
-          Manage employee leave requests and approvals
-        </p>
+        
       </div>
       <button
         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 hover:cursor-pointer"
@@ -72,36 +64,10 @@
       </button>
     </div>
 
-    <app-add-request-form
-      *ngIf="showAddRequestForm"
-      (close)="showAddRequestForm = false"
-    />
+  
 
-    <app-stats-cards />
+    
 
-    <div class="flex flex-wrap gap-2 mb-6">
-      <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm"
-      >
-        All
-      </button>
-      <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-800 font-medium text-sm border border-yellow-200"
-      >
-        Pending
-      </button>
-      <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-800 font-medium text-sm border border-green-200"
-      >
-        Approved
-      </button>
-      <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-800 font-medium text-sm border border-red-200"
-      >
-        Rejected
-      </button>
-    </div>
-
-    <app-add-requests />
+    
   </div>
 </main>
