@@ -10,9 +10,9 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
     {
         Task<List<T>> GetAllAsync(bool includeDeletedEntities = false);
         Task<T?> GetFirstOrDefaultAsync(int primaryKey, bool includeDeletedEntities = false);
-        void Insert(params T[] records);
-        void Update(params T[] records);
-        void SoftDelete(params T[] records);
+        Task<T> AddAsync(T entity);
+        Task<T?> UpdateAsync(T entity);
+        Task<bool> DeleteAsync(int primaryKey);
         Task SaveChangesAsync();
     }
 }

@@ -62,5 +62,28 @@ namespace ManagementSimulator.Database.Repositories
             }
             return result;
         }
+
+        public async Task<T> AddAsync(T entity)
+        {
+            Insert(entity);
+            await SaveChangesAsync();
+            return entity;
+        }
+        public async Task<T?> UpdateAsync(T entity)
+        {
+            Update(entity);
+            await SaveChangesAsync();
+            return entity;
+        }
+        public async Task<bool> DeleteAsync(int primaryKey)
+        {
+            var entity = await GetFirstOrDefaultAsync(primaryKey);
+            if (entity is null)
+            {
+                return false;
+            }
+            SoftDelete(entity);
+            return true;
+        }
     }
 }
