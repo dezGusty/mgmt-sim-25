@@ -29,6 +29,38 @@ namespace ManagementSimulator.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                   .Property(u => u.Email)
+                   .HasMaxLength(50);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Department>()
+                .Property(d => d.Name)
+                .HasMaxLength(30);
+
+            modelBuilder.Entity<Department>()
+                .HasIndex(d => d.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<JobTitle>()
+                .Property(jt => jt.Name)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<JobTitle>()
+                .HasIndex(jt => jt.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<LeaveRequestType>()
+                .Property(lrt => lrt.Description)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<LeaveRequestType>()
+                .HasIndex(lrt => lrt.Description)
+                .IsUnique();
+
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(lr => lr.User)
                 .WithMany(u => u.LeaveRequests)
