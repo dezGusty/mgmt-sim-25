@@ -413,5 +413,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 
-.vs/*
-
+Backend/ManagementSimulator/.vs/
