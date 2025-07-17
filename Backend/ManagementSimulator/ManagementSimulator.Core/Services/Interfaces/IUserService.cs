@@ -14,7 +14,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<List<UserResponseDto>> GetAllUsersAsync();
         Task<UserResponseDto?> GetUserByIdAsync(int id);
         Task<UserResponseDto> AddUserAsync(CreateUserRequestDto request);
-        Task<UserResponseDto?> UpdateUserAsync(UpdateUserRequestDto request);
+        Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto request);
         Task<bool> DeleteUserAsync(int id);
     }
 }

@@ -48,9 +48,9 @@ namespace ManagementSimulator.Core.Services
             return user.ToUserResponseDto();
         }
 
-        public async Task<UserResponseDto?> UpdateUserAsync(UpdateUserRequestDto dto)
+        public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
         {
-            var user = await _repository.GetFirstOrDefaultAsync(dto.Id);
+            var user = await _repository.GetFirstOrDefaultAsync(id);
             if (user == null)
                 return null;
 
