@@ -69,7 +69,8 @@ namespace ManagementSimulator.API.Controllers
             try
             {
                 var department = await _departmentService.AddDepartmentAsync(dto);
-                return CreatedAtAction(nameof(GetDepartmentByIdAsync), new { id = department.Id }, department);
+
+                return Created($"/api/departments/{department.Id}", department);
             }
             catch (Exception ex)
             {
@@ -77,6 +78,7 @@ namespace ManagementSimulator.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the department.");
             }
         }
+
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -100,18 +102,18 @@ namespace ManagementSimulator.API.Controllers
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateDepartmentAsync([FromBody] UpdateDepartmentRequestDto dto)
+        public async Task<IActionResult> UpdateDepartmentAsync(int id,[FromBody] UpdateDepartmentRequestDto dto)
         {
             try
             {
-                var updatedDepartment = await _departmentService.UpdateDepartmentAsync(dto);
+                var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id,dto);
                 if (updatedDepartment == null)
                 {
-                    return NotFound($"Department with ID {dto.Id} not found.");
+                    return NotFound($"Department with ID {id} not found.");
                 }
                 return Ok(updatedDepartment);
             }
