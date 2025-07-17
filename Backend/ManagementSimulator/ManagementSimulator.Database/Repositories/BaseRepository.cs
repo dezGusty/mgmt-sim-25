@@ -19,8 +19,6 @@ namespace ManagementSimulator.Database.Repositories
             return await GetRecords(includeDeletedEntities).ToListAsync();
         }
 
-
-
         public Task<T?> GetFirstOrDefaultAsync(int primaryKey, bool includeDeletedEntities = false)
         {
             var records = GetRecords(includeDeletedEntities);
