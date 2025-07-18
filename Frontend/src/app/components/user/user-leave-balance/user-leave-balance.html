@@ -1,14 +1,14 @@
 <!-- Overlay backdrop -->
-<div class="fixed inset-0 bg-black/25 bg-opacity-50 z-40 flex items-center justify-center p-4">
+<div class="fixed inset-0 bg-black/25 bg-opacity-50 z-40 flex items-start justify-center overflow-y-auto pt-24">
   <!-- Modal content -->
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl animate-fade-in">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl animate-fade-in max-h-[calc(100vh-120px)] flex flex-col my-4">
     <!-- Modal header -->
-    <div class="p-4 border-b flex justify-between items-center">
+    <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
       <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
         <svg class="w-5 h-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Leave Balance
+        Leave Balance 
       </h3>
       <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -18,7 +18,7 @@
     </div>
     
     <!-- Content -->
-    <div class="p-6">
+    <div class="p-6 overflow-y-auto flex-1">
       <!-- Year selector -->
       <div class="mb-6 flex items-center justify-between">
         <h4 class="text-lg font-medium text-gray-900">Leave entitlement for:</h4>
@@ -28,32 +28,31 @@
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </div>
         </div>
       </div>
       
       <!-- Balance summary -->
-      <div class="bg-purple-50 rounded-lg p-4 mb-6 border border-purple-100">
+      <div class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg p-4 mb-6 border border-purple-100">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-purple-700">Total leave days</p>
             <h5 class="text-2xl font-bold text-purple-900">{{ getTotalDays() }} days</h5>
           </div>
-          <div class="hidden sm:block h-12 w-0.5 bg-purple-200"></div>
+          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
           <div>
             <p class="text-sm font-medium text-purple-700">Used</p>
             <h5 class="text-2xl font-bold text-purple-900">{{ getUsedDays() }} days</h5>
           </div>
-          <div class="hidden sm:block h-12 w-0.5 bg-purple-200"></div>
+          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
           <div>
             <p class="text-sm font-medium text-purple-700">Remaining</p>
             <h5 class="text-2xl font-bold text-purple-900">{{ getRemainingDays() }} days</h5>
           </div>
         </div>
         <!-- Progress bar -->
-        <div class="w-full h-2.5 bg-gray-200 rounded-full mt-3">
+        <div class="w-full h-2.5 bg-gray-100 rounded-full mt-3">
           <div class="h-2.5 rounded-full" [style.width.%]="getUsagePercentage()" [ngClass]="{
             'bg-green-500': getUsagePercentage() < 50,
             'bg-yellow-500': getUsagePercentage() >= 50 && getUsagePercentage() < 80,
