@@ -18,6 +18,9 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
         public ICollection<LeaveRequest> ReviewedRequests { get; set; } = new List<LeaveRequest>();
 
+        public ICollection<EmployeeManager> Managers { get; set; } = new List<EmployeeManager>(); 
+        public ICollection<EmployeeManager> Subordinates { get; set; } = new List<EmployeeManager>();
+
 
         // fields
         [Required,MaxLength(50),EmailAddress]
@@ -32,5 +35,13 @@ namespace ManagementSimulator.Database.Entities
         public UserRole Role { get; set; } = UserRole.InvalidRole;
 
         public string PasswordHash { get; set; }
+
+        public string FullName => $"{FirstName} {LastName}";
+
+
+        public bool IsPasswordValid(string password)
+        {
+            return PasswordHash == password;
+        }
     }
 }
