@@ -83,7 +83,9 @@
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Leave Balance</h3>
         <p class="text-gray-600 mb-4">Check your remaining days</p>
-        <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+        <button 
+          class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" 
+          (click)="toggleLeaveBalance()">
           View Balance
         </button>
       </div>
@@ -95,9 +97,16 @@
       (close)="toggleRequestForm()"
     ></app-user-request-form>
 
+    <!-- Requests list that appears when showRequestsList is true -->
     <app-user-requests-list
       *ngIf="showRequestsList"
       (close)="toggleRequestsList()"
     ></app-user-requests-list>
+
+    <!-- User leave balance component that appears when showLeaveBalance is true -->
+    <app-user-leave-balance
+      *ngIf="showLeaveBalance"
+      (close)="toggleLeaveBalance()"
+    ></app-user-leave-balance>
   </div>
 </div>
