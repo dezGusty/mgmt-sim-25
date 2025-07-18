@@ -7,15 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ManagementSimulator.Infrastructure.Exceptions;
 
 namespace ManagementSimulator.Database.Repositories
 {
     public class DepartmentRepository: BaseRepository<Department>, IDeparmentRepository
     {
-        private readonly MGMTSimulatorDbContext _databaseContext;
+        private readonly MGMTSimulatorDbContext _dbContext;
         public DepartmentRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
         {
-            _databaseContext = databaseContext;
+            _dbContext = databaseContext;
+        }
+
+        public async Task<Department?> GetDepartmentByNameAsync(string name)
+        {
+            return await _dbContext.Departments.FirstOrDefaultAsync(d => d.Name == name);
         }
     }
 }

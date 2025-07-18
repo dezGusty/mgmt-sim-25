@@ -1,12 +1,32 @@
-﻿using System;
+﻿using ManagementSimulator.Database.Context;
+using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Database.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Core.Services;
 
 namespace ManagementSimulator.Core
 {
-    internal class DIConfig
+    public static class DIConfig
     {
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IDepartmentService, DepartmentService>();
+            services.AddScoped<IJobTitleService, JobTitleService>();
+            services.AddScoped<ILeaveRequestService, LeaveRequestService>();
+            services.AddScoped<ILeaveRequestTypeService, LeaveRequestTypeService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmployeeManagerService, EmployeeManagerService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IAuthService, AuthService>();
+
+            return services;
+        }
+
     }
 }

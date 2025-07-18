@@ -413,4 +413,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-Backend/ManagementSimulator/.vs/ManagementSimulator/CopilotIndices/17.13.444.19527/CodeChunks.db
+.vs/*
+
+Backend/ManagementSimulator/ManagementSimulator.Database/Migrations/
+Backend/ManagementSimulator/ManagementSimulator/appsettings.json
+
+Backend/ManagementSimulator/.vs/

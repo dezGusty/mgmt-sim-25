@@ -18,5 +18,10 @@ namespace ManagementSimulator.Database.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description)
+        {
+            return await _dbContext.LeaveRequestTypes.FirstOrDefaultAsync(lrt => lrt.Description == description);
+        }
     }
 }
