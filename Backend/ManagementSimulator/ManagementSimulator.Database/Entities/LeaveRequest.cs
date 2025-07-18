@@ -11,7 +11,7 @@ namespace ManagementSimulator.Database.Entities
     public class LeaveRequest : BaseEntity
     {
         // navigation properties
-        public int UserdId { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
 
         public int? ReviewerId { get; set; }
@@ -25,13 +25,13 @@ namespace ManagementSimulator.Database.Entities
         public DateTime EndDate { get; set; }
 
         [MaxLength(50)]
-        public string Reason { get; set; }
+        public string? Reason { get; set; }
 
-        public bool IsApproved { get; set; }
+        public bool? IsApproved { get; set; }
 
         public RequestStatus RequestStatus { get; set; }
 
         [MaxLength(100)]
-        public string ReviewerComment { get; set; }
+        public string? ReviewerComment { get; set; }
     }
 }
