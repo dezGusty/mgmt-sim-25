@@ -12,7 +12,6 @@ namespace ManagementSimulator.Database.Entities
         // navigation properties
         public ICollection<JobTitle> JobTitles { get; set; } = new List<JobTitle>();
 
-
         //fields
         [Required, MaxLength(30)]
         public string? Name { get; set; }

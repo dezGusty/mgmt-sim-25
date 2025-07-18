@@ -23,20 +23,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllDepartmentsAsync()
         {
-            try
+            var departments = await _departmentService.GetAllDepartmentsAsync();
+            if (departments == null || !departments.Any())
             {
-                var departments = await _departmentService.GetAllDepartmentsAsync();
-                if (departments == null || !departments.Any())
-                {
-                    return NotFound("No departments found.");
-                }
-                return Ok(departments);
+                return NotFound("No departments found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving departments");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving departments.");
-            }
+            return Ok(departments);
         }
 
         [HttpGet("{id}")]
@@ -45,20 +37,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetDepartmentByIdAsync(int id)
         {
-            try
+            var department = await _departmentService.GetDepartmentByIdAsync(id);
+            if (department == null)
             {
-                var department = await _departmentService.GetDepartmentByIdAsync(id);
-                if (department == null)
-                {
-                    return NotFound($"Department with ID {id} not found.");
-                }
-                return Ok(department);
+                return NotFound($"Department with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving department by ID");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the department.");
-            }
+            return Ok(department);
         }
 
         [HttpPost]
@@ -66,17 +50,8 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddDepartmentAsync([FromBody] CreateDepartmentRequestDto dto)
         {
-            try
-            {
-                var department = await _departmentService.AddDepartmentAsync(dto);
-
-                return Created($"/api/departments/{department.Id}", department);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating department");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the department.");
-            }
+            var department = await _departmentService.AddDepartmentAsync(dto);
+            return Created($"/api/departments/{department.Id}", department);
         }
 
 
@@ -86,20 +61,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteDepartmentAsync(int id)
         {
-            try
+            bool result = await _departmentService.DeleteDepartmentAsync(id);
+            if (!result)
             {
-                bool result = await _departmentService.DeleteDepartmentAsync(id);
-                if (!result)
-                {
-                    return NotFound($"Department with ID {id} not found.");
-                }
-                return Ok($"Department with ID {id} deleted successfully.");
+                return NotFound($"Department with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting department, department not found");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the department.");
-            }
+            return Ok($"Department with ID {id} deleted successfully.");
         }
 
         [HttpPatch("{id}")]
@@ -108,20 +75,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateDepartmentAsync(int id,[FromBody] UpdateDepartmentRequestDto dto)
         {
-            try
+            var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id,dto);
+            if (updatedDepartment == null)
             {
-                var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id,dto);
-                if (updatedDepartment == null)
-                {
-                    return NotFound($"Department with ID {id} not found.");
-                }
-                return Ok(updatedDepartment);
+                return NotFound($"Department with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating department");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the department.");
-            }
+            return Ok(updatedDepartment);
         }
     }
 }

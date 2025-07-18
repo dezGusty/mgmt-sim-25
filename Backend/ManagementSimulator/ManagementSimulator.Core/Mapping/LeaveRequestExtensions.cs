@@ -28,7 +28,7 @@ namespace ManagementSimulator.Core.Mapping
                 EndDate = entity.EndDate,
 
                 Reason = entity.Reason ?? string.Empty,
-                IsApproved = entity.IsApproved,
+                IsApproved = (bool)entity.IsApproved,
                 RequestStatus = entity.RequestStatus,
                 ReviewerComment = entity.ReviewerComment ?? string.Empty
             };

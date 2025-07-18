@@ -12,13 +12,13 @@ namespace ManagementSimulator.Database.Entities
     {
         // navigation properties
         public int UserId { get; set; }
-        public User? User { get; set; }
+        public User User { get; set; }
 
         public int? ReviewerId { get; set; }
         public User? Reviewer { get; set; }
 
         public int LeaveRequestTypeId { get; set; }
-        public LeaveRequestType? LeaveRequestType { get; set; }
+        public LeaveRequestType LeaveRequestType { get; set; }
 
         // fields
         public DateTime StartDate { get; set; }
@@ -27,7 +27,7 @@ namespace ManagementSimulator.Database.Entities
         [MaxLength(50)]
         public string? Reason { get; set; }
 
-        public bool IsApproved { get; set; }
+        public bool? IsApproved { get; set; }
 
         public RequestStatus RequestStatus { get; set; }
 

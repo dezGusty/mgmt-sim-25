@@ -21,6 +21,7 @@ namespace ManagementSimulator.Core
             services.AddScoped<ILeaveRequestService, LeaveRequestService>();
             services.AddScoped<ILeaveRequestTypeService, LeaveRequestTypeService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmployeeManagerService, EmployeeManagerService>();
 
             return services;
         }

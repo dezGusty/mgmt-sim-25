@@ -30,8 +30,8 @@ namespace ManagementSimulator.Database.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                   .Property(u => u.Email)
-                   .HasMaxLength(50);
+                .Property(u => u.Email)
+                .HasMaxLength(50);
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
@@ -79,6 +79,23 @@ namespace ManagementSimulator.Database.Context
                 .HasForeignKey(lr => lr.LeaveRequestTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<EmployeeManager>()
+                .HasIndex(um => new { um.EmployeeId, um.ManagerId })
+                .IsUnique();
+
+            // ✅ Configurare relații auto-referențiale UserManager
+            modelBuilder.Entity<EmployeeManager>()
+                .HasOne(um => um.Employee)
+                .WithMany(u => u.Managers) // User -> managerii săi (M:N)
+                .HasForeignKey(um => um.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeManager>()
+                .HasOne(um => um.Manager)
+                .WithMany(u => u.Subordinates) // User -> subordonații săi (M:N)
+                .HasForeignKey(um => um.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             base.OnModelCreating(modelBuilder);
 
             ApplySoftDeleteFilter<Department>(modelBuilder);
@@ -86,7 +103,9 @@ namespace ManagementSimulator.Database.Context
             ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);
             ApplySoftDeleteFilter<User>(modelBuilder);
+            ApplySoftDeleteFilter<EmployeeManager>(modelBuilder);
         }
+
 
         private void ApplySoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class
         {
@@ -98,5 +117,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
         public DbSet<LeaveRequestType> LeaveRequestTypes { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<EmployeeManager> EmployeeManagers { get; set; }
     }
 }

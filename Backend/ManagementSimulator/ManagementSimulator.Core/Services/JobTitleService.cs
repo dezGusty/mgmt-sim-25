@@ -1,4 +1,5 @@
-﻿using ManagementSimulator.Core.Dtos.Requests.JobTitle;
+﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
+using ManagementSimulator.Core.Dtos.Requests.JobTitle;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
@@ -50,12 +51,12 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request)
         {
-            if (_jobTitleRepository.GetJobTitleByNameAsync(request.Name!) != null)
+            if (await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
-            if(_departmentRepository.GetFirstOrDefaultAsync(request.DepartmentId) == null)
+            if(await _departmentRepository.GetFirstOrDefaultAsync(request.DepartmentId) == null)
             {
                 throw new EntryNotFoundException(nameof(Department), request.DepartmentId);
             }
@@ -79,24 +80,23 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<JobTitleResponseDto?> UpdateJobTitleAsync(int id, UpdateJobTitleRequestDto request)
         {
-            var jobTitle = await _jobTitleRepository.GetFirstOrDefaultAsync(request.Id);
+            var jobTitle = await _jobTitleRepository.GetFirstOrDefaultAsync(id);
             if (jobTitle == null)
             { 
-                throw new EntryNotFoundException(nameof(JobTitle), request.Id); 
+                throw new EntryNotFoundException(nameof(JobTitle), id); 
             }
 
-            if(await _departmentRepository.GetFirstOrDefaultAsync(request.DepartmentId) == null)
+            if (request.DepartmentId != null && await _departmentRepository.GetFirstOrDefaultAsync((int)request.DepartmentId) == null)
             {
                 throw new EntryNotFoundException(nameof(Department), request.DepartmentId);
             }
 
-            if (await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!) != null)
+            if (request.Name != null && request.Name != string.Empty && await _jobTitleRepository.GetJobTitleByNameAsync(request.Name) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
-            jobTitle.Name = request.Name;
-            jobTitle.DepartmentId = request.DepartmentId;
+            PatchHelper.PatchRequestToEntity.PatchFrom<UpdateJobTitleRequestDto, JobTitle>(jobTitle, request);
             jobTitle.ModifiedAt = DateTime.UtcNow;
 
             await _jobTitleRepository.UpdateAsync(jobTitle);

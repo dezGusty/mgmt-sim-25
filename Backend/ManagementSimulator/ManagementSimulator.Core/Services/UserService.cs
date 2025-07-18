@@ -11,6 +11,7 @@ using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -60,10 +61,20 @@ namespace ManagementSimulator.Core.Services
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                Role = dto.Role,
                 JobTitleId = dto.JobTitleId,
                 PasswordHash = dto.Password // Hashing should be applied in real scenarios!
             };
+
+            // creezi relațiile din tabela intermediară
+            foreach (var managerId in dto.ManagerIds)
+            {
+                var userManager = new EmployeeManager
+                {
+                    EmployeeId = user.Id,
+                    ManagerId = managerId
+                };
+                //_context.UserManagers.Add(userManager);
+            }
 
             await _userRepository.AddAsync(user);
             return user.ToUserResponseDto();
@@ -71,31 +82,27 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
         {
-            if (await _userRepository.GetUserByEmail(dto.Email) != null)
+            User? existing = await _userRepository.GetFirstOrDefaultAsync(id);
+
+            if(existing == null)
+            {
+                throw new EntryNotFoundException(nameof(User), id);
+            }
+
+            if (dto.Email != null && dto.Email != string.Empty && await _userRepository.GetUserByEmail(dto.Email) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(User), nameof(User.Email));
             }
 
-            if (await _jobTitleRepository.GetFirstOrDefaultAsync(dto.JobTitleId) == null)
+            if (dto.JobTitleId != null && await _jobTitleRepository.GetFirstOrDefaultAsync((int)dto.JobTitleId) == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), dto.JobTitleId);
             }
 
-            User user = new User()
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                Role = dto.Role,
-                JobTitleId = dto.JobTitleId
-            };
-            
-            if (!string.IsNullOrEmpty(dto.Password))
-                user.PasswordHash = dto.Password;
+            PatchHelper.PatchRequestToEntity.PatchFrom<UpdateUserRequestDto, User>(existing, dto);
 
-            await _userRepository.UpdateAsync(user);
-            return user.ToUserResponseDto();
+            await _userRepository.SaveChangesAsync();
+            return existing.ToUserResponseDto();
         }
 
         public async Task<bool> DeleteUserAsync(int id)

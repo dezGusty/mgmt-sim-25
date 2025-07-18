@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
+using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
@@ -25,7 +26,7 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
         }
 
-        public async Task<LeaveRequestResponseDto> AddLeaveRequestAsync(LeaveRequestRequestDto dto)
+        public async Task<LeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
         {
             if (await _userRepository.GetFirstOrDefaultAsync(dto.UserId) == null)
             {
@@ -45,7 +46,7 @@ namespace ManagementSimulator.Core.Services
                 EndDate = dto.EndDate,
                 Reason = dto.Reason,
                 RequestStatus = RequestStatus.Pending,
-                IsApproved = false
+                IsApproved = null
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
@@ -102,6 +103,37 @@ namespace ManagementSimulator.Core.Services
 
             await _leaveRequestRepository.DeleteAsync(id);
             return true;
+        }
+
+        public async Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto)
+        {
+            LeaveRequest? existing = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
+
+            if(existing == null)
+            {
+                throw new EntryNotFoundException(nameof(LeaveRequest), id);
+            }
+
+            if(dto.UserId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.UserId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), dto.UserId);
+            }
+
+            if(dto.ReviewerId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.ReviewerId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), dto.ReviewerId);
+            }
+
+            if(dto.LeaveRequestTypeId != null && await _leaveRequestTypeRepository.GetFirstOrDefaultAsync((int)dto.LeaveRequestTypeId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
+            }
+
+            PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestDto, LeaveRequest>(existing, dto);
+            existing.ModifiedAt = DateTime.UtcNow;
+
+            await _leaveRequestRepository.SaveChangesAsync();
+            return existing.ToLeaveRequestResponseDto();
         }
     }
 }

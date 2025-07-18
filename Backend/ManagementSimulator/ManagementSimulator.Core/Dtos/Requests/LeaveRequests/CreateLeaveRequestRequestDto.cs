@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequest
 {
-    public class LeaveRequestRequestDto
+    public class CreateLeaveRequestRequestDto
     {
         public int UserId { get; set; }
         public int? ReviewerId { get; set; }
@@ -17,10 +17,5 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequest
         public DateTime EndDate { get; set; }
 
         public string Reason { get; set; } = string.Empty;
-        public bool IsApproved { get; set; }
-        public RequestStatus RequestStatus { get; set; }
-
-        public string ReviewerComment { get; set; } = string.Empty;
     }
-
 }

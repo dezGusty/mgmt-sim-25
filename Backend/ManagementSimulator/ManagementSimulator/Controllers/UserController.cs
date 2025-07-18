@@ -24,20 +24,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllUsersAsync()
         {
-            try
+            var users = await _userService.GetAllUsersAsync();
+            if (users == null || !users.Any())
             {
-                var users = await _userService.GetAllUsersAsync();
-                if (users == null || !users.Any())
-                {
-                    return NotFound("No users found.");
-                }
-                return Ok(users);
+                return NotFound("No users found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving users");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving users.");
-            }
+            return Ok(users);
         }
 
         [HttpGet("{id}")]
@@ -46,20 +38,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUserByIdAsync(int id)
         {
-            try
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
             {
-                var user = await _userService.GetUserByIdAsync(id);
-                if (user == null)
-                {
-                    return NotFound($"User with ID {id} not found.");
-                }
-                return Ok(user);
+                return NotFound($"User with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving user by ID");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the user.");
-            }
+            return Ok(user);
         }
 
         [HttpPost]
@@ -67,16 +51,8 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddUserAsync([FromBody] CreateUserRequestDto dto)
         {
-            try
-            {
-                var user = await _userService.AddUserAsync(dto);
-                return Created($"/api/users/{user.Id}", user);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating user");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the user.");
-            }
+            var user = await _userService.AddUserAsync(dto);
+            return Created($"/api/users/{user.Id}", user);
         }
 
         [HttpPatch("{id}")]
@@ -85,20 +61,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUserAsync(int id, [FromBody] UpdateUserRequestDto dto)
         {
-            try
+            var updatedUser = await _userService.UpdateUserAsync(id, dto);
+            if (updatedUser == null)
             {
-                var updatedUser = await _userService.UpdateUserAsync(id, dto);
-                if (updatedUser == null)
-                {
-                    return NotFound($"User with ID {id} not found.");
-                }
-                return Ok(updatedUser);
+                return NotFound($"User with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating user");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the user.");
-            }
+            return Ok(updatedUser);
         }
 
         [HttpDelete("{id}")]
@@ -107,20 +75,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUserAsync(int id)
         {
-            try
+            bool result = await _userService.DeleteUserAsync(id);
+            if (!result)
             {
-                bool result = await _userService.DeleteUserAsync(id);
-                if (!result)
-                {
-                    return NotFound($"User with ID {id} not found.");
-                }
-                return Ok($"User with ID {id} deleted successfully.");
+                return NotFound($"User with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting user");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the user.");
-            }
+            return Ok($"User with ID {id} deleted successfully.");
         }
     }
 }

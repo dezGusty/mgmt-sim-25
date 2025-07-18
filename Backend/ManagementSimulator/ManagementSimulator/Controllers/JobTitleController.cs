@@ -24,20 +24,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllJobTitlesAsync()
         {
-            try
+            var jobTitles = await _jobTitleService.GetAllJobTitlesAsync();
+            if (jobTitles == null || !jobTitles.Any())
             {
-                var jobTitles = await _jobTitleService.GetAllJobTitlesAsync();
-                if (jobTitles == null || !jobTitles.Any())
-                {
-                    return NotFound("No job titles found.");
-                }
-                return Ok(jobTitles);
+                return NotFound("No job titles found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving job titles");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving job titles.");
-            }
+            return Ok(jobTitles);
         }
 
         [HttpGet("{id}")]
@@ -46,20 +38,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetJobTitleByIdAsync(int id)
         {
-            try
+            var jobTitle = await _jobTitleService.GetJobTitleByIdAsync(id);
+            if (jobTitle == null)
             {
-                var jobTitle = await _jobTitleService.GetJobTitleByIdAsync(id);
-                if (jobTitle == null)
-                {
-                    return NotFound($"Job title with ID {id} not found.");
-                }
-                return Ok(jobTitle);
+                return NotFound($"Job title with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving job title by ID");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the job title.");
-            }
+            return Ok(jobTitle);
         }
 
         [HttpPost]
@@ -67,17 +51,8 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddJobTitleAsync([FromBody] CreateJobTitleRequestDto dto)
         {
-            try
-            {
-                var jobTitle = await _jobTitleService.AddJobTitleAsync(dto);
-                return Created($"/api/jobtitles/{jobTitle.Id}", jobTitle);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating job title");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the job title.");
-            }
+            var jobTitle = await _jobTitleService.AddJobTitleAsync(dto);
+            return Created($"/api/jobtitles/{jobTitle.Id}", jobTitle);
         }
 
         [HttpPatch("{id}")]
@@ -86,20 +61,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateJobTitleAsync(int id, [FromBody] UpdateJobTitleRequestDto dto)
         {
-            try
+            var updatedJobTitle = await _jobTitleService.UpdateJobTitleAsync(id,dto);
+            if (updatedJobTitle == null)
             {
-                var updatedJobTitle = await _jobTitleService.UpdateJobTitleAsync(id,dto);
-                if (updatedJobTitle == null)
-                {
-                    return NotFound($"Job title with ID {id} not found.");
-                }
-                return Ok(updatedJobTitle);
+                return NotFound($"Job title with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating job title");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the job title.");
-            }
+            return Ok(updatedJobTitle);
         }
 
         [HttpDelete("{id}")]
@@ -108,20 +75,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteJobTitleAsync(int id)
         {
-            try
+            bool result = await _jobTitleService.DeleteJobTitleAsync(id);
+            if (!result)
             {
-                bool result = await _jobTitleService.DeleteJobTitleAsync(id);
-                if (!result)
-                {
-                    return NotFound($"Job title with ID {id} not found.");
-                }
-                return Ok($"Job title with ID {id} deleted successfully.");
+                return NotFound($"Job title with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting job title");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the job title.");
-            }
+            return Ok($"Job title with ID {id} deleted successfully.");
         }
     }
 }

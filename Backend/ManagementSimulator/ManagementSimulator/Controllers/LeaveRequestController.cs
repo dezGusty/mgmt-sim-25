@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
+using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,18 +21,10 @@ namespace ManagementSimulator.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddLeaveRequestAsync([FromBody] LeaveRequestRequestDto dto)
+        public async Task<IActionResult> AddLeaveRequestAsync([FromBody] CreateLeaveRequestRequestDto dto)
         {
-            try
-            {
-                var newRequestId = await _leaveRequestService.AddLeaveRequestAsync(dto);
-                return Created($"/api/leaveRequests/{newRequestId}", newRequestId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating leave request.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the leave request.");
-            }
+            var newRequestId = await _leaveRequestService.AddLeaveRequestAsync(dto);
+            return Created($"/api/leaveRequests/{newRequestId}", newRequestId);
         }
 
         [HttpGet("{id}")]
@@ -40,20 +33,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetLeaveRequestByIdAsync(int id)
         {
-            try
+            var request = await _leaveRequestService.GetRequestByIdAsync(id);
+            if (request == null)
             {
-                var request = await _leaveRequestService.GetRequestByIdAsync(id);
-                if (request == null)
-                {
-                    return NotFound($"Leave request with ID {id} not found.");
-                }
-                return Ok(request);
+                return NotFound($"Leave request with ID {id} not found.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving leave request.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the leave request.");
-            }
+            return Ok(request);
         }
 
         [HttpGet("user/{userId}")]
@@ -62,20 +47,12 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetRequestsByUserAsync(int userId)
         {
-            try
+            var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
+            if (!requests.Any())
             {
-                var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
-                if (!requests.Any())
-                {
-                    return NotFound($"No leave requests found for user with ID {userId}.");
-                }
-                return Ok(requests);
+                return NotFound($"No leave requests found for user with ID {userId}.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving leave requests for user.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving leave requests.");
-            }
+            return Ok(requests);
         }
 
         [HttpGet]
@@ -83,35 +60,28 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllRequestsAsync()
         {
-            try
-            {
-                var requests = await _leaveRequestService.GetAllRequestsAsync();
-                return Ok(requests);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving all leave requests.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving leave requests.");
-            }
+            var requests = await _leaveRequestService.GetAllRequestsAsync();
+            return Ok(requests);
         }
 
-
-        [HttpPatch("{id}")]
+        [HttpPatch("review/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ReviewLeaveRequestAsync(int id, [FromBody] ReviewLeaveRequestDto dto)
         {
-            try
-            {
-                await _leaveRequestService.ReviewLeaveRequestAsync(id, dto);
-                return Ok("Leave request reviewed successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error reviewing leave request with ID {id}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while reviewing the leave request.");
-            }
+            await _leaveRequestService.ReviewLeaveRequestAsync(id, dto);
+            return Ok("Leave request reviewed successfully.");
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateLeaveRequestAsync(int id, [FromBody] UpdateLeaveRequestDto dto)
+        {
+            await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
+            return Ok("Leave request reviewed successfully.");
         }
     }
 }

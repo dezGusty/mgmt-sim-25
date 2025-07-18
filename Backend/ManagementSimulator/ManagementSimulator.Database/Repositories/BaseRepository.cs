@@ -85,6 +85,7 @@ namespace ManagementSimulator.Database.Repositories
                 return false;
             }
             SoftDelete(entity);
+            await SaveChangesAsync();
             return true;
         }
     }

@@ -20,6 +20,7 @@ namespace ManagementSimulator.Database
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
             services.AddScoped<ILeaveRequestTypeRepository, LeaveRequestTypeRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
 
             return services;
         }

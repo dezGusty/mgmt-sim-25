@@ -12,7 +12,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
     {
         Task<List<LeaveRequestTypeResponseDto>> GetAllLeaveRequestTypesAsync();
         Task<LeaveRequestTypeResponseDto?> GetLeaveRequestTypeByIdAsync(int id);
-        Task<LeaveRequestTypeResponseDto?> UpdateLeaveRequestTypeAsync(UpdateLeaveRequestTypeRequestDto dto);
+        Task<LeaveRequestTypeResponseDto?> UpdateLeaveRequestTypeAsync(int id,UpdateLeaveRequestTypeRequestDto dto);
         Task<bool> DeleteLeaveRequestTypeAsync(int id);
         Task<LeaveRequestTypeResponseDto> AddLeaveRequestTypeAsync(CreateLeaveRequestTypeRequestDto dto);
     }

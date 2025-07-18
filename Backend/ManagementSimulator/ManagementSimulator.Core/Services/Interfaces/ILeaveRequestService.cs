@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
+using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Database.Entities;
 using System;
@@ -11,11 +12,12 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface ILeaveRequestService
     {
-        Task<LeaveRequestResponseDto> AddLeaveRequestAsync(LeaveRequestRequestDto dto);
+        Task<LeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto);
         Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId);
         Task<List<LeaveRequestResponseDto>> GetAllRequestsAsync();
         Task<LeaveRequestResponseDto> GetRequestByIdAsync(int id);
-        Task ReviewLeaveRequestAsync(ReviewLeaveRequestDto dto);
+        Task ReviewLeaveRequestAsync(int id,ReviewLeaveRequestDto dto);
+        Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto);
         Task<bool> DeleteLeaveRequestAsync(int id);
     }
 
