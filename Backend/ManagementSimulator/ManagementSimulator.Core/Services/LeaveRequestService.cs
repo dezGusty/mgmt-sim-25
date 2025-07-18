@@ -60,12 +60,12 @@ namespace ManagementSimulator.Core.Services
             return request.ToLeaveRequestResponseDto();
         }
 
-        public async Task ReviewLeaveRequestAsync(ReviewLeaveRequestDto dto)
+        public async Task ReviewLeaveRequestAsync(int id, ReviewLeaveRequestDto dto)
         {
-            var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(dto.Id);
+            var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
 
             if (request == null)
-                throw new Exception($"Leave request with id {dto.Id} not found");
+                throw new Exception($"Leave request with id {id} not found");
 
             request.IsApproved = dto.IsApproved;
             request.RequestStatus = dto.RequestStatus;

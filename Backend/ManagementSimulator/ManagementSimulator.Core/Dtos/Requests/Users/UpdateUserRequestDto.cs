@@ -14,7 +14,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.Users
         public string LastName { get; set; } = string.Empty;
         public UserRole Role { get; set; }
         public int JobTitleId { get; set; }
-        // Password update can be optional
         public string? Password { get; set; }
     }
 }
