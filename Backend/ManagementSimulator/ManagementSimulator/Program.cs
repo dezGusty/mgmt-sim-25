@@ -1,6 +1,7 @@
 using ManagementSimulator.Core;
 using ManagementSimulator.Database;
 using ManagementSimulator.Infrastructure.Config;
+using ManagementSimulator.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

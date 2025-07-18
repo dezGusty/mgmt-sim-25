@@ -11,12 +11,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSimulator.Database.Repositories
 {
-    internal class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository : BaseRepository<User>, IUserRepository
     {
         private readonly MGMTSimulatorDbContext _dbContext;
         public UserRepository(MGMTSimulatorDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
     }
 }

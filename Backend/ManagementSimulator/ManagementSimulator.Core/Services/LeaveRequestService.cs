@@ -5,6 +5,7 @@ using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Enums;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Infrastructure.Exceptions;
 
 
 namespace ManagementSimulator.Core.Services
@@ -12,14 +13,30 @@ namespace ManagementSimulator.Core.Services
     public class LeaveRequestService : ILeaveRequestService
     {
         private readonly ILeaveRequestRepository _leaveRequestRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
 
-        public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository)
+        public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository,
+                                   IUserRepository userRepository,
+                                   ILeaveRequestTypeRepository leaveRequestTypeRepository)
         {
             _leaveRequestRepository = leaveRequestRepository;
+            _userRepository = userRepository;
+            _leaveRequestTypeRepository = leaveRequestTypeRepository;
         }
 
-        public async Task<int> AddLeaveRequestAsync(LeaveRequestRequestDto dto)
+        public async Task<LeaveRequestResponseDto> AddLeaveRequestAsync(LeaveRequestRequestDto dto)
         {
+            if (await _userRepository.GetFirstOrDefaultAsync(dto.UserId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), dto.UserId);
+            }
+
+            if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
+            }
+
             var leaveRequest = new LeaveRequest
             {
                 UserId = dto.UserId,
@@ -32,7 +49,7 @@ namespace ManagementSimulator.Core.Services
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
-            return leaveRequest.Id;
+            return leaveRequest.ToLeaveRequestResponseDto();
         }
 
         public async Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId)
@@ -55,7 +72,7 @@ namespace ManagementSimulator.Core.Services
             var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
 
             if (request == null)
-                throw new Exception($"Leave request with id {id} not found");
+                throw new EntryNotFoundException(nameof(LeaveRequest), id);
 
             return request.ToLeaveRequestResponseDto();
         }
@@ -65,7 +82,7 @@ namespace ManagementSimulator.Core.Services
             var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
 
             if (request == null)
-                throw new Exception($"Leave request with id {id} not found");
+                throw new EntryNotFoundException(nameof(LeaveRequest), dto.Id);
 
             request.IsApproved = dto.IsApproved;
             request.RequestStatus = dto.RequestStatus;
@@ -75,6 +92,16 @@ namespace ManagementSimulator.Core.Services
 
             await _leaveRequestRepository.UpdateAsync(request);
         }
-    }
 
+        public async Task<bool> DeleteLeaveRequestAsync(int id)
+        {
+            if(await _leaveRequestRepository.GetFirstOrDefaultAsync(id) == null)
+            {
+                throw new EntryNotFoundException(nameof(LeaveRequest), id);
+            }
+
+            await _leaveRequestRepository.DeleteAsync(id);
+            return true;
+        }
+    }
 }

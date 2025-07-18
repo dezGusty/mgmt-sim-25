@@ -3,6 +3,7 @@ using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Infrastructure.Exceptions;
 
 
 namespace ManagementSimulator.Core.Services
@@ -32,7 +33,9 @@ namespace ManagementSimulator.Core.Services
         {
             var department = await _repository.GetFirstOrDefaultAsync(id);
             if (department == null)
-                return null;
+            {
+                throw new EntryNotFoundException(nameof(Department), id);
+            }
 
             return new DepartmentResponseDto
             {
@@ -44,6 +47,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<DepartmentResponseDto> AddDepartmentAsync(CreateDepartmentRequestDto request)
         {
+            if (await _repository.GetDepartmentByNameAsync(request.Name) != null)
+            {
+                throw new UniqueConstraintViolationException(nameof(Department), nameof(Department.Name));
+            }
+
             var newDepartment = new Department
             {
                 Name = request.Name,
@@ -64,7 +72,9 @@ namespace ManagementSimulator.Core.Services
         {
             var existing = await _repository.GetFirstOrDefaultAsync(id);
             if (existing == null)
-                return null;
+            { 
+                throw new EntryNotFoundException(nameof(Department), request.Id); 
+            }
 
             existing.Name = request.Name;
             existing.Description = request.Description ?? string.Empty;
@@ -83,6 +93,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<bool> DeleteDepartmentAsync(int id)
         {
+            if(_repository.GetFirstOrDefaultAsync(id) == null)
+            {
+                throw new EntryNotFoundException(nameof(Department), id);
+            }
+
             return await _repository.DeleteAsync(id);
         }
     }
