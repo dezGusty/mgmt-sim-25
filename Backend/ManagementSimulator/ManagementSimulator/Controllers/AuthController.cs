@@ -30,6 +30,7 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync(HttpContext);
         return Ok(new { message = "Successfully logged out." });
     }
+
     [HttpGet("me")]
     public IActionResult Me()
     {
@@ -43,5 +44,4 @@ public class AuthController : ControllerBase
             Role = User.FindFirst(ClaimTypes.Role)?.Value
         });
     }
-
 }

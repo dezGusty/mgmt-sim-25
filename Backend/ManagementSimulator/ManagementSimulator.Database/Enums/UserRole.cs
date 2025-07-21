@@ -10,6 +10,7 @@ namespace ManagementSimulator.Database.Enums
     {
         InvalidRole = 0,
         Employee = 1,
-        Admin = 2
+        Manager = 2  //Manager
+        //Admin=3
     }
 }
