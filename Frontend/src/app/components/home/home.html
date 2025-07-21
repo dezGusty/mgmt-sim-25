@@ -20,9 +20,42 @@
 
     <!-- Butoanele principale -->
     <div class="space-y-4">
+
       <!-- Admin Button -->
       <button
         (click)="navigateToAdmin()"
+        class="w-full bg-pink-400 hover:bg-gray-700 text-white py-4 px-6 rounded-lg flex items-center justify-between transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+      >
+        <div class="flex items-center gap-3">
+          <svg
+          class="w-5 h-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 448 512"
+        >
+          <path
+            fill="currentColor"
+            d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.7-5.8-72.9-16h-16.7C100.3 288 0 388.3 0 512h448c0-123.7-100.3-224-224-224z"
+          />
+        </svg>
+          <div class="text-left">
+            <div class="font-semibold text-lg">Admin</div>
+            <div class="text-gray-100 text-sm">Manage all users</div>
+          </div>
+        </div>
+        <svg
+          class="w-5 h-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 320 512"
+        >
+          <path
+            fill="currentColor"
+            d="m310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+          />
+        </svg>
+      </button>
+      <!-- Manager Button -->
+      <button
+        (click)="navigateToManager()"
         class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg flex items-center justify-between transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
       >
         <div class="flex items-center gap-3">

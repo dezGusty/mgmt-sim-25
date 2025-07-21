@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { UserRequestForm } from './user-request-form/user-request-form';
 import { UserRequestsList } from './user-requests-list/user-requests-list';
 import { UserLeaveBalance } from './user-leave-balance/user-leave-balance';
+import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.html',
   styleUrl: './user.css',
-  imports: [CommonModule, UserRequestForm, UserRequestsList, UserLeaveBalance],
+  imports: [CommonModule, UserRequestForm, UserRequestsList, UserLeaveBalance, CustomNavbar],
 })
 export class User {
   showRequestForm = false;

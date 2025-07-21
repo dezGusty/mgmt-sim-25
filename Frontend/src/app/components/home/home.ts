@@ -13,6 +13,10 @@ export class Home {
     this.router.navigate(['/admin']);
   }
 
+  navigateToManager() {
+    this.router.navigate(['/manager']);
+  }
+
   navigateToLogin() {
     this.router.navigate(['/login']);
   }
