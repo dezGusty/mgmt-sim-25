@@ -19,16 +19,19 @@ namespace ManagementSimulator.Core.Services
         public async Task<bool> LoginAsync(HttpContext httpContext, string email, string password)
         {
             var user = await _userRepository.GetUserByEmail(email);
-
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 return false;
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
-        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+            };
+
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Rolename));
+            }
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -36,6 +39,7 @@ namespace ManagementSimulator.Core.Services
             await httpContext.SignInAsync("Cookies", principal);
             return true;
         }
+
 
         public async Task LogoutAsync(HttpContext httpContext)
         {

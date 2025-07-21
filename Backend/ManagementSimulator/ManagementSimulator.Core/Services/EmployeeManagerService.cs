@@ -1,5 +1,6 @@
 ﻿using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
 using System;
@@ -66,7 +67,7 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = e.Role,
+                Role = string.Join(" ", e.Roles.Select(r => r.Rolename)),
                 JobTitleName = e.Title.Name ?? string.Empty,
             }).ToList();
         }
@@ -86,7 +87,7 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = e.Role,
+                Role = string.Join(" ", e.Roles.Select(r => r.Rolename)),
                 JobTitleName = e.Title.Name ?? string.Empty,
             }).ToList();
         }
