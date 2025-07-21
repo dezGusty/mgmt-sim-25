@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-50">
-  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+  <nav class="border-b sticky top-0 z-50 bg-[#020126]" >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
+      <div class="flex justify-between items-center h-20">
         <div class="flex items-center gap-2">
           <svg
             class="w-6 h-6"
@@ -9,21 +9,21 @@
             viewBox="0 0 640 512"
           >
             <path
-              fill="oklch(54.6% 0.245 262.881)"
+              fill="#7EE3DB"
               d="M381 114.9L186.1 41.8c-16.7-6.2-35.2-5.3-51.1 2.7L89.1 67.4C78 73 77.2 88.5 87.6 95.2l146.9 94.5L136 240 77.8 214.1c-8.7-3.9-18.8-3.7-27.3 .6L18.3 230.8c-9.3 4.7-11.8 16.8-5 24.7l73.1 85.3c6.1 7.1 15 11.2 24.3 11.2l137.7 0c5 0 9.9-1.2 14.3-3.4L535.6 212.2c46.5-23.3 82.5-63.3 100.8-112C645.9 75 627.2 48 600.2 48l-57.4 0c-20.2 0-40.2 4.8-58.2 14L381 114.9zM0 480c0 17.7 14.3 32 32 32l576 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 448c-17.7 0-32 14.3-32 32z"
             />
           </svg>
-          <h1 class="text-xl font-bold text-gray-900">Leave Management</h1>
+          <h1 class="text-2xl font-bold text-white">SIEMENS Leave Management</h1>
         </div>
         <div class="flex gap-2">
           <button
-            class="flex items-center gap-1 px-3 py-1 rounded bg-green-600 text-white font-medium text-sm"
+            class="flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold  text-sm"
           >
-            User
+            Logout
           </button>
           <button
             (click)="goBack()"
-            class="text-gray-600 hover:text-gray-800 text-sm"
+            class="text-emerald-600 hover:text-gray-800 text-sm"
           >
             ← Home
           </button>
@@ -32,20 +32,27 @@
     </div>
   </nav>
 
+  <!-- Gradient container -->
+  <div class="w-full h-52 bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB]  flex items-center justify-between px-6">
+     <!-- Text în stânga -->
+    <div class="text-white max-w-md ">
+      <h2 class="text-4xl  font-semibold text-[#020126]">Ready to take that well-deserved break?</h2>
+    </div>
+
+    <!-- Imagine în dreapta -->
+    <img
+      src="assets/images/people.png"
+      alt="Illustration"
+      class="h-auto w-auto object-contain"
+    />
+  </div>
+
+
   <div class="max-w-7xl mx-auto p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <div>
         <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <svg
-            class="w-8 h-8"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 448 512"
-          >
-            <path
-              fill="oklch(54.6% 0.245 262.881)"
-              d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
-            />
-          </svg>
+          
           User Dashboard
         </h2>
         <p class="text-gray-600 mt-1">
@@ -60,7 +67,7 @@
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Submit Request</h3>
         <p class="text-gray-600 mb-4">Create a new leave request</p>
         <button 
-          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded"
           (click)="toggleRequestForm()"
         >
           New Request
@@ -72,7 +79,7 @@
         <h3 class="text-lg font-semibold text-gray-900 mb-2">My Requests</h3>
         <p class="text-gray-600 mb-4">View your submitted requests</p>
         <button 
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded"
           (click)="toggleRequestsList()"
         >
           View Requests
@@ -83,7 +90,9 @@
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Leave Balance</h3>
         <p class="text-gray-600 mb-4">Check your remaining days</p>
-        <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+        <button 
+          class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded" 
+          (click)="toggleLeaveBalance()">
           View Balance
         </button>
       </div>
@@ -95,9 +104,16 @@
       (close)="toggleRequestForm()"
     ></app-user-request-form>
 
+    <!-- Requests list that appears when showRequestsList is true -->
     <app-user-requests-list
       *ngIf="showRequestsList"
       (close)="toggleRequestsList()"
     ></app-user-requests-list>
+
+    <!-- User leave balance component that appears when showLeaveBalance is true -->
+    <app-user-leave-balance
+      *ngIf="showLeaveBalance"
+      (close)="toggleLeaveBalance()"
+    ></app-user-leave-balance>
   </div>
 </div>

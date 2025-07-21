@@ -1,0 +1,113 @@
+<!-- Overlay backdrop -->
+<div class="fixed inset-0 bg-black/25 bg-opacity-50 z-40 flex items-start justify-center overflow-y-auto pt-24">
+  <!-- Modal content -->
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl animate-fade-in max-h-[calc(100vh-120px)] flex flex-col my-4">
+    <!-- Modal header -->
+    <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+      <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <svg class="w-5 h-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Leave Balance 
+      </h3>
+      <button (click)="close.emit()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Content -->
+    <div class="p-6 overflow-y-auto flex-1">
+      <!-- Year selector -->
+      <div class="mb-6 flex items-center justify-between">
+        <h4 class="text-lg font-medium text-gray-900">Leave entitlement for:</h4>
+        <div class="relative w-32">
+          <select [(ngModel)]="selectedYear" class="w-full py-2 pl-3 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
+            <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Balance summary -->
+      <div class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg p-4 mb-6 border border-purple-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-purple-700">Total leave days</p>
+            <h5 class="text-2xl font-bold text-purple-900">{{ getTotalDays() }} days</h5>
+          </div>
+          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
+          <div>
+            <p class="text-sm font-medium text-purple-700">Used</p>
+            <h5 class="text-2xl font-bold text-purple-900">{{ getUsedDays() }} days</h5>
+          </div>
+          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
+          <div>
+            <p class="text-sm font-medium text-purple-700">Remaining</p>
+            <h5 class="text-2xl font-bold text-purple-900">{{ getRemainingDays() }} days</h5>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="w-full h-2.5 bg-gray-100 rounded-full mt-3">
+          <div class="h-2.5 rounded-full" [style.width.%]="getUsagePercentage()" [ngClass]="{
+            'bg-green-500': getUsagePercentage() < 50,
+            'bg-yellow-500': getUsagePercentage() >= 50 && getUsagePercentage() < 80,
+            'bg-red-500': getUsagePercentage() >= 80
+          }"></div>
+        </div>
+      </div>
+      
+      <!-- Leave details -->
+      <div class="space-y-6">
+        <div *ngFor="let category of leaveCategories">
+          <div class="flex justify-between items-center mb-2">
+            <h5 class="font-medium text-gray-900">{{ category.name }}</h5>
+            <span class="text-sm text-gray-500">{{ category.used }} / {{ category.total }} days</span>
+          </div>
+          <div class="w-full h-2 bg-gray-200 rounded-full">
+            <div class="h-2 rounded-full" [style.width.%]="(category.used / category.total) * 100" [ngClass]="category.color"></div>
+          </div>
+          <p *ngIf="category.note" class="mt-1 text-xs text-gray-500">{{ category.note }}</p>
+        </div>
+      </div>
+
+      <!-- Upcoming leave information -->
+      <div class="mt-8">
+        <h4 class="text-lg font-medium text-gray-900 mb-4">Upcoming leaves</h4>
+        
+        <div *ngIf="upcomingLeaves.length === 0" class="text-center py-6 border border-dashed border-gray-300 rounded-md">
+          <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="text-gray-500">No upcoming leave planned</p>
+        </div>
+        
+        <div *ngFor="let leave of upcomingLeaves" class="flex items-center border-b py-3 last:border-b-0">
+          <div [ngClass]="leave.typeColor" class="w-2 h-2 rounded-full mr-3"></div>
+          <div class="flex-1">
+            <p class="font-medium text-gray-900">{{ leave.type }}</p>
+            <p class="text-sm text-gray-500">{{ leave.startDate | date:'MMM d' }} - {{ leave.endDate | date:'MMM d, y' }}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-medium text-gray-900">{{ leave.days }} days</p>
+            <p class="text-sm" [ngClass]="{
+              'text-yellow-600': leave.status === 'pending',
+              'text-green-600': leave.status === 'approved'
+            }">{{ leave.status | titlecase }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="p-4 border-t bg-gray-50 flex justify-end">
+      <button (click)="close.emit()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded font-medium">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
