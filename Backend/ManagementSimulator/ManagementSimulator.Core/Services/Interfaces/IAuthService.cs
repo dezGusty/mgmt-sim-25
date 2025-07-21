@@ -1,5 +1,5 @@
-﻿using ManagementSimulator.Core.Dtos.Requests;
-using ManagementSimulator.Core.Dtos.Responses;
+
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,9 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<LoginResponse?> LoginAsync(UserLoginRequest request);
+
+        Task<bool> LoginAsync(HttpContext httpContext, string email, string password);
+        Task LogoutAsync(HttpContext httpContext);
     }
+
 }

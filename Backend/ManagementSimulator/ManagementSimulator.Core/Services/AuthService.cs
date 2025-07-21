@@ -1,49 +1,53 @@
-﻿using ManagementSimulator.Core.Dtos.Requests;
-using ManagementSimulator.Core.Dtos.Responses;
-using ManagementSimulator.Core.Mapping;
+
 using ManagementSimulator.Core.Services.Interfaces;
-using ManagementSimulator.Database.Context;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ManagementSimulator.Database.Repositories.Intefaces;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ManagementSimulator.Core.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly MGMTSimulatorDbContext _context;
-        private readonly IJwtService _jwtService;
 
-        public AuthService(MGMTSimulatorDbContext context, IJwtService jwtService)
+
+        private readonly IUserRepository _userRepository;
+
+        public AuthService(IUserRepository userRepository)
         {
-            _context = context;
-            _jwtService = jwtService;
+            _userRepository = userRepository;
         }
 
-        public async Task<LoginResponse?> LoginAsync(UserLoginRequest request)
+        public async Task<bool> LoginAsync(HttpContext httpContext, string email, string password)
         {
-            var user = await _context.Users
-                .Include(u => u.Title)
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _userRepository.GetUserByEmail(email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+                return false;
 
-            if (user == null)
-                return null;
-
-            if (!user.IsPasswordValid(request.Password))
-                return null;
-
-            var token = _jwtService.GenerateToken(user);
-            var expiresAt = DateTime.UtcNow.AddHours(24);
-
-            return new LoginResponse
+            var claims = new List<Claim>
             {
-                Token = token,
-                ExpiresAt = expiresAt,
-                User = user.ToUserResponseDto()
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
             };
+
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Rolename));
+            }
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await httpContext.SignInAsync("Cookies", principal);
+            return true;
+        }
+
+
+        public async Task LogoutAsync(HttpContext httpContext)
+        {
+            await httpContext.SignOutAsync("Cookies");
         }
     }
+
 }

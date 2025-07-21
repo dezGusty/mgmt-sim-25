@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Humanizer;
-using ManagementSimulator.Core.Dtos.Requests.Users;
+﻿using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
-using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -62,7 +55,7 @@ namespace ManagementSimulator.Core.Services
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 JobTitleId = dto.JobTitleId,
-                PasswordHash = dto.Password // Hashing should be applied in real scenarios!
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
             // creezi relațiile din tabela intermediară

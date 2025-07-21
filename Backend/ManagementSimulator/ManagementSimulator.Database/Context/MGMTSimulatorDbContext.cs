@@ -29,6 +29,14 @@ namespace ManagementSimulator.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<EmployeeRole>()
+                .Property(er => er.Rolename)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<EmployeeRole>()
+                .HasIndex(er => er.Rolename)
+                .IsUnique();
+
             modelBuilder.Entity<User>()
                 .Property(u => u.Email)
                 .HasMaxLength(50);
@@ -83,7 +91,7 @@ namespace ManagementSimulator.Database.Context
                 .HasIndex(um => new { um.EmployeeId, um.ManagerId })
                 .IsUnique();
 
-            // ✅ Configurare relații auto-referențiale UserManager
+            // Configurare relații auto-referențiale UserManager
             modelBuilder.Entity<EmployeeManager>()
                 .HasOne(um => um.Employee)
                 .WithMany(u => u.Managers) // User -> managerii săi (M:N)
@@ -118,5 +126,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<LeaveRequestType> LeaveRequestTypes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
+        public DbSet<EmployeeRole> EmployeeRoles { get; set; }
     }
 }

@@ -1,63 +1,48 @@
-﻿using ManagementSimulator.Core.Dtos.Requests;
-using ManagementSimulator.Core.Dtos.Responses;
+
+using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-namespace ManagementSimulator.API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService)
     {
-        private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
+        _authService = authService;
+    }
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
+    {
+        var success = await _authService.LoginAsync(HttpContext, dto.Email, dto.Password);
+        if (!success)
+            return Unauthorized("Incorrect email or password.");
+
+        return Ok(new { message = "Successfully authenticated." });
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync(HttpContext);
+        return Ok(new { message = "Successfully logged out." });
+    }
+
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        if (!User.Identity!.IsAuthenticated)
+            return Unauthorized(new { message = "User is not authenticated." });
+
+        return Ok(new
         {
-            _authService = authService;
-            _logger = logger;
-        }
-
-        [HttpPost("login")]
-        [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<LoginResponse>> LoginAsync([FromBody] UserLoginRequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var result = await _authService.LoginAsync(request);
-
-                if (result == null)
-                {
-                    return Unauthorized("Invalid email or password");
-                }
-
-                _logger.LogInformation("User {Email} logged in successfully", request.Email);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during login for user {Email}", request.Email);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred during login");
-            }
-        }
-
-        [HttpPost("logout")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Logout()
-        {
-            _logger.LogInformation("User logged out");
-            return Ok(new { message = "Logged out successfully" });
-        }
+            UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            Email = User.FindFirst(ClaimTypes.Email)?.Value,
+            Role = User.FindFirst(ClaimTypes.Role)?.Value
+        });
     }
 }

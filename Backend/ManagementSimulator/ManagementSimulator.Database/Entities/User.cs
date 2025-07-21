@@ -21,6 +21,7 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<EmployeeManager> Managers { get; set; } = new List<EmployeeManager>(); 
         public ICollection<EmployeeManager> Subordinates { get; set; } = new List<EmployeeManager>();
 
+        public ICollection<EmployeeRole> Roles { get; set; } = new List<EmployeeRole>();
 
         // fields
         [Required,MaxLength(50),EmailAddress]
@@ -31,8 +32,6 @@ namespace ManagementSimulator.Database.Entities
 
         [Required, MaxLength(50)]
         public string LastName { get; set; }
-
-        public UserRole Role { get; set; } = UserRole.InvalidRole;
 
         public string PasswordHash { get; set; }
 
