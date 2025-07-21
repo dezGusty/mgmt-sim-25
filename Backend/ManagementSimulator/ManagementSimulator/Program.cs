@@ -1,7 +1,10 @@
-using ManagementSimulator.Core;
+﻿using ManagementSimulator.Core;
 using ManagementSimulator.Database;
 using ManagementSimulator.Infrastructure.Config;
 using ManagementSimulator.Infrastructure.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,19 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddServices();
 builder.Services.AddRepositories();
+
+
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/api/auth/login";  
+        options.Cookie.Name = "ManagementSimulator.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+        options.ExpireTimeSpan = TimeSpan.FromHours(12); 
+        options.SlidingExpiration = true;
+    });
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,6 +44,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
