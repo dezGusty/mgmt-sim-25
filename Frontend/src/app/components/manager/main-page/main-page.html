@@ -17,7 +17,7 @@
         </div>
         <div class="flex gap-2">
           <button
-            class="flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold  text-sm"
+            class="flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold  transition-all duration-200 transform hover:scale-105  text-sm"
           >
             Logout
           </button>
@@ -32,59 +32,67 @@
     </div>
   </nav>
 
-  <div class="max-w-7xl mx-auto p-6">
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
-    >
+  <!-- Header Section cu design modern -->
+  <div class="w-full bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] px-6 pt-10 shadow-lg relative overflow-hidden">
+    
+
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      <!-- Text cu stil îmbunătățit -->
       <div>
-        
-        <p class="text-gray-600 mt-1">
-          Manage employee leave requests and approvals
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">Team Management</h2>
+        <p class="text-slate-700 max-w-xl text-lg">
+          Manage employee leave requests and approvals efficiently with our advanced dashboard
         </p>
       </div>
+      
+      <!-- Buton cu design modern -->
       <button
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 hover:cursor-pointer"
+        class="bg-white hover:bg-slate-50 shadow-md text-slate-900 px-6 py-3 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium"
         (click)="showAddRequestForm = true"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 448 512"
-          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="w-5 h-5 text-[#20B486]"
         >
-          <path
-            fill="currentColor"
-            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v112H80c-17.7 0-32 14.3-32 32s14.3 32 32 32h112v112c0 17.7 14.3 32 32 32s32-14.3 32-32V256h112c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
-          />
+          <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
         </svg>
         Add New Request
       </button>
     </div>
-
-    <app-add-request-form
-      *ngIf="showAddRequestForm"
-      (close)="showAddRequestForm = false"
-    />
-
+    
+    <!-- Componenta pentru request form -->
+    <div class="mt-8" *ngIf="showAddRequestForm">
+      <app-add-request-form
+        (close)="showAddRequestForm = false"
+      />
+    </div>
+    
+    <!-- Stats cards cu marginea superioară -->
     <app-stats-cards />
+  </div>
 
+  <div class=" p-6 ">
     <div class="flex flex-wrap gap-2 mb-6">
       <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm"
+        class="flex items-center gap-1 px-3 py-1 rounded bg-blue-600 text-white font-medium text-sm  transition-all duration-200 transform hover:scale-105"
       >
         All
       </button>
       <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-800 font-medium text-sm border border-yellow-200"
+        class="flex items-center gap-1 px-3 py-1 rounded bg-yellow-100 text-yellow-800 font-medium text-sm border border-yellow-200 transition-all duration-200 transform hover:scale-105"
       >
         Pending
       </button>
       <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-800 font-medium text-sm border border-green-200"
+        class="flex items-center gap-1 px-3 py-1 rounded bg-green-100 text-green-800 font-medium text-sm border border-green-200 transition-all duration-200 transform hover:scale-105"
       >
         Approved
       </button>
       <button
-        class="flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-800 font-medium text-sm border border-red-200"
+        class="flex items-center gap-1 px-3 py-1 rounded bg-red-100 text-red-800 font-medium text-sm border border-red-200 transition-all duration-200 transform hover:scale-105"
       >
         Rejected
       </button>

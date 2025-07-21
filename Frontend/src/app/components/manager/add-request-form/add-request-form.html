@@ -62,21 +62,21 @@
         <button
           type="submit"
           [disabled]="isSubmitting || !employee || !from || !to || !reason"
-          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          class="flex-1  bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded  transition-all duration-200 transform hover:scale-105"
         >
           {{ isSubmitting ? "Adding Request..." : "Add Request" }}
         </button>
         <button
           type="button"
           (click)="handleClose()"
-          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded  transition-all duration-200 transform hover:scale-105"
         >
           Cancel
         </button>
       </div>
     </form>
     <button
-      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded"
+      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded  transition-all duration-200 transform hover:scale-105"
       (click)="handleClose()"
     >
       X

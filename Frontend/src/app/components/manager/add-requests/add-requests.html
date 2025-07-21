@@ -1,23 +1,23 @@
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
   <div
     *ngFor="let req of requests"
-    class="hover:shadow-md transition-shadow duration-300 border-l-4 rounded-lg bg-white border-l-blue-500"
+    class="hover:shadow-lg hover:translate-y-[-2px] transition-all duration-300 border-l-4 rounded-lg bg-white border-[#7ee3db97] shadow-sm"
   >
     <div class="p-6">
       <div class="flex justify-between items-start mb-4">
         <div class="flex items-center gap-2">
-          <h3 class="text-lg font-semibold text-gray-900">
+          <h3 class="text-lg font-semibold text-slate-900">
             {{ req.employee }}
           </h3>
         </div>
         <span
-          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border"
+          class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium shadow-sm"
           [ngClass]="{
-            'bg-yellow-100 text-yellow-800 border-yellow-200':
+            'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800':
               req.status === 'Pending',
-            'bg-green-100 text-green-800 border-green-200':
+            'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] text-slate-900':
               req.status === 'Approved',
-            'bg-red-100 text-red-800 border-red-200': req.status === 'Rejected'
+            'bg-gradient-to-r from-red-100 to-red-200 text-red-800': req.status === 'Rejected'
           }"
         >
           <ng-container *ngIf="req.status === 'Pending'">
@@ -62,52 +62,46 @@
           {{ req.status }}
         </span>
       </div>
-      <div class="space-y-3">
-        <div class="flex items-center gap-2 text-sm text-gray-600">
+      <div class="space-y-3 mt-2">
+        <div class="flex items-center gap-2 text-sm text-slate-700">
           <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
+            class="w-4 h-4 text-[#7EE3DB]"
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 448 512"
           >
-            <circle cx="12" cy="12" r="10"></circle>
+            <path fill="currentColor" d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192h80v56H48V192zm0 104h80v64H48V296zm128 0h96v64H176V296zm144 0h80v64H320V296zm80-48H320V192h80v56zm0 160v40c0 8.8-7.2 16-16 16H320V408h80zm-128 0v56H176V408h96zm-144 0v56H64c-8.8 0-16-7.2-16-16V408h80zM272 248H176V192h96v56z"/>
           </svg>
-          <span>{{ req.from }} - {{ req.to }}</span>
+          <span class="font-medium">{{ req.from }} - {{ req.to }}</span>
           <span
-            class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
+            class="ml-2 px-3 py-1 bg-gradient-to-r from-[#7EE3DB]/40 to-[#88F8BF]/40 text-slate-900 rounded-full text-xs font-medium shadow-sm"
           >
             {{ req.days }} days
           </span>
         </div>
-        <div class="flex items-start gap-2 text-sm text-gray-600">
+        <div class="flex items-start gap-2 text-sm text-slate-700">
           <svg
-            class="w-4 h-4 mt-0.5 flex-shrink-0"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
+            class="w-4 h-4 mt-0.5 flex-shrink-0 text-[#7EE3DB]"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
           >
-            <circle cx="12" cy="12" r="10"></circle>
+            <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
           </svg>
-          <p>{{ req.reason }}</p>
+          <p class="text-slate-700">{{ req.reason }}</p>
         </div>
-        <div class="flex items-center gap-2 text-xs text-gray-500">
+        <div class="flex items-center gap-2 text-xs text-slate-500">
           <svg
-            class="w-3 h-3"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
+            class="w-3 h-3 text-[#7EE3DB]"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
           >
-            <circle cx="12" cy="12" r="10"></circle>
+            <path fill="currentColor" d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
           </svg>
           <span>Submitted {{ req.submitted }}</span>
         </div>
       </div>
       <div class="mt-4 pt-4 border-t">
         <button
-          class="w-full border border-gray-300 rounded py-2 text-sm font-medium hover:bg-gray-50 hover:cursor-pointer"
+          class="w-full rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 py-2 text-sm font-medium hover:cursor-pointe0r  transition-all duration-200 transform hover:scale-105"
           (click)="openDetails(req)"
         >
           View Details
@@ -128,7 +122,7 @@
       (reject)="onReject($event)"
     ></app-request-detail>
     <button
-      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer"
+      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer  transition-all duration-200 transform hover:scale-105"
       (click)="closeDetails()"
     >
       Close
@@ -137,7 +131,7 @@
 </div>
 <button
   *ngIf="selectedRequest"
-  class="fixed top-4 right-4 bg-gray-200 px-3 py-1 rounded"
+  class="fixed top-4 right-4 bg-gray-200 px-3 py-1 rounded  transition-all duration-200 transform hover:scale-105"
   (click)="closeDetails()"
 >
   Close
