@@ -16,7 +16,6 @@ interface LeaveRequest {
 
 @Component({
   selector: 'app-request-detail',
-  standalone: true,
   imports: [NgClass, CommonModule, FormsModule],
   templateUrl: './request-detail.html',
   styleUrl: './request-detail.css',

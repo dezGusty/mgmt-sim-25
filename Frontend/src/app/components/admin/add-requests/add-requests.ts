@@ -16,7 +16,6 @@ interface LeaveRequest {
 
 @Component({
   selector: 'app-add-requests',
-  standalone: true,
   imports: [CommonModule, NgClass, RequestDetail],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
