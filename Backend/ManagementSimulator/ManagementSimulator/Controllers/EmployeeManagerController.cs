@@ -58,7 +58,7 @@ namespace ManagementSimulator.API.Controllers
             return Ok();
         }
 
-        [HttpPatch("{employeeId}/{managerId}")]
+        [HttpPatch("/employee/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -68,7 +68,7 @@ namespace ManagementSimulator.API.Controllers
             return Ok();
         }
 
-        [HttpPatch("{employeeId}/{managerId}")]
+        [HttpPatch("/manager/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
