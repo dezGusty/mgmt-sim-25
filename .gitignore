@@ -419,4 +419,4 @@ Backend/ManagementSimulator/ManagementSimulator.Database/Migrations/
 Backend/ManagementSimulator/ManagementSimulator/appsettings.json
 
 Backend/ManagementSimulator/.vs/
-ManagementSimulator/appsettings.Development.json
+Backend/ManagementSimulator/appsettings.Development.json
