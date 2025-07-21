@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManagementSimulator.Core.Dtos.Requests
+namespace ManagementSimulator.Core.Dtos.Requests.Users
 {
     public class UserLoginRequest
     {

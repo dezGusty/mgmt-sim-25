@@ -18,9 +18,9 @@ namespace ManagementSimulator.Core.Mapping
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = string.Join(" ", user.Roles.Select(r => r.Rolename)),
+                Role = string.Join(" ", user.Roles.Where(eru => eru.DeletedAt == null).Select(ru => ru.Role.Rolename)),
                 JobTitleId = user.JobTitleId,
-                JobTitleName = user.Title?.Name ?? string.Empty
+                JobTitleName = user.Title.Name
             };
         }
     }

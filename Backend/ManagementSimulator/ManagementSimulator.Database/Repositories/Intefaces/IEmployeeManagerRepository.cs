@@ -14,6 +14,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         public Task AddEmployeeManagersAsync(int subOrdinateId,int managersId);
         public Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
         public Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId);
+        public Task<EmployeeManager?> GetEmployeeManagersByIdIncludeDeletedAsync(int employeeId, int managerId);
         public Task SaveChangesAsync(); 
     }
 }

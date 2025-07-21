@@ -10,7 +10,7 @@ namespace ManagementSimulator.Database.Entities
     public class EmployeeRole : BaseEntity
     {
         // navigation properties 
-        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<EmployeeRoleUser> Users { get; set; } = new List<EmployeeRoleUser>();
 
         // fields
         [MaxLength(50)]

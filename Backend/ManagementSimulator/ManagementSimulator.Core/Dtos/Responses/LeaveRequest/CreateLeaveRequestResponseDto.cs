@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequest
+namespace ManagementSimulator.Core.Dtos.Responses.LeaveRequest
 {
-    public class CreateLeaveRequestRequestDto
+    public class CreateLeaveRequestResponseDto
     {
+        public int Id { get; set; }
         public int UserId { get; set; }
-        public int LeaveRequestTypeId { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
