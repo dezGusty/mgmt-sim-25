@@ -123,7 +123,7 @@ namespace ManagementSimulator.Database.Context
             ApplySoftDeleteFilter<JobTitle>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);
-            ApplySoftDeleteFilter<User>(modelBuilder);
+            // ApplySoftDeleteFilter<User>(modelBuilder);
             ApplySoftDeleteFilter<EmployeeManager>(modelBuilder);
             ApplySoftDeleteFilter<EmployeeRole>(modelBuilder);
            // ApplySoftDeleteFilter<EmployeeRoleUser>(modelBuilder);
