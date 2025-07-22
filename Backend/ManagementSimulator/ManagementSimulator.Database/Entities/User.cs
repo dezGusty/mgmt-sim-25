@@ -21,7 +21,7 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<EmployeeManager> Managers { get; set; } = new List<EmployeeManager>(); 
         public ICollection<EmployeeManager> Subordinates { get; set; } = new List<EmployeeManager>();
 
-        public ICollection<EmployeeRole> Roles { get; set; } = new List<EmployeeRole>();
+        public ICollection<EmployeeRoleUser> Roles { get; set; } = new List<EmployeeRoleUser>();
 
         // fields
         [Required,MaxLength(50),EmailAddress]

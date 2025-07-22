@@ -1,4 +1,4 @@
-﻿using ManagementSimulator.Core.Dtos.Responses;
+﻿using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Database.Entities;
 using System;
 using System.Collections.Generic;
@@ -16,21 +16,29 @@ namespace ManagementSimulator.Core.Mapping
             {
                 Id = entity.Id,
                 UserId = entity.UserId,
-                UserName = entity.User?.FullName ?? string.Empty,
 
                 ReviewerId = entity.ReviewerId,
-                ReviewerName = entity.Reviewer?.FullName ?? string.Empty,
 
                 LeaveRequestTypeId = entity.LeaveRequestTypeId,
-                LeaveRequestTypeName = entity.LeaveRequestType?.Description ?? string.Empty,
 
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
 
                 Reason = entity.Reason ?? string.Empty,
-                IsApproved = (bool)entity.IsApproved,
                 RequestStatus = entity.RequestStatus,
                 ReviewerComment = entity.ReviewerComment ?? string.Empty
+            };
+        }
+
+        public static CreateLeaveRequestResponseDto ToCreateLeaveRequestResponseDto(this LeaveRequest entity)
+        {
+            return new CreateLeaveRequestResponseDto
+            {
+                Id = entity.Id,
+                UserId = entity.UserId,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                Reason = entity.Reason ?? string.Empty,
             };
         }
     }

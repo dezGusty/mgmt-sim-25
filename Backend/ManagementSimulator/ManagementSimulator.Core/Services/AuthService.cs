@@ -33,7 +33,7 @@ namespace ManagementSimulator.Core.Services
 
             foreach (var role in user.Roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role.Rolename));
+                claims.Add(new Claim(ClaimTypes.Role, role.Role.Rolename));
             }
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
