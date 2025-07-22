@@ -4,41 +4,53 @@ import { EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 
-export interface FormData {
-  // Manager fields
-  name?: string;
-  email?: string;
-  department?: string;
-  jobTitle?: string;
-  
-  // Department fields
-  departmentName?: string;
-  departmentCode?: string;
-  description?: string;
-  departmentHead?: string;
-  
-  // Job Title fields
-  title?: string;
-  code?: string;
-  level?: string;
-  minSalary?: number;
-  maxSalary?: number;
-  
-  // User fields
-  role?: string;
+export interface UserFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  department: string;
+  jobTitle: string;
+  role: 'admin' | 'manager' | 'employee';
   manager?: string;
   startDate?: Date;
-  
-  // Leave Type fields
-  leaveTypeName?: string;
-  category?: string;
-  maxDaysPerYear?: number;
-  advanceNoticeDays?: number;
-  requiresApproval?: boolean;
-  requiresDocumentation?: boolean;
-  probationPeriodExcluded?: boolean;
-  
-  status?: string;
+  password?: string;
+  status?: 'active' | 'inactive';
+}
+
+export interface DepartmentFormData {
+  departmentName: string;
+  departmentCode: string;
+  description?: string;
+  departmentHead?: string;
+  budget?: number;
+  status?: 'active' | 'inactive';
+}
+
+export interface JobTitleFormData {
+  title: string;
+  code: string;
+  department: string;
+  level: 'entry' | 'mid' | 'senior' | 'executive';
+  minSalary?: number;
+  maxSalary?: number;
+  description?: string;
+  requirements?: string[];
+  status?: 'active' | 'inactive';
+}
+
+export interface LeaveTypeFormData {
+  leaveTypeName: string;
+  code: string;
+  category: 'paid' | 'unpaid' | 'sick' | 'special';
+  maxDaysPerYear: number; // -1 for unlimited
+  advanceNoticeDays: number;
+  description?: string;
+  requiresApproval: boolean;
+  requiresDocumentation: boolean;
+  probationPeriodExcluded: boolean;
+  minimumTenure?: number;
+  eligibleRoles?: string[];
+  status?: 'active' | 'inactive';
 }
 
 @Component({
@@ -117,10 +129,12 @@ export class AddForm implements OnInit {
     switch (this.formType) {
       case 'manager':
         this.adminForm = this.formBuilder.group({
-          name: ['', [Validators.required, Validators.minLength(2)]],
+          firstName: ['', [Validators.required, Validators.minLength(2)]],
+          lastName: ['', [Validators.required, Validators.minLength(2)]],
           email: ['', [Validators.required, Validators.email]],
           department: ['', Validators.required],
           jobTitle: ['', Validators.required],
+
           status: ['active']
         });
         break;

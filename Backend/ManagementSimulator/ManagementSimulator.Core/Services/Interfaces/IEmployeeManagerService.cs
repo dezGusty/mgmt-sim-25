@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;

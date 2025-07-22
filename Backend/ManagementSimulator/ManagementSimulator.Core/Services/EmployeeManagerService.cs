@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;

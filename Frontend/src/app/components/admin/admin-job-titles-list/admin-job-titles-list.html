@@ -15,20 +15,10 @@
         </svg>
       </div>
     </div>
-    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+    <!-- <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
       <option value="">All Departments</option>
-      <option value="engineering">Engineering</option>
-      <option value="marketing">Marketing</option>
-      <option value="sales">Sales</option>
-      <option value="hr">Human Resources</option>
-    </select>
-    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-      <option value="">All Levels</option>
-      <option value="entry">Entry Level</option>
-      <option value="mid">Mid Level</option>
-      <option value="senior">Senior Level</option>
-      <option value="executive">Executive</option>
-    </select>
+      <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+    </select> -->
   </div>
 
   <!-- Job Titles Table -->
@@ -38,10 +28,7 @@
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employees</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary Range</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
@@ -50,42 +37,24 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div class="flex-shrink-0 h-10 w-10">
-                <div class="h-10 w-10 rounded-lg flex items-center justify-center" 
-                     [style.background-color]="jobTitle.color + '20'">
+                <div class="h-10 w-10 rounded-lg flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
-                       class="w-5 h-5" [style.color]="jobTitle.color">
+                       class="w-5 h-5">
                     <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
                   </svg>
                 </div>
               </div>
               <div class="ml-4">
-                <div class="text-sm font-medium text-gray-900">{{ jobTitle.title }}</div>
-                <div class="text-sm text-gray-500">{{ jobTitle.code }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ jobTitle.name }}</div>
+                <div class="text-sm text-gray-500">{{ jobTitle.id }}</div>
               </div>
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{ jobTitle.department }}</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  [class]="getLevelBadgeClass(jobTitle.level)">
-              {{ jobTitle.level | titlecase }}
-            </span>
+            <div class="text-sm text-gray-900">{{ jobTitle.departmentName }}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm text-gray-900">{{ jobTitle.employeeCount }}</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">
-              ${{ jobTitle.salaryMin | number:'1.0-0' }} - ${{ jobTitle.salaryMax | number:'1.0-0' }}
-            </div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  [class]="jobTitle.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-              {{ jobTitle.status | titlecase }}
-            </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <div class="flex space-x-2">
@@ -100,11 +69,6 @@
                   <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <button class="text-gray-600 hover:text-gray-800 transition-colors" (click)="duplicateJobTitle(jobTitle)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5A3 3 0 0111.25 4.5H9.5a3 3 0 00-2.664 2.958 47.796 47.796 0 00-.21 4.042H9.5zM8.25 6.75h8.5a2.25 2.25 0 012.25 2.25v.5h-13v-.5a2.25 2.25 0 012.25-2.25z" clip-rule="evenodd" />
-                </svg>
-              </button>
               <button class="text-red-600 hover:text-red-800 transition-colors" (click)="deleteJobTitle(jobTitle)">
                 <svg xmlns="http://www.w3.org/2024/24" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
                   <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
@@ -115,26 +79,6 @@
         </tr>
       </tbody>
     </table>
-  </div>
-
-  <!-- Job Title Statistics -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-gray-900">{{ getTotalJobTitles() }}</div>
-      <div class="text-sm text-gray-500">Total Job Titles</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-green-600">{{ getActiveJobTitles() }}</div>
-      <div class="text-sm text-gray-500">Active Positions</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-blue-600">{{ getAvgSalary() | currency }}</div>
-      <div class="text-sm text-gray-500">Average Salary</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-purple-600">{{ getMostPopularDepartment() }}</div>
-      <div class="text-sm text-gray-500">Most Positions</div>
-    </div>
   </div>
 
   <!-- Empty State -->

@@ -1,23 +1,25 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 import { OnInit } from '@angular/core';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 
 import { AdminStatsCards } from './admin-stats-cards/admin-stats-cards'; 
-import { AdminManagersList } from './admin-managers-list/admin-managers-list'; 
+import { AdminUsersList } from './admin-users-list/admin-users-list'; 
 import { AdminDepartmentsList } from './admin-departments-list/admin-departments-list'; 
 import { AdminJobTitlesList } from './admin-job-titles-list/admin-job-titles-list'; 
 import { AdminUserRelationships } from './admin-user-relationships/admin-user-relationships'; 
 import { AdminLeaveTypesList } from './admin-leave-request-types-list/admin-leave-request-types-list';
 import { AddForm } from './admin-add-form/admin-add-form';
+import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 
 @Component({
   selector: 'app-admin-main-page',
   imports: [CommonModule,
+    HttpClientModule,
     CustomNavbar,
     AdminStatsCards,
-    AdminManagersList,
+    AdminUsersList,
     AdminDepartmentsList, 
     AdminJobTitlesList,
     AdminUserRelationships,
@@ -27,7 +29,7 @@ import { AddForm } from './admin-add-form/admin-add-form';
   templateUrl: './main-page.html',
 })
 export class AdminMainPage implements OnInit {
-  activeTab: string = 'managers';
+  activeTab: string = 'users';
   showAddForm: boolean = false;
 
   // Stats data

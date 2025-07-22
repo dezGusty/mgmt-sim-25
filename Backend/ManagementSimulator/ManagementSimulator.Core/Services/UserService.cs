@@ -1,5 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Users;
-using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
@@ -24,7 +24,20 @@ namespace ManagementSimulator.Core.Services
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllUsersWithReferencesAsync();
-            return users.Select(u => u.ToUserResponseDto()).ToList();
+            return users.Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                JobTitleId = u.JobTitleId,
+                JobTitleName = u.Title?.Name ?? string.Empty,
+                Role = string.Join(",", u.Roles
+                    .Where(eru => eru.DeletedAt == null)
+                    .Select(ru => ru.Role.Rolename)),
+                DepartmentId = u.Title?.DepartmentId,
+                DepartmentName = u.Title?.Department?.Name ?? string.Empty
+            }).ToList();
         }
 
         public async Task<UserResponseDto?> GetUserByIdAsync(int id)
