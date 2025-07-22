@@ -1,0 +1,153 @@
+<!-- Job Titles List Component -->
+<div class="space-y-6">
+  <!-- Search and Filter Bar -->
+  <div class="flex flex-col sm:flex-row gap-4">
+    <div class="flex-1">
+      <div class="relative">
+        <input
+          type="text"
+          placeholder="Search job titles..."
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+          [(ngModel)]="searchTerm"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-gray-400 absolute left-3 top-2.5">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+      <option value="">All Departments</option>
+      <option value="engineering">Engineering</option>
+      <option value="marketing">Marketing</option>
+      <option value="sales">Sales</option>
+      <option value="hr">Human Resources</option>
+    </select>
+    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+      <option value="">All Levels</option>
+      <option value="entry">Entry Level</option>
+      <option value="mid">Mid Level</option>
+      <option value="senior">Senior Level</option>
+      <option value="executive">Executive</option>
+    </select>
+  </div>
+
+  <!-- Job Titles Table -->
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employees</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary Range</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let jobTitle of jobTitles; let i = index" class="hover:bg-gray-50 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <div class="h-10 w-10 rounded-lg flex items-center justify-center" 
+                     [style.background-color]="jobTitle.color + '20'">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
+                       class="w-5 h-5" [style.color]="jobTitle.color">
+                    <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">{{ jobTitle.title }}</div>
+                <div class="text-sm text-gray-500">{{ jobTitle.code }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ jobTitle.department }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  [class]="getLevelBadgeClass(jobTitle.level)">
+              {{ jobTitle.level | titlecase }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ jobTitle.employeeCount }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">
+              ${{ jobTitle.salaryMin | number:'1.0-0' }} - ${{ jobTitle.salaryMax | number:'1.0-0' }}
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                  [class]="jobTitle.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              {{ jobTitle.status | titlecase }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <div class="flex space-x-2">
+              <button class="text-[#20B486] hover:text-[#1a9c75] transition-colors" (click)="editJobTitle(jobTitle)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+                </svg>
+              </button>
+              <button class="text-blue-600 hover:text-blue-800 transition-colors" (click)="viewJobTitle(jobTitle)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                  <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button class="text-gray-600 hover:text-gray-800 transition-colors" (click)="duplicateJobTitle(jobTitle)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5A3 3 0 0111.25 4.5H9.5a3 3 0 00-2.664 2.958 47.796 47.796 0 00-.21 4.042H9.5zM8.25 6.75h8.5a2.25 2.25 0 012.25 2.25v.5h-13v-.5a2.25 2.25 0 012.25-2.25z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button class="text-red-600 hover:text-red-800 transition-colors" (click)="deleteJobTitle(jobTitle)">
+                <svg xmlns="http://www.w3.org/2024/24" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Job Title Statistics -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-gray-900">{{ getTotalJobTitles() }}</div>
+      <div class="text-sm text-gray-500">Total Job Titles</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-green-600">{{ getActiveJobTitles() }}</div>
+      <div class="text-sm text-gray-500">Active Positions</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-blue-600">{{ getAvgSalary() | currency }}</div>
+      <div class="text-sm text-gray-500">Average Salary</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-purple-600">{{ getMostPopularDepartment() }}</div>
+      <div class="text-sm text-gray-500">Most Positions</div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="jobTitles.length === 0" class="text-center py-12">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">No job titles found</h3>
+    <p class="mt-1 text-sm text-gray-500">Get started by creating a new job title.</p>
+    <div class="mt-6">
+      <button class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        Add Job Title
+      </button>
+    </div>
+  </div>
+</div>
