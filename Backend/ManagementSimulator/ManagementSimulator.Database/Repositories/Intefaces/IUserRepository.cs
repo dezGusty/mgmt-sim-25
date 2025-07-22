@@ -13,5 +13,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         public Task<List<User>> GetAllUsersWithReferencesAsync();
         public Task<User?> GetUserWithReferencesByIdAsync(int id);
         Task<List<User>> GetUsersByManagerIdAsync(int managerId);
+        Task<bool> RestoreUserByIdAsync(int id);
+        Task<User?> GetUserByIdIncludeDeletedAsync(int id);
     }
 }
