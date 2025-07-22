@@ -183,5 +183,17 @@ namespace ManagementSimulator.Core.Services
 
             return await _userRepository.DeleteAsync(id);
         }
+
+        public async Task RestoreUserByIdAsync(int id)
+        {
+            var userToRestore = await _userRepository.GetUserByIdIncludeDeletedAsync(id);
+            if (userToRestore == null)
+            {
+                throw new EntryNotFoundException(nameof(User), id);
+            }
+
+            userToRestore.DeletedAt = null;
+            await _userRepository.SaveChangesAsync();
+        }
     }
 }

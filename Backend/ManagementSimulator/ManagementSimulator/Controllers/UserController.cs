@@ -82,5 +82,15 @@ namespace ManagementSimulator.API.Controllers
             }
             return Ok($"User with ID {id} deleted successfully.");
         }
+
+        [HttpPatch("users/{id}/restore")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RestoreUserAsync(int id)
+        {
+            await _userService.RestoreUserByIdAsync(id);
+            return Ok($"User with ID {id} restored successfully.");
+        }
     }
 }
