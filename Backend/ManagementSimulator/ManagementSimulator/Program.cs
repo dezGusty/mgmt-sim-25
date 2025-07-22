@@ -44,6 +44,7 @@ builder.Services.AddAuthentication("Cookies")
         options.Cookie.Name = "ManagementSimulator.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.ExpireTimeSpan = TimeSpan.FromHours(12);
         options.SlidingExpiration = true;
     });
