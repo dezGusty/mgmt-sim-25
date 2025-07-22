@@ -34,6 +34,11 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.User), managerId);
             }
 
+            if (await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId) != null)
+            {
+                throw new UniqueConstraintViolationException(nameof(EmployeeManager), "Entry already exists");
+            }
+
             await _employeeManagerRepository.AddEmployeeManagersAsync(employeeId, managerId);
         }
 
@@ -67,8 +72,9 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = string.Join(" ", e.Roles.Select(r => r.Rolename)),
+                Role = string.Join(" ", e.Roles.Where(eru => eru.DeletedAt == null).Select(r => r.Role.Rolename)),
                 JobTitleName = e.Title.Name ?? string.Empty,
+                JobTitleId = e.JobTitleId
             }).ToList();
         }
 
@@ -87,48 +93,73 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = string.Join(" ", e.Roles.Select(r => r.Rolename)),
+                Role = string.Join(" ", e.Roles.Where(eru => eru.DeletedAt == null).Select(r => r.Role.Rolename)),
                 JobTitleName = e.Title.Name ?? string.Empty,
+                JobTitleId = e.JobTitleId
             }).ToList();
-        }
-
-        public async Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId)
-        {
-            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId);
-
-            if(userManager == null)
-            {
-                throw new EntryNotFoundException(nameof(Database.Entities.EmployeeManager), $"{employeeId}-{managerId}");
-            }
-
-            userManager.EmployeeId = newEmployeeId;
-            userManager.ModifiedAt = DateTime.UtcNow;
-
-            await _employeeManagerRepository.SaveChangesAsync();
-            return new EmployeeManagerResponseDto
-            {
-                EmployeeId = userManager.EmployeeId,
-                ManagerId = userManager.ManagerId,
-            };
         }
 
         public async Task<EmployeeManagerResponseDto> UpdateManagerForEmployeeAsync(int employeeId, int managerId, int newManagerId)
         {
-            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId);
-
+            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdIncludeDeletedAsync(employeeId, managerId);
             if (userManager == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.EmployeeManager), $"{employeeId}-{managerId}");
             }
-
-            userManager.ManagerId = newManagerId;
-            userManager.ModifiedAt = DateTime.UtcNow;
+            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdIncludeDeletedAsync(employeeId, newManagerId);
+            if (newEmployeeManager != null)
+            {
+                if (newEmployeeManager.DeletedAt == null)
+                    throw new UniqueConstraintViolationException(nameof(Database.Entities.EmployeeManager), "Entry already exists");
+                else
+                {
+                    newEmployeeManager.DeletedAt = null;
+                    newEmployeeManager.ModifiedAt = DateTime.UtcNow;
+                    userManager.DeletedAt = DateTime.UtcNow;
+                }
+            }
+            else
+            {
+                userManager.ManagerId = newManagerId;
+                userManager.ModifiedAt = DateTime.UtcNow;
+            }
             await _employeeManagerRepository.SaveChangesAsync();
-
             return new EmployeeManagerResponseDto
             {
-                EmployeeId = userManager.EmployeeId,
-                ManagerId = userManager.ManagerId,
+                EmployeeId = employeeId,
+                ManagerId = newEmployeeManager?.ManagerId ?? newManagerId,
+            };
+        }
+
+        public async Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId)
+        {
+            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdIncludeDeletedAsync(employeeId, managerId);
+            if (userManager == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.EmployeeManager), $"{employeeId}-{managerId}");
+            }
+            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdIncludeDeletedAsync(newEmployeeId, managerId);
+            if (newEmployeeManager != null)
+            {
+                if (newEmployeeManager.DeletedAt == null)
+                    throw new UniqueConstraintViolationException(nameof(Database.Entities.EmployeeManager), "Entry already exists");
+                else
+                {
+                    newEmployeeManager.DeletedAt = null;
+                    newEmployeeManager.ModifiedAt = DateTime.UtcNow;
+                    userManager.DeletedAt = DateTime.UtcNow;
+                }
+            }
+            else
+            {
+                userManager.EmployeeId = newEmployeeId;
+                userManager.ModifiedAt = DateTime.UtcNow;
+            }
+            await _employeeManagerRepository.SaveChangesAsync();
+            return new EmployeeManagerResponseDto
+            {
+                EmployeeId = newEmployeeManager?.EmployeeId ?? newEmployeeId,
+                ManagerId = managerId,
             };
         }
     }

@@ -25,5 +25,29 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
-    }
+
+        public async Task<List<User>> GetAllUsersWithReferencesAsync()
+        {
+            return await _dbContext.Users
+                .Include(u => u.Roles)
+                .Include(u => u.Title)
+                .ToListAsync();
+        }
+
+        public async Task<User?> GetUserWithReferencesByIdAsync(int id)
+        {
+            return await _dbContext.Users
+                .Include(u => u.Roles)
+                    .ThenInclude(ru => ru.Role)
+                .Include(u => u.Title)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId)
+        {
+            return await _dbContext.EmployeeManagers
+                                .Where(em => em.ManagerId == managerId)
+                                 .Select(em => em.Employee)
+                                 .ToListAsync();
+        }
+}
 }
