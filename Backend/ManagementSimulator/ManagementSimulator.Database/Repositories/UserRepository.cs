@@ -42,5 +42,12 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Title)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
-    }
+        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId)
+        {
+            return await _dbContext.EmployeeManagers
+                                .Where(em => em.ManagerId == managerId)
+                                 .Select(em => em.Employee)
+                                 .ToListAsync();
+        }
+}
 }

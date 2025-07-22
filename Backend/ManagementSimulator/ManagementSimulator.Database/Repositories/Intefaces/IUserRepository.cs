@@ -12,5 +12,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         public Task<User?> GetUserByEmail(string email);
         public Task<List<User>> GetAllUsersWithReferencesAsync();
         public Task<User?> GetUserWithReferencesByIdAsync(int id);
+        Task<List<User>> GetUsersByManagerIdAsync(int managerId);
     }
 }
