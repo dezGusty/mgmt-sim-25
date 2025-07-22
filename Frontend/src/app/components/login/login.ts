@@ -25,9 +25,9 @@ export class Login {
         alert("Login successful!");
         this.auth.me().subscribe({
           next: (user: any) => {
-            console.log('User info:', user); // Pentru debugging
+            console.log('User info:', user);
 
-            const role = user.role || user.Role; // Verifică ambele variante
+            const role = user.role || user.Role;
 
             switch (role) {
               case 'Admin':
@@ -36,7 +36,7 @@ export class Login {
               case 'Manager':
                 this.router.navigate(['/manager']);
                 break;
-              case 'Employee': // Rolul din backend
+              case 'Employee':
                 this.router.navigate(['/user']);
                 break;
               default:
@@ -53,19 +53,16 @@ export class Login {
         });
       },
       error: (err) => {
-        console.error('Login error full:', err);
-        console.error('Login error.error:', err.error);
-        console.error('Login error.message:', err.message);
-
-        let errorMessage = 'Unknown error';
-        if (err.error?.message) {
+        let errorMessage = 'Email sau parola incorecte!';
+        if (err.status === 401) {
+          errorMessage = 'Email sau parola incorecte!';
+        } else if (err.error?.message) {
           errorMessage = err.error.message;
         } else if (err.error) {
           errorMessage = err.error;
         } else if (err.message) {
           errorMessage = err.message;
         }
-
         alert("Login failed: " + errorMessage);
       }
     });
