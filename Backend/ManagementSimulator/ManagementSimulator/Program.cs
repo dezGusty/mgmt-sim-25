@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core;
 using ManagementSimulator.Database;
 using ManagementSimulator.Database.Context;
+using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Infrastructure.Config;
 using ManagementSimulator.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -78,19 +79,34 @@ using (var scope = app.Services.CreateScope())
         roles.Add(role);
     }
 
-    // Seed admin user with Admin role
-    if (!dbContext.Users.Any())
+    if (!dbContext.Users.Any(u => u.Email == "admin@simulator.com"))
     {
-        dbContext.Users.Add(new ManagementSimulator.Database.Entities.User
+        var adminRole = roles.First(r => r.Rolename == "Admin");
+
+        var adminUser = new ManagementSimulator.Database.Entities.User
         {
             FirstName = "admin",
             LastName = "admin",
             Email = "admin@simulator.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-            Roles = new List<ManagementSimulator.Database.Entities.EmployeeRole> { roles.First(r => r.Rolename == "Admin") },
             JobTitleId = itAdminTitle.Id,
             Title = itAdminTitle
-        });
+        };
+
+        dbContext.Users.Add(adminUser);
+        dbContext.SaveChanges(); // Salvează user-ul mai întâi
+
+        // Adaugă relația în tabela de legătură
+        var roleUser = new ManagementSimulator.Database.Entities.EmployeeRoleUser
+        {
+            UsersId = adminUser.Id,
+            RolesId = adminRole.Id,
+            Role = adminRole,
+            User = adminUser,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.Add(roleUser);
         dbContext.SaveChanges();
     }
 }

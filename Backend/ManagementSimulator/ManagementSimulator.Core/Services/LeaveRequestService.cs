@@ -1,6 +1,6 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
-using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
@@ -26,7 +26,7 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
         }
 
-        public async Task<LeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
+        public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
         {
             if (await _userRepository.GetFirstOrDefaultAsync(dto.UserId) == null)
             {
@@ -46,11 +46,10 @@ namespace ManagementSimulator.Core.Services
                 EndDate = dto.EndDate,
                 Reason = dto.Reason,
                 RequestStatus = RequestStatus.Pending,
-                IsApproved = null
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
-            return leaveRequest.ToLeaveRequestResponseDto();
+            return leaveRequest.ToCreateLeaveRequestResponseDto();
         }
 
         public async Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId)
@@ -85,7 +84,6 @@ namespace ManagementSimulator.Core.Services
             if (request == null)
                 throw new EntryNotFoundException(nameof(LeaveRequest), dto.Id);
 
-            request.IsApproved = dto.IsApproved;
             request.RequestStatus = dto.RequestStatus;
             request.ReviewerComment = dto.ReviewerComment;
 
@@ -135,5 +133,23 @@ namespace ManagementSimulator.Core.Services
             await _leaveRequestRepository.SaveChangesAsync();
             return existing.ToLeaveRequestResponseDto();
         }
+
+        
+        public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId)
+        {
+            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+            var employeeIds = employees.Select(e => e.Id).ToList();
+
+            var allRequests = await _leaveRequestRepository.GetAllAsync();
+            var filtered = allRequests
+                .Where(r => employeeIds.Contains(r.UserId))
+                .Select(r => r.ToLeaveRequestResponseDto())
+                .ToList();
+
+            return filtered;
+       }
+
+
+
     }
 }

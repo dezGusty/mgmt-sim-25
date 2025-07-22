@@ -91,6 +91,19 @@ namespace ManagementSimulator.Database.Context
                 .HasIndex(um => new { um.EmployeeId, um.ManagerId })
                 .IsUnique();
 
+            modelBuilder.Entity<EmployeeRoleUser>()
+                .HasKey(eru => new { eru.RolesId, eru.UsersId });
+
+            modelBuilder.Entity<EmployeeRoleUser>()
+                .HasOne(eru => eru.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(eru => eru.RolesId);
+
+            modelBuilder.Entity<EmployeeRoleUser>()
+                .HasOne(eru => eru.User)
+                .WithMany(u => u.Roles)
+                .HasForeignKey(eru => eru.UsersId);
+
             // Configurare relații auto-referențiale UserManager
             modelBuilder.Entity<EmployeeManager>()
                 .HasOne(um => um.Employee)
@@ -110,8 +123,10 @@ namespace ManagementSimulator.Database.Context
             ApplySoftDeleteFilter<JobTitle>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);
-            ApplySoftDeleteFilter<User>(modelBuilder);
+            // ApplySoftDeleteFilter<User>(modelBuilder);
             ApplySoftDeleteFilter<EmployeeManager>(modelBuilder);
+            ApplySoftDeleteFilter<EmployeeRole>(modelBuilder);
+           // ApplySoftDeleteFilter<EmployeeRoleUser>(modelBuilder);
         }
 
 
@@ -127,5 +142,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<User> Users { get; set; }
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
+        public DbSet<EmployeeRoleUser> EmployeeRolesUsers { get; set; }
     }
 }

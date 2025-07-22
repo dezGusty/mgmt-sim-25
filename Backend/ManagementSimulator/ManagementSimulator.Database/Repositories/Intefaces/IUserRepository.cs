@@ -10,5 +10,10 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
     public interface IUserRepository : IBaseRepostory<User>
     {
         public Task<User?> GetUserByEmail(string email);
+        public Task<List<User>> GetAllUsersWithReferencesAsync();
+        public Task<User?> GetUserWithReferencesByIdAsync(int id);
+        Task<List<User>> GetUsersByManagerIdAsync(int managerId);
+        Task<bool> RestoreUserByIdAsync(int id);
+        Task<User?> GetUserByIdIncludeDeletedAsync(int id);
     }
 }

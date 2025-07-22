@@ -23,5 +23,19 @@ namespace ManagementSimulator.Database.Repositories
         {
             return await _dbContext.JobTitles.FirstOrDefaultAsync(jt => jt.Name == name);
         }
+
+        public async Task<List<JobTitle>> GetAllJobTitlesWithDepartmentAsync()
+        {
+            return await _dbContext.JobTitles
+                .Include(jt => jt.Department)
+                .ToListAsync();
+        }
+
+        public async Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id)
+        {
+            return await _dbContext.JobTitles
+                .Include(jt => jt.Department)
+                .FirstOrDefaultAsync(jt => jt.Id == id);
+        }
     }
 }

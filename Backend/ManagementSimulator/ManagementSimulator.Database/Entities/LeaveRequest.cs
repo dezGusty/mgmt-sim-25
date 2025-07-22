@@ -27,8 +27,6 @@ namespace ManagementSimulator.Database.Entities
         [MaxLength(50)]
         public string? Reason { get; set; }
 
-        public bool? IsApproved { get; set; }
-
         public RequestStatus RequestStatus { get; set; }
 
         [MaxLength(100)]
