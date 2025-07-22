@@ -1,22 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { Router } from '@angular/router';
-
-import { RouterModule } from '@angular/router';
+import { AuthService } from './../../services/auth/auth';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  imports: [CommonModule, FormsModule],
 })
 export class Login {
-  constructor(private router: Router) { }
+  email = '';
+  password = '';
+  errorMessage = '';
+
+  constructor(
+    private router: Router,
+    @Inject(AuthService) private authService: AuthService
+  ) {}
 
   goBack() {
     this.router.navigate(['/']);
   }
 
-  goToForgotPassword() {
-    this.router.navigate(['/forgot-password']);
+  onSubmit() {
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => this.router.navigate(['/manager']),
+      error: (err) => {
+        this.errorMessage = 'Invalid credentials';
+        console.error(err);
+      },
+    });
   }
 }

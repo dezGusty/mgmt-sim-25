@@ -18,6 +18,7 @@ namespace ManagementSimulator.API.Controllers
             _logger = logger;
         }
 
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
