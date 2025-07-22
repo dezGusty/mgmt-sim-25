@@ -24,6 +24,7 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.Users
                 .Where(u => u.DeletedAt == null)
                 .Include(u => u.Roles)
+                    .ThenInclude(r => r.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
