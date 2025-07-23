@@ -22,10 +22,10 @@ namespace ManagementSimulator.Core.Services
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
-        {
-            var users = await _userRepository.GetAllUsersWithReferencesAsync();
+{
+    var users = await _userRepository.GetAllUsersWithReferencesAsync();
             return users.Select(u => u.ToUserResponseDto()).ToList();
-        }
+}
 
         public async Task<UserResponseDto?> GetUserByIdAsync(int id)
         {

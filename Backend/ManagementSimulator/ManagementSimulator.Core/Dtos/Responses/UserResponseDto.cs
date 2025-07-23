@@ -13,7 +13,7 @@ namespace ManagementSimulator.Core.Dtos.Responses
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; }
+        public List<string> Roles { get; set; } = new();
         public int JobTitleId { get; set; }
         public string JobTitleName { get; set; } = string.Empty;
     }
