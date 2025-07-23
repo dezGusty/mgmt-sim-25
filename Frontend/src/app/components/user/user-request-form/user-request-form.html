@@ -6,8 +6,7 @@
       <button
         (click)="closeForm()"
         class="text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="Close"
-      >
+        aria-label="Close">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -26,13 +25,11 @@
           [(ngModel)]="leaveRequestTypeId"
           name="type"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        >
+          required>
           <option value="" disabled>Select leave type</option>
           <option 
             *ngFor="let type of leaveRequestTypes" 
-            [value]="type.id"
-          >
+            [value]="type.id">
             {{ type.description }}
           </option>
         </select>
@@ -48,9 +45,11 @@
           id="fromDate"
           [(ngModel)]="startDate"
           name="fromDate"
+          [min]="todayDate"
+          (change)="onStartDateChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+          required />
+        <p class="text-xs text-gray-500 mt-1">Select a date from today onwards</p>
       </div>
 
       <!-- To Date -->
@@ -63,13 +62,22 @@
           id="toDate"
           [(ngModel)]="endDate"
           name="toDate"
+          [min]="minEndDate"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+          required />
+        <!-- ✅ Mesaj de help condiționat -->
+        <p class="text-xs text-gray-500 mt-1">
+          <span *ngIf="startDate; else noStartDate">
+            Select a date from {{ startDate }} onwards
+          </span>
+          <ng-template #noStartDate>
+            Select start date first
+          </ng-template>
+        </p>
       </div>
 
       <!-- Reason -->
-      <div class="mb-6" >
+      <div class="mb-6">
         <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
           Reason
         </label>
@@ -79,13 +87,17 @@
           name="reason"
           rows="3"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        ></textarea>
+          required></textarea>
       </div>
 
       <!-- Error Message -->
       <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded transition-all">
-        {{ errorMessage }}
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          {{ errorMessage }}
+        </div>
       </div>
 
       <!-- Submit Buttons -->
@@ -93,15 +105,14 @@
         <button
           type="button"
           (click)="closeForm()"
-          class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
-        >
+          class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors">
           Cancel
         </button>
         <button
           type="submit"
           class="submit-button bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded flex items-center gap-2"
-          [disabled]="isSubmitting || isLoadingTypes"
-        >
+          [disabled]="isSubmitting || isLoadingTypes">
+          
           <span *ngIf="isSubmitting" class="loading-spinner"></span>
           {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
         </button>

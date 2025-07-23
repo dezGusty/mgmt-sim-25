@@ -29,6 +29,14 @@ export class UserRequestForm {
   leaveRequestTypes: LeaveRequestType[] = [];
   isLoadingTypes = true;
 
+  get todayDate() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  get minEndDate(): string {
+    return this.startDate || this.todayDate;
+  }
+
   constructor(
     private leaveRequestService: LeaveRequestService, 
     private leaveRequestTypeService: LeaveRequestTypeService
@@ -36,6 +44,34 @@ export class UserRequestForm {
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
+  }
+
+  onStartDateChange() {
+    if (this.endDate && this.endDate < this.startDate) {
+      console.log('⚠️ End date is before start date, resetting...');
+      this.endDate = '';
+    }
+  }
+
+   validateDates(): boolean {
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (this.startDate < today) {
+      this.errorMessage = 'Start date cannot be in the past.';
+      return false;
+    }
+    
+    if (this.endDate < this.startDate) {
+      this.errorMessage = 'End date cannot be before start date.';
+      return false;
+    }
+    
+    if (!this.startDate || !this.endDate) {
+      this.errorMessage = 'Please select both start and end dates.';
+      return false;
+    }
+    
+    return true;
   }
 
   loadLeaveRequestTypes() {
@@ -96,6 +132,11 @@ export class UserRequestForm {
   }
   
   submitForm() {
+
+    if (!this.validateDates()) {
+      return;
+    }
+
     console.log('Form data:', {
       leaveRequestTypeId: this.leaveRequestTypeId,
       startDate: this.startDate,
