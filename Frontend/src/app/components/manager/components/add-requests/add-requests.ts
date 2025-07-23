@@ -1,38 +1,56 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { RequestDetail } from '../request-detail/request-detail';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { ILeaveRequest } from '../../../../models/leave-request';
+import { IRequestStats } from '../../../../models/request-stats';
 
 @Component({
   selector: 'app-add-requests',
+  standalone: true,
   imports: [CommonModule, NgClass, RequestDetail],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
-export class AddRequests {
+export class AddRequests implements OnInit {
+  @Output() statsUpdated = new EventEmitter<IRequestStats>();
+
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
 
-  constructor(private leaveRequests: LeaveRequests) {
+  constructor(private leaveRequests: LeaveRequests) {}
+
+  ngOnInit() {
     this.loadRequests();
   }
 
-  async loadRequests() {
-    const apiData = await this.leaveRequests.fetchByManager();
-    if (Array.isArray(apiData)) {
-      this.requests = apiData.map((item: any) => ({
-        id: String(item.id),
-        employeeName: item.fullName,
-        status: this.mapStatus(item.requestStatus),
-        from: this.formatDate(item.startDate),
-        to: this.formatDate(item.endDate),
-        days: this.calcDays(item.startDate, item.endDate),
-        reason: item.reason,
-        createdAt: this.formatDate(item.createdAt),
-        comment: item.reviewerComment,
-      }));
-    }
+  loadRequests() {
+    this.leaveRequests.fetchByManager().subscribe((apiData) => {
+      if (Array.isArray(apiData)) {
+        this.requests = apiData.map((item: any) => ({
+          id: String(item.id),
+          employeeName: item.fullName,
+          status: this.mapStatus(item.requestStatus),
+          from: this.formatDate(item.startDate),
+          to: this.formatDate(item.endDate),
+          days: this.calcDays(item.startDate, item.endDate),
+          reason: item.reason,
+          createdAt: this.formatDate(item.createdAt),
+          comment: item.reviewerComment,
+        }));
+
+        const stats = this.calculateStats(this.requests);
+        this.statsUpdated.emit(stats);
+      }
+    });
+  }
+
+  calculateStats(requests: ILeaveRequest[]): IRequestStats {
+    const total = requests.length;
+    const pending = requests.filter((r) => r.status === 'Pending').length;
+    const approved = requests.filter((r) => r.status === 'Approved').length;
+    const rejected = requests.filter((r) => r.status === 'Rejected').length;
+    return { total, pending, approved, rejected };
   }
 
   mapStatus(status: number): 'Pending' | 'Approved' | 'Rejected' {

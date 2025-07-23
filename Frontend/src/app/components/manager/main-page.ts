@@ -5,6 +5,7 @@ import { AddRequests } from './components/add-requests/add-requests';
 import { AddRequestForm } from './components/add-request-form/add-request-form';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { IRequestStats } from '../../models/request-stats';
 
 @Component({
   selector: 'app-manager-main-page',
@@ -24,7 +25,6 @@ export class ManagerMainPage {
   constructor(private router: Router) {
     this.fetchMe();
   }
-
   async fetchMe() {
     try {
       const response = await fetch('https://localhost:7275/api/Auth/me', {
@@ -37,6 +37,17 @@ export class ManagerMainPage {
       console.error('Auth/me error:', err);
       return null;
     }
+  }
+
+  stats: IRequestStats = {
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  };
+
+  onStatsUpdated(newStats: IRequestStats) {
+    this.stats = newStats;
   }
 
   goBack() {
