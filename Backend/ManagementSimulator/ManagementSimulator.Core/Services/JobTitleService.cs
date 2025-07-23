@@ -30,7 +30,6 @@ namespace ManagementSimulator.Core.Services
                 Name = j.Name ?? string.Empty,
                 DepartmentId = j.DepartmentId,
                 DepartmentName = j.Department?.Name ?? string.Empty,
-                EmployeeCount = j.Users.Count(e => e.DeletedAt == null)
             }).ToList();
         }
 
@@ -107,7 +106,7 @@ namespace ManagementSimulator.Core.Services
                 Id = jobTitle.Id,
                 Name = jobTitle.Name ?? string.Empty,
                 DepartmentId = jobTitle.DepartmentId,
-                DepartmentName = jobTitle.Department?.Name ?? string.Empty,
+                DepartmentName = jobTitle.Department?.Name ?? string.Empty
             };
         }
 

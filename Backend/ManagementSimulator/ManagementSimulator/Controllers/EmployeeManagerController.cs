@@ -30,6 +30,15 @@ namespace ManagementSimulator.API.Controllers
             return Ok();
         }
 
+        [HttpGet()]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllEmployeeManagersAsync()
+        {
+            var employeeManagers = await _employeeManagerService.GetAllEmployeeManagersAsync();
+            return Ok(employeeManagers);
+        }
+
         [HttpGet("/managers/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

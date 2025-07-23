@@ -9,6 +9,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IEmployeeManagerRepository
     {
+        public Task<List<EmployeeManager>> GetAllEmployeeManagersAsync();
         public Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId);
         public Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId);
         public Task AddEmployeeManagersAsync(int subOrdinateId,int managersId);

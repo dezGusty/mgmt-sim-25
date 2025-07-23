@@ -40,45 +40,74 @@
           </svg>
         </div>
         <h4 class="text-md font-medium text-gray-900">System Administrators</h4>
-        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ admins.length }} users</span>
+        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getAdminCount() }} users</span>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8">
-        <div *ngFor="let admin of admins" class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+        <div *ngFor="let user of users | userFilter:'Admin'" class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
           <img class="h-10 w-10 rounded-full object-cover" 
-               [src]="admin.avatar || 'https://ui-avatars.com/api/?name=' + admin.name + '&background=ef4444&color=fff'" 
-               [alt]="admin.name">
+               [src]="user.avatar || 'https://ui-avatars.com/api/?name=' + user.name + '&background=ef4444&color=fff'" 
+               [alt]="user.name">
           <div>
-            <div class="text-sm font-medium text-gray-900">{{ admin.name }}</div>
-            <div class="text-xs text-gray-500">{{ admin.email }}</div>
+            <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+            <div class="text-xs text-gray-500">{{ user.email }}</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Manager Level -->
-    <div *ngFor="let manager of managersWithTeams" class="mb-6 border-l-4 border-[#20B486] pl-4">
+    <div class="mb-8">
       <div class="flex items-center space-x-3 mb-4">
-        <img class="h-12 w-12 rounded-full object-cover" 
-             [src]="manager.avatar || 'https://ui-avatars.com/api/?name=' + manager.name + '&background=20B486&color=fff'" 
-             [alt]="manager.name">
-        <div>
-          <div class="text-lg font-medium text-gray-900">{{ manager.name }}</div>
-          <div class="text-sm text-gray-500">{{ manager.jobTitle }} - {{ manager.department }}</div>
-          <div class="text-xs text-[#20B486] font-medium">Manager ({{ manager.teamMembers.length }} direct reports)</div>
+        <div class="p-2 bg-green-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-600">
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+          </svg>
         </div>
+        <h4 class="text-md font-medium text-gray-900">Team Managers</h4>
+        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getManagerCount() }} managers</span>
       </div>
-      
-      <!-- Team Members -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8">
-        <div *ngFor="let member of manager.teamMembers" class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-          <img class="h-8 w-8 rounded-full object-cover" 
-               [src]="member.avatar || 'https://ui-avatars.com/api/?name=' + member.name + '&background=6b7280&color=fff'" 
-               [alt]="member.name">
-          <div>
-            <div class="text-sm font-medium text-gray-900">{{ member.name }}</div>
-            <div class="text-xs text-gray-500">{{ member.jobTitle }}</div>
+
+      <div *ngFor="let manager of users | userFilter:'Manager'" class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+        
+        <!-- Header-ul managerului -->
+        <div class="bg-white border-b border-gray-200 p-4">
+          <div class="flex items-center space-x-3">
+            <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]" 
+                [src]="manager.avatar || 'https://ui-avatars.com/api/?name=' + manager.name + '&background=20B486&color=fff'" 
+                [alt]="manager.name">
+            <div>
+              <div class="text-lg font-semibold text-gray-900">{{ manager.name }}</div>
+              <div class="text-sm text-gray-600">{{ manager.jobTitle }} - {{ manager.department }}</div>
+              <div class="flex items-center space-x-2 mt-1">
+                <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
+                <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="p-4">
+        <div *ngIf="manager.subordinatesNames && manager.subordinatesNames.length > 0; else noSubordinates">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div *ngFor="let subordinateName of manager.subordinatesNames; let i = index;" 
+                class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
+              <img class="h-10 w-10 rounded-full object-cover" 
+                  [src]="'https://ui-avatars.com/api/?name=' + subordinateName + '&background=6b7280&color=eee'" 
+                  [alt]="subordinateName">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">{{ subordinateName }}</div>
+                <div class="text-xs text-gray-500 truncate">{{ manager.subordinatesJobTitleNames?.[i] }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <ng-template #noSubordinates>
+            <div class="text-center py-4">
+              <div class="text-gray-400 text-sm">No team members assigned</div>
+            </div>
+          </ng-template>
         </div>
       </div>
     </div>

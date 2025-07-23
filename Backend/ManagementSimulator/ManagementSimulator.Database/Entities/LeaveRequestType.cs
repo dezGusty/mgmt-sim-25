@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,7 +15,6 @@ namespace ManagementSimulator.Database.Entities
         // fields
         [MaxLength(100)]
         public string AdditionalDetails { get; set; }
-        
         [MaxLength(50)]
         public string Description { get; set; } 
     }

@@ -171,5 +171,15 @@ namespace ManagementSimulator.Core.Services
                 ManagerId = managerId,
             };
         }
+
+        public async Task<List<EmployeeManagerResponseDto>> GetAllEmployeeManagersAsync()
+        {
+            var employeeManagers = await _employeeManagerRepository.GetAllEmployeeManagersAsync();
+            return employeeManagers.Select(employeeManagers => new EmployeeManagerResponseDto
+            {
+                EmployeeId = employeeManagers.EmployeeId,
+                ManagerId = employeeManagers.ManagerId,
+            }).ToList();
+        }
     }
 }

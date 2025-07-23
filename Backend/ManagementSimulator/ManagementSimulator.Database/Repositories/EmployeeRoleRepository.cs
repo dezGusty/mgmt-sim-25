@@ -52,5 +52,14 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(eru => eru.Role)
                 .ToListAsync(); 
         }
+
+        public async Task<List<EmployeeRoleUser>?> GetEmployeeRoleUsersByUserIdsAsync(List<int> userIds)
+        {
+            return await _dbContext.EmployeeRolesUsers
+                .Where(eru => eru.DeletedAt == null)
+                .Where(eru => userIds.Contains(eru.UsersId))
+                .Include(eru => eru.Role)
+                .ToListAsync();
+        }
     }
 }

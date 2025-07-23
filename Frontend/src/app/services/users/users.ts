@@ -15,4 +15,8 @@ export class UsersService {
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}/users`);
   }
+
+  getAllUsersIncludeRelationships(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.baseUrl}/users/IncludeRelationships`);
+  }
 }

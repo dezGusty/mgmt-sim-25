@@ -32,7 +32,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<EmployeeRole>()
                 .Property(er => er.Rolename)
                 .HasMaxLength(50);
-
             modelBuilder.Entity<EmployeeRole>()
                 .HasIndex(er => er.Rolename)
                 .IsUnique();
@@ -40,7 +39,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<User>()
                 .Property(u => u.Email)
                 .HasMaxLength(50);
-
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
@@ -48,7 +46,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<Department>()
                 .Property(d => d.Name)
                 .HasMaxLength(30);
-
             modelBuilder.Entity<Department>()
                 .HasIndex(d => d.Name)
                 .IsUnique();
@@ -56,7 +53,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<JobTitle>()
                 .Property(jt => jt.Name)
                 .HasMaxLength(50);
-
             modelBuilder.Entity<JobTitle>()
                 .HasIndex(jt => jt.Name)
                 .IsUnique();
@@ -64,7 +60,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<LeaveRequestType>()
                 .Property(lrt => lrt.Description)
                 .HasMaxLength(50);
-
             modelBuilder.Entity<LeaveRequestType>()
                 .HasIndex(lrt => lrt.Description)
                 .IsUnique();
@@ -87,48 +82,41 @@ namespace ManagementSimulator.Database.Context
                 .HasForeignKey(lr => lr.LeaveRequestTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<EmployeeManager>()
-                .HasIndex(um => new { um.EmployeeId, um.ManagerId })
-                .IsUnique();
+            modelBuilder.Entity<EmployeeManager>(entity =>
+            {
+                entity.HasKey(em => new { em.EmployeeId, em.ManagerId });
+
+                entity.HasOne(em => em.Employee)
+                      .WithMany(u => u.Managers)
+                      .HasForeignKey(em => em.EmployeeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(em => em.Manager)
+                      .WithMany(u => u.Subordinates)
+                      .HasForeignKey(em => em.ManagerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
             modelBuilder.Entity<EmployeeRoleUser>()
                 .HasKey(eru => new { eru.RolesId, eru.UsersId });
-
             modelBuilder.Entity<EmployeeRoleUser>()
                 .HasOne(eru => eru.Role)
                 .WithMany(r => r.Users)
                 .HasForeignKey(eru => eru.RolesId);
-
             modelBuilder.Entity<EmployeeRoleUser>()
                 .HasOne(eru => eru.User)
                 .WithMany(u => u.Roles)
                 .HasForeignKey(eru => eru.UsersId);
 
-            // Configurare relații auto-referențiale UserManager
-            modelBuilder.Entity<EmployeeManager>()
-                .HasOne(um => um.Employee)
-                .WithMany(u => u.Managers) // User -> managerii săi (M:N)
-                .HasForeignKey(um => um.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<EmployeeManager>()
-                .HasOne(um => um.Manager)
-                .WithMany(u => u.Subordinates) // User -> subordonații săi (M:N)
-                .HasForeignKey(um => um.ManagerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             base.OnModelCreating(modelBuilder);
 
+            // Soft delete filters
             ApplySoftDeleteFilter<Department>(modelBuilder);
             ApplySoftDeleteFilter<JobTitle>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);
-            // ApplySoftDeleteFilter<User>(modelBuilder);
-            ApplySoftDeleteFilter<EmployeeManager>(modelBuilder);
             ApplySoftDeleteFilter<EmployeeRole>(modelBuilder);
-           // ApplySoftDeleteFilter<EmployeeRoleUser>(modelBuilder);
         }
-
 
         private void ApplySoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class
         {
