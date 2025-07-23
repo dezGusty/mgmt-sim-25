@@ -53,9 +53,9 @@ export class Login {
         });
       },
       error: (err) => {
-        let errorMessage = 'Email sau parola incorecte!';
+        let errorMessage = 'Unable to log in. Please check your credentials.';
         if (err.status === 401) {
-          errorMessage = 'Email sau parola incorecte!';
+          errorMessage = 'Unauthorized access - please log in with a valid account.';
         } else if (err.error?.message) {
           errorMessage = err.error.message;
         } else if (err.error) {
