@@ -22,11 +22,8 @@ export class Login {
   onLogin() {
     this.auth.login(this.email, this.password).subscribe({
       next: (_) => {
-        alert("Login successful!");
         this.auth.me().subscribe({
           next: (user: any) => {
-            console.log('User info:', user);
-
             const role = user.role || user.Role;
 
             switch (role) {
