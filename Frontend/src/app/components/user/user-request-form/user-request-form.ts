@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LeaveRequestService } from '../../../services/leaveRequest.service';
+import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
 import { LeaveRequest } from '../../../models/entities/LeaveRequest';
 import { LeaveRequestType } from '../../../models/entities/LeaveRequestType';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type';

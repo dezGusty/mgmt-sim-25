@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LeaveRequestService } from '../../../services/leaveRequest.service';
+import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
 
 interface LeaveCategory {
   name: string;
