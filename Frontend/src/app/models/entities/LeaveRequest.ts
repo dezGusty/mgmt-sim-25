@@ -11,4 +11,7 @@ export interface LeaveRequest {
   isApproved?: boolean;
   requestStatus: RequestStatus;
   reviewerComment?: string;
+
+  duration?: number;
+  selected?: boolean;
 }

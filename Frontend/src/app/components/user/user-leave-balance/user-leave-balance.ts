@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LeaveRequestService } from '../../../services/leaveRequest.service';
 
 interface LeaveCategory {
   name: string;
@@ -30,58 +31,35 @@ export class UserLeaveBalance implements OnInit {
 
   selectedYear = new Date().getFullYear();
   availableYears = [2023, 2024, 2025, 2026];
-  
-  leaveCategories: LeaveCategory[] = [
-    {
-      name: 'Annual Leave',
-      total: 21,
-      used: 12,
-      color: 'bg-blue-500',
-    },
-    {
-      name: 'Sick Leave',
-      total: 10,
-      used: 3,
-      color: 'bg-red-500',
-    },
-    {
-      name: 'Work from Home',
-      total: 30,
-      used: 15,
-      color: 'bg-green-500',
-      note: 'Max 3 days per week'
-    },
-    {
-      name: 'Special Leave',
-      total: 5,
-      used: 0,
-      color: 'bg-purple-500',
-      note: 'For special circumstances only'
-    }
-  ];
-  
+
+  leaveCategories: LeaveCategory[] = [];
   upcomingLeaves: UpcomingLeave[] = [];
+  isLoading = true;
+  errorMessage = '';
+  
+  constructor(private leaveRequestService: LeaveRequestService) {}
+
   
   ngOnInit() {
-    // Simulate API call to fetch upcoming leaves
-    this.upcomingLeaves = [
-      {
-        type: 'Annual Leave',
-        startDate: new Date('2025-07-25'),
-        endDate: new Date('2025-08-05'),
-        days: 10,
-        status: 'approved',
-        typeColor: 'bg-blue-500'
+    this.loadLeaveBalance();
+  }
+
+  loadLeaveBalance() {
+    this.isLoading = true;
+    const userId = 1; 
+    
+    this.leaveRequestService.getLeaveBalance(userId).subscribe({
+      next: (data) => {
+        this.leaveCategories = data.categories;
+        this.upcomingLeaves = data.upcomingLeaves;
+        this.isLoading = false;
       },
-      {
-        type: 'Work from Home',
-        startDate: new Date('2025-07-20'),
-        endDate: new Date('2025-07-20'),
-        days: 1,
-        status: 'pending',
-        typeColor: 'bg-green-500'
+      error: (err) => {
+        this.errorMessage = 'Nu s-a putut încărca balanța de concediu.';
+        this.isLoading = false;
+        console.error('Error loading leave balance:', err);
       }
-    ];
+    });
   }
   
   getTotalDays(): number {
