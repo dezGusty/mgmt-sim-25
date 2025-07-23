@@ -40,14 +40,25 @@ namespace ManagementSimulator.API.Controllers
             return Ok(employeeManagers);
         }
 
-            [Authorize(Roles = "Manager")]
-            [HttpGet("/employees")]
-            [ProducesResponseType(StatusCodes.Status200OK)]
-            [ProducesResponseType(StatusCodes.Status404NotFound)]
-            [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-            public async Task<IActionResult> GetEmployeesForManagers()
-            {
-                var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        [Authorize(Roles = "Admin")]
+        [HttpGet("/employees/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetEmployeesForManagers(int id)
+        {
+            var employeeManagers = await _employeeManagerService.GetEmployeesByManagerIdAsync(id);
+            return Ok(employeeManagers);
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpGet("/employeesByManager")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetEmployeesForManagers()
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             Console.WriteLine("tetetDawdawdad AWDAw dw daw WDa dawd");
 
             Console.WriteLine(nameIdentifierClaim);
