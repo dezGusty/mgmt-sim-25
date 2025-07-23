@@ -32,21 +32,17 @@ export class UserRequestForm {
   constructor(
     private leaveRequestService: LeaveRequestService, 
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {
-    console.log('📝 UserRequestForm component initialized');
-  }
+  ) {}
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
   }
 
   loadLeaveRequestTypes() {
-    console.log('📥 Loading leave request types from database...');
     this.isLoadingTypes = true;
     
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
-        console.log('✅ Leave request types loaded:', types);
         this.leaveRequestTypes = types;
         this.isLoadingTypes = false;
         
@@ -55,21 +51,52 @@ export class UserRequestForm {
         }
       },
       error: (err) => {
-        console.error('❌ Error loading leave request types:', err);
         this.isLoadingTypes = false;
         this.errorMessage = 'Failed to load leave request types.';
       }
     });
   }
   
+  
+
+  resetFormSmooth() {
+    const formElement = document.querySelector('.form-container');
+    if (formElement) {
+      formElement.classList.add('fade-out');
+    }
+    
+    setTimeout(() => {
+      this.startDate = '';
+      this.endDate = '';
+      this.reason = '';
+      this.leaveRequestTypeId = this.leaveRequestTypes.length > 0 ? this.leaveRequestTypes[0].id : 0;
+      this.errorMessage = '';
+      
+      if (formElement) {
+        formElement.classList.remove('fade-out');
+        formElement.classList.add('fade-in');
+        
+        setTimeout(() => {
+          formElement.classList.remove('fade-in');
+        }, 300);
+      }
+    }, 150); 
+  }
+
+  resetForm() {
+    this.startDate = '';
+    this.endDate = '';
+    this.reason = '';
+    this.leaveRequestTypeId = this.leaveRequestTypes.length > 0 ? this.leaveRequestTypes[0].id : 0;
+    this.errorMessage = '';
+  }
+
   closeForm() {
-    console.log('❌ Closing request form');
     this.close.emit();
   }
   
   submitForm() {
-    console.log('📤 Starting form submission...');
-    console.log('📋 Form data:', {
+    console.log('Form data:', {
       leaveRequestTypeId: this.leaveRequestTypeId,
       startDate: this.startDate,
       endDate: this.endDate,
@@ -80,7 +107,7 @@ export class UserRequestForm {
     this.errorMessage = '';
     
     const userId = 1; 
-    console.log('👤 Using userId:', userId);
+    console.log('Using userId:', userId);
     
     const newRequest: LeaveRequest = {
       id: 0, 
@@ -90,29 +117,31 @@ export class UserRequestForm {
       endDate: new Date(this.endDate),
       reason: this.reason,
       requestStatus: RequestStatus.PENDING, 
-
     };
-    
-    console.log('📦 Prepared request object:', newRequest);
-    console.log('🔗 Calling leaveRequestService.addLeaveRequest()...');
     
     this.leaveRequestService.addLeaveRequest(newRequest).subscribe({
       next: (createdRequest) => {
-        console.log('✅ Request created successfully!', createdRequest);
         this.isSubmitting = false;
+        
         this.requestSubmitted.emit(createdRequest);
-        this.closeForm();
+        
+        setTimeout(() => {
+          this.resetFormSmooth();
+        }, 300); 
+        
+        setTimeout(() => {
+          this.closeForm();
+        }, 800); 
       },
       error: (err) => {
-        console.error('❌ Error submitting leave request:', err);
-        console.error('❌ Error details:', {
+        console.error('Error details:', {
           message: err.message,
           status: err.status,
           statusText: err.statusText,
           error: err.error
         });
         this.isSubmitting = false;
-        this.errorMessage = err.error?.message || 'A apărut o eroare la trimiterea cererii.';
+        this.errorMessage = err.error?.message || 'An error occurred while submitting the request.';
       }
     });
   }
