@@ -27,8 +27,8 @@ namespace ManagementSimulator.Core.Services
             return leaveRequestTypes.Select(l => new LeaveRequestTypeResponseDto
             {
                 Id = l.Id,
-                Description = l.Description ?? string.Empty
-                // Other characteristics can be added here 
+                Description = l.Description ?? string.Empty,
+                AdditionalDetails = l.AdditionalDetails ?? string.Empty
             }).ToList();
         }
 
@@ -44,8 +44,8 @@ namespace ManagementSimulator.Core.Services
             return new LeaveRequestTypeResponseDto
             {
                 Id = leaveRequestType.Id,
-                Description = leaveRequestType.Description ?? string.Empty
-                // Other characteristics can be added here 
+                Description = leaveRequestType.Description ?? string.Empty,
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
             };
         }
 
@@ -73,7 +73,7 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
-                ModifiedAt = leaveRequestType.ModifiedAt,
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
             };
         }
 
@@ -107,6 +107,7 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
             };
         }
     }

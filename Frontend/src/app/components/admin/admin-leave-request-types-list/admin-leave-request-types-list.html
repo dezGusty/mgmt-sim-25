@@ -15,23 +15,11 @@
         </svg>
       </div>
     </div>
-    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-      <option value="">All Categories</option>
-      <option value="paid">Paid Leave</option>
-      <option value="unpaid">Unpaid Leave</option>
-      <option value="sick">Medical Leave</option>
-      <option value="special">Special Leave</option>
-    </select>
-    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-      <option value="">All Status</option>
-      <option value="active">Active</option>
-      <option value="inactive">Inactive</option>
-    </select>
   </div>
 
   <!-- Leave Types Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let leaveType of leaveTypes; let i = index" 
+    <div *ngFor="let leaveType of leaveRequestTypes; let i = index; trackBy: trackByLeaveType" 
          class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-[#20B486]">
       
       <!-- Leave Type Header -->
@@ -45,100 +33,41 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ leaveType.name }}</h3>
-            <p class="text-sm text-gray-500">{{ leaveType.code }}</p>
+            <h3 class="text-lg font-semibold text-gray-900">{{ leaveType.description }}</h3>
           </div>
         </div>
-        
-        <!-- Status Badge -->
-        <span class="px-2 py-1 text-xs font-medium rounded-full"
-              [class]="leaveType.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-          {{ leaveType.status | titlecase }}
-        </span>
-      </div>
-
-      <!-- Category Badge -->
-      <div class="mb-4">
-        <span class="px-3 py-1 text-xs font-medium rounded-full"
-              [class]="getCategoryBadgeClass(leaveType.category)">
-          {{ leaveType.category | titlecase }} Leave
-        </span>
       </div>
 
       <!-- Description -->
-      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ leaveType.description }}</p>
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ leaveType.additionalDetails }}</p>
 
       <!-- Leave Details -->
-      <div class="space-y-3 mb-4">
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">Max Days per Year:</span>
-          <span class="font-medium text-gray-900">
-            {{ leaveType.maxDaysPerYear === -1 ? 'Unlimited' : leaveType.maxDaysPerYear + ' days' }}
-          </span>
-        </div>
-        
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">Advance Notice:</span>
-          <span class="font-medium text-gray-900">{{ leaveType.advanceNoticeDays }} days</span>
-        </div>
-        
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">Requires Approval:</span>
-          <span class="font-medium" [class]="leaveType.requiresApproval ? 'text-orange-600' : 'text-green-600'">
-            {{ leaveType.requiresApproval ? 'Yes' : 'No' }}
-          </span>
-        </div>
-
+      <!-- <div class="space-y-3 mb-4">
         <div *ngIf="leaveType.requiresDocumentation" class="flex justify-between items-center text-sm">
           <span class="text-gray-600">Documentation:</span>
           <span class="font-medium text-blue-600">Required</span>
         </div>
-      </div>
+      </div> -->
 
       <!-- Usage Statistics -->
-      <div class="grid grid-cols-2 gap-3 mb-4">
+      <!-- <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-lg font-bold text-gray-900">{{ leaveType.usageCount || 0 }}</div>
+          <div class="text-lg font-bold text-gray-900">{{ leaveType.requestsThisYear || 0 }}</div>
           <div class="text-xs text-gray-500">Requests This Year</div>
         </div>
         <div class="text-center p-3 bg-gray-50 rounded-lg">
           <div class="text-lg font-bold text-gray-900">{{ leaveType.averageDuration || 0 }}</div>
           <div class="text-xs text-gray-500">Avg Duration (days)</div>
         </div>
-      </div>
+      </div> -->
 
-      <!-- Eligibility Rules -->
-      <div class="mb-4 p-3 bg-blue-50 rounded-lg">
-        <div class="text-xs font-medium text-blue-800 mb-1">Eligibility</div>
-        <div class="text-xs text-blue-700">
-          <div *ngIf="leaveType.minimumTenure">Min. Tenure: {{ leaveType.minimumTenure }} months</div>
-          <div *ngIf="leaveType.eligibleRoles?.length">
-            Roles: {{ leaveType.eligibleRoles?.join(', ') || 'All roles' }}
-          </div>
-          <div *ngIf="leaveType.probationPeriodExcluded">
-            Excludes probation period
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
+      <!-- Action Buttons --> 
       <div class="flex space-x-2">
         <button class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                (click)="editLeaveType(leaveType)">
+                >
           Edit
         </button>
-        <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                (click)="viewLeaveType(leaveType)">
-          View Details
-        </button>
-        <button class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                (click)="duplicateLeaveType(leaveType)">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-            <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5A3 3 0 0011.25 4.5H9.5a3 3 0 00-2.664 2.958 47.796 47.796 0 00-.21 4.042H9.5zM8.25 6.75h8.5a2.25 2.25 0 012.25 2.25v.5h-13v-.5a2.25 2.25 0 012.25-2.25z" clip-rule="evenodd" />
-          </svg>
-        </button>
-        <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                (click)="deleteLeaveType(leaveType)">
+        <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
             <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
           </svg>
@@ -148,7 +77,7 @@
   </div>
 
   <!-- Leave Types Statistics -->
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+  <!-- <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
     <div class="bg-white p-4 rounded-lg border border-gray-200">
       <div class="text-2xl font-bold text-gray-900">{{ getTotalLeaveTypes() }}</div>
       <div class="text-sm text-gray-500">Total Leave Types</div>
@@ -169,67 +98,7 @@
       <div class="text-2xl font-bold text-purple-600">{{ getAverageDuration() }}</div>
       <div class="text-sm text-gray-500">Avg Duration (days)</div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Quick Actions -->
-  <div class="bg-white rounded-lg border border-gray-200 p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <button class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left" (click)="createStandardLeaveType()">
-        <div class="flex items-center space-x-3">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-600">
-              <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <div class="text-sm font-medium text-gray-900">Add Standard Leave</div>
-            <div class="text-xs text-gray-500">Annual, Sick, Personal leave types</div>
-          </div>
-        </div>
-      </button>
-
-      <button class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left" (click)="bulkImportLeaveTypes()">
-        <div class="flex items-center space-x-3">
-          <div class="p-2 bg-blue-100 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-blue-600">
-              <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 011.06 0l4.5 4.5a.75.75 0 01-1.06 1.06l-3.22-3.22V16.5a.75.75 0 01-1.5 0V4.81L8.03 8.03a.75.75 0 01-1.06-1.06l4.5-4.5zM3 15.75a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <div class="text-sm font-medium text-gray-900">Bulk Import</div>
-            <div class="text-xs text-gray-500">Import from CSV or template</div>
-          </div>
-        </div>
-      </button>
-
-      <button class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left" (click)="exportLeaveTypes()">
-        <div class="flex items-center space-x-3">
-          <div class="p-2 bg-purple-100 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-purple-600">
-              <path fill-rule="evenodd" d="M12 2.25a.75.75 0 01.75.75v11.69l3.22-3.22a.75.75 0 111.06 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 111.06-1.06l3.22 3.22V3a.75.75 0 01.75-.75zm-9 13.5a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <div class="text-sm font-medium text-gray-900">Export Data</div>
-            <div class="text-xs text-gray-500">Download leave types report</div>
-          </div>
-        </div>
-      </button>
-    </div>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="leaveTypes.length === 0" class="text-center py-12">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zM14.25 15h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zM16.5 15h.008v.008H16.5V15zm0 2.25h.008v.008H16.5v-.008z" />
-    </svg>
-    <h3 class="mt-2 text-sm font-medium text-gray-900">No leave types found</h3>
-    <p class="mt-1 text-sm text-gray-500">Get started by creating your first leave type.</p>
-    <div class="mt-6">
-      <button class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-        Add Leave Type
-      </button>
-    </div>
-  </div>
 </div>

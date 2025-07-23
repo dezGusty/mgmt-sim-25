@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminLeaveRequestTypesList } from './admin-leave-request-types-list';
+import { AdminLeaveTypesList } from './admin-leave-request-types-list';
 
 describe('AdminLeaveRequestTypesList', () => {
-  let component: AdminLeaveRequestTypesList;
-  let fixture: ComponentFixture<AdminLeaveRequestTypesList>;
+  let component: AdminLeaveTypesList;
+  let fixture: ComponentFixture<AdminLeaveTypesList>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminLeaveRequestTypesList]
+      imports: [AdminLeaveTypesList]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminLeaveRequestTypesList);
+    fixture = TestBed.createComponent(AdminLeaveTypesList);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
