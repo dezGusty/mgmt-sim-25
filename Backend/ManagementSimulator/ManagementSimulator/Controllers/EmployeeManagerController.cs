@@ -1,7 +1,9 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.EmployeeManagers;
 using ManagementSimulator.Core.Dtos.Requests.UserManagers;
 using ManagementSimulator.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ManagementSimulator.API.Controllers
 {
@@ -38,6 +40,7 @@ namespace ManagementSimulator.API.Controllers
             return Ok(employeeManagers);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("/employees/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -47,6 +50,29 @@ namespace ManagementSimulator.API.Controllers
             var employeeManagers = await _employeeManagerService.GetEmployeesByManagerIdAsync(id);
             return Ok(employeeManagers);
         }
+
+        [Authorize(Roles = "Manager")]
+        [HttpGet("/employeesByManager")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetEmployeesForManagers()
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine("tetetDawdawdad AWDAw dw daw WDa dawd");
+
+            Console.WriteLine(nameIdentifierClaim);
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+                return Unauthorized("Manager ID is missing from the token.");
+
+            if (!int.TryParse(nameIdentifierClaim, out var managerId))
+                return BadRequest("Invalid Manager ID.");
+
+            var employeeManagers = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
+            return Ok(employeeManagers);
+        }
+
 
         [HttpDelete("{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

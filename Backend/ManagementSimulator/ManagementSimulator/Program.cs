@@ -5,29 +5,37 @@ using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Infrastructure.Config;
 using ManagementSimulator.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+// OpenAPI / Swagger
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddServices();
 builder.Services.AddRepositories();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:4200")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
+
 
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>
@@ -36,13 +44,10 @@ builder.Services.AddAuthentication("Cookies")
         options.Cookie.Name = "ManagementSimulator.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.ExpireTimeSpan = TimeSpan.FromHours(12);
         options.SlidingExpiration = true;
     });
-
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 AppConfig.Init(app.Configuration);
@@ -51,20 +56,18 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MGMTSimulatorDbContext>();
 
-    // Seed IT department
     var itDepartment = dbContext.Departments.FirstOrDefault(d => d.Name == "IT");
     if (itDepartment == null)
     {
-        itDepartment = new ManagementSimulator.Database.Entities.Department { Name = "IT" };
+        itDepartment = new Department { Name = "IT" };
         dbContext.Departments.Add(itDepartment);
         dbContext.SaveChanges();
     }
 
-    // Seed ITAdmin job title
     var itAdminTitle = dbContext.JobTitles.FirstOrDefault(jt => jt.Name == "ITAdmin" && jt.DepartmentId == itDepartment.Id);
     if (itAdminTitle == null)
     {
-        itAdminTitle = new ManagementSimulator.Database.Entities.JobTitle
+        itAdminTitle = new JobTitle
         {
             Name = "ITAdmin",
             DepartmentId = itDepartment.Id,
@@ -74,15 +77,14 @@ using (var scope = app.Services.CreateScope())
         dbContext.SaveChanges();
     }
 
-    // Seed default roles
     var roleNames = new[] { "Admin", "Manager", "Employee" };
-    var roles = new List<ManagementSimulator.Database.Entities.EmployeeRole>();
+    var roles = new List<EmployeeRole>();
     foreach (var roleName in roleNames)
     {
         var role = dbContext.EmployeeRoles.FirstOrDefault(r => r.Rolename == roleName);
         if (role == null)
         {
-            role = new ManagementSimulator.Database.Entities.EmployeeRole { Rolename = roleName };
+            role = new EmployeeRole { Rolename = roleName };
             dbContext.EmployeeRoles.Add(role);
             dbContext.SaveChanges();
         }
@@ -93,7 +95,7 @@ using (var scope = app.Services.CreateScope())
     {
         var adminRole = roles.First(r => r.Rolename == "Admin");
 
-        var adminUser = new ManagementSimulator.Database.Entities.User
+        var adminUser = new User
         {
             FirstName = "admin",
             LastName = "admin",
@@ -104,10 +106,9 @@ using (var scope = app.Services.CreateScope())
         };
 
         dbContext.Users.Add(adminUser);
-        dbContext.SaveChanges(); // Salvează user-ul mai întâi
+        dbContext.SaveChanges();
 
-        // Adaugă relația în tabela de legătură
-        var roleUser = new ManagementSimulator.Database.Entities.EmployeeRoleUser
+        var roleUser = new EmployeeRoleUser
         {
             UsersId = adminUser.Id,
             RolesId = adminRole.Id,
@@ -116,12 +117,11 @@ using (var scope = app.Services.CreateScope())
             CreatedAt = DateTime.UtcNow
         };
 
-        dbContext.Add(roleUser);
+        dbContext.EmployeeRolesUsers.Add(roleUser);
         dbContext.SaveChanges();
     }
 }
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -129,7 +129,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+
+app.UseCors("AllowAngular");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -10,15 +10,35 @@
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1"
-          >Employee Name</label
+          >Employee</label
         >
-        <input
-          [(ngModel)]="employee"
-          name="employee"
-          type="text"
+        <select
+          [(ngModel)]="userId"
+          name="userId"
           class="w-full px-3 py-2 border rounded bg-gray-50"
           required
-        />
+        >
+          <option value="" disabled selected>Select employee</option>
+          <option *ngFor="let emp of employees" [value]="emp.id">
+            {{ emp.name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Leave Type</label
+        >
+        <select
+          [(ngModel)]="leaveRequestTypeId"
+          name="leaveRequestTypeId"
+          class="w-full px-3 py-2 border rounded bg-gray-50"
+          required
+        >
+          <option value="" disabled selected>Select leave type</option>
+          <option *ngFor="let type of leaveTypes" [value]="type.id">
+            {{ type.description }}
+          </option>
+        </select>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -26,8 +46,8 @@
             >Start Date</label
           >
           <input
-            [(ngModel)]="from"
-            name="from"
+            [(ngModel)]="startDate"
+            name="startDate"
             type="date"
             class="w-full px-3 py-2 border rounded bg-gray-50"
             required
@@ -38,8 +58,8 @@
             >End Date</label
           >
           <input
-            [(ngModel)]="to"
-            name="to"
+            [(ngModel)]="endDate"
+            name="endDate"
             type="date"
             class="w-full px-3 py-2 border rounded bg-gray-50"
             required
@@ -61,22 +81,29 @@
       <div class="flex gap-3 pt-4 border-t">
         <button
           type="submit"
-          [disabled]="isSubmitting || !employee || !from || !to || !reason"
-          class="flex-1  bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded  transition-all duration-200 transform hover:scale-105"
+          [disabled]="
+            isSubmitting ||
+            !userId ||
+            !leaveRequestTypeId ||
+            !startDate ||
+            !endDate ||
+            !reason
+          "
+          class="flex-1 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded transition-all duration-200 transform hover:scale-105"
         >
           {{ isSubmitting ? "Adding Request..." : "Add Request" }}
         </button>
         <button
           type="button"
           (click)="handleClose()"
-          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded  transition-all duration-200 transform hover:scale-105"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded transition-all duration-200 transform hover:scale-105"
         >
           Cancel
         </button>
       </div>
     </form>
     <button
-      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded  transition-all duration-200 transform hover:scale-105"
+      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded transition-all duration-200 transform hover:scale-105"
       (click)="handleClose()"
     >
       X
