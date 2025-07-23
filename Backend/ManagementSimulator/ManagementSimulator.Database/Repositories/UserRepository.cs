@@ -33,7 +33,9 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.Users
                 .Where(u => u.DeletedAt == null)
                 .Include(u => u.Roles)
+                     .ThenInclude(r => r.Role)
                 .Include(u => u.Title)
+                    .ThenInclude(jt => jt.Department)
                 .ToListAsync();
         }
 

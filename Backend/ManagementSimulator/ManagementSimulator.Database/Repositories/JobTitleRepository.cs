@@ -28,6 +28,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             return await _dbContext.JobTitles
                 .Include(jt => jt.Department)
+                .Include(jt => jt.Users)
                 .ToListAsync();
         }
 

@@ -1,0 +1,104 @@
+<!-- Leave Types List Component -->
+<div class="space-y-6">
+  <!-- Search and Filter Bar -->
+  <div class="flex flex-col sm:flex-row gap-4">
+    <div class="flex-1">
+      <div class="relative">
+        <input
+          type="text"
+          placeholder="Search leave types..."
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+          [(ngModel)]="searchTerm"
+        />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-gray-400 absolute left-3 top-2.5">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave Types Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let leaveType of leaveRequestTypes; let i = index; trackBy: trackByLeaveType" 
+         class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-[#20B486]">
+      
+      <!-- Leave Type Header -->
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex items-center space-x-3">
+          <div class="p-3 rounded-lg" [style.background-color]="leaveType.color + '20'">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
+                 class="w-6 h-6" [style.color]="leaveType.color">
+              <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+              <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">{{ leaveType.description }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ leaveType.additionalDetails }}</p>
+
+      <!-- Leave Details -->
+      <!-- <div class="space-y-3 mb-4">
+        <div *ngIf="leaveType.requiresDocumentation" class="flex justify-between items-center text-sm">
+          <span class="text-gray-600">Documentation:</span>
+          <span class="font-medium text-blue-600">Required</span>
+        </div>
+      </div> -->
+
+      <!-- Usage Statistics -->
+      <!-- <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <div class="text-lg font-bold text-gray-900">{{ leaveType.requestsThisYear || 0 }}</div>
+          <div class="text-xs text-gray-500">Requests This Year</div>
+        </div>
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <div class="text-lg font-bold text-gray-900">{{ leaveType.averageDuration || 0 }}</div>
+          <div class="text-xs text-gray-500">Avg Duration (days)</div>
+        </div>
+      </div> -->
+
+      <!-- Action Buttons --> 
+      <div class="flex space-x-2">
+        <button class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+          Edit
+        </button>
+        <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave Types Statistics -->
+  <!-- <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-gray-900">{{ getTotalLeaveTypes() }}</div>
+      <div class="text-sm text-gray-500">Total Leave Types</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-green-600">{{ getActiveLeaveTypes() }}</div>
+      <div class="text-sm text-gray-500">Active Types</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-blue-600">{{ getPaidLeaveTypes() }}</div>
+      <div class="text-sm text-gray-500">Paid Leave Types</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-orange-600">{{ getTotalRequestsThisYear() }}</div>
+      <div class="text-sm text-gray-500">Requests This Year</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-purple-600">{{ getAverageDuration() }}</div>
+      <div class="text-sm text-gray-500">Avg Duration (days)</div>
+    </div>
+  </div> -->
+
+  <!-- Quick Actions -->
+</div>

@@ -1,0 +1,315 @@
+<!-- Add Admin Form Component -->
+<div class="bg-white rounded-lg border border-gray-200 p-6 shadow-lg">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-lg font-semibold text-gray-900">Add New Item</h3>
+    <button 
+      class="text-gray-400 hover:text-gray-600 transition-colors"
+      (click)="close.emit()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Form Type Selection -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">What would you like to add?</label>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <button 
+        class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'manager' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('manager')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+        </svg>
+        <div class="text-xs font-medium">Manager</div>
+      </button>
+
+      <button 
+        class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'department' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('department')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
+        </svg>
+        <div class="text-xs font-medium">Department</div>
+      </button>
+
+      <button 
+        class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'jobTitle' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('jobTitle')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+        </svg>
+        <div class="text-xs font-medium">Job Title</div>
+      </button>
+
+      <button 
+        class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'user' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('user')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
+        </svg>
+        <div class="text-xs font-medium">User</div>
+      </button>
+
+      <button 
+        class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'leaveType' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('leaveType')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+          <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+        </svg>
+        <div class="text-xs font-medium">Leave Type</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Dynamic Form Content -->
+  <form (ngSubmit)="onSubmit()" *ngIf="formType">
+    
+    <!-- Manager Form -->
+    <div *ngIf="formType === 'manager'" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="John Doe" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="john@company.com" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Department</option>
+            <option value="engineering">Engineering</option>
+            <option value="marketing">Marketing</option>
+            <option value="sales">Sales</option>
+            <option value="hr">Human Resources</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="Engineering Manager" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Form -->
+    <div *ngIf="formType === 'department'" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Department Name *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="Engineering" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Department Code *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="ENG" required>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" rows="3" placeholder="Department description..."></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Department Head</label>
+        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+          <option value="">Select Manager</option>
+          <option value="manager1">John Smith</option>
+          <option value="manager2">Jane Doe</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Job Title Form -->
+    <div *ngIf="formType === 'jobTitle'" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="Senior Developer" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Job Code *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="SD-001" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Department</option>
+            <option value="engineering">Engineering</option>
+            <option value="marketing">Marketing</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Level *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Level</option>
+            <option value="entry">Entry Level</option>
+            <option value="mid">Mid Level</option>
+            <option value="senior">Senior Level</option>
+            <option value="executive">Executive</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
+          <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="50000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
+          <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="80000">
+        </div>
+      </div>
+    </div>
+
+    <!-- Leave Type Form -->
+    <div *ngIf="formType === 'leaveType'" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Leave Type Name *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="Annual Leave" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Code *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="AL" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Category</option>
+            <option value="paid">Paid Leave</option>
+            <option value="unpaid">Unpaid Leave</option>
+            <option value="sick">Medical Leave</option>
+            <option value="special">Special Leave</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Max Days/Year</label>
+          <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="21">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Advance Notice (days)</label>
+          <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="7">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" rows="3" placeholder="Leave type description..."></textarea>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-[#20B486] focus:ring-[#20B486]">
+          <span class="ml-2 text-sm text-gray-700">Requires Approval</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-[#20B486] focus:ring-[#20B486]">
+          <span class="ml-2 text-sm text-gray-700">Requires Documentation</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-[#20B486] focus:ring-[#20B486]">
+          <span class="ml-2 text-sm text-gray-700">Exclude Probation Period</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- User Form -->
+    <div *ngIf="formType === 'user'" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="Jane Smith" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" placeholder="jane@company.com" required>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="employee">Employee</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent" required>
+            <option value="">Select Department</option>
+            <option value="engineering">Engineering</option>
+            <option value="marketing">Marketing</option>
+            <option value="sales">Sales</option>
+            <option value="hr">Human Resources</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+            <option value="">Select Job Title</option>
+            <option value="developer">Software Developer</option>
+            <option value="designer">UI/UX Designer</option>
+            <option value="analyst">Business Analyst</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
+          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+            <option value="">Select Manager</option>
+            <option value="manager1">John Smith</option>
+            <option value="manager2">Sarah Johnson</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+          <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+      <button 
+        type="button"
+        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        (click)="close.emit()">
+        Cancel
+      </button>
+      <button 
+        type="submit"
+        class="px-4 py-2 text-sm font-medium text-white bg-[#20B486] rounded-lg hover:bg-[#1a9c75] transition-colors">
+        Create {{ getFormTypeLabel() }}
+      </button>
+    </div>
+  </form>
+
+  <!-- No Selection State -->
+  <div *ngIf="!formType" class="text-center py-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400 mb-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Select an Item Type</h3>
+    <p class="text-sm text-gray-500">Choose what you'd like to add from the options above.</p>
+  </div>
+</div>
