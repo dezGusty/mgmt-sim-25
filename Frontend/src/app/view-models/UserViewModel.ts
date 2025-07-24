@@ -10,6 +10,8 @@ export interface UserViewModel {
   subordinatesNames?: string[];
   subordinatesJobTitleIds?: number[];
   subordinatesJobTitleNames?: string[];
+  managersIds?: number[];
+  subordinatesEmails?: string[];
   teamSize?: number;
   status?: string;
   avatar?: string;

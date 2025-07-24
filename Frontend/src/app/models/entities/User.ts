@@ -12,4 +12,6 @@ export interface User {
   subordinatesNames?: string[];
   subordinatesJobTitleIds?: number[];
   subordinatesJobTitles?: string[];
+  subordinatesEmails?: string[];
+  managersIds?: number[];
 }

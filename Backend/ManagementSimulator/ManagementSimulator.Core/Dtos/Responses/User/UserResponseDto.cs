@@ -22,5 +22,7 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public List<string>? SubordinatesNames { get; set; } = new List<string>();
         public List<string>? SubordinatesJobTitles { get; set; } = new List<string>();
         public List<int>? SubordinatesJobTitleIds { get; set; } = new List<int>();
+        public List<int>? ManagersIds { get; set; } = new List<int>();
+        public List<string>? SubordinatesEmails { get; set; } = new List<string>();
     }
 }

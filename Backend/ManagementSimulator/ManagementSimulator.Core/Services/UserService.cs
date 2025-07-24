@@ -252,8 +252,10 @@ namespace ManagementSimulator.Core.Services
 
                     SubordinatesId = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
+                    SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
-                    SubordinatesJobTitleIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.JobTitleId)).ToList()
+                    SubordinatesJobTitleIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.JobTitleId)).ToList(),
+                    ManagersIds = managers.SelectMany(u => u.Managers.Select(m => m.ManagerId)).ToList(),
                 };
             }).ToList();
         }

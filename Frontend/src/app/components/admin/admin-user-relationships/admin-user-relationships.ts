@@ -6,21 +6,17 @@ import { User } from '../../../models/entities/User';
 import { UserViewModel } from '../../../view-models/UserViewModel';
 import { UsersService } from '../../../services/users/users';
 import { UserFilterPipe } from '../../../pipes/filterPipe/filter-pipe';
+import { UnassignedUsersPipe } from '../../../pipes/unassignedUsersPipe/unassigned-users-pipe';
 
 @Component({
   selector: 'app-admin-user-relationships',
-  imports: [CommonModule, FormsModule, UserFilterPipe],
+  imports: [CommonModule, FormsModule, UserFilterPipe, UnassignedUsersPipe],
   templateUrl: './admin-user-relationships.html',
   styleUrl: './admin-user-relationships.css'
 })
 export class AdminUserRelationships implements OnInit {
-  unassignedUsers: any[] = []; // ← Adaugă această proprietate
-  userRelationships: any[] = []; // ← Adaugă această proprietate
-  searchTerm: string = '';
-  selectedRole: string = '';
-  selectedDepartment: string = '';
-  viewMode:string = 'hierarchy';
-
+  managersIds: Set<number> = new Set<number>();
+  adminsIds: Set<number> = new Set<number>();
   users: UserViewModel[] = [];
 
   constructor(private userService: UsersService) {
@@ -29,10 +25,6 @@ export class AdminUserRelationships implements OnInit {
 
   ngOnInit(): void {
     this.loadUserRelationships();
-  }
-
-  setViewMode(mode: 'hierarchy' | 'table'): void {
-    this.viewMode = mode;
   }
 
   loadUserRelationships(): void {
@@ -50,6 +42,15 @@ export class AdminUserRelationships implements OnInit {
   }
 
   mapToUserViewModel(user: User): UserViewModel {
+    user.managersIds?.forEach(element => {
+      this.managersIds.add(element);
+    });
+
+    if(user.roles.includes("Admin"))
+    { 
+      this.adminsIds.add(user.id);
+    }
+
     return {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
@@ -63,11 +64,25 @@ export class AdminUserRelationships implements OnInit {
       roles : user.roles || [],
       subordinatesJobTitleIds: user.subordinatesJobTitleIds || [],
       subordinatesJobTitleNames: user.subordinatesJobTitles  || [],
+      managersIds: user.managersIds || [],
+      subordinatesEmails: user.subordinatesEmails || [],
     };
   }
 
+  isManager(userId: number): boolean {
+    return this.managersIds.has(userId);
+  }
+
+  isAdmin(user: number): boolean {
+    return this.adminsIds.has(user);
+  }
+
   areUnassignedUsers(): boolean {
-    return this.unassignedUsers.length > 0;
+      return this.users.some(u => u.managersIds && u.managersIds.length > 0);
+  }
+
+  getUnassignedUsersCount(): number {
+    return this.users.filter(u => u.managersIds && u.managersIds.length === 0).length;
   }
   
   getSubordinateCount(manager: any): number {
@@ -92,15 +107,6 @@ export class AdminUserRelationships implements OnInit {
 
   viewRelationship(relationship: any): void {
     console.log('View relationship:', relationship);
-    // Logica pentru vizualizarea relației
-  }
-
-  getTotalRelationships(): number {
-    return this.userRelationships.length;
-  }
-
-  getUnassignedCount(): number {
-    return this.unassignedUsers.length;
   }
 
   getRoleBadgeClass(role: string): string {

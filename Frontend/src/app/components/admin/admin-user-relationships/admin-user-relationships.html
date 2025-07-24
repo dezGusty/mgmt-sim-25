@@ -2,23 +2,7 @@
 <div class="space-y-6">
   <!-- View Toggle -->
   <div class="flex items-center space-x-4">
-    <div class="flex bg-gray-100 rounded-lg p-1">
-      <button 
-        class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-        [class]="viewMode === 'hierarchy' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-        (click)="setViewMode('hierarchy')">
-        Hierarchy View
-      </button>
-      <button 
-        class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-        [class]="viewMode === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-        (click)="setViewMode('table')">
-        Table View
-      </button>
-    </div>
-    
     <div class="flex-1"></div>
-    
     <button class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
         <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
@@ -26,10 +10,6 @@
       Assign Relationship
     </button>
   </div>
-
-  <!-- Hierarchy View -->
-  <div *ngIf="viewMode === 'hierarchy'" class="bg-white rounded-lg border border-gray-200 p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-6">Organizational Hierarchy</h3>
     
     <!-- Admin Level -->
     <div class="mb-8">
@@ -78,6 +58,7 @@
                 [alt]="manager.name">
             <div>
               <div class="text-lg font-semibold text-gray-900">{{ manager.name }}</div>
+              <div class="text-xs text-gray-500">{{ manager.email }}</div>
               <div class="text-sm text-gray-600">{{ manager.jobTitle }} - {{ manager.department }}</div>
               <div class="flex items-center space-x-2 mt-1">
                 <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
@@ -97,7 +78,16 @@
                   [alt]="subordinateName">
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium text-gray-900 truncate">{{ subordinateName }}</div>
+                <div class="text-xs text-gray-500">{{ manager.subordinatesEmails?.[i] }}</div>
                 <div class="text-xs text-gray-500 truncate">{{ manager.subordinatesJobTitleNames?.[i] }}</div>
+                <div *ngIf="isManager(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                  <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
+                </div>
+
+                <div *ngIf="isAdmin(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                  <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
+                </div>
+
               </div>
             </div>
           </div>
@@ -113,7 +103,7 @@
     </div>
 
     <!-- Unassigned Users -->
-    <div *ngIf="unassignedUsers.length > 0" class="border-l-4 border-orange-400 pl-4">
+    <div *ngIf="areUnassignedUsers()" class="border-l-4 border-orange-400 pl-4">
       <div class="flex items-center space-x-3 mb-4">
         <div class="p-2 bg-orange-100 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-600">
@@ -121,17 +111,18 @@
           </svg>
         </div>
         <h4 class="text-md font-medium text-gray-900">Unassigned Users</h4>
-        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{ unassignedUsers.length }} users</span>
+        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{ getUnassignedUsersCount() }} users</span>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8">
-        <div *ngFor="let user of unassignedUsers" class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50">
+        <div *ngFor="let user of users | unassignedUsersPipe" class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50">
           <div class="flex items-center space-x-3">
             <img class="h-8 w-8 rounded-full object-cover" 
                  [src]="user.avatar || 'https://ui-avatars.com/api/?name=' + user.name + '&background=f97316&color=fff'" 
                  [alt]="user.name">
             <div>
               <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+              <div class="text-xs text-gray-500">{{ user.email }}</div>
               <div class="text-xs text-gray-500">{{ user.jobTitle }}</div>
             </div>
           </div>
@@ -141,116 +132,9 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Table View -->
-  <div *ngIf="viewMode === 'table'" class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-    <!-- Search and Filter -->
-    <div class="p-4 border-b border-gray-200">
-      <div class="flex flex-col sm:flex-row gap-4">
-        <div class="flex-1">
-          <div class="relative">
-            <input
-              type="text"
-              placeholder="Search users..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-              [(ngModel)]="searchTerm"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-gray-400 absolute left-3 top-2.5">
-              <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
-            </svg>
-          </div>
-        </div>
-        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-          <option value="">All Roles</option>
-          <option value="admin">Admins</option>
-          <option value="manager">Managers</option>
-          <option value="employee">Employees</option>
-        </select>
-        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-          <option value="">All Departments</option>
-          <option value="engineering">Engineering</option>
-          <option value="marketing">Marketing</option>
-          <option value="sales">Sales</option>
-          <option value="hr">Human Resources</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Relationships Table -->
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reports To</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Direct Reports</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let relationship of userRelationships; let i = index" class="hover:bg-gray-50 transition-colors">
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <div class="flex-shrink-0 h-10 w-10">
-                <img class="h-10 w-10 rounded-full object-cover" 
-                     [src]="relationship.user.avatar || 'https://ui-avatars.com/api/?name=' + relationship.user.name + '&background=6b7280&color=fff'" 
-                     [alt]="relationship.user.name">
-              </div>
-              <div class="ml-4">
-                <div class="text-sm font-medium text-gray-900">{{ relationship.user.name }}</div>
-                <div class="text-sm text-gray-500">{{ relationship.user.email }}</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  [class]="getRoleBadgeClass(relationship.user.role)">
-              {{ relationship.user.role | titlecase }}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{ relationship.user.department }}</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div *ngIf="relationship.manager" class="flex items-center space-x-2">
-              <img class="h-6 w-6 rounded-full object-cover" 
-                   [src]="relationship.manager.avatar || 'https://ui-avatars.com/api/?name=' + relationship.manager.name + '&background=20B486&color=fff'" 
-                   [alt]="relationship.manager.name">
-              <span class="text-sm text-gray-900">{{ relationship.manager.name }}</span>
-            </div>
-            <div *ngIf="!relationship.manager" class="text-sm text-gray-400">No manager assigned</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{ relationship.directReports || 0 }}</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            <div class="flex space-x-2">
-              <button class="text-[#20B486] hover:text-[#1a9c75] transition-colors" (click)="editRelationship(relationship)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
-                </svg>
-              </button>
-              <button class="text-blue-600 hover:text-blue-800 transition-colors" (click)="viewRelationship(relationship)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-                  <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+  
   <!-- Statistics Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-gray-900">{{ getTotalRelationships() }}</div>
-      <div class="text-sm text-gray-500">Total Relationships</div>
-    </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="bg-white p-4 rounded-lg border border-gray-200">
       <div class="text-2xl font-bold text-red-600">{{ getAdminCount() }}</div>
       <div class="text-sm text-gray-500">System Admins</div>
@@ -260,7 +144,7 @@
       <div class="text-sm text-gray-500">Managers</div>
     </div>
     <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-orange-600">{{ getUnassignedCount() }}</div>
+      <div class="text-2xl font-bold text-orange-600">{{ getUnassignedUsersCount() }}</div>
       <div class="text-sm text-gray-500">Unassigned Users</div>
     </div>
   </div>
