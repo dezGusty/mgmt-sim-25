@@ -28,7 +28,6 @@ namespace ManagementSimulator.Database.Repositories
         {
             return await _dbContext.JobTitles
                 .Include(jt => jt.Department)
-                .Include(jt => jt.Users)
                 .ToListAsync();
         }
 
@@ -37,6 +36,15 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.JobTitles
                 .Include(jt => jt.Department)
                 .FirstOrDefaultAsync(jt => jt.Id == id);
+        }
+
+        public async Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids)
+        {
+            return await _dbContext.JobTitles
+                .Where(jt => jt.DeletedAt == null)
+                .Where(jt => ids.Contains(jt.Id))
+                .Include(jt => jt.Department)
+                .ToListAsync();
         }
     }
 }

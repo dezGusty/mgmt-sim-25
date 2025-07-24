@@ -73,7 +73,11 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = string.Join(" ", e.Roles.Where(eru => eru.DeletedAt == null).Select(r => r.Role.Rolename)),
+                Roles = e.Roles
+                    .Where(eru => eru.DeletedAt == null && eru.Role != null)
+                    .Select(ru => ru.Role.Rolename)
+                    .ToList(),
+
                 JobTitleName = e.Title.Name ?? string.Empty,
                 JobTitleId = e.JobTitleId
             }).ToList();
@@ -94,7 +98,11 @@ namespace ManagementSimulator.Core.Services
                 FirstName = e.FirstName,
                 LastName = e.LastName,
                 Email = e.Email,
-                Role = string.Join(" ", e.Roles.Where(eru => eru.DeletedAt == null).Select(r => r.Role.Rolename)),
+                Roles = e.Roles
+                    .Where(eru => eru.DeletedAt == null && eru.Role != null)
+                    .Select(ru => ru.Role.Rolename)
+                    .ToList(),
+
                 JobTitleName = e.Title.Name ?? string.Empty,
                 JobTitleId = e.JobTitleId
             }).ToList();
@@ -162,6 +170,16 @@ namespace ManagementSimulator.Core.Services
                 EmployeeId = newEmployeeManager?.EmployeeId ?? newEmployeeId,
                 ManagerId = managerId,
             };
+        }
+
+        public async Task<List<EmployeeManagerResponseDto>> GetAllEmployeeManagersAsync()
+        {
+            var employeeManagers = await _employeeManagerRepository.GetAllEmployeeManagersAsync();
+            return employeeManagers.Select(employeeManagers => new EmployeeManagerResponseDto
+            {
+                EmployeeId = employeeManagers.EmployeeId,
+                ManagerId = employeeManagers.ManagerId,
+            }).ToList();
         }
     }
 }

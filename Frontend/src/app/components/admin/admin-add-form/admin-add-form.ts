@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { EventEmitter, OnInit, Output, Input } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { Department } from '../../../models/entities/Department';
+import { DepartmentService } from '../../../services/departments/department';
 
 export interface UserFormData {
   firstName: string;
@@ -18,12 +20,9 @@ export interface UserFormData {
 }
 
 export interface DepartmentFormData {
-  departmentName: string;
-  departmentCode: string;
+  id: number;
+  name: string;
   description?: string;
-  departmentHead?: string;
-  budget?: number;
-  status?: 'active' | 'inactive';
 }
 
 export interface JobTitleFormData {
@@ -55,17 +54,18 @@ export interface LeaveTypeFormData {
 
 @Component({
   selector: 'app-admin-add-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './admin-add-form.html',
   styleUrl: './admin-add-form.css'
 })
 export class AddForm implements OnInit {
+  @Input() formType: string = '';
   @Output() close = new EventEmitter<void>();
-  @Output() submit = new EventEmitter<{ type: string; data: FormData }>();
+  @Output() submit = new EventEmitter<{ type: string; data: any }>();
 
-  formType: string = '';
   adminForm: FormGroup;
   isSubmitting: boolean = false;
+  error: string = '';
 
   // Dropdown options
   departments = [
@@ -112,7 +112,7 @@ export class AddForm implements OnInit {
     { value: 'manager', label: 'Project Manager' }
   ];
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: FormBuilder, private departmentService: DepartmentService) {
     this.adminForm = this.formBuilder.group({});
   }
 
@@ -122,6 +122,7 @@ export class AddForm implements OnInit {
 
   setFormType(type: string): void {
     this.formType = type;
+    this.error = '';
     this.buildForm();
   }
 
@@ -141,11 +142,8 @@ export class AddForm implements OnInit {
 
       case 'department':
         this.adminForm = this.formBuilder.group({
-          departmentName: ['', [Validators.required, Validators.minLength(2)]],
-          departmentCode: ['', [Validators.required, Validators.maxLength(10)]],
-          description: [''],
-          departmentHead: [''],
-          status: ['active']
+          name: ['', [Validators.required, Validators.minLength(2)]],
+          description: ['']
         });
         break;
 
@@ -195,36 +193,74 @@ export class AddForm implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.adminForm.valid && !this.isSubmitting) {
-      this.isSubmitting = true;
-      
-      const formData = this.adminForm.value;
-      
-      // Emit the form data with type
-      this.submit.emit({
-        type: this.formType,
-        data: formData
-      });
-
-      // Simulate API call delay
-      setTimeout(() => {
-        this.isSubmitting = false;
-        this.close.emit();
-        this.resetForm();
-      }, 1000);
-
-      console.log(`${this.formType} form submitted:`, formData);
-    } else {
-      // Mark all fields as touched to show validation errors
+    if (this.adminForm.invalid) {
       this.markFormGroupTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.error = '';
+
+    switch (this.formType) {
+      case 'department':
+        this.submitDepartment();
+        break;
     }
   }
 
-  private markFormGroupTouched(): void {
-    Object.keys(this.adminForm.controls).forEach(field => {
-      const control = this.adminForm.get(field);
-      control?.markAsTouched({ onlySelf: true });
+  private submitDepartment(): void {
+    const departmentData: DepartmentFormData = this.adminForm.value;
+
+    this.departmentService.createDepartment(departmentData).subscribe({
+      next: (department) => {
+        console.log('Department created successfully:', department);
+        this.submit.emit({ type: 'department', data: department });
+        this.close.emit();
+        this.isSubmitting = false;
+      },
+      error: (error) => {
+        console.error('Error creating department:', error);
+        this.error = error.error?.message || 'Failed to create department. Please try again.';
+        this.isSubmitting = false;
+      }
     });
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.adminForm.controls).forEach(key => {
+      const control = this.adminForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.adminForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.adminForm.get(fieldName);
+    if (field && field.errors && (field.dirty || field.touched)) {
+      if (field.errors['required']) {
+        return `${this.getFieldLabel(fieldName)} is required`;
+      }
+      if (field.errors['minlength']) {
+        return `${this.getFieldLabel(fieldName)} must be at least ${field.errors['minlength'].requiredLength} characters`;
+      }
+    }
+    return '';
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      name: 'Department Name',
+      description: 'Description'
+    };
+    return labels[fieldName] || fieldName;
+  }
+
+  onClose(): void {
+    this.close.emit();
   }
 
   private resetForm(): void {
@@ -249,61 +285,12 @@ export class AddForm implements OnInit {
     }
   }
 
-  // Validation helper methods
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.adminForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  getFieldError(fieldName: string): string {
-    const field = this.adminForm.get(fieldName);
-    if (field && field.errors) {
-      if (field.errors['required']) {
-        return `${this.getFieldLabel(fieldName)} is required`;
-      }
-      if (field.errors['email']) {
-        return 'Please enter a valid email address';
-      }
-      if (field.errors['minlength']) {
-        return `${this.getFieldLabel(fieldName)} must be at least ${field.errors['minlength'].requiredLength} characters`;
-      }
-      if (field.errors['maxlength']) {
-        return `${this.getFieldLabel(fieldName)} must not exceed ${field.errors['maxlength'].requiredLength} characters`;
-      }
-      if (field.errors['min']) {
-        return `${this.getFieldLabel(fieldName)} must be at least ${field.errors['min'].min}`;
-      }
-    }
-    return '';
-  }
-
-  private getFieldLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
-      name: 'Name',
-      email: 'Email',
-      department: 'Department',
-      jobTitle: 'Job Title',
-      departmentName: 'Department Name',
-      departmentCode: 'Department Code',
-      title: 'Title',
-      code: 'Code',
-      level: 'Level',
-      minSalary: 'Minimum Salary',
-      maxSalary: 'Maximum Salary',
-      role: 'Role',
-      leaveTypeName: 'Leave Type Name',
-      category: 'Category',
-      maxDaysPerYear: 'Max Days Per Year',
-      advanceNoticeDays: 'Advance Notice Days'
-    };
-    return labels[fieldName] || fieldName;
-  }
 
   // Form validation methods
   validateSalaryRange(): void {
     const minSalary = this.adminForm.get('minSalary')?.value;
     const maxSalary = this.adminForm.get('maxSalary')?.value;
-    
+
     if (minSalary && maxSalary && minSalary > maxSalary) {
       this.adminForm.get('maxSalary')?.setErrors({ 'salaryRange': true });
     }

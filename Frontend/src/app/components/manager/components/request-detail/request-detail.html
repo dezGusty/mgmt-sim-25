@@ -17,7 +17,7 @@
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-2">
         <span class="text-lg font-semibold text-gray-900">{{
-          request.employee
+          request.employeeName
         }}</span>
       </div>
       <span
@@ -134,7 +134,7 @@
           Submitted On
         </label>
         <p class="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
-          {{ request.submitted }}
+          {{ request.createdAt }}
         </p>
       </div>
     </div>
@@ -193,13 +193,13 @@
       *ngIf="request.status === 'Pending'"
     >
       <button
-        class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded hover:cursor-pointer  transition-all duration-200 transform hover:scale-105"
+        class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"
         (click)="approve.emit({ id: request.id, comment: pendingComment })"
       >
         Approve Request
       </button>
       <button
-        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded hover:cursor-pointer  transition-all duration-200 transform hover:scale-105"
+        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"
         (click)="reject.emit({ id: request.id, comment: pendingComment })"
       >
         Reject Request

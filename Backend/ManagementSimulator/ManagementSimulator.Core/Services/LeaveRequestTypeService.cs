@@ -28,7 +28,7 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = l.Id,
                 Description = l.Description ?? string.Empty,
-                AdditionalDetails = l.AdditionalDetails ?? string.Empty
+                AdditionalDetails = l.AdditionalDetails ?? string.Empty,
             }).ToList();
         }
 
@@ -45,7 +45,7 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
             };
         }
 

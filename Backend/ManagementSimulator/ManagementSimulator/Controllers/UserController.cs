@@ -32,6 +32,20 @@ namespace ManagementSimulator.API.Controllers
             return Ok(users);
         }
 
+        [HttpGet("IncludeRelationships")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllUsersWithRelationshipsAsync()
+        {
+            var users = await _userService.GetAllUsersIncludeRelationshipsAsync();
+            if (users == null || !users.Any())
+            {
+                return NotFound("No users found.");
+            }
+            return Ok(users);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

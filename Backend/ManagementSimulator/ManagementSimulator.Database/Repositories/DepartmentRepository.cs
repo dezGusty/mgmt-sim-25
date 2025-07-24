@@ -23,5 +23,12 @@ namespace ManagementSimulator.Database.Repositories
         {
             return await _dbContext.Departments.FirstOrDefaultAsync(d => d.Name == name);
         }
+
+        public async Task<Department?> GetDepartmentByIdAsync(int id)
+        {
+            return await _dbContext.Departments
+                .Where(d => d.DeletedAt == null)
+                .FirstOrDefaultAsync(d => d.Id == id);
+        }
     }
 }

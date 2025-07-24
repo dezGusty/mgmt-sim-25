@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DepartmentService } from '../../../services/departments/department';
 import { Department } from '../../../models/entities/Department';
+import { AddForm } from '../admin-add-form/admin-add-form';
 
 @Component({
   selector: 'app-admin-departments-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AddForm],
   templateUrl: './admin-departments-list.html',
   styleUrl: './admin-departments-list.css'
 })
@@ -17,6 +18,7 @@ export class AdminDepartmentsList implements OnInit {
   searchTerm: string = '';
   isLoading: boolean = true;
   error: string = '';
+  showAddForm: boolean = false;
 
 
   constructor(private departmentService: DepartmentService) { }
@@ -85,7 +87,18 @@ export class AdminDepartmentsList implements OnInit {
   }
 
   addDepartment(): void {
-    console.log('Add new department');
+    this.showAddForm = true;
+  }
+
+  onFormClose(): void {
+    this.showAddForm = false;
+  }
+
+  onFormSubmit(event: { type: string, data: any }): void {
+    if (event.type === 'department') {
+      this.departments.push(event.data);
+      this.filterDepartments();
+    }
   }
 
   getTotalDepartments(): number {

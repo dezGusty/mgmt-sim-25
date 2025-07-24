@@ -53,7 +53,9 @@ export class AdminUsersList implements OnInit {
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
       jobTitle: user.jobTitleName || 'Unknown',
-      department: user.departmentName || 'Unknown',          
+      jobTitleId: user.jobTitleId || 0,
+      department: user.departmentName || 'Unknown',    
+      departmentId: user.departmentId || 0,      
       status: 'active',
       avatar: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=20B486&color=fff`
     };
@@ -72,10 +74,10 @@ export class AdminUsersList implements OnInit {
       const matchesSearch = !this.searchTerm || 
         user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        user.jobTitle.toLowerCase().includes(this.searchTerm.toLowerCase());
+        user.jobTitle?.toLowerCase().includes(this.searchTerm.toLowerCase());
 
       const matchesDepartment = !this.selectedDepartment || 
-        user.department.toLowerCase() === this.selectedDepartment.toLowerCase();
+        user.department?.toLowerCase() === this.selectedDepartment.toLowerCase();
 
       return matchesSearch && matchesDepartment;
     });

@@ -82,8 +82,16 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<EmployeeManager?> GetEmployeeManagersByIdIncludeDeletedAsync(int employeeId, int managerId)
         {
             return await _context.EmployeeManagers
+                     .Where(em => em.DeletedAt == null)
                      .Where(em => em.EmployeeId == employeeId && em.ManagerId == managerId)
                      .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<EmployeeManager>> GetAllEmployeeManagersAsync()
+        {
+            return await _context.EmployeeManagers
+                .Where(em => em.DeletedAt == null)
+                .ToListAsync();
         }
     }
 }

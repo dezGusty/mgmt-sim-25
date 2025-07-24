@@ -14,5 +14,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<EmployeeRoleUser?> GetEmployeeRoleUserIncludeDeletedAsync(int userId, int roleId);
         Task DeleteEmployeeUserRoleAsync(EmployeeRoleUser employeeRoleUser);
         Task<List<EmployeeRoleUser>> GetEmployeeRoleUsersByUserIdAsync(int userId);
+        Task<List<EmployeeRoleUser>?> GetEmployeeRoleUsersByUserIdsAsync(List<int> userIds);
     }
 }
