@@ -6,11 +6,13 @@ import { User } from './components/user/user';
 import { ResetPassword } from './components/reset-password/reset-password';
 import { AdminMainPage } from './components/admin/main-page';
 import { AuthGuard } from './guards/auth.guard';
+import { LoginGuard } from './guards/login.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: Login,
+    canActivate: [LoginGuard],
   },
   {
     path: 'manager',
@@ -33,6 +35,7 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Login,
+    canActivate: [LoginGuard],
   },
   { path: 'reset-password', component: ResetPassword },
   { path: '**', redirectTo: '/' },
