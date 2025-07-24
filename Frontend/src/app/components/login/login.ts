@@ -21,12 +21,13 @@ export class Login {
   constructor(private auth: Auth, private router: Router) { }
 
   onLogin() {
+    this.errorMessage = '';
     this.auth.login(this.email, this.password).subscribe({
       next: (_) => {
         this.auth.me().subscribe({
           next: (user: any) => {
-            const role = user.role || user.Role;
-
+            const roles = user.Roles || user.roles || [];
+            const role = roles.length > 0 ? roles[0] : undefined;
             switch (role) {
               case 'Admin':
                 this.router.navigate(['/admin']);
@@ -63,16 +64,6 @@ export class Login {
         }
         alert("Login failed: " + errorMessage);
       }
-    });
-  }
-
-  onSubmit() {
-    this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/manager']),
-      error: (err) => {
-        this.errorMessage = 'Invalid credentials';
-        console.error(err);
-      },
     });
   }
 }
