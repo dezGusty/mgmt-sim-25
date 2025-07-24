@@ -16,6 +16,7 @@ export class Login {
 
   email = '';
   password = '';
+  errorMessage = '';
 
   constructor(private auth: Auth, private router: Router) { }
 
@@ -65,12 +66,8 @@ export class Login {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/']);
-  }
-
   onSubmit() {
-    this.authService.login(this.email, this.password).subscribe({
+    this.auth.login(this.email, this.password).subscribe({
       next: () => this.router.navigate(['/manager']),
       error: (err) => {
         this.errorMessage = 'Invalid credentials';
