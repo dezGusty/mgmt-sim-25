@@ -43,10 +43,8 @@ export class User {
     this.showSuccessMessage = true;
     this.successMessage = 'Leave request submitted successfully! 🎉';
     
-    // Închideți formularul
     this.showRequestForm = false;
     
-    // Închideți lista dacă era deschisă
     if (this.showRequestsList) {
       this.showRequestsList = false; 
     }

@@ -3,31 +3,25 @@
 
   <div *ngIf="showSuccessMessage" 
        class="fixed top-20 right-4 z-70 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in flex items-center gap-3">
-    <!-- Icon de succes -->
     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
     </svg>
     
-    <!-- Mesajul -->
     <span class="font-medium">{{ successMessage }}</span>
     
-    <!-- Buton de închidere -->
     <button (click)="closeSuccessMessage()" 
             class="ml-4 text-white hover:text-gray-200 font-bold text-lg leading-none">
       ×
     </button>
   </div>
 
-  <!-- Gradient container - rămâne pe toată lățimea -->
+  <!-- Gradient container -->
   <div class="w-full h-52 bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] shadow-lg relative overflow-hidden">
-    <!-- Container pentru conținut - respectă marginile -->
     <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-      <!-- Text în stânga -->
       <div class="text-white max-w-md">
         <h2 class="text-4xl font-semibold text-[#020126]">Ready to take that well-deserved break?</h2>
       </div>
 
-      <!-- Avionul în dreapta -->
       <div class="hidden sm:block w-60 h-52 relative">
       <!-- Plane icon -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="w-36 h-36 absolute right-24 bottom-6 text-slate-900 opacity-65 transform -rotate-12">

@@ -13,7 +13,6 @@
   transform: scale(1);
 }
 
-/* Animații pentru câmpurile individuale */
 .form-field {
   transition: all 0.2s ease-in-out;
 }
@@ -23,7 +22,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Animație pentru butonul de submit */
 .submit-button {
   transition: all 0.2s ease-in-out;
 }
@@ -38,7 +36,6 @@
   cursor: not-allowed;
 }
 
-/* Loading animation pentru buton */
 .loading-spinner {
   display: inline-block;
   width: 16px;

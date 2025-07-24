@@ -137,12 +137,6 @@ export class UserRequestForm {
       return;
     }
 
-    console.log('Form data:', {
-      leaveRequestTypeId: this.leaveRequestTypeId,
-      startDate: this.startDate,
-      endDate: this.endDate,
-      reason: this.reason
-    });
 
     this.isSubmitting = true;
     this.errorMessage = '';
