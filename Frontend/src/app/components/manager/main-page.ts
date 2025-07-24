@@ -24,22 +24,7 @@ export class ManagerMainPage {
   showAddRequestForm = false;
   currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
 
-  constructor(private router: Router) {
-    this.fetchMe();
-  }
-  async fetchMe() {
-    try {
-      const response = await fetch('https://localhost:7275/api/Auth/me', {
-        credentials: 'include',
-      });
-      const data = await response.json();
-      console.log('Auth/me:', data);
-      return data;
-    } catch (err) {
-      console.error('Auth/me error:', err);
-      return null;
-    }
-  }
+  constructor(private router: Router) {}
 
   stats: IRequestStats = {
     total: 0,
