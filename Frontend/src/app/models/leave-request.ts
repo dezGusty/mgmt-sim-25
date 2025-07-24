@@ -7,5 +7,6 @@ export interface ILeaveRequest {
   days: number;
   reason: string;
   createdAt: string;
+  createdAtDate: Date;
   comment?: string;
 }

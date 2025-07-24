@@ -25,13 +25,7 @@ export class AddRequestForm implements OnInit {
   employees: { id: number; name: string }[] = [];
 
   @Output() close = new EventEmitter<void>();
-  @Output() submit = new EventEmitter<{
-    userId: number;
-    leaveRequestTypeId: number;
-    startDate: string;
-    endDate: string;
-    reason: string;
-  }>();
+  @Output() requestAdded = new EventEmitter<any>();
 
   constructor(
     private leaveTypeService: LeaveRequestTypeService,
@@ -44,7 +38,6 @@ export class AddRequestForm implements OnInit {
       this.leaveTypes = types;
     });
     this.employeeService.getEmployees().subscribe((users) => {
-      console.log('Employees:', users);
       this.employees = users;
     });
   }
@@ -68,13 +61,15 @@ export class AddRequestForm implements OnInit {
         reason: this.reason,
       })
       .subscribe({
-        next: (res) => {
+        next: (createdRequest) => {
           this.isSubmitting = false;
+          console.log('Request created successfully:', createdRequest);
+          this.requestAdded.emit(createdRequest); // Emit cererea creată
           this.handleClose();
         },
         error: (err) => {
           this.isSubmitting = false;
-          // poți adăuga aici un mesaj de eroare dacă vrei
+          console.error('Error creating request:', err);
         },
       });
   }

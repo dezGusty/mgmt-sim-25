@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef } from '@angular/core';
 import { StatsCards } from './components/stats-cards/stats-cards';
 import { CommonModule } from '@angular/common';
 import { AddRequests } from './components/add-requests/add-requests';
@@ -20,7 +20,9 @@ import { IRequestStats } from '../../models/request-stats';
   styleUrl: './main-page.css',
 })
 export class ManagerMainPage {
+  @ViewChild('addRequestsRef') addRequestsComponent!: AddRequests;
   showAddRequestForm = false;
+  currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
 
   constructor(private router: Router) {
     this.fetchMe();
@@ -50,7 +52,15 @@ export class ManagerMainPage {
     this.stats = newStats;
   }
 
+  onRequestAdded(createdRequest: any) {
+    this.addRequestsComponent.addNewRequestToList(createdRequest);
+  }
+
   goBack() {
     this.router.navigate(['/']);
+  }
+
+  setFilter(filter: 'All' | 'Pending' | 'Approved' | 'Rejected') {
+    this.currentFilter = filter;
   }
 }
