@@ -36,11 +36,5 @@ namespace ManagementSimulator.Database.Entities
         public string PasswordHash { get; set; }
 
         public string FullName => $"{FirstName} {LastName}";
-
-
-        public bool IsPasswordValid(string password)
-        {
-            return PasswordHash == password;
-        }
     }
 }

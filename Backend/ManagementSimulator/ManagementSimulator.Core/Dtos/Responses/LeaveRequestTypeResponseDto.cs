@@ -9,9 +9,7 @@ namespace ManagementSimulator.Core.Dtos.Responses
     public class LeaveRequestTypeResponseDto
     {
         public int Id { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public DateTime? ModifiedAt { get; set; }
+        public string? Description { get; set; } = string.Empty;
+        public string? AdditionalDetails { get; set; }
     }
 }

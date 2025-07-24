@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/authService/auth';
 
@@ -69,7 +69,13 @@ export class Login {
     this.router.navigate(['/']);
   }
 
-  goToForgotPassword() {
-    this.router.navigate(['/forgot-password']);
+  onSubmit() {
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => this.router.navigate(['/manager']),
+      error: (err) => {
+        this.errorMessage = 'Invalid credentials';
+        console.error(err);
+      },
+    });
   }
 }

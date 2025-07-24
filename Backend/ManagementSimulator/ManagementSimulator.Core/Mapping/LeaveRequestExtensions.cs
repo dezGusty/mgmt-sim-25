@@ -17,6 +17,9 @@ namespace ManagementSimulator.Core.Mapping
                 Id = entity.Id,
                 UserId = entity.UserId,
 
+                FullName = entity.User?.FullName ?? string.Empty,
+
+
                 ReviewerId = entity.ReviewerId,
 
                 LeaveRequestTypeId = entity.LeaveRequestTypeId,
@@ -26,7 +29,9 @@ namespace ManagementSimulator.Core.Mapping
 
                 Reason = entity.Reason ?? string.Empty,
                 RequestStatus = entity.RequestStatus,
-                ReviewerComment = entity.ReviewerComment ?? string.Empty
+                ReviewerComment = entity.ReviewerComment ?? string.Empty,
+
+                CreatedAt = entity.CreatedAt,
             };
         }
 

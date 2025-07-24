@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IUserService
     {
+        Task<List<UserResponseDto>> GetAllUsersIncludeRelationshipsAsync();
         Task<List<UserResponseDto>> GetAllUsersAsync();
         Task<UserResponseDto?> GetUserByIdAsync(int id);
         Task<UserResponseDto> AddUserAsync(CreateUserRequestDto request);

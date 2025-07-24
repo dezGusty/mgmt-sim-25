@@ -1,0 +1,151 @@
+<!-- User Relationships Component -->
+<div class="space-y-6">
+  <!-- View Toggle -->
+  <div class="flex items-center space-x-4">
+    <div class="flex-1"></div>
+    <button class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+        <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+      </svg>
+      Assign Relationship
+    </button>
+  </div>
+    
+    <!-- Admin Level -->
+    <div class="mb-8">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-red-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-red-600">
+            <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.814 3.051 10.923 7.613 13.777a.75.75 0 00.774 0C15.199 20.673 18.25 15.564 18.25 9.75a12.74 12.74 0 00-.635-4.235.75.75 0 00-.722-.515 11.209 11.209 0 01-7.877-3.08z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h4 class="text-md font-medium text-gray-900">System Administrators</h4>
+        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getAdminCount() }} users</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8">
+        <div *ngFor="let user of users | userFilter:'Admin'" class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <img class="h-10 w-10 rounded-full object-cover" 
+               [src]="user.avatar || 'https://ui-avatars.com/api/?name=' + user.name + '&background=ef4444&color=fff'" 
+               [alt]="user.name">
+          <div>
+            <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+            <div class="text-xs text-gray-500">{{ user.email }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager Level -->
+    <div class="mb-8">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-green-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-600">
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h4 class="text-md font-medium text-gray-900">Team Managers</h4>
+        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getManagerCount() }} managers</span>
+      </div>
+
+      <div *ngFor="let manager of users | userFilter:'Manager'" class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+        
+        <!-- Header-ul managerului -->
+        <div class="bg-white border-b border-gray-200 p-4">
+          <div class="flex items-center space-x-3">
+            <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]" 
+                [src]="manager.avatar || 'https://ui-avatars.com/api/?name=' + manager.name + '&background=20B486&color=fff'" 
+                [alt]="manager.name">
+            <div>
+              <div class="text-lg font-semibold text-gray-900">{{ manager.name }}</div>
+              <div class="text-xs text-gray-500">{{ manager.email }}</div>
+              <div class="text-sm text-gray-600">{{ manager.jobTitle }} - {{ manager.department }}</div>
+              <div class="flex items-center space-x-2 mt-1">
+                <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
+                <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4">
+        <div *ngIf="manager.subordinatesNames && manager.subordinatesNames.length > 0; else noSubordinates">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div *ngFor="let subordinateName of manager.subordinatesNames; let i = index;" 
+                class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
+              <img class="h-10 w-10 rounded-full object-cover" 
+                  [src]="'https://ui-avatars.com/api/?name=' + subordinateName + '&background=6b7280&color=eee'" 
+                  [alt]="subordinateName">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-gray-900 truncate">{{ subordinateName }}</div>
+                <div class="text-xs text-gray-500">{{ manager.subordinatesEmails?.[i] }}</div>
+                <div class="text-xs text-gray-500 truncate">{{ manager.subordinatesJobTitleNames?.[i] }}</div>
+                <div *ngIf="isManager(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                  <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
+                </div>
+
+                <div *ngIf="isAdmin(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                  <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <ng-template #noSubordinates>
+            <div class="text-center py-4">
+              <div class="text-gray-400 text-sm">No team members assigned</div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unassigned Users -->
+    <div *ngIf="areUnassignedUsers()" class="border-l-4 border-orange-400 pl-4">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-orange-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-600">
+            <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h4 class="text-md font-medium text-gray-900">Unassigned Users</h4>
+        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{ getUnassignedUsersCount() }} users</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8">
+        <div *ngFor="let user of users | unassignedUsersPipe" class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50">
+          <div class="flex items-center space-x-3">
+            <img class="h-8 w-8 rounded-full object-cover" 
+                 [src]="user.avatar || 'https://ui-avatars.com/api/?name=' + user.name + '&background=f97316&color=fff'" 
+                 [alt]="user.name">
+            <div>
+              <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+              <div class="text-xs text-gray-500">{{ user.email }}</div>
+              <div class="text-xs text-gray-500">{{ user.jobTitle }}</div>
+            </div>
+          </div>
+          <button class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium" (click)="assignManager(user)">
+            Assign
+          </button>
+        </div>
+      </div>
+    </div>
+  
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-red-600">{{ getAdminCount() }}</div>
+      <div class="text-sm text-gray-500">System Admins</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-[#20B486]">{{ getManagerCount() }}</div>
+      <div class="text-sm text-gray-500">Managers</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+      <div class="text-2xl font-bold text-orange-600">{{ getUnassignedUsersCount() }}</div>
+      <div class="text-sm text-gray-500">Unassigned Users</div>
+    </div>
+  </div>
+</div>

@@ -42,7 +42,7 @@ public class AuthController : ControllerBase
         {
             UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             Email = User.FindFirst(ClaimTypes.Email)?.Value,
-            Role = User.FindFirst(ClaimTypes.Role)?.Value
+            Roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList()
         });
     }
 }

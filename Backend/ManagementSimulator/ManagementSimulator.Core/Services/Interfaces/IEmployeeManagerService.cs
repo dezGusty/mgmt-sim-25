@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IEmployeeManagerService
     {
+        Task<List<EmployeeManagerResponseDto>> GetAllEmployeeManagersAsync();
         Task<List<UserResponseDto>> GetManagersByEmployeeIdAsync(int employeeId);
         Task<List<UserResponseDto>> GetEmployeesByManagerIdAsync(int managerId);
         Task AddEmployeeManagerAsync(int employeeId, int managerId);

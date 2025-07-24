@@ -3,7 +3,9 @@ using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Services;
 using ManagementSimulator.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ManagementSimulator.API.Controllers
 {
@@ -85,15 +87,22 @@ namespace ManagementSimulator.API.Controllers
             await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
             return Ok("Leave request reviewed successfully.");
         }
-    
 
-    [HttpGet("by-manager/{managerId}")]
-        public async Task<IActionResult> GetRequestsByManager(int managerId)
+        [Authorize(Roles = "Manager")]
+        [HttpGet("by-manager")]
+        public async Task<IActionResult> GetRequestsByManager()
         {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            //De incercat de luat manager id direct din id
-            //var managerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized("Manager ID is missing from the token.");
+            }
 
+            if (!int.TryParse(nameIdentifierClaim, out var managerId))
+            {
+                return BadRequest("Invalid Manager ID.");
+            }
 
             var requests = await _leaveRequestService.GetLeaveRequestsForManagerAsync(managerId);
             return Ok(requests);

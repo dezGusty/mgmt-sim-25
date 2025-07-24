@@ -33,6 +33,7 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.Users
                 .Where(u => u.DeletedAt == null)
                 .Include(u => u.Roles)
+                    .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
                 .ToListAsync();
         }
@@ -46,6 +47,7 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Title)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
+
         public async Task<List<User>> GetUsersByManagerIdAsync(int managerId)
         {
             return await _dbContext.EmployeeManagers
@@ -62,10 +64,51 @@ namespace ManagementSimulator.Database.Repositories
                 .ExecuteUpdateAsync(u => u.SetProperty(x => x.DeletedAt, _ => null)) > 0;
         }
 
+
         public async Task<User?> GetUserByIdIncludeDeletedAsync(int id)
         {
             return await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            return await _dbContext.Users
+                .Where(u => u.DeletedAt == null)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<List<User>> GetAllUsersIncludeRelationships()
+        {
+            return await _dbContext.Users
+                .Where(u => u.DeletedAt == null)
+                .Include(u => u.Roles)
+                    .ThenInclude(r => r.Role)
+                .Include(u => u.Title)
+                .Include(u => u.Subordinates)
+                    .ThenInclude(em => em.Employee)
+                        .ThenInclude(u => u.Title)
+                 .ToListAsync();
+        }
+
+        public async Task<List<User>?> GetSubordinatesByUserIdsAsync(List<int> ids)
+        {
+            return await _dbContext.Users
+                .Where(u => u.DeletedAt == null)
+                .Where(u => ids.Contains(u.Id))
+                .Include(u => u.Subordinates)
+                    .ThenInclude(em => em.Employee)
+                .ToListAsync();
+        }
+
+        public async Task<List<User>?> GetManagersByUserIdsAsync(List<int> ids)
+        {
+            return await _dbContext.Users
+                .Where(u => u.DeletedAt == null)
+                .Where(u => ids.Contains(u.Id))
+                .Include(u => u.Managers)
+                    .ThenInclude(em => em.Manager)
+                .ToListAsync();
         }
     }
 }

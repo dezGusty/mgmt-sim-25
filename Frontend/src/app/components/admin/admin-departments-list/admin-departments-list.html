@@ -1,0 +1,101 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-gray-900">Departments</h2>
+    <button (click)="addDepartment()"
+      class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+      Add Department
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="flex items-center space-x-4 mb-6">
+    <div class="relative flex-1">
+      <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Search departments..."
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#20B486] mx-auto"></div>
+    <p class="mt-4 text-gray-500">Loading departments...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="text-center py-12">
+    <div class="text-red-500 mb-4">
+      <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-red-900 mb-2">Error Loading Departments</h3>
+    <p class="text-red-700 mb-4">{{ error }}</p>
+    <button (click)="loadDepartments()"
+      class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Departments Grid -->
+  <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let department of filteredDepartments"
+      class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ department.name }}</h3>
+          <p class="text-gray-600 text-sm">{{ department.description || 'No description available' }}</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button (click)="editDepartment(department)" class="text-blue-600 hover:text-blue-800 p-1 rounded"
+            title="Edit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          <button (click)="deleteDepartment(department)" class="text-red-600 hover:text-red-800 p-1 rounded"
+            title="Delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-500">
+        ID: {{ department.id }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && filteredDepartments.length === 0" class="text-center py-12">
+    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">No departments found</h3>
+    <p class="mt-1 text-sm text-gray-500">
+      {{ searchTerm ? 'No departments match your search criteria.' : 'Get started by creating a new department.' }}
+    </p>
+    <div class="mt-6">
+      <button (click)="addDepartment()"
+        class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        Add Department
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Form Modal -->
+<app-admin-add-form *ngIf="showAddForm" (close)="onFormClose()" (submit)="onFormSubmit($event)"
+  [formType]="'department'"></app-admin-add-form>
