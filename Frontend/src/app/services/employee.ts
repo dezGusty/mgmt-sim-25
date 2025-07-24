@@ -8,7 +8,9 @@ export class EmployeeService {
 
   getEmployees(): Observable<{ id: number; name: string }[]> {
     return this.http
-      .get<any[]>('https://localhost:7275/employees', { withCredentials: true })
+      .get<any[]>('https://localhost:7275/employeesByManager', {
+        withCredentials: true,
+      })
       .pipe(
         map((users) =>
           users.map((u) => ({

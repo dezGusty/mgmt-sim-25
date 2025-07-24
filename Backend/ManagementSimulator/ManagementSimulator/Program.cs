@@ -4,13 +4,7 @@ using ManagementSimulator.Database.Context;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Infrastructure.Config;
 using ManagementSimulator.Infrastructure.Middleware;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +29,6 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
 
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>

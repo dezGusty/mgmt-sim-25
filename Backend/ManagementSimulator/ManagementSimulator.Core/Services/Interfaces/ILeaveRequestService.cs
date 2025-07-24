@@ -16,7 +16,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId);
         Task<List<LeaveRequestResponseDto>> GetAllRequestsAsync();
         Task<LeaveRequestResponseDto> GetRequestByIdAsync(int id);
-        Task ReviewLeaveRequestAsync(int id,ReviewLeaveRequestDto dto);
+        Task ReviewLeaveRequestAsync(int id,ReviewLeaveRequestDto dto, int managerId);
         Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto);
         Task<bool> DeleteLeaveRequestAsync(int id);
         Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId);

@@ -9,10 +9,10 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequest
 {
     public class ReviewLeaveRequestDto
     {
-        public int Id { get; set; }
-        public bool IsApproved { get; set; }
         public RequestStatus RequestStatus { get; set; }
         public string ReviewerComment { get; set; } = string.Empty;
+
+
     }
 
 }

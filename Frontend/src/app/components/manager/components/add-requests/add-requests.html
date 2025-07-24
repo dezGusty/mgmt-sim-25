@@ -1,6 +1,6 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
   <div
-    *ngFor="let req of requests"
+    *ngFor="let req of filteredRequests"
     class="hover:shadow-lg hover:translate-y-[-2px] transition-all duration-300 border-l-4 rounded-lg bg-white border-[#7ee3db97] shadow-sm"
   >
     <div class="p-6">
@@ -111,7 +111,7 @@
       </div>
       <div class="mt-4 pt-4 border-t">
         <button
-          class="w-full rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 py-2 text-sm font-medium hover:cursor-pointe0r transition-all duration-200 transform hover:scale-105"
+          class="w-full rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 py-2 text-sm font-medium hover:cursor-pointe0r transition-all duration-200 transform"
           (click)="openDetails(req)"
         >
           View Details

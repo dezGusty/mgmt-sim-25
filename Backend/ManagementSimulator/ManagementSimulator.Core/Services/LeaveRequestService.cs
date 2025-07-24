@@ -77,15 +77,17 @@ namespace ManagementSimulator.Core.Services
             return request.ToLeaveRequestResponseDto();
         }
 
-        public async Task ReviewLeaveRequestAsync(int id, ReviewLeaveRequestDto dto)
+        public async Task ReviewLeaveRequestAsync(int id, ReviewLeaveRequestDto dto, int managerId)
         {
             var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
 
             if (request == null)
-                throw new EntryNotFoundException(nameof(LeaveRequest), dto.Id);
+                throw new EntryNotFoundException(nameof(LeaveRequest), id);
 
             request.RequestStatus = dto.RequestStatus;
             request.ReviewerComment = dto.ReviewerComment;
+            request.ReviewerId = managerId;
+
 
             request.ModifiedAt = DateTime.UtcNow;
 
@@ -148,8 +150,5 @@ namespace ManagementSimulator.Core.Services
 
             return filtered;
        }
-
-
-
     }
 }

@@ -68,14 +68,26 @@ namespace ManagementSimulator.API.Controllers
             return Ok(requests);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpPatch("review/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ReviewLeaveRequestAsync(int id, [FromBody] ReviewLeaveRequestDto dto)
         {
-            await _leaveRequestService.ReviewLeaveRequestAsync(id, dto);
-            return Ok("Leave request reviewed successfully.");
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized("Manager ID is missing from the token.");
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var managerId))
+            {
+                return BadRequest("Invalid Manager ID.");
+            }
+
+            await _leaveRequestService.ReviewLeaveRequestAsync(id, dto, managerId);
+            return Ok(new { message = "Leave request reviewed successfully." });
         }
 
         [HttpPatch("{id}")]
