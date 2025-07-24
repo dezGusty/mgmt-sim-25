@@ -8,17 +8,32 @@ import { AdminMainPage } from './components/admin/main-page';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: Home, canActivate: [AuthGuard] },
+  {
+    path: '',
+    component: Home,
+  },
   {
     path: 'manager',
     component: ManagerMainPage,
+    canActivate: [AuthGuard],
+    data: { roles: ['Manager'] },
   },
   {
     path: 'admin',
     component: AdminMainPage,
+    canActivate: [AuthGuard],
+    data: { roles: ['Admin'] },
   },
-  { path: 'login', component: Login },
-  { path: 'user', component: User },
+  {
+    path: 'user',
+    component: User,
+    canActivate: [AuthGuard],
+    data: { roles: ['Employee'] },
+  },
+  {
+    path: 'login',
+    component: Login,
+  },
   { path: 'reset-password', component: ResetPassword },
   { path: '**', redirectTo: '/' },
 ];

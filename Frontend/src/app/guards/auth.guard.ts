@@ -11,32 +11,46 @@ import { Observable } from 'rxjs';
 export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot
-  ):
-    | boolean
-    | UrlTree
-    | Promise<boolean | UrlTree>
-    | Observable<boolean | UrlTree> {
-    return fetch('https://localhost:7275/api/Auth/me', {
-      credentials: 'include',
-    })
-      .then(async (response) => {
-        if (!response.ok) return this.router.parseUrl('/login');
-        const data = await response.json();
-        if (data && data.userId && data.email && data.roles) {
-          const allowedRoles = route.data['roles'] as string[] | undefined;
-          if (!allowedRoles || allowedRoles.length === 0) {
-            // No role restriction, just needs to be authenticated
-            return true;
-          }
-          // Check if user has at least one allowed role
-          if (data.roles.some((role: string) => allowedRoles.includes(role))) {
-            return true;
-          }
-        }
+  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
+    try {
+      const response = await fetch('https://localhost:7275/api/Auth/me', {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
         return this.router.parseUrl('/login');
-      })
-      .catch(() => this.router.parseUrl('/login'));
+      }
+
+      const data = await response.json();
+
+      if (data && data.userId && data.email && data.roles) {
+        const roles: string[] = data.roles;
+
+        const allowedRoles = route.data['roles'] as string[] | undefined;
+
+        // Dacă nu există restricție de rol (ex: la pagina principală sau login), dar utilizatorul e deja logat:
+        if (!allowedRoles || allowedRoles.length === 0) {
+          // Dacă e deja logat și încearcă să acceseze /login → redirect către pagina potrivită
+          if (route.routeConfig?.path === 'login') {
+            if (roles.includes('Admin')) return this.router.parseUrl('/admin');
+            if (roles.includes('Manager'))
+              return this.router.parseUrl('/manager');
+            if (roles.includes('Employee') || roles.includes('User'))
+              return this.router.parseUrl('/user');
+            return this.router.parseUrl('/');
+          }
+          return true;
+        }
+
+        // Verifică dacă are rolul necesar
+        if (roles.some((role) => allowedRoles.includes(role))) {
+          return true;
+        }
+      }
+
+      return this.router.parseUrl('/login');
+    } catch {
+      return this.router.parseUrl('/login');
+    }
   }
 }
