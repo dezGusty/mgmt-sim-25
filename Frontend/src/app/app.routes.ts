@@ -12,17 +12,13 @@ export const routes: Routes = [
   {
     path: 'manager',
     component: ManagerMainPage,
-    canActivate: [AuthGuard],
-    data: { roles: ['Manager'] },
   },
   {
     path: 'admin',
     component: AdminMainPage,
-    canActivate: [AuthGuard],
-    data: { roles: ['Admin'] },
   },
   { path: 'login', component: Login },
-  { path: 'user', component: User, canActivate: [AuthGuard] },
+  { path: 'user', component: User },
   { path: 'reset-password', component: ResetPassword },
   { path: '**', redirectTo: '/' },
 ];

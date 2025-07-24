@@ -1,4 +1,13 @@
 <div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-gray-900">Departments</h2>
+    <button (click)="addDepartment()"
+      class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+      Add Department
+    </button>
+  </div>
+
   <!-- Search and Filters -->
   <div class="flex items-center space-x-4 mb-6">
     <div class="relative flex-1">
@@ -86,3 +95,7 @@
     </div>
   </div>
 </div>
+
+<!-- Add Form Modal -->
+<app-admin-add-form *ngIf="showAddForm" (close)="onFormClose()" (submit)="onFormSubmit($event)"
+  [formType]="'department'"></app-admin-add-form>
