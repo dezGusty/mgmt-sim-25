@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
 using ManagementSimulator.Core.Dtos.Requests.JobTitle;
 using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories;
@@ -30,6 +31,7 @@ namespace ManagementSimulator.Core.Services
                 Name = j.Name ?? string.Empty,
                 DepartmentId = j.DepartmentId,
                 DepartmentName = j.Department?.Name ?? string.Empty,
+                EmployeeCount = j.Users.Count(u => u.DeletedAt == null),
             }).ToList();
         }
 
@@ -123,5 +125,25 @@ namespace ManagementSimulator.Core.Services
             return true;
         }
 
+        public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
+        {
+            var result = await _jobTitleRepository.GetAllJobTitlesWithDepartmentsFilteredAsync(payload.DepartmentName,payload.JobTitleName,payload.PagedQueryParams.ToQueryParams());
+
+            return new PagedResponseDto<JobTitleResponseDto>
+            {
+                Data = result.Select(jt => new JobTitleResponseDto
+                {
+                    Id = jt.Id,
+                    Name = jt.Name,
+                    DepartmentName = jt.Department.Name ?? string.Empty,
+                    DepartmentId = jt.Department.Id,
+                    EmployeeCount = jt.Users.Count,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)result.Count() / (int)payload.PagedQueryParams.PageSize) : 1
+            };
+        }
     }
 }

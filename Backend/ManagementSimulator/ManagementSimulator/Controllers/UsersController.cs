@@ -46,6 +46,20 @@ namespace ManagementSimulator.API.Controllers
             return Ok(users);
         }
 
+        [HttpGet("queried/IncludeRelationships")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllUsersWithRelationshipsPagedAsync([FromQuery] QueriedUserRequestDto payload)
+        {
+            var users = await _userService.GetAllUsersIncludeRelationshipsPagedAsync(payload);
+            if(users.Data == null || !users.Data.Any())
+            {
+                return NotFound("No users found.");
+            }
+            return Ok(users);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -97,7 +111,7 @@ namespace ManagementSimulator.API.Controllers
             return Ok($"User with ID {id} deleted successfully.");
         }
 
-        [HttpPatch("users/{id}/restore")]
+        [HttpPatch("{id}/restore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

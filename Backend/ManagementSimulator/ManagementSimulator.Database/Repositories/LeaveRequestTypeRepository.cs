@@ -7,6 +7,9 @@ using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using Microsoft.IdentityModel.Tokens;
+using ManagementSimulator.Database.Extensions;
 
 
 namespace ManagementSimulator.Database.Repositories
@@ -17,6 +20,42 @@ namespace ManagementSimulator.Database.Repositories
         public LeaveRequestTypeRepository(MGMTSimulatorDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<List<LeaveRequestType>> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters)
+        {
+            IQueryable<LeaveRequestType> query = GetRecords();
+
+            // Filtering
+            if(!description.IsNullOrEmpty())
+            {
+                query = query.Where(lrt => lrt.Description.Contains(description));
+            }
+
+            if (parameters == null)
+                return await query.ToListAsync();
+
+            // sorting
+            if (!parameters.SortBy.IsNullOrEmpty())
+            {
+                query = query.ApplySorting<LeaveRequestType>(parameters.SortBy, parameters.SortDescending ?? false);
+            }
+            else
+            {
+                query = query.OrderBy(lrt => lrt.Id);
+            }
+
+            // filtering
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return await query.ToListAsync();
+            }
+            else
+            {
+                return await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                                   .Take((int)parameters.PageSize)
+                                   .ToListAsync();
+            }
         }
 
         public async Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description)

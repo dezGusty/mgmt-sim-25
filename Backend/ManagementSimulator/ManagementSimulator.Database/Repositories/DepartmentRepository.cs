@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ManagementSimulator.Infrastructure.Exceptions;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using ManagementSimulator.Database.Extensions;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -29,6 +31,39 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.Departments
                 .Where(d => d.DeletedAt == null)
                 .FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<List<Department>> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters)
+        {
+            IQueryable<Department> query = GetRecords();
+
+            // Filtering
+            if(!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(d => d.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (parameters == null)
+                return await query.ToListAsync();
+
+            // Sorting
+            if (string.IsNullOrEmpty(parameters.SortBy))
+                query = query.OrderBy(d => d.Id);
+            else
+                query.ApplySorting<Department>(parameters.SortBy, parameters.SortDescending ?? false);
+
+            // Pagination
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return await query.ToListAsync();
+            }
+            else
+            {
+                return await query
+                    .Skip((int)parameters.PageSize * ((int)parameters.Page - 1))
+                    .Take((int)parameters.PageSize)
+                    .ToListAsync();
+            }
         }
     }
 }

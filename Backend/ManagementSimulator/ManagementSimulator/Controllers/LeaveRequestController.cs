@@ -68,6 +68,15 @@ namespace ManagementSimulator.API.Controllers
             return Ok(requests);
         }
 
+        [HttpGet("queried/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllRequestsFilteredAsync(int id,[FromQuery] QueriedLeaveRequestRequestDto payload)
+        {
+            var requests = await _leaveRequestService.GetAllLeaveRequestsFilteredAsync(id,payload);
+            return Ok(requests);
+        }
+
         [Authorize(Roles = "Manager")]
         [HttpPatch("review/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

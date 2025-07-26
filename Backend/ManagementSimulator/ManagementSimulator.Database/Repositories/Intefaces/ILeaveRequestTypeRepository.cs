@@ -1,4 +1,5 @@
-﻿using ManagementSimulator.Database.Entities;
+﻿using ManagementSimulator.Database.Dtos.QueryParams;
+using ManagementSimulator.Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface ILeaveRequestTypeRepository : IBaseRepostory<LeaveRequestType>
     {
-        public Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description);
+        Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description);
+        Task<List<LeaveRequestType>> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters);
     }
 }

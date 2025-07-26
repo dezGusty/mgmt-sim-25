@@ -32,6 +32,20 @@ namespace ManagementSimulator.API.Controllers
             return Ok(jobTitles);
         }
 
+        [HttpGet("queried")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllJobTitlesFilteredAsync([FromQuery] QueriedJobTitleRequestDto payload)
+        {
+            var jobTitles = await _jobTitleService.GetAllJobTitlesFilteredAsync(payload);
+            if (jobTitles.Data == null || !jobTitles.Data.Any())
+            {
+                return NotFound("No job titles found.");
+            }
+            return Ok(jobTitles);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

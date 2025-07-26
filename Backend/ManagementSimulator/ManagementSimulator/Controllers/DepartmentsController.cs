@@ -31,6 +31,20 @@ namespace ManagementSimulator.API.Controllers
             return Ok(departments);
         }
 
+        [HttpGet("queried")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllDepartmentsFilteredAsync([FromQuery] QueriedDepartmentRequestDto payload)
+        {
+            var departments = await _departmentService.GetAllDepartmentsFilteredAsync(payload);
+            if (departments.Data == null || !departments.Data.Any())
+            {
+                return NotFound("No departments found.");
+            }
+            return Ok(departments);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

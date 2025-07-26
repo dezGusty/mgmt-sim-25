@@ -1,4 +1,5 @@
-﻿using ManagementSimulator.Database.Entities;
+﻿using ManagementSimulator.Database.Dtos.QueryParams;
+using ManagementSimulator.Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<JobTitle>> GetAllJobTitlesWithDepartmentAsync();
         Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id);
         Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids);
+        Task<List<JobTitle>?> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName,string? jobTitleName, QueryParams parameters);
     }
 }

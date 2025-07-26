@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequestType;
+using ManagementSimulator.Core.Dtos.Requests.LeaveRequestTypes;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllLeaveRequestTypesAsync()
         {
             var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesAsync();
             if (types == null || !types.Any())
@@ -31,6 +32,21 @@ namespace ManagementSimulator.API.Controllers
             }
             return Ok(types);
         }
+
+        [HttpGet("queried")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllLeaveRequestTypesFilteredAsync([FromQuery] QueriedLeaveRequestTypeRequestDto payload)
+        {
+            var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesFilteredAsync(payload);
+            if (types.Data == null || !types.Data.Any())
+            {
+                return NotFound("No leave request types found.");
+            }
+            return Ok(types);
+        }
+
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

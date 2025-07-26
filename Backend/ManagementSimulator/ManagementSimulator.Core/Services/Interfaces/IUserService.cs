@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IUserService
     {
+        Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsPagedAsync(QueriedUserRequestDto payload);
         Task<List<UserResponseDto>> GetAllUsersIncludeRelationshipsAsync();
         Task<List<UserResponseDto>> GetAllUsersAsync();
         Task<UserResponseDto?> GetUserByIdAsync(int id);

@@ -7,6 +7,9 @@ using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using Microsoft.IdentityModel.Tokens;
+using ManagementSimulator.Database.Extensions;
 
 
 namespace ManagementSimulator.Database.Repositories
@@ -30,11 +33,12 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<List<User>> GetAllUsersWithReferencesAsync()
         {
+            // Deleted included
             return await _dbContext.Users
-                .Where(u => u.DeletedAt == null)
                 .Include(u => u.Roles)
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
+                    .ThenInclude(jt => jt.Department)
                 .ToListAsync();
         }
 
@@ -109,6 +113,43 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Managers)
                     .ThenInclude(em => em.Manager)
                 .ToListAsync();
+        }
+
+        public async Task<List<User>?> GetAllUsersFilteredAsync(string? lastName, string? email, QueryParams parameters)
+        {
+            IQueryable<User> query = GetRecords(includeDeletedEntities: true);
+
+            // filtering 
+            if (!lastName.IsNullOrEmpty())
+            {
+                query = query.Where(u => u.LastName.Contains(lastName));
+            }
+
+            if (!email.IsNullOrEmpty())
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            // sorting
+            if (parameters == null)
+                return await query.ToListAsync();
+
+            if (!parameters.SortBy.IsNullOrEmpty())
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return await query.ToListAsync();
+            }
+            else
+            {
+                return await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                                   .Take((int)parameters.PageSize)
+                                    .ToListAsync();
+            }
         }
     }
 }

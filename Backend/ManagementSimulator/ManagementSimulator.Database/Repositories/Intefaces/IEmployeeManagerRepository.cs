@@ -9,13 +9,13 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IEmployeeManagerRepository
     {
-        public Task<List<EmployeeManager>> GetAllEmployeeManagersAsync();
-        public Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId);
-        public Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId);
-        public Task AddEmployeeManagersAsync(int subOrdinateId,int managersId);
-        public Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
-        public Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId);
-        public Task<EmployeeManager?> GetEmployeeManagersByIdIncludeDeletedAsync(int employeeId, int managerId);
-        public Task SaveChangesAsync(); 
+        Task<List<EmployeeManager>> GetAllEmployeeManagersAsync();
+        Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId);
+        Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId);
+        Task AddEmployeeManagersAsync(int subOrdinateId,int managersId);
+        Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
+        Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId);
+        Task<EmployeeManager?> GetEmployeeManagersByIdIncludeDeletedAsync(int employeeId, int managerId);
+        Task SaveChangesAsync();
     }
 }
