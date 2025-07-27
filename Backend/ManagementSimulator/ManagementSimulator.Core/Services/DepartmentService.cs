@@ -108,10 +108,16 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<DepartmentResponseDto>> GetAllDepartmentsFilteredAsync(QueriedDepartmentRequestDto payload)
         {
-            var result = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams());
 
             if (result == null || !result.Any())
-                return null;
+                return new PagedResponseDto<DepartmentResponseDto>
+                {
+                    Data = new List<DepartmentResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
 
             return new PagedResponseDto<DepartmentResponseDto>
             {
@@ -124,7 +130,7 @@ namespace ManagementSimulator.Core.Services
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)result.Count() / (int)payload.PagedQueryParams.PageSize) : 1
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
             };
         }
     }

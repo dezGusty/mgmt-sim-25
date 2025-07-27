@@ -127,7 +127,16 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
-            var result = await _jobTitleRepository.GetAllJobTitlesWithDepartmentsFilteredAsync(payload.DepartmentName,payload.JobTitleName,payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesWithDepartmentsFilteredAsync(payload.DepartmentName, payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
+
+            if (result == null || !result.Any())
+                return new PagedResponseDto<JobTitleResponseDto>
+                {
+                    Data = new List<JobTitleResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
 
             return new PagedResponseDto<JobTitleResponseDto>
             {
@@ -142,7 +151,7 @@ namespace ManagementSimulator.Core.Services
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)result.Count() / (int)payload.PagedQueryParams.PageSize) : 1
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
             };
         }
     }

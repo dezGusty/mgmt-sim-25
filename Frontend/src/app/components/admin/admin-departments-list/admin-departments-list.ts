@@ -2,24 +2,28 @@ import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DepartmentService } from '../../../services/departments/department';
-import { Department } from '../../../models/entities/Department';
-import { AddForm } from '../admin-add-form/admin-add-form';
+import { DepartmentService } from '../../../services/departments/department-service';
+import { IDepartment } from '../../../models/entities/idepartment';
+import { IFilteredDepartmentsRequest } from '../../../models/requests/ifiltered-departments-request';
+import { DepartmentViewModel } from '../../../view-models/department-view-model';
 
 @Component({
   selector: 'app-admin-departments-list',
-  imports: [CommonModule, FormsModule, AddForm],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-departments-list.html',
   styleUrl: './admin-departments-list.css'
 })
 export class AdminDepartmentsList implements OnInit {
-  departments: Department[] = [];
-  filteredDepartments: Department[] = [];
+  departments: DepartmentViewModel[] = [];
+
   searchTerm: string = '';
   isLoading: boolean = true;
   error: string = '';
-  showAddForm: boolean = false;
-
+  
+  readonly pageSize = 6;
+  currentPage: number = 1;
+  totalPages: number = 0;
+  sortDescending: boolean = false;
 
   constructor(private departmentService: DepartmentService) { }
 
@@ -30,10 +34,23 @@ export class AdminDepartmentsList implements OnInit {
   loadDepartments(): void {
     this.isLoading = true;
     this.error = '';
-    this.departmentService.getAllDepartments().subscribe({
-      next: (departments) => {
-        this.departments = departments;
-        this.filteredDepartments = [...this.departments];
+
+    const params: IFilteredDepartmentsRequest = {
+      name: this.searchTerm,
+      params: {
+        sortBy: "name", 
+        sortDescending: this.sortDescending,
+        page: this.currentPage,
+        pageSize: this.pageSize
+      }
+    };
+
+    this.departmentService.getAllDepartmentsFiltered(params).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.departments = response.data.map(d => this.mapToDepartmentViewModel(d));
+        this.totalPages = response.totalPages
+        
         this.isLoading = false;
       },
       error: (err) => {
@@ -41,68 +58,113 @@ export class AdminDepartmentsList implements OnInit {
         this.error = 'Failed to load departments. Please try again later.';
         console.error('Error loading departments:', err);
         this.departments = [];
-        this.filteredDepartments = [];
       }
     });
-
-
   }
 
-  onSearchChange(): void {
-    this.filterDepartments();
+  mapToDepartmentViewModel(department: IDepartment): DepartmentViewModel {
+    return {
+      id: department.id,
+      name: department.name,
+      description: department.description
+    };
   }
 
-  private filterDepartments(): void {
-    this.filteredDepartments = this.departments.filter(department => {
-      const matchesSearch = !this.searchTerm ||
-        department.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        department.description?.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      return matchesSearch;
-    });
-  }
-
-  editDepartment(department: Department): void {
-    console.log('Edit department:', department);
-  }
-
-  viewDepartment(department: Department): void {
-    console.log('View department:', department);
-  }
-
-  deleteDepartment(department: Department): void {
-    if (confirm(`Are you sure you want to delete ${department.name} department?`)) {
-      this.departmentService.deleteDepartment(department.id).subscribe({
-        next: () => {
-          this.departments = this.departments.filter(d => d.id !== department.id);
-          this.filterDepartments();
-          console.log('Department deleted:', department);
-        },
-        error: (error) => {
-          console.error('Error deleting department:', error);
-          alert('Failed to delete department. Please try again.');
-        }
-      });
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadDepartments();
     }
   }
 
-  addDepartment(): void {
-    this.showAddForm = true;
+  onSearch(): void {
+    this.currentPage = 1; 
+    this.loadDepartments();
   }
 
-  onFormClose(): void {
-    this.showAddForm = false;
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadDepartments();
+    }
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadDepartments();
+    }
+  }
+
+  goToFirstPage(): void {
+    if (this.currentPage !== 1) {
+      this.currentPage = 1;
+      this.loadDepartments();
+    }
+  }
+
+  goToLastPage(): void {
+    if (this.currentPage !== this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.loadDepartments();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    const half = Math.floor(maxVisiblePages / 2);
+    
+    let start = Math.max(1, this.currentPage - half);
+    let end = Math.min(this.totalPages, start + maxVisiblePages - 1);
+    
+    if (end - start + 1 < maxVisiblePages) {
+      start = Math.max(1, end - maxVisiblePages + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  getStartResultIndex(): number {
+    return ((this.currentPage - 1) * this.pageSize) + 1;
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1; 
+    this.loadDepartments();
+  }
+
+  toggleSortOrder(): void {
+    this.sortDescending = !this.sortDescending;
+    this.currentPage = 1; 
+    this.loadDepartments();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.currentPage = 1; 
+    this.loadDepartments();
+  }
+
+  editDepartment(department: DepartmentViewModel): void {
+    console.log('Edit department:', department);
+  }
+
+  viewDepartment(department: DepartmentViewModel): void {
+    console.log('View department:', department);
+  }
+
+  deleteDepartment(department: DepartmentViewModel): void {
+    console.log('Delete department:', department);
   }
 
   onFormSubmit(event: { type: string, data: any }): void {
     if (event.type === 'department') {
-      this.departments.push(event.data);
-      this.filterDepartments();
+      this.loadDepartments();
     }
   }
-
-  getTotalDepartments(): number {
-    return this.departments.length;
-  }
-
 }

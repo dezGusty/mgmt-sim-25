@@ -21,13 +21,14 @@ namespace ManagementSimulator.API.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddEmployeeManagerAsync([FromBody] CreateEmployeeManagerRequest request)
         {
             await _employeeManagerService.AddEmployeeManagerAsync(request.EmployeeId, request.ManagerId);
-            return Ok();
+            return Ok(new { message = "Employee-Manager relationship created successfully." });
         }
 
         [HttpGet()]
@@ -63,25 +64,22 @@ namespace ManagementSimulator.API.Controllers
         [Authorize(Roles = "Manager")]
         [HttpGet("/employeesByManager")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetEmployeesForManagers()
         {
             var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine("tetetDawdawdad AWDAw dw daw WDa dawd");
-
-            Console.WriteLine(nameIdentifierClaim);
 
             if (string.IsNullOrEmpty(nameIdentifierClaim))
-                return Unauthorized("Manager ID is missing from the token.");
+                return Unauthorized(new { message = "Manager ID is missing from the token." });
 
             if (!int.TryParse(nameIdentifierClaim, out var managerId))
-                return BadRequest("Invalid Manager ID.");
+                return BadRequest(new { message = "Invalid Manager ID." });
 
             var employeeManagers = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
             return Ok(employeeManagers);
         }
-
 
         [HttpDelete("{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -90,29 +88,29 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> DeleteEmployeeManagerAsync(int employeeId, int managerId)
         {
             await _employeeManagerService.DeleteEmployeeManagerAsync(employeeId, managerId);
-            return Ok();
+            return Ok(new { message = "Employee-Manager relationship deleted successfully." });
         }
-
 
         [HttpPatch("/employee/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateEmployeeForManagerAsync(int employeeId, int managerId, [FromBody] UpdateEmployeeForManagerRequest request)
         {
             await _employeeManagerService.UpdateEmployeeForManagerAsync(employeeId, managerId, request.NewEmployeeId);
-            return Ok();
+            return Ok(new { message = "Employee updated for manager successfully." });
         }
-
 
         [HttpPatch("/manager/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateManagerForEmployeeAsync(int employeeId, int managerId, [FromBody] UpdateManagerForEmployeeRequest request)
         {
             await _employeeManagerService.UpdateManagerForEmployeeAsync(employeeId, managerId, request.NewManagerId);
-            return Ok();
+            return Ok(new { message = "Manager updated for employee successfully." });
         }
     }
 }

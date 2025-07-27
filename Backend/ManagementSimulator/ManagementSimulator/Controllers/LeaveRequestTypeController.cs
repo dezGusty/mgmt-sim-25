@@ -28,7 +28,7 @@ namespace ManagementSimulator.API.Controllers
             var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesAsync();
             if (types == null || !types.Any())
             {
-                return NotFound("No leave request types found.");
+                return NotFound(new { message = "No leave request types found." });
             }
             return Ok(types);
         }
@@ -42,11 +42,10 @@ namespace ManagementSimulator.API.Controllers
             var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesFilteredAsync(payload);
             if (types.Data == null || !types.Data.Any())
             {
-                return NotFound("No leave request types found.");
+                return NotFound(new { message = "No leave request types found." });
             }
             return Ok(types);
         }
-
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -57,31 +56,32 @@ namespace ManagementSimulator.API.Controllers
             var type = await _leaveRequestTypeService.GetLeaveRequestTypeByIdAsync(id);
             if (type == null)
             {
-                return NotFound($"Leave request type with ID {id} not found.");
+                return NotFound(new { message = $"Leave request type with ID {id} not found." });
             }
             return Ok(type);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddAsync([FromBody] CreateLeaveRequestTypeRequestDto dto)
         {
             var result = await _leaveRequestTypeService.AddLeaveRequestTypeAsync(dto);
-
             return Created($"/api/LeaveRequestType/{result.Id}", result);
         }
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateLeaveRequestTypeRequestDto dto)
         {
             var updatedType = await _leaveRequestTypeService.UpdateLeaveRequestTypeAsync(id, dto);
             if (updatedType == null)
             {
-                return NotFound($"Leave request type with ID {id} not found.");
+                return NotFound(new { message = $"Leave request type with ID {id} not found." });
             }
             return Ok(updatedType);
         }
@@ -95,9 +95,9 @@ namespace ManagementSimulator.API.Controllers
             bool result = await _leaveRequestTypeService.DeleteLeaveRequestTypeAsync(id);
             if (!result)
             {
-                return NotFound($"Leave request type with ID {id} not found.");
+                return NotFound(new { message = $"Leave request type with ID {id} not found." });
             }
-            return Ok($"Leave request type with ID {id} deleted successfully.");
+            return Ok(new { message = $"Leave request type with ID {id} deleted successfully." });
         }
     }
 }

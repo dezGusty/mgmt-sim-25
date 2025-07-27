@@ -11,6 +11,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
     public interface ILeaveRequestTypeRepository : IBaseRepostory<LeaveRequestType>
     {
         Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description);
-        Task<List<LeaveRequestType>> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters);
+        Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters);
     }
 }

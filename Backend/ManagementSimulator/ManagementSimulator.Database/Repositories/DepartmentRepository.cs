@@ -33,36 +33,42 @@ namespace ManagementSimulator.Database.Repositories
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<List<Department>> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters)
+        public async Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters)
         {
             IQueryable<Department> query = GetRecords();
 
             // Filtering
-            if(!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(name))
             {
-                query = query.Where(d => d.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+                var lowerName = name.ToLower();
+                query = query.Where(d => d.Name.ToLower().Contains(lowerName));
             }
 
+            var totalCount = await query.CountAsync();
+
             if (parameters == null)
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
 
             // Sorting
             if (string.IsNullOrEmpty(parameters.SortBy))
                 query = query.OrderBy(d => d.Id);
             else
-                query.ApplySorting<Department>(parameters.SortBy, parameters.SortDescending ?? false);
+                query = query.ApplySorting<Department>(parameters.SortBy, parameters.SortDescending ?? false);
 
             // Pagination
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
-                return await query.ToListAsync();
+                var allData = await query.ToListAsync();
+                return (allData, totalCount);
             }
             else
             {
-                return await query
+                var pagedData = await query
                     .Skip((int)parameters.PageSize * ((int)parameters.Page - 1))
                     .Take((int)parameters.PageSize)
                     .ToListAsync();
+
+                return (pagedData, totalCount);
             }
         }
     }

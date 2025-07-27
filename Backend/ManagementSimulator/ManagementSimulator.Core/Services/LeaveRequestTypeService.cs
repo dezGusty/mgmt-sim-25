@@ -115,7 +115,16 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<LeaveRequestTypeResponseDto>> GetAllLeaveRequestTypesFilteredAsync(QueriedLeaveRequestTypeRequestDto payload)
         {
-            var result = await _leaveRequestTypeRepository.GetAllLeaveRequestTypesFilteredAsync(payload.Description, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _leaveRequestTypeRepository.GetAllLeaveRequestTypesFilteredAsync(payload.Description, payload.PagedQueryParams.ToQueryParams());
+
+            if (result == null || !result.Any())
+                return new PagedResponseDto<LeaveRequestTypeResponseDto>
+                {
+                    Data = new List<LeaveRequestTypeResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
 
             return new PagedResponseDto<LeaveRequestTypeResponseDto>
             {
@@ -128,7 +137,7 @@ namespace ManagementSimulator.Core.Services
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)result.Count() / (int)payload.PagedQueryParams.PageSize) : 1
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
     }

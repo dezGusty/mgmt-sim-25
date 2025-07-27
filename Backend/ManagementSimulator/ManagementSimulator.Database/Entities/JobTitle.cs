@@ -11,7 +11,7 @@ namespace ManagementSimulator.Database.Entities
     {
         //navigation properties 
         public int DepartmentId { get; set; }
-        public Department? Department { get; set; }
+        public Department Department { get; set; }
 
         public ICollection<User> Users { get; set; } = new List<User>();
 

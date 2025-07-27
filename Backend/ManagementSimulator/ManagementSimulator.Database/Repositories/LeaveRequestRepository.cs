@@ -21,27 +21,29 @@ namespace ManagementSimulator.Database.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<List<LeaveRequest>> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters)
+        public async Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests
                                                         .Include(lr => lr.User)
                                                         .Where(lr => employeeIds.Contains(lr.UserId));
-
             // filtering
-            if(!lastName.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(lastName))
             {
                 query = query.Where(lr => lr.User.LastName.Contains(lastName));
             }
-
-            if(!email.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(email))
             {
                 query = query.Where(lr => lr.User.Email.Contains(email));
             }
 
+            // Obține totalul ÎNAINTE de paginare
+            var totalCount = await query.CountAsync();
+
             if (parameters == null)
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
+
             // sorting
-            if (!parameters.SortBy.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(parameters.SortBy))
                 query = query.ApplySorting<LeaveRequest>(parameters.SortBy, parameters.SortDescending ?? false);
             else
                 query = query.OrderBy(lr => lr.Id);
@@ -49,13 +51,14 @@ namespace ManagementSimulator.Database.Repositories
             // paging 
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
             }
             else
             {
-                return await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
-                                   .Take((int)parameters.PageSize)
-                                    .ToListAsync(); 
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
             }
         }
     }

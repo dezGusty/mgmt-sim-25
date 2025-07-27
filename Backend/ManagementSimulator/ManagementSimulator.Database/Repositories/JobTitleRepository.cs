@@ -52,13 +52,12 @@ namespace ManagementSimulator.Database.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<JobTitle>?> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName, string? jobTitleName, QueryParams parameters)
+        public async Task<(List<JobTitle>? Data, int TotalCount)> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName, string? jobTitleName, QueryParams parameters)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles
                                                     .Where(jt => jt.DeletedAt == null)
                                                     .Include(jt => jt.Department)
                                                     .Include(jt => jt.Users);
-
             // Filtering 
             if (!string.IsNullOrEmpty(departmentName))
             {
@@ -69,13 +68,18 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(jt => jt.Name != null && jt.Name.Contains(jobTitleName));
             }
 
+            var totalCount = await query.CountAsync();
+
             if (parameters == null)
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
 
             // sorting
-            if (!parameters.SortBy.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(parameters.SortBy))
             {
-                query = query.ApplySorting<JobTitle>(parameters.SortBy, parameters.SortDescending ?? false);
+                if (string.Equals(parameters.SortBy, "departmentName", StringComparison.OrdinalIgnoreCase))
+                    query = query.OrderBy(jt => jt.Department.Name);
+                else if (string.Equals(parameters.SortBy, "jobTitleName", StringComparison.OrdinalIgnoreCase))
+                    query = query.OrderBy(jt => jt.Name);
             }
             else
             {
@@ -85,13 +89,14 @@ namespace ManagementSimulator.Database.Repositories
             // Pagination
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
             }
             else
             {
-                return await query.Skip(((int)(parameters.Page) - 1) * (int)(parameters.PageSize))
+                var pagedData = await query.Skip(((int)(parameters.Page) - 1) * (int)(parameters.PageSize))
                              .Take((int)parameters.PageSize)
                              .ToListAsync();
+                return (pagedData, totalCount);
             }
         }
     }

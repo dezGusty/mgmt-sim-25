@@ -40,7 +40,7 @@ namespace ManagementSimulator.API.Controllers
             var request = await _leaveRequestService.GetRequestByIdAsync(id);
             if (request == null)
             {
-                return NotFound($"Leave request with ID {id} not found.");
+                return NotFound(new { message = $"Leave request with ID {id} not found." });
             }
             return Ok(request);
         }
@@ -54,7 +54,7 @@ namespace ManagementSimulator.API.Controllers
             var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
             if (!requests.Any())
             {
-                return NotFound($"No leave requests found for user with ID {userId}.");
+                return NotFound(new { message = $"No leave requests found for user with ID {userId}." });
             }
             return Ok(requests);
         }
@@ -70,16 +70,23 @@ namespace ManagementSimulator.API.Controllers
 
         [HttpGet("queried/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllRequestsFilteredAsync(int id,[FromQuery] QueriedLeaveRequestRequestDto payload)
+        public async Task<IActionResult> GetAllRequestsFilteredAsync(int id, [FromQuery] QueriedLeaveRequestRequestDto payload)
         {
-            var requests = await _leaveRequestService.GetAllLeaveRequestsFilteredAsync(id,payload);
+            var requests = await _leaveRequestService.GetAllLeaveRequestsFilteredAsync(id, payload);
+            if (requests == null || requests.Data == null || !requests.Data.Any())
+            {
+                return NotFound(new { message = "Requests not found" });
+            }
             return Ok(requests);
         }
 
         [Authorize(Roles = "Manager")]
         [HttpPatch("review/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ReviewLeaveRequestAsync(int id, [FromBody] ReviewLeaveRequestDto dto)
@@ -87,12 +94,12 @@ namespace ManagementSimulator.API.Controllers
             var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(nameIdentifierClaim))
             {
-                return Unauthorized("Manager ID is missing from the token.");
+                return Unauthorized(new { message = "Manager ID is missing from the token." });
             }
 
             if (!int.TryParse(nameIdentifierClaim, out var managerId))
             {
-                return BadRequest("Invalid Manager ID.");
+                return BadRequest(new { message = "Invalid Manager ID." });
             }
 
             await _leaveRequestService.ReviewLeaveRequestAsync(id, dto, managerId);
@@ -106,23 +113,27 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> UpdateLeaveRequestAsync(int id, [FromBody] UpdateLeaveRequestDto dto)
         {
             await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
-            return Ok("Leave request reviewed successfully.");
+            return Ok(new { message = "Leave request updated successfully." });
         }
 
         [Authorize(Roles = "Manager")]
         [HttpGet("by-manager")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetRequestsByManager()
         {
             var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(nameIdentifierClaim))
             {
-                return Unauthorized("Manager ID is missing from the token.");
+                return Unauthorized(new { message = "Manager ID is missing from the token." });
             }
 
             if (!int.TryParse(nameIdentifierClaim, out var managerId))
             {
-                return BadRequest("Invalid Manager ID.");
+                return BadRequest(new { message = "Invalid Manager ID." });
             }
 
             var requests = await _leaveRequestService.GetLeaveRequestsForManagerAsync(managerId);

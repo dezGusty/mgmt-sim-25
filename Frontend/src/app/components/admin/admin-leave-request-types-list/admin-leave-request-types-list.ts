@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type';
-import { LeaveRequestType } from '../../../models/entities/LeaveRequestType';
-import { LeaveRequestTypeViewModel } from '../../../view-models/LeaveRequestTypeViewModel';
+import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
+import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
+import { LeaveRequestTypeViewModel } from '../../../view-models/leave-request-type-view-model';
 import { ColorGenerator } from '../../../services/colorGenerator/color-generator';
 
 @Component({
@@ -34,7 +34,7 @@ export class AdminLeaveTypesList implements OnInit {
       response => {
           console.log('API response:', response);
 
-          const rawLeaveTypes: LeaveRequestType[] = response;
+          const rawLeaveTypes: ILeaveRequestType[] = response;
           this.leaveRequestTypes = rawLeaveTypes.map(leaveType => this.mapToLeaveTypeViewModel(leaveType));
           this.filteredLeaveTypes = [...this.leaveRequestTypes];
 
@@ -43,7 +43,7 @@ export class AdminLeaveTypesList implements OnInit {
     )
   }
   
-  private mapToLeaveTypeViewModel(leaveType: LeaveRequestType): LeaveRequestTypeViewModel {
+  private mapToLeaveTypeViewModel(leaveType: ILeaveRequestType): LeaveRequestTypeViewModel {
     return {
       id : leaveType.id,
       additionalDetails: leaveType.additionalDetails || '',

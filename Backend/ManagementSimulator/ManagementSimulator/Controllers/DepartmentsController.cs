@@ -26,7 +26,7 @@ namespace ManagementSimulator.API.Controllers
             var departments = await _departmentService.GetAllDepartmentsAsync();
             if (departments == null || !departments.Any())
             {
-                return NotFound("No departments found.");
+                return NotFound(new { message = "No departments found." });
             }
             return Ok(departments);
         }
@@ -38,9 +38,9 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllDepartmentsFilteredAsync([FromQuery] QueriedDepartmentRequestDto payload)
         {
             var departments = await _departmentService.GetAllDepartmentsFilteredAsync(payload);
-            if (departments.Data == null || !departments.Data.Any())
+            if (departments == null || departments.Data == null || !departments.Data.Any())
             {
-                return NotFound("No departments found.");
+                return NotFound(new { message = "No departments found." });
             }
             return Ok(departments);
         }
@@ -54,20 +54,20 @@ namespace ManagementSimulator.API.Controllers
             var department = await _departmentService.GetDepartmentByIdAsync(id);
             if (department == null)
             {
-                return NotFound($"Department with ID {id} not found.");
+                return NotFound(new { message = $"Department with ID {id} not found." });
             }
             return Ok(department);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddDepartmentAsync([FromBody] CreateDepartmentRequestDto dto)
         {
             var department = await _departmentService.AddDepartmentAsync(dto);
             return Created($"/api/departments/{department.Id}", department);
         }
-
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -78,21 +78,22 @@ namespace ManagementSimulator.API.Controllers
             bool result = await _departmentService.DeleteDepartmentAsync(id);
             if (!result)
             {
-                return NotFound($"Department with ID {id} not found.");
+                return NotFound(new { message = $"Department with ID {id} not found." });
             }
-            return Ok($"Department with ID {id} deleted successfully.");
+            return Ok(new { message = $"Department with ID {id} deleted successfully." });
         }
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateDepartmentAsync(int id,[FromBody] UpdateDepartmentRequestDto dto)
+        public async Task<IActionResult> UpdateDepartmentAsync(int id, [FromBody] UpdateDepartmentRequestDto dto)
         {
-            var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id,dto);
+            var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id, dto);
             if (updatedDepartment == null)
             {
-                return NotFound($"Department with ID {id} not found.");
+                return NotFound(new { message = $"Department with ID {id} not found." });
             }
             return Ok(updatedDepartment);
         }

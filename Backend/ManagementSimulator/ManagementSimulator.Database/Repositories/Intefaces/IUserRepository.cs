@@ -10,8 +10,11 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IUserRepository : IBaseRepostory<User>
     {
+        Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters);
+        Task<List<User>> GetAllAdminsAsync(string? lastName, string? email);
         Task<List<User>> GetAllUsersIncludeRelationships();
         Task<User?> GetUserByEmail(string email);
+        Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName,string? email, QueryParams parameters);
         Task<List<User>> GetAllUsersWithReferencesAsync();
         Task<User?> GetUserWithReferencesByIdAsync(int id);
         Task<List<User>> GetUsersByManagerIdAsync(int managerId);
@@ -20,6 +23,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<User?> GetUserByIdAsync(int id);
         Task<List<User>?> GetSubordinatesByUserIdsAsync(List<int> ids);
         Task<List<User>?> GetManagersByUserIdsAsync(List<int> ids);
-        Task<List<User>?> GetAllUsersFilteredAsync(string? lastName, string? email, QueryParams parameters);
+        Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters);
     }
 }

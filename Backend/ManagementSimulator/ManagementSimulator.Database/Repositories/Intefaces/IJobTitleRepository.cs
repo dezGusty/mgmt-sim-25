@@ -14,6 +14,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<JobTitle>> GetAllJobTitlesWithDepartmentAsync();
         Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id);
         Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids);
-        Task<List<JobTitle>?> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName,string? jobTitleName, QueryParams parameters);
+        Task<(List<JobTitle>? Data, int TotalCount)> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName,string? jobTitleName, QueryParams parameters);
     }
 }

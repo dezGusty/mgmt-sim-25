@@ -1,4 +1,4 @@
-export interface EmployeeRole {
+export interface IEmployeeRole {
   id: number;
   rolename: string;
 }

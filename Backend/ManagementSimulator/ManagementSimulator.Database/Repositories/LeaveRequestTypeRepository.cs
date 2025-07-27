@@ -22,21 +22,23 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<List<LeaveRequestType>> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters)
+        public async Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters)
         {
             IQueryable<LeaveRequestType> query = GetRecords();
-
             // Filtering
-            if(!description.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(description))
             {
                 query = query.Where(lrt => lrt.Description.Contains(description));
             }
 
+            // Obține totalul ÎNAINTE de paginare
+            var totalCount = await query.CountAsync();
+
             if (parameters == null)
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
 
             // sorting
-            if (!parameters.SortBy.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(parameters.SortBy))
             {
                 query = query.ApplySorting<LeaveRequestType>(parameters.SortBy, parameters.SortDescending ?? false);
             }
@@ -45,16 +47,17 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.OrderBy(lrt => lrt.Id);
             }
 
-            // filtering
+            // pagination
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
-                return await query.ToListAsync();
+                return (await query.ToListAsync(), totalCount);
             }
             else
             {
-                return await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
-                                   .Take((int)parameters.PageSize)
-                                   .ToListAsync();
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                               .ToListAsync();
+                return (pagedData, totalCount);
             }
         }
 
