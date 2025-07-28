@@ -10,7 +10,7 @@ import { AdminDepartmentsList } from './admin-departments-list/admin-departments
 import { AdminJobTitlesList } from './admin-job-titles-list/admin-job-titles-list'; 
 import { AdminUserRelationships } from './admin-user-relationships/admin-user-relationships'; 
 import { AdminLeaveTypesList } from './admin-leave-request-types-list/admin-leave-request-types-list';
-import { AddForm } from './admin-add-form/admin-add-form';
+import { AddForm } from './admin-add-form/form/admin-add-form';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 
 @Component({

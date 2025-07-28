@@ -46,11 +46,10 @@ namespace ManagementSimulator.Infrastructure.Middleware
 
             var response = new
             {
-                error = new
-                {
-                    message = exception.Message,
-                    exception = exception.GetType().Name,
-                }
+                Message = exception.Message,
+                Data = new object(),
+                Success = false,
+                Timestamp = DateTime.UtcNow
             };
 
             var options = new JsonSerializerOptions

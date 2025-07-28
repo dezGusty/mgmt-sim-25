@@ -7,6 +7,7 @@ import { UserViewModel } from '../../../view-models/user-view-model';
 import { IUser } from '../../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
+import { IApiResponse } from '../../../models/responses/iapi-response';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -20,12 +21,10 @@ export class AdminUsersList implements OnInit {
   searchBy: string = 'name';
   sortDescending: boolean = false;
   
-  // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
   
-  // Loading state
   isLoading: boolean = false;
 
   constructor(private usersService: UsersService) { }
@@ -49,11 +48,11 @@ export class AdminUsersList implements OnInit {
     };
 
     this.usersService.getAllUsersFiltered(filterRequest).subscribe({
-      next: (response: IFilteredApiResponse<IUser>) => {
+      next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
         console.log('API response:', response);   
-        const rawUsers: IUser[] = response.data || [];
+        const rawUsers: IUser[] = response.data.data || [];
         this.users = rawUsers.map(user => this.mapToUserViewModel(user));
-        this.totalPages = response.totalPages
+        this.totalPages = response.data.totalPages
         this.isLoading = false;
       },
       error: (err) => {

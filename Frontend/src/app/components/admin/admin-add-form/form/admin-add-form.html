@@ -1,0 +1,78 @@
+<!-- Add Admin Form Component -->
+<div class="bg-white rounded-lg border border-gray-200 p-6 shadow-lg">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-lg font-semibold text-gray-900">Add New Item</h3>
+    <button class="text-gray-400 hover:text-gray-600 transition-colors" (click)="close.emit()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+        <path fill-rule="evenodd"
+          d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+          clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Form Type Selection -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">What would you like to add?</label>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <button class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'user' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('user')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path
+            d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
+        </svg>
+        <div class="text-xs font-medium">User</div>
+      </button>
+
+      <button class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'department' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('department')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path
+            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+        <div class="text-xs font-medium">Department</div>
+      </button>
+
+      <button class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'jobTitle' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('jobTitle')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path fill-rule="evenodd"
+            d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+            clip-rule="evenodd" />
+        </svg>
+        <div class="text-xs font-medium">Job Title</div>
+      </button>
+
+      <button class="p-3 border rounded-lg text-center hover:bg-gray-50 transition-colors"
+        [class]="formType === 'leaveRequestType' ? 'border-[#20B486] bg-green-50 text-[#20B486]' : 'border-gray-300 text-gray-700'"
+        (click)="setFormType('leaveRequestType')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mx-auto mb-2">
+          <path fill-rule="evenodd"
+            d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z"
+            clip-rule="evenodd" />
+        </svg>
+        <div class="text-xs font-medium">Leave Type</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Form Components -->
+  <div *ngIf="formType === 'department'" class="space-y-4">
+    <app-add-department></app-add-department>
+  </div>
+
+  <div *ngIf="formType === 'jobTitle'" class="space-y-4">
+    <app-add-job-title></app-add-job-title>
+  </div>
+
+  <div *ngIf="formType === 'leaveRequestType'" class="space-y-4">
+    <app-add-leave-request-type></app-add-leave-request-type>
+  </div>
+
+  <div *ngIf="formType === 'user'" class="space-y-4">
+    <app-add-user></app-add-user>
+  </div>
+</div>

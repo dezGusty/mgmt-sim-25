@@ -78,11 +78,11 @@ export class UserRequestForm {
     
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
-        this.leaveRequestTypes = types;
+        this.leaveRequestTypes = types.data;
         this.isLoadingTypes = false;
         
-        if (types.length > 0) {
-          this.leaveRequestTypeId = types[0].id;
+        if (types.data.length > 0) {
+          this.leaveRequestTypeId = types.data[0].id;
         }
       },
       error: (err) => {
@@ -157,7 +157,7 @@ export class UserRequestForm {
       next: (createdRequest) => {
         this.isSubmitting = false;
         
-        this.requestSubmitted.emit(createdRequest);
+        this.requestSubmitted.emit(createdRequest.data);
         
         setTimeout(() => {
           this.resetFormSmooth();

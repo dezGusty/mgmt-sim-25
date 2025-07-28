@@ -1,4 +1,4 @@
-  export interface IFilteredApiResponse<T> {
+export interface IFilteredApiResponse<T> {
   data: T[];
   page: number;
   pageSize: number;

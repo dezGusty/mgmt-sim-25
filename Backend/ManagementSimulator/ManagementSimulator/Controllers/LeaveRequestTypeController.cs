@@ -28,9 +28,22 @@ namespace ManagementSimulator.API.Controllers
             var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesAsync();
             if (types == null || !types.Any())
             {
-                return NotFound(new { message = "No leave request types found." });
+                return NotFound(new
+                {
+                    Message = "No leave request types found.",
+                    Data = new List<object>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(types);
+
+            return Ok(new
+            {
+                Message = "Leave request types retrieved successfully.",
+                Data = types,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("queried")]
@@ -42,9 +55,22 @@ namespace ManagementSimulator.API.Controllers
             var types = await _leaveRequestTypeService.GetAllLeaveRequestTypesFilteredAsync(payload);
             if (types.Data == null || !types.Data.Any())
             {
-                return NotFound(new { message = "No leave request types found." });
+                return NotFound(new
+                {
+                    Message = "No filtered leave request types found.",
+                    Data = new List<object>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(types);
+
+            return Ok(new
+            {
+                Message = "Filtered leave request types retrieved successfully.",
+                Data = types,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("{id}")]
@@ -56,9 +82,22 @@ namespace ManagementSimulator.API.Controllers
             var type = await _leaveRequestTypeService.GetLeaveRequestTypeByIdAsync(id);
             if (type == null)
             {
-                return NotFound(new { message = $"Leave request type with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Leave request type with ID {id} not found.",
+                    Data = new List<LeaveRequestTypeResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(type);
+
+            return Ok(new
+            {
+                Message = "Leave request type retrieved successfully.",
+                Data = type,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPost]
@@ -68,7 +107,13 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> AddAsync([FromBody] CreateLeaveRequestTypeRequestDto dto)
         {
             var result = await _leaveRequestTypeService.AddLeaveRequestTypeAsync(dto);
-            return Created($"/api/LeaveRequestType/{result.Id}", result);
+            return Created($"/api/LeaveRequestType/{result.Id}", new
+            {
+                Message = "Leave request type created successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}")]
@@ -81,9 +126,22 @@ namespace ManagementSimulator.API.Controllers
             var updatedType = await _leaveRequestTypeService.UpdateLeaveRequestTypeAsync(id, dto);
             if (updatedType == null)
             {
-                return NotFound(new { message = $"Leave request type with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Leave request type with ID {id} not found.",
+                    Data = new List<LeaveRequestTypeResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(updatedType);
+
+            return Ok(new
+            {
+                Message = "Leave request type updated successfully.",
+                Data = updatedType,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpDelete("{id}")]
@@ -95,9 +153,22 @@ namespace ManagementSimulator.API.Controllers
             bool result = await _leaveRequestTypeService.DeleteLeaveRequestTypeAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Leave request type with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Leave request type with ID {id} not found.",
+                    Data = new List<LeaveRequestTypeResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(new { message = $"Leave request type with ID {id} deleted successfully." });
+
+            return Ok(new
+            {
+                Message = $"Leave request type with ID {id} deleted successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }

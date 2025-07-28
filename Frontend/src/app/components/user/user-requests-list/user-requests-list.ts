@@ -50,7 +50,7 @@ export class UserRequestsList implements OnInit {
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
         console.log('✅ Leave request types loaded:', types);
-        this.leaveRequestTypes = types;
+        this.leaveRequestTypes = types.data;
         this.isLoadingTypes = false;
       },
       error: (err) => {
@@ -79,8 +79,8 @@ export class UserRequestsList implements OnInit {
     this.leaveRequestService.getUserLeaveRequests(userId).subscribe({
       next: (data) => {
         console.log('✅ Requests loaded successfully!', data);
-        console.log('📊 Number of requests:', data.length);
-        this.requests = data;
+        console.log('📊 Number of requests:', data.data.length);
+        this.requests = data.data;
         this.filteredRequests = [...this.requests];
         this.isLoading = false;
         console.log('📋 Filtered requests:', this.filteredRequests);

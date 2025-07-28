@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
+using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Services;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,11 +25,18 @@ namespace ManagementSimulator.API.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddLeaveRequestAsync([FromBody] CreateLeaveRequestRequestDto dto)
         {
-            var newRequestId = await _leaveRequestService.AddLeaveRequestAsync(dto);
-            return Created($"/api/leaveRequests/{newRequestId}", newRequestId);
+            var leaveRequest = await _leaveRequestService.AddLeaveRequestAsync(dto);
+            return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+            {
+                Message = "Leave request created successfully.",
+                Data = leaveRequest,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("{id}")]
@@ -40,9 +48,22 @@ namespace ManagementSimulator.API.Controllers
             var request = await _leaveRequestService.GetRequestByIdAsync(id);
             if (request == null)
             {
-                return NotFound(new { message = $"Leave request with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Leave request with ID {id} not found.",
+                    Data = new LeaveRequestResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(request);
+
+            return Ok(new
+            {
+                Message = "Leave request retrieved successfully.",
+                Data = request,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("user/{userId}")]
@@ -52,11 +73,24 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetRequestsByUserAsync(int userId)
         {
             var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
-            if (!requests.Any())
+            if (requests == null || !requests.Any())
             {
-                return NotFound(new { message = $"No leave requests found for user with ID {userId}." });
+                return NotFound(new
+                {
+                    Message = $"No leave requests found for user with ID {userId}.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(requests);
+
+            return Ok(new
+            {
+                Message = "Leave requests retrieved successfully.",
+                Data = requests,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet]
@@ -65,7 +99,24 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllRequestsAsync()
         {
             var requests = await _leaveRequestService.GetAllRequestsAsync();
-            return Ok(requests);
+            if (requests == null || !requests.Any())
+            {
+                return NotFound(new
+                {
+                    Message = "No leave requests found.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Leave requests retrieved successfully.",
+                Data = requests,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("queried/{id}")]
@@ -77,9 +128,22 @@ namespace ManagementSimulator.API.Controllers
             var requests = await _leaveRequestService.GetAllLeaveRequestsFilteredAsync(id, payload);
             if (requests == null || requests.Data == null || !requests.Data.Any())
             {
-                return NotFound(new { message = "Requests not found" });
+                return NotFound(new
+                {
+                    Message = "No filtered leave requests found.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(requests);
+
+            return Ok(new
+            {
+                Message = "Filtered leave requests retrieved successfully.",
+                Data = requests,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [Authorize(Roles = "Manager")]
@@ -94,16 +158,34 @@ namespace ManagementSimulator.API.Controllers
             var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(nameIdentifierClaim))
             {
-                return Unauthorized(new { message = "Manager ID is missing from the token." });
+                return Unauthorized(new
+                {
+                    Message = "Manager ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
 
             if (!int.TryParse(nameIdentifierClaim, out var managerId))
             {
-                return BadRequest(new { message = "Invalid Manager ID." });
+                return BadRequest(new
+                {
+                    Message = "Invalid Manager ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
 
             await _leaveRequestService.ReviewLeaveRequestAsync(id, dto, managerId);
-            return Ok(new { message = "Leave request reviewed successfully." });
+            return Ok(new
+            {
+                Message = "Leave request reviewed successfully.",
+                Data = new List<LeaveRequestResponseDto>(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}")]
@@ -112,8 +194,14 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateLeaveRequestAsync(int id, [FromBody] UpdateLeaveRequestDto dto)
         {
-            await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
-            return Ok(new { message = "Leave request updated successfully." });
+            var result = await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
+            return Ok(new
+            {
+                Message = "Leave request updated successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [Authorize(Roles = "Manager")]
@@ -121,6 +209,7 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetRequestsByManager()
         {
@@ -128,16 +217,45 @@ namespace ManagementSimulator.API.Controllers
 
             if (string.IsNullOrEmpty(nameIdentifierClaim))
             {
-                return Unauthorized(new { message = "Manager ID is missing from the token." });
+                return Unauthorized(new
+                {
+                    Message = "Manager ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
 
             if (!int.TryParse(nameIdentifierClaim, out var managerId))
             {
-                return BadRequest(new { message = "Invalid Manager ID." });
+                return BadRequest(new
+                {
+                    Message = "Invalid Manager ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
 
             var requests = await _leaveRequestService.GetLeaveRequestsForManagerAsync(managerId);
-            return Ok(requests);
+            if (requests == null || !requests.Any())
+            {
+                return NotFound(new
+                {
+                    Message = "No leave requests found for this manager.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Manager's leave requests retrieved successfully.",
+                Data = requests,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }

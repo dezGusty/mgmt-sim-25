@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Users;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -27,9 +28,22 @@ namespace ManagementSimulator.API.Controllers
             var users = await _userService.GetAllUsersAsync();
             if (users == null || !users.Any())
             {
-                return NotFound(new { message = "No users found." });
+                return NotFound(new
+                {
+                    Message = "No users found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(users);
+
+            return Ok(new
+            {
+                Message = "Users retrieved successfully.",
+                Data = users,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("unassignedUsers/queried")]
@@ -39,11 +53,24 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllUnassignedUsersFiltered([FromQuery] int page, [FromQuery] int pageSize)
         {
             var unassignedUsers = await _userService.GetAllUnassignedUsersFilteredAsync(page, pageSize);
-            if (unassignedUsers == null || !unassignedUsers.Data.Any())
+            if (unassignedUsers == null || unassignedUsers.Data == null || !unassignedUsers.Data.Any())
             {
-                return NotFound(new { message = "No unassigned users found." });
+                return NotFound(new
+                {
+                    Message = "No unassigned users found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(unassignedUsers);
+
+            return Ok(new
+            {
+                Message = "Unassigned users retrieved successfully.",
+                Data = unassignedUsers,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("admins")]
@@ -52,12 +79,25 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllAdminsAsync([FromQuery] string? lastName, [FromQuery] string? email)
         {
-            var admins = await _userService.GetAllAdminsAsync(lastName,email);
-            if(admins == null || !admins.Any())
+            var admins = await _userService.GetAllAdminsAsync(lastName, email);
+            if (admins == null || !admins.Any())
             {
-                return NotFound(new { message = "No users found." });
+                return NotFound(new
+                {
+                    Message = "No admin users found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(admins);
+
+            return Ok(new
+            {
+                Message = "Admin users retrieved successfully.",
+                Data = admins,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("queried")]
@@ -69,9 +109,22 @@ namespace ManagementSimulator.API.Controllers
             var users = await _userService.GetAllUsersFilteredAsync(payload);
             if (users == null || users.Data == null || !users.Data.Any())
             {
-                return NotFound(new { message = "No users found." });
+                return NotFound(new
+                {
+                    Message = "No filtered users found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(users);
+
+            return Ok(new
+            {
+                Message = "Filtered users retrieved successfully.",
+                Data = users,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("includeRelationships")]
@@ -83,9 +136,22 @@ namespace ManagementSimulator.API.Controllers
             var users = await _userService.GetAllUsersIncludeRelationshipsAsync();
             if (users == null || !users.Any())
             {
-                return NotFound(new { message = "No users found." });
+                return NotFound(new
+                {
+                    Message = "No users with relationships found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(users);
+
+            return Ok(new
+            {
+                Message = "Users with relationships retrieved successfully.",
+                Data = users,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("includeRelationships/queried")]
@@ -97,9 +163,22 @@ namespace ManagementSimulator.API.Controllers
             var users = await _userService.GetAllUsersIncludeRelationshipsFilteredAsync(payload);
             if (users.Data == null || !users.Data.Any())
             {
-                return NotFound(new { message = "No users found." });
+                return NotFound(new
+                {
+                    Message = "No filtered users with relationships found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(users);
+
+            return Ok(new
+            {
+                Message = "Filtered users with relationships retrieved successfully.",
+                Data = users,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("{id}")]
@@ -111,9 +190,22 @@ namespace ManagementSimulator.API.Controllers
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
-                return NotFound(new { message = $"User with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"User with ID {id} not found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(user);
+
+            return Ok(new
+            {
+                Message = "User retrieved successfully.",
+                Data = user,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPost]
@@ -123,7 +215,13 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> AddUserAsync([FromBody] CreateUserRequestDto dto)
         {
             var user = await _userService.AddUserAsync(dto);
-            return Created($"/api/users/{user.Id}", user);
+            return Created($"/api/users/{user.Id}", new
+            {
+                Message = "User created successfully.",
+                Data = user,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}")]
@@ -136,9 +234,22 @@ namespace ManagementSimulator.API.Controllers
             var updatedUser = await _userService.UpdateUserAsync(id, dto);
             if (updatedUser == null)
             {
-                return NotFound(new { message = $"User with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"User with ID {id} not found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(updatedUser);
+
+            return Ok(new
+            {
+                Message = "User updated successfully.",
+                Data = updatedUser,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpDelete("{id}")]
@@ -150,9 +261,22 @@ namespace ManagementSimulator.API.Controllers
             bool result = await _userService.DeleteUserAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"User with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"User with ID {id} not found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(new { message = $"User with ID {id} deleted successfully." });
+
+            return Ok(new
+            {
+                Message = $"User with ID {id} deleted successfully.",
+                Data = new List<UserResponseDto>(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}/restore")]
@@ -162,7 +286,14 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> RestoreUserAsync(int id)
         {
             await _userService.RestoreUserByIdAsync(id);
-            return Ok(new { message = $"User with ID {id} restored successfully." });
+
+            return Ok(new
+            {
+                Message = $"User with ID {id} restored successfully.",
+                Data = new List<UserResponseDto>(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }
