@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ILeaveRequestType } from '../../models/entities/ileave-request-type';
 import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-titles-request';
+import { IApiResponse } from '../../models/responses/iapi-response';
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +15,11 @@ export class LeaveRequestTypeService {
 
   }
 
-  getAllLeaveRequestTypes() : Observable<ILeaveRequestType[]> {
-    return this.httpClient.get<ILeaveRequestType[]>(`${this.baseUrl}`);
+  getAllLeaveRequestTypes() : Observable<IApiResponse<ILeaveRequestType[]>> {
+    return this.httpClient.get<IApiResponse<ILeaveRequestType[]>>(`${this.baseUrl}`);
   }
 
-  getAllLeaveRequestTypesFiltered() : Observable<IFilteredJobTitlesRequest> {
-    return this.httpClient.get<IFilteredJobTitlesRequest>(`${this.baseUrl}/queried`);
+  getAllLeaveRequestTypesFiltered() : Observable<IApiResponse<IFilteredJobTitlesRequest>> {
+    return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(`${this.baseUrl}/queried`);
   }
 }

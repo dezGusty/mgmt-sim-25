@@ -6,6 +6,7 @@ import { IUser } from '../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
+import { IApiResponse } from '../../models/responses/iapi-response';
 
 @Injectable({
   providedIn: 'root'
@@ -15,11 +16,11 @@ export class UsersService {
 
   constructor(private http: HttpClient) {}
 
-  getAllUsersIncludeRelationships(): Observable<IUser[]> {
-    return this.http.get<IUser[]>(`${this.baseUrl}/includeRelationships`);
+  getAllUsersIncludeRelationships(): Observable<IApiResponse<IUser[]>> {
+    return this.http.get<IApiResponse<IUser[]>>(`${this.baseUrl}/includeRelationships`);
   }
 
-  getAllUsersFiltered(params: IFilteredUsersRequest): Observable<IFilteredApiResponse<IUser>> {
+  getAllUsersFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
     
     if (params?.lastName) {
@@ -46,14 +47,14 @@ export class UsersService {
       paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
     }
 
-    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+    return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/queried`, {params : paramsToSend});
   }
 
-  getAllAdmins() : Observable<IUser[]> {
-    return this.http.get<IUser[]>(`${this.baseUrl}/admins`);
+  getAllAdmins() : Observable<IApiResponse<IUser[]>> {
+    return this.http.get<IApiResponse<IUser[]>>(`${this.baseUrl}/admins`);
   }
 
-  getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IFilteredApiResponse<IUser>> {
+  getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
 
     if (params?.params.page) {
@@ -64,10 +65,10 @@ export class UsersService {
       paramsToSend = paramsToSend.set('pageSize', params.params.pageSize.toString());
     }
 
-    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/unassignedUsers/queried`, { params: paramsToSend });
+    return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/unassignedUsers/queried`, { params: paramsToSend });
   }
 
-  getUsersIncludeRelationshipsFiltered(params: IFilteredUsersRequest): Observable<IFilteredApiResponse<IUser>> {
+  getUsersIncludeRelationshipsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
     
     if (params?.lastName) {
@@ -94,7 +95,7 @@ export class UsersService {
       paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
     }
     
-    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/includeRelationships/queried`, { params: paramsToSend });
+    return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/includeRelationships/queried`, { params: paramsToSend });
   }
 
   restoreUser(userId: number): Observable<string> {

@@ -12,8 +12,4 @@ export class EmployeeManagerService {
   constructor(private http: HttpClient) {
 
   }
-
-  getAllRelations(): Observable<IEmployeeManager[]> {
-    return this.http.get<IEmployeeManager[]>(`${this.baseUrl}/employeemanager`);
-  }
 }

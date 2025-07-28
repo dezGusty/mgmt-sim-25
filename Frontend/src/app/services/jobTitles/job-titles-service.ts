@@ -5,6 +5,7 @@ import { IJobTitle } from '../../models/entities/ijob-title';
 import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-titles-request';
 import { HttpParams } from '@angular/common/http';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
+import { IApiResponse } from '../../models/responses/iapi-response';
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,11 @@ export class JobTitlesService {
 
   }
 
-  getAllJobTitles() : Observable<IJobTitle[]> {
-    return this.http.get<IJobTitle[]>(`${this.baseUrl}`);
+  getAllJobTitles() : Observable<IApiResponse<IJobTitle[]>> {
+    return this.http.get<IApiResponse<IJobTitle[]>>(`${this.baseUrl}`);
   }
 
-  getAllJobTitlesFiltered(params :IFilteredJobTitlesRequest) : Observable<IFilteredApiResponse<IJobTitle>> {
+  getAllJobTitlesFiltered(params :IFilteredJobTitlesRequest) : Observable<IApiResponse<IFilteredApiResponse<IJobTitle>>> {
     let paramsToSend = new HttpParams();
     
     if (params?.jobTitleName) {
@@ -47,6 +48,6 @@ export class JobTitlesService {
       paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
     }
 
-    return this.http.get<IFilteredApiResponse<IJobTitle>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+    return this.http.get<IApiResponse<IFilteredApiResponse<IJobTitle>>>(`${this.baseUrl}/queried`, {params : paramsToSend});
   }
 }

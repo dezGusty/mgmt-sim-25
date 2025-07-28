@@ -20,6 +20,7 @@ export class LeaveRequests {
         })
       );
   }
+  
   addLeaveRequest(data: {
     userId: number;
     leaveRequestTypeId: number;
