@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { LeaveRequest } from "../../models/entities/iLeave-request";
 import { environment } from "../../../environments/environment";
-
+import { IApiResponse } from "../../models/responses/iapi-response";
 
 @Injectable({
     providedIn: "root"
@@ -13,12 +13,12 @@ export class LeaveRequestService {
 
     constructor(private http: HttpClient) {}
 
-    getUserLeaveRequests(userId: number): Observable<LeaveRequest[]> {
-        return this.http.get<LeaveRequest[]>(`${this.apiUrl}/user/${userId}`);
+    getUserLeaveRequests(userId: number): Observable<IApiResponse<LeaveRequest[]>> {
+        return this.http.get<IApiResponse<LeaveRequest[]>>(`${this.apiUrl}/user/${userId}`);
     }
 
-    addLeaveRequest(request: LeaveRequest): Observable<LeaveRequest> {
-        return this.http.post<LeaveRequest>(this.apiUrl, request);
+    addLeaveRequest(request: LeaveRequest): Observable<IApiResponse<LeaveRequest>> {
+        return this.http.post<IApiResponse<LeaveRequest>>(this.apiUrl, request);
     }
 
     cancelLeaveRequest(requestId: number): Observable<void> {
@@ -28,5 +28,4 @@ export class LeaveRequestService {
     getLeaveBalance(userId: number): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/balance/${userId}`);
     }
-
 }
