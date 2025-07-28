@@ -1,5 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
+using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Database.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementSimulator.API.Controllers
@@ -26,9 +28,22 @@ namespace ManagementSimulator.API.Controllers
             var departments = await _departmentService.GetAllDepartmentsAsync();
             if (departments == null || !departments.Any())
             {
-                return NotFound(new { message = "No departments found." });
+                return NotFound(new 
+                {
+                    Message = "No departments found.",
+                    Data = new List<DepartmentResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(departments);
+
+            return Ok(new
+            {
+                Message = "Departmens retrieved succesfully.",
+                Data = departments,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("queried")]
@@ -40,9 +55,22 @@ namespace ManagementSimulator.API.Controllers
             var departments = await _departmentService.GetAllDepartmentsFilteredAsync(payload);
             if (departments == null || departments.Data == null || !departments.Data.Any())
             {
-                return NotFound(new { message = "No departments found." });
+                return NotFound(new
+                {
+                    Message = "No departments found.",
+                    Data = new List<DepartmentResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(departments);
+
+            return Ok(new
+            {
+                Message = "Departmens retrieved succesfully.",
+                Data = departments,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("{id}")]
@@ -54,9 +82,22 @@ namespace ManagementSimulator.API.Controllers
             var department = await _departmentService.GetDepartmentByIdAsync(id);
             if (department == null)
             {
-                return NotFound(new { message = $"Department with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = "No departments found.",
+                    Data = new DepartmentResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(department);
+
+            return Ok(new
+            {
+                Message = "Departmens retrieved succesfully.",
+                Data = department,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPost]
@@ -66,7 +107,13 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> AddDepartmentAsync([FromBody] CreateDepartmentRequestDto dto)
         {
             var department = await _departmentService.AddDepartmentAsync(dto);
-            return Created($"/api/departments/{department.Id}", department);
+            return Created($"/api/departments/{department.Id}", new
+            {
+                Message = "Department created successfully.",
+                Data = department,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpDelete("{id}")]
@@ -78,9 +125,22 @@ namespace ManagementSimulator.API.Controllers
             bool result = await _departmentService.DeleteDepartmentAsync(id);
             if (!result)
             {
-                return NotFound(new { message = $"Department with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Department with Id {id} not found.",
+                    Data = new DepartmentResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(new { message = $"Department with ID {id} deleted successfully." });
+
+            return Ok(new
+            {
+                Message = "Department created successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}")]
@@ -93,9 +153,22 @@ namespace ManagementSimulator.API.Controllers
             var updatedDepartment = await _departmentService.UpdateDepartmentAsync(id, dto);
             if (updatedDepartment == null)
             {
-                return NotFound(new { message = $"Department with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Department with Id {id} not found.",
+                    Data = new DepartmentResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(updatedDepartment);
+
+            return Ok(new
+            {
+                Message = "Department created successfully.",
+                Data = updatedDepartment,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }

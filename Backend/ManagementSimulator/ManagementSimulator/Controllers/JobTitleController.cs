@@ -25,11 +25,25 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllJobTitlesAsync()
         {
             var jobTitles = await _jobTitleService.GetAllJobTitlesAsync();
+
             if (jobTitles == null || !jobTitles.Any())
             {
-                return NotFound(new { message = "No job titles found." });
+                return NotFound(new
+                {
+                    Message = "No job titles found.",
+                    Data = new List<JobTitleResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(jobTitles);
+
+            return Ok(new
+            {
+                Message = "Job titles retrieved successfully.",
+                Data = jobTitles,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("queried")]
@@ -39,11 +53,25 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllJobTitlesFilteredAsync([FromQuery] QueriedJobTitleRequestDto payload)
         {
             var jobTitles = await _jobTitleService.GetAllJobTitlesFilteredAsync(payload);
+
             if (jobTitles == null || jobTitles.Data == null || !jobTitles.Data.Any())
             {
-                return NotFound(new { message = "No job titles found." });
+                return NotFound(new
+                {
+                    Message = "No job titles found.",
+                    Data = new List<JobTitleResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(jobTitles);
+
+            return Ok(new
+            {
+                Message = "Job titles retrieved successfully.",
+                Data = jobTitles,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpGet("{id}")]
@@ -53,11 +81,25 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetJobTitleByIdAsync(int id)
         {
             var jobTitle = await _jobTitleService.GetJobTitleByIdAsync(id);
+
             if (jobTitle == null)
             {
-                return NotFound(new { message = $"Job title with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Job title with Id {id} not found.",
+                    Data = new JobTitleResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(jobTitle);
+
+            return Ok(new
+            {
+                Message = "Job title retrieved successfully.",
+                Data = jobTitle,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPost]
@@ -67,7 +109,14 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> AddJobTitleAsync([FromBody] CreateJobTitleRequestDto dto)
         {
             var jobTitle = await _jobTitleService.AddJobTitleAsync(dto);
-            return Created($"/api/jobtitles/{jobTitle.Id}", jobTitle);
+
+            return Created($"/api/jobtitles/{jobTitle.Id}", new
+            {
+                Message = "Job title created successfully.",
+                Data = jobTitle,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpPatch("{id}")]
@@ -78,11 +127,25 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> UpdateJobTitleAsync(int id, [FromBody] UpdateJobTitleRequestDto dto)
         {
             var updatedJobTitle = await _jobTitleService.UpdateJobTitleAsync(id, dto);
+
             if (updatedJobTitle == null)
             {
-                return NotFound(new { message = $"Job title with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Job title with Id {id} not found.",
+                    Data = new JobTitleResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(updatedJobTitle);
+
+            return Ok(new
+            {
+                Message = "Job title updated successfully.",
+                Data = updatedJobTitle,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
 
         [HttpDelete("{id}")]
@@ -92,11 +155,25 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> DeleteJobTitleAsync(int id)
         {
             bool result = await _jobTitleService.DeleteJobTitleAsync(id);
+
             if (!result)
             {
-                return NotFound(new { message = $"Job title with ID {id} not found." });
+                return NotFound(new
+                {
+                    Message = $"Job title with Id {id} not found.",
+                    Data = false,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
             }
-            return Ok(new { message = $"Job title with ID {id} deleted successfully." });
+
+            return Ok(new
+            {
+                Message = "Job title deleted successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }
