@@ -5,6 +5,7 @@ import { IDepartment } from '../../models/entities/idepartment';
 import { IFilteredDepartmentsRequest } from '../../models/requests/ifiltered-departments-request';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
+import { IApiResponse } from '../../models/responses/iapi-response';
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +15,15 @@ export class DepartmentService {
 
   constructor(private http: HttpClient) { }
 
-  getAllDepartments(): Observable<IDepartment[]> {
-    return this.http.get<IDepartment[]>(this.apiUrl);
+  getAllDepartments(): Observable<IApiResponse<IDepartment[]>> {
+    return this.http.get<IApiResponse<IDepartment[]>>(this.apiUrl);
   }
 
-  getAllDepartmentsFiltered(params: IFilteredDepartmentsRequest): Observable<IFilteredApiResponse<IDepartment>> {
+  addDepartment(department : IDepartment) : Observable<IApiResponse<IDepartment>> {
+    return this.http.post<IApiResponse<IDepartment>>(this.apiUrl, department)
+  }
+
+  getAllDepartmentsFiltered(params: IFilteredDepartmentsRequest): Observable<IApiResponse<IFilteredApiResponse<IDepartment>>> {
     let paramsToSend = new HttpParams();
     
     if (params?.name) {
@@ -41,22 +46,22 @@ export class DepartmentService {
       paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
     }
 
-    return this.http.get<IFilteredApiResponse<IDepartment>>(`${this.apiUrl}/queried`, {params : paramsToSend});
+    return this.http.get<IApiResponse<IFilteredApiResponse<IDepartment>>>(`${this.apiUrl}/queried`, {params : paramsToSend});
   }
 
-  getDepartmentById(id: number): Observable<IDepartment> {
-    return this.http.get<IDepartment>(`${this.apiUrl}/${id}`);
+  getDepartmentById(id: number): Observable<IApiResponse<IDepartment>> {
+    return this.http.get<IApiResponse<IDepartment>>(`${this.apiUrl}/${id}`);
   }
 
-  createDepartment(department: IDepartment): Observable<IDepartment> {
-    return this.http.post<IDepartment>(this.apiUrl, department);
+  createDepartment(department: IDepartment): Observable<IApiResponse<IDepartment>> {
+    return this.http.post<IApiResponse<IDepartment>>(this.apiUrl, department);
   }
 
-  updateDepartment(id: number, department: IDepartment): Observable<IDepartment> {
-    return this.http.put<IDepartment>(`${this.apiUrl}/${id}`, department);
+  updateDepartment(id: number, department: IDepartment): Observable<IApiResponse<IDepartment>> {
+    return this.http.patch<IApiResponse<IDepartment>>(`${this.apiUrl}/${id}`, department);
   }
 
-  deleteDepartment(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteDepartment(id: number): Observable<IApiResponse<boolean>> {
+    return this.http.delete<IApiResponse<boolean>>(`${this.apiUrl}/${id}`);
   }
 }
