@@ -1,88 +1,271 @@
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-    <input type="text"
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-    placeholder="Jane Smith" required>
-</div>
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-    <input type="email"
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-    placeholder="jane@company.com" required>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-    <select
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-    required>
-    <option value="">Select Role</option>
-    <option value="admin">Admin</option>
-    <option value="manager">Manager</option>
-    <option value="employee">Employee</option>
-    </select>
-</div>
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
-    <select
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-    required>
-    <option value="">Select Department</option>
-    <option value="engineering">Engineering</option>
-    <option value="marketing">Marketing</option>
-    <option value="sales">Sales</option>
-    <option value="hr">Human Resources</option>
-    </select>
-</div>
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-    <select
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-    <option value="">Select Job Title</option>
-    <option value="developer">Software Developer</option>
-    <option value="designer">UI/UX Designer</option>
-    <option value="analyst">Business Analyst</option>
-    </select>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
-    <select
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-    <option value="">Select Manager</option>
-    <option value="manager1">John Smith</option>
-    <option value="manager2">Sarah Johnson</option>
-    </select>
-</div>
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-    <input type="date"
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-</div>
-</div>
-
-  <!-- Category, Max Days, and Advance Notice
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Leave days left for current year</label>
-      <input 
-        type="number"
-        name="leaveDaysLeftCurrentYear"
-        [(ngModel)]="leaveDaysLeftCurrentYear"
-        #leaveDaysLeftCurrentYear="ngModel"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        [class.border-red-500]="isFieldInvalid(leaveDaysLeftCurrentYear)"
-        placeholder="21"
-        min="1"
-        max="365">
-      
-      <div *ngIf="isFieldInvalid(leaveDaysLeftCurrentYear)" class="mt-1 text-sm text-red-600">
-        <span *ngIf="leaveDaysLeftCurrentYear.errors?.['min']">Minimum days left is 0</span>
-        <span *ngIf="leaveDaysLeftCurrentYear.errors?.['max']">Maximum days left is </span>
-      </div>
+<!-- add-user.component.html -->
+<form #userForm="ngForm" (ngSubmit)="submit(userForm)" class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <input type="text"
+            name="firstName"
+            [(ngModel)]="firstName"
+            #firstNameField="ngModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+            placeholder="Enter your first name..." 
+            required
+            minlength="2"
+            maxlength="50">
+            <div *ngIf="isFieldInvalid(firstNameField)" class="mt-1 text-sm text-red-600">
+                <div *ngIf="firstNameField.errors?.['required']">First name is required</div>
+                <div *ngIf="firstNameField.errors?.['minlength']">Minimum 2 characters required</div>
+                <div *ngIf="firstNameField.errors?.['maxlength']">Maximum 50 characters</div>
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+            <input type="text"
+            name="lastName"
+            [(ngModel)]="lastName"
+            #lastNameField="ngModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+            placeholder="Enter your last name..." 
+            required
+            minlength="2"
+            maxlength="50">
+            <div *ngIf="isFieldInvalid(lastNameField)" class="mt-1 text-sm text-red-600">
+                <div *ngIf="lastNameField.errors?.['required']">Last name is required</div>
+                <div *ngIf="lastNameField.errors?.['minlength']">Minimum 2 characters required</div>
+                <div *ngIf="lastNameField.errors?.['maxlength']">Maximum 50 characters</div>
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input type="email"
+            name="email"
+            [(ngModel)]="email"
+            #emailField="ngModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+            placeholder="e.g. john.doe@gmail.com"
+            required        
+            minlength="2"
+            maxlength="50">
+            <div *ngIf="isFieldInvalid(emailField)" class="mt-1 text-sm text-red-600">
+                <div *ngIf="emailField.errors?.['required']">Email is Required</div>
+                <div *ngIf="emailField.errors?.['email']">Please enter a valid email</div>
+                <div *ngIf="emailField.errors?.['minlength']">Minimum 2 characters required</div>
+                <div *ngIf="emailField.errors?.['maxlength']">Maximum 50 characters</div>
+            </div>
+        </div>
+   
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Employment</label>
+            <input type="date"
+            name="dateOfEmployment"
+            [max]="maxDate"
+            [ngModel]="getDateOfEmploymentForInput()"
+            (ngModelChange)="setDateFromInput($event)"
+            #DateOfEmploymentField="ngModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+            required>
+            
+            <!-- Experience Info -->
+            <div *ngIf="dateOfEmployment" class="mt-1 text-xs text-blue-600">
+                Experience: {{getYearsOfExperienceDisplay()}} {{getBonusLeaveDaysDisplay()}}
+            </div>
+            
+            <div *ngIf="isFieldInvalid(DateOfEmploymentField)" class="mt-1 text-sm text-red-600">
+                <div *ngIf="DateOfEmploymentField.errors?.['maxDate']">Date of employment cannot be in the future</div>
+                <div *ngIf="DateOfEmploymentField.errors?.['required']">Date of employment is required</div>
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+            
+            <!-- Simplified Input field -->
+            <div class="relative w-80 max-w-full">
+                <input
+                    type="text"
+                    [(ngModel)]="searchText"
+                    (ngModelChange)="onSearchTextChange($event)"
+                    (focus)="openDropdown()"
+                    (click)="openDropdown()"
+                    name="jobTitleSearch"
+                    #jobTitleSearchField="ngModel"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10"
+                    placeholder="Search and select job title..."
+                    autocomplete="off"
+                    [class.border-red-500]="!isJobTitleFieldValid() && jobTitleSearchField.touched"
+                    required>
+                
+                <!-- Dropdown Arrow -->
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200" 
+                        [class.rotate-180]="isDropdownOpen"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                
+                <!-- Click outside overlay -->
+                <div *ngIf="isDropdownOpen" 
+                     class="fixed inset-0 z-10" 
+                     (click)="closeDropdown()"></div>
+            </div>
+            
+            <!-- Simplified Dropdown Results -->
+            <div *ngIf="isDropdownOpen" 
+                class="absolute z-50 w-80 max-w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                
+                <!-- Loading State -->
+                <div *ngIf="isLoading" class="p-3 text-center text-gray-500">
+                    <span>Loading...</span>
+                </div>
+                
+                <!-- No Results -->
+                <div *ngIf="!isLoading && filteredJobTitles.length === 0 && searchText.trim() !== ''" 
+                    class="p-3 text-center text-gray-500">
+                    <span>No job titles found for "{{searchText}}"</span>
+                </div>
+                
+                <!-- Results Container -->
+                <div *ngIf="!isLoading && filteredJobTitles.length > 0" class="max-h-48 overflow-y-auto">
+                    <!-- Job Title Options -->
+                    <div *ngFor="let jobTitle of filteredJobTitles"
+                        (click)="selectJobTitle(jobTitle)"
+                        class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
+                        [class.bg-green-50]="selectedJobTitleId === jobTitle.id">
+                        
+                        <!-- Highlight search text -->
+                        <span [innerHTML]="highlightSearchText(jobTitle.name || '', searchText)"></span>
+                        
+                        <!-- Selected indicator -->
+                        <span *ngIf="selectedJobTitleId === jobTitle.id" 
+                            class="float-right text-green-600">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                    </div>
+                    
+                    <!-- Load More Option -->
+                    <div *ngIf="canLoadMore" 
+                         (click)="loadMore()"
+                         class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium">
+                        <span *ngIf="!isLoading">Load More Job Titles...</span>
+                        <span *ngIf="isLoading">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden field pentru validare -->
+            <input type="hidden" 
+                [(ngModel)]="selectedJobTitleId" 
+                name="selectedJobTitleId"
+                #selectedJobTitleIdField="ngModel"
+                required
+                min="1">
+                
+            <!-- Error Messages -->
+            <div *ngIf="(!isJobTitleFieldValid() && jobTitleSearchField.touched) || 
+                        (selectedJobTitleIdField.invalid && selectedJobTitleIdField.touched)" 
+                class="mt-1 text-sm text-red-600">
+                <div *ngIf="!isJobTitleFieldValid()">Please select a valid job title</div>
+                <div *ngIf="selectedJobTitleIdField.errors?.['required']">Job Title is required</div>
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Leave Days Left Current Year *</label>
+            <div class="relative">
+                <input
+                    type="number"
+                    [(ngModel)]="leaveDaysLeftCurrentYear"
+                    name="leaveDaysLeftCurrentYear"
+                    #leaveDaysLeftCurrentYearField="ngModel"
+                    placeholder="0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10"
+                    autocomplete="off"
+                    required
+                    min="1"
+                    [max]="maxLeaveDays">
+                
+                <!-- Info Icon -->
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <div *ngIf="isFieldInvalid(leaveDaysLeftCurrentYearField)" class="mt-1 text-sm text-red-600">
+                <div *ngIf="leaveDaysLeftCurrentYearField.errors?.['required']">Leave days is required</div>
+                <div *ngIf="leaveDaysLeftCurrentYearField.errors?.['min']">Minimum 1 day required</div>
+                <div *ngIf="leaveDaysLeftCurrentYearField.errors?.['max']">Maximum {{maxLeaveDays}} days allowed</div>
+            </div>
+        </div>
+        
+        <!-- User Roles Section -->
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-3">User Roles *</label>
+            <div class="flex flex-wrap gap-4">
+                <!-- Admin Checkbox -->
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="adminRole"
+                        name="adminRole"
+                        [(ngModel)]="isAdmin"
+                        #adminRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded">
+                    <label for="adminRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer">
+                        Admin
+                    </label>
+                </div>
+                
+                <!-- Manager Checkbox -->
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="managerRole"
+                        name="managerRole"
+                        [(ngModel)]="isManager"
+                        #managerRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded">
+                    <label for="managerRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer">
+                        Manager
+                    </label>
+                </div>
+                
+                <!-- Employee Checkbox -->
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="employeeRole"
+                        name="employeeRole"
+                        [(ngModel)]="isEmployee"
+                        #employeeRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded">
+                    <label for="employeeRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer">
+                        Employee
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Role Error Messages -->
+            <div *ngIf="!isRoleFieldValid() && (adminRoleField.touched || managerRoleField.touched || employeeRoleField.touched)" 
+                 class="mt-1 text-sm text-red-600">
+                <div>Please select at least one role</div>
+            </div>
+        </div>
     </div>
-  </div> -->
+    
+    <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+            Cancel
+        </button>
+        <button type="submit" [disabled]="userForm.invalid || !isJobTitleFieldValid() || !isRoleFieldValid()" 
+                class="px-4 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed">
+            Add User
+        </button>
+    </div>
+</form>

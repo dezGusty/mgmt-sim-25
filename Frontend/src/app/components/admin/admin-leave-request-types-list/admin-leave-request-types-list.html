@@ -1,6 +1,5 @@
-<!-- Leave Types List Component -->
 <div class="space-y-6">
-  <!-- Search and Filter Bar -->
+  <!-- Search Bar -->
   <div class="flex flex-col sm:flex-row gap-4">
     <div class="flex-1">
       <div class="relative">
@@ -19,7 +18,7 @@
 
   <!-- Leave Types Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let leaveType of leaveRequestTypes; let i = index; trackBy: trackByLeaveType" 
+    <div *ngFor="let leaveType of filteredLeaveTypes; let i = index; trackBy: trackByLeaveType" 
          class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-[#20B486]">
       
       <!-- Leave Type Header -->
@@ -34,37 +33,24 @@
           </div>
           <div>
             <h3 class="text-lg font-semibold text-gray-900">{{ leaveType.description }}</h3>
+            <!-- Paid/Unpaid Status Badge -->
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': leaveType.isPaid,
+                    'bg-gray-100 text-gray-800': !leaveType.isPaid
+                  }">
+              {{ leaveType.isPaid ? 'Paid' : 'Unpaid' }}
+            </span>
           </div>
         </div>
       </div>
 
       <!-- Description -->
       <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ leaveType.additionalDetails }}</p>
-
-      <!-- Leave Details -->
-      <!-- <div class="space-y-3 mb-4">
-        <div *ngIf="leaveType.requiresDocumentation" class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">Documentation:</span>
-          <span class="font-medium text-blue-600">Required</span>
-        </div>
-      </div> -->
-
-      <!-- Usage Statistics -->
-      <!-- <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-lg font-bold text-gray-900">{{ leaveType.requestsThisYear || 0 }}</div>
-          <div class="text-xs text-gray-500">Requests This Year</div>
-        </div>
-        <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-lg font-bold text-gray-900">{{ leaveType.averageDuration || 0 }}</div>
-          <div class="text-xs text-gray-500">Avg Duration (days)</div>
-        </div>
-      </div> -->
-
+      
       <!-- Action Buttons --> 
       <div class="flex space-x-2">
-        <button class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
+        <button class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
           Edit
         </button>
         <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -75,30 +61,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Leave Types Statistics -->
-  <!-- <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-gray-900">{{ getTotalLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Total Leave Types</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-green-600">{{ getActiveLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Active Types</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-blue-600">{{ getPaidLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Paid Leave Types</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-orange-600">{{ getTotalRequestsThisYear() }}</div>
-      <div class="text-sm text-gray-500">Requests This Year</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-purple-600">{{ getAverageDuration() }}</div>
-      <div class="text-sm text-gray-500">Avg Duration (days)</div>
-    </div>
-  </div> -->
-
-  <!-- Quick Actions -->
 </div>

@@ -4,6 +4,7 @@ using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Core.Utils;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
@@ -18,17 +19,20 @@ namespace ManagementSimulator.Core.Services
         private readonly IJobTitleRepository _jobTitleRepository;
         private readonly IEmployeeRoleRepository _employeeRoleRepository;
         private readonly IDeparmentRepository _deparmentRepository;
+        private readonly IEmailService _emailService;
 
         public UserService(
             IUserRepository userRepository,
             IJobTitleRepository jobTitleRepository,
             IEmployeeRoleRepository employeeRoleRepository,
-            IDeparmentRepository deparmentRepository)
+            IDeparmentRepository deparmentRepository,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
             _jobTitleRepository = jobTitleRepository;
             _deparmentRepository = deparmentRepository;
+            _emailService = emailService;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -74,18 +78,22 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(JobTitle), dto.JobTitleId);
             }
 
+            string temporaryPassword = PasswordGenerator.GenerateSimpleCode();
+
             double yearsOfEmployment = (DateTime.Now - dto.DateOfEmployment).TotalDays / 365.25;
+
             var user = new User
             {
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 JobTitleId = dto.JobTitleId,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Title = jt,
-                AnnuallyLeaveDays = 21 + (int)(yearsOfEmployment)/10,
+                AnnuallyLeaveDays = 21 + (int)(yearsOfEmployment) / 10,
                 LeaveDaysLeftCurrentYear = dto.LeaveDaysLeftCurrentYear,
                 DateOfEmployment = dto.DateOfEmployment,
+                MustChangePassword = true,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword)
             };
 
             await _userRepository.AddAsync(user);
@@ -113,6 +121,19 @@ namespace ManagementSimulator.Core.Services
                     };
                     await _employeeRoleRepository.AddEmployeeRoleUserAsync(employeeRoleUser);
                 }
+            }
+
+            try
+            {
+                await _emailService.SendWelcomeEmailWithPasswordAsync(
+                    user.Email,
+                    user.FirstName,
+                    temporaryPassword
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new MailNotSentException(user.Email);        
             }
 
             return user.ToUserResponseDto();

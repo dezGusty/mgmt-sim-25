@@ -16,3 +16,14 @@ export interface IUser {
   managersIds?: number[];
   isActive?: boolean;
 }
+
+export interface IAddUser {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  jobTitleId: number;
+  employeeRolesIds: number[];
+  dateOfEmployment: Date;
+  leaveDaysLeftCurrentYear: number;
+}

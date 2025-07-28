@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IJobTitle } from '../../../models/entities/ijob-title';
 import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
-import { JobTitleViewModel } from '../../../view-models/job-title-view-model';
+import { IJobTitleViewModel } from '../../../view-models/job-title-view-model';
 import { IFilteredJobTitlesRequest } from '../../../models/requests/ifiltered-job-titles-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../../models/responses/iapi-response';
@@ -16,7 +16,7 @@ import { IApiResponse } from '../../../models/responses/iapi-response';
   styleUrl: './admin-job-titles-list.css'
 })
 export class AdminJobTitlesList implements OnInit {
-  jobTitles: JobTitleViewModel[] = [];
+  jobTitles: IJobTitleViewModel[] = [];
   searchTerm: string = '';
   searchBy: string = 'jobTitle'; 
   sortDescending: boolean = false;
@@ -75,7 +75,7 @@ export class AdminJobTitlesList implements OnInit {
     }
   }
 
-  private mapToJobTitleViewModel(jobTitle: IJobTitle): JobTitleViewModel {
+  private mapToJobTitleViewModel(jobTitle: IJobTitle): IJobTitleViewModel {
     return {
       id: jobTitle.id,
       name: jobTitle.name,
@@ -169,15 +169,15 @@ export class AdminJobTitlesList implements OnInit {
     return pages;
   }
 
-  deleteJobTitle(jobTitle: JobTitleViewModel) {
+  deleteJobTitle(jobTitle: IJobTitleViewModel) {
 
   }
 
-  editJobTitle(jobTitle: JobTitleViewModel) {
+  editJobTitle(jobTitle: IJobTitleViewModel) {
 
   }
 
-  trackByJobTitleId(index: number, item: JobTitleViewModel): number {
+  trackByJobTitleId(index: number, item: IJobTitleViewModel): number {
     return item.id;
   }
 }

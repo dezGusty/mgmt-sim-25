@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IUser } from '../../models/entities/iuser';
+import { IAddUser, IUser } from '../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
@@ -106,5 +106,9 @@ export class UsersService {
   deleteUser(userId: number): Observable<string> {
     return this.http.delete<any>(`${this.baseUrl}/${userId}`)
       .pipe(map(response => response.message));
+  }
+
+  addUser(user: IAddUser): Observable<IApiResponse<IUser>> {
+    return this.http.post<IApiResponse<IUser>>(this.baseUrl, user);
   }
 }

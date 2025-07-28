@@ -3,7 +3,7 @@ import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../services/users/users-service';
-import { UserViewModel } from '../../../view-models/user-view-model';
+import { IUserViewModel } from '../../../view-models/user-view-model';
 import { IUser } from '../../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
@@ -16,7 +16,7 @@ import { IApiResponse } from '../../../models/responses/iapi-response';
   styleUrl: './admin-users-list.css'
 })
 export class AdminUsersList implements OnInit {
-  users: UserViewModel[] = [];
+  users: IUserViewModel[] = [];
   searchTerm: string = '';
   searchBy: string = 'name';
   sortDescending: boolean = false;
@@ -73,7 +73,7 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  private mapToUserViewModel(user: IUser): UserViewModel {
+  private mapToUserViewModel(user: IUser): IUserViewModel {
     return {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
@@ -188,12 +188,12 @@ export class AdminUsersList implements OnInit {
     return this.users.filter(user => user.status === 'inactive').length;
   }
 
-  editUser(user: UserViewModel): void {
+  editUser(user: IUserViewModel): void {
     console.log('Edit user:', user);
     // Implement edit functionality - poate deschizi un modal sau navighezi la o pagină de edit
   }
 
-  deleteUser(user: UserViewModel): void {
+  deleteUser(user: IUserViewModel): void {
     if (confirm(`Are you sure you want to delete ${user.name}?`)) {
       this.usersService.deleteUser(user.id).subscribe({
         next: (response) => {
@@ -209,7 +209,7 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  restoreUser(user: UserViewModel): void {
+  restoreUser(user: IUserViewModel): void {
     if (confirm(`Are you sure you want to restore ${user.name}?`)) {
       this.usersService.restoreUser(user.id).subscribe({
         next: () => {
@@ -225,7 +225,7 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  trackByUserId(index: number, user: UserViewModel): number {
+  trackByUserId(index: number, user: IUserViewModel): number {
     return user.id;
   }
 }

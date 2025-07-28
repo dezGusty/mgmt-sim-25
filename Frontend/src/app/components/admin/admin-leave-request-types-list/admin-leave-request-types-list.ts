@@ -1,10 +1,9 @@
-import { Component } from '@angular/core';
-import { OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
-import { LeaveRequestTypeViewModel } from '../../../view-models/leave-request-type-view-model';
+import { ILeaveRequestTypeViewModel } from '../../../view-models/leave-request-type-view-model';
 import { ColorGenerator } from '../../../services/colorGenerator/color-generator';
 
 @Component({
@@ -14,16 +13,13 @@ import { ColorGenerator } from '../../../services/colorGenerator/color-generator
   styleUrl: './admin-leave-request-types-list.css'
 })
 export class AdminLeaveTypesList implements OnInit {
-  leaveRequestTypes: LeaveRequestTypeViewModel[] = [];
-  filteredLeaveTypes: LeaveRequestTypeViewModel[] = [];
+  leaveRequestTypes: ILeaveRequestTypeViewModel[] = [];
   searchTerm: string = '';
-  selectedCategory: string = '';
-  selectedStatus: string = '';
 
-  constructor(private leaveRequestTypeService: LeaveRequestTypeService,
-              private colorGenerator: ColorGenerator) {
-
-  }
+  constructor(
+    private leaveRequestTypeService: LeaveRequestTypeService,
+    private colorGenerator: ColorGenerator
+  ) {}
 
   ngOnInit(): void {
     this.loadLeaveTypes();
@@ -32,48 +28,41 @@ export class AdminLeaveTypesList implements OnInit {
   loadLeaveTypes(): void {
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe(
       response => {
-          console.log('API response:', response);
-
-          const rawLeaveTypes: ILeaveRequestType[] = response.data;
-          this.leaveRequestTypes = rawLeaveTypes.map(leaveType => this.mapToLeaveTypeViewModel(leaveType));
-          this.filteredLeaveTypes = [...this.leaveRequestTypes];
-
-          console.log('Mapped Leave Types:', this.leaveRequestTypes);
+        console.log('API response:', response);
+        
+        const rawLeaveTypes: ILeaveRequestType[] = response.data;
+        this.leaveRequestTypes = rawLeaveTypes.map(leaveType => 
+          this.mapToLeaveTypeViewModel(leaveType)
+        );
+        
+        console.log('Mapped Leave Types:', this.leaveRequestTypes);
       }
-    )
+    );
   }
   
-  private mapToLeaveTypeViewModel(leaveType: ILeaveRequestType): LeaveRequestTypeViewModel {
+  private mapToLeaveTypeViewModel(leaveType: ILeaveRequestType): ILeaveRequestTypeViewModel {
     return {
-      id : leaveType.id,
+      id: leaveType.id,
       additionalDetails: leaveType.additionalDetails || '',
       description: leaveType.description || '',
+      isPaid: leaveType.isPaid,
       color: this.colorGenerator.generateColorFromId(leaveType.id)
     };
   }
 
-  trackByLeaveType(index: number, leaveType: LeaveRequestTypeViewModel): any {
-    return leaveType.id + '-' + leaveType.color;
-  }
-
-  onSearchChange(): void {
-    this.filterLeaveTypes();
-  }
-
-  private filterLeaveTypes(): void {
-    this.filteredLeaveTypes = this.leaveRequestTypes.filter(leaveType => {
-      const matchesSearch = !this.searchTerm || 
-        leaveType.description?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        leaveType.additionalDetails?.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      return matchesSearch;
-    });
-  }
-
-  getCategoryBadgeClass(category: string): string {
-    switch (category) {
-      default:
-        return 'bg-blue-100 text-blue-800';
+  get filteredLeaveTypes(): ILeaveRequestTypeViewModel[] {
+    if (!this.searchTerm) {
+      return this.leaveRequestTypes;
     }
+    
+    const searchLower = this.searchTerm.toLowerCase();
+    return this.leaveRequestTypes.filter(leaveType => 
+      leaveType.description?.toLowerCase().includes(searchLower) ||
+      leaveType.additionalDetails?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  trackByLeaveType(index: number, leaveType: ILeaveRequestTypeViewModel): string {
+    return `${leaveType.id}-${leaveType.color}`;
   }
 }

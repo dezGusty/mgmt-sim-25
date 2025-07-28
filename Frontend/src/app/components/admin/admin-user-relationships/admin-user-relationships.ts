@@ -3,7 +3,7 @@ import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IUser } from '../../../models/entities/iuser';
-import { UserViewModel } from '../../../view-models/user-view-model';
+import { IUserViewModel } from '../../../view-models/user-view-model';
 import { UsersService } from '../../../services/users/users-service';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 
@@ -16,9 +16,9 @@ import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-
 export class AdminUserRelationships implements OnInit {
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
-  managers: UserViewModel[] = []; 
-  admins: UserViewModel[] = [];
-  unassignedUsers: UserViewModel[] = [];
+  managers: IUserViewModel[] = []; 
+  admins: IUserViewModel[] = [];
+  unassignedUsers: IUserViewModel[] = [];
 
   searchTerm: string = '';
   searchBy: 'lastName' | 'email' = 'lastName';
@@ -101,7 +101,7 @@ export class AdminUserRelationships implements OnInit {
     });
   }
 
-  mapToUserViewModel(user: IUser): UserViewModel {
+  mapToUserViewModel(user: IUser): IUserViewModel {
     user.managersIds?.forEach(element => {
       this.managersIds.add(element);
     });

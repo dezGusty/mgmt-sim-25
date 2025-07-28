@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { IFilteredDepartmentsRequest } from '../../../models/requests/ifiltered-departments-request';
-import { DepartmentViewModel } from '../../../view-models/department-view-model';
+import { IDepartmentViewModel } from '../../../view-models/department-view-model';
 
 @Component({
   selector: 'app-admin-departments-list',
@@ -14,7 +14,7 @@ import { DepartmentViewModel } from '../../../view-models/department-view-model'
   styleUrl: './admin-departments-list.css'
 })
 export class AdminDepartmentsList implements OnInit {
-  departments: DepartmentViewModel[] = [];
+  departments: IDepartmentViewModel[] = [];
 
   searchTerm: string = '';
   isLoading: boolean = true;
@@ -62,7 +62,7 @@ export class AdminDepartmentsList implements OnInit {
     });
   }
 
-  mapToDepartmentViewModel(department: IDepartment): DepartmentViewModel {
+  mapToDepartmentViewModel(department: IDepartment): IDepartmentViewModel {
     return {
       id: department.id,
       name: department.name,
@@ -150,15 +150,15 @@ export class AdminDepartmentsList implements OnInit {
     this.loadDepartments();
   }
 
-  editDepartment(department: DepartmentViewModel): void {
+  editDepartment(department: IDepartmentViewModel): void {
     console.log('Edit department:', department);
   }
 
-  viewDepartment(department: DepartmentViewModel): void {
+  viewDepartment(department: IDepartmentViewModel): void {
     console.log('View department:', department);
   }
 
-  deleteDepartment(department: DepartmentViewModel): void {
+  deleteDepartment(department: IDepartmentViewModel): void {
     console.log('Delete department:', department);
   }
 
