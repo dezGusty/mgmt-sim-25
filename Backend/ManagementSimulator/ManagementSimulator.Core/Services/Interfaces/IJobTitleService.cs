@@ -2,6 +2,7 @@
 using ManagementSimulator.Core.Dtos.Requests.JobTitle;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IJobTitleService
     {
+        Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload);
         Task<List<JobTitleResponseDto>> GetAllJobTitlesAsync();
         Task<JobTitleResponseDto?> GetJobTitleByIdAsync(int id);
         Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request);

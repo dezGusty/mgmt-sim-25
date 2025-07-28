@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../../models/entities/User';
-import { UserViewModel } from '../../../view-models/UserViewModel';
-import { UsersService } from '../../../services/users/users';
+import { IUser } from '../../../models/entities/iuser';
+import { UserViewModel } from '../../../view-models/user-view-model';
+import { UsersService } from '../../../services/users/users-service';
 import { UserFilterPipe } from '../../../pipes/filterPipe/filter-pipe';
 import { UnassignedUsersPipe } from '../../../pipes/unassignedUsersPipe/unassigned-users-pipe';
+import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 
 @Component({
   selector: 'app-admin-user-relationships',
@@ -17,37 +18,97 @@ import { UnassignedUsersPipe } from '../../../pipes/unassignedUsersPipe/unassign
 export class AdminUserRelationships implements OnInit {
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
-  users: UserViewModel[] = [];
+  managers: UserViewModel[] = []; 
+  admins: UserViewModel[] = [];
+  unassignedUsers: UserViewModel[] = [];
 
-  constructor(private userService: UsersService) {
+  searchTerm: string = '';
+  searchBy: 'lastName' | 'email' = 'lastName';
+  sortDescending: boolean = false;
+  
+  readonly pageSizeManagers: number = 3;
+  currentPageManagers: number = 1;
+  totalPagesManagers: number = 0;
 
-  }
+  readonly pageSizeUnassignedUsers: number = 3;
+  currentPageUnassignedUsers: number = 1;
+  totalPagesUnassignedUsers: number = 0;
+
+  constructor(private userService: UsersService) {}
 
   ngOnInit(): void {
-    this.loadUserRelationships();
+    this.loadManagersWithRelationships();
+    this.loadAdmins();
+    this.loadUnassignedUsers();
   }
 
-  loadUserRelationships(): void {
-    this.userService.getAllUsersIncludeRelationships().subscribe({
+  loadAdmins(): void {
+    this.userService.getAllAdmins().subscribe({
       next: (response) => {
-        console.log('API response:', response);
-        const rawUsers: User[] = response;
-
-        this.users = rawUsers.map(user => this.mapToUserViewModel(user));
+        const rawAdmins: IUser[] = response;
+        this.admins = rawAdmins.map(admin => this.mapToUserViewModel(admin));
       },
       error: (err) => {
-        console.error('Failed to fetch users:', err);
+        console.error('Failed to fetch admins:', err);
       }
     })
   }
 
-  mapToUserViewModel(user: User): UserViewModel {
+  loadManagersWithRelationships(): void {
+    const params: IFilteredUsersRequest = {
+      [this.searchBy === 'email' ? 'email' : 'lastName']: this.searchTerm,
+      params: {
+        sortBy: this.searchBy === 'lastName' ? 'lastName' : 'email',
+        sortDescending: this.sortDescending,
+        page: this.currentPageManagers,
+        pageSize: this.pageSizeManagers
+      }
+    };
+
+    this.userService.getUsersIncludeRelationshipsFiltered(params).subscribe({
+      next: (response) => {
+        console.log('Managers API response:', response);
+        const rawUsers: IUser[] = response.data;
+        this.managers = rawUsers.map(user => this.mapToUserViewModel(user));
+        
+        this.totalPagesManagers = response.totalPages;
+      },
+      error: (err) => {
+        console.error('Failed to fetch managers with relationships:', err);
+      }
+    });
+  }
+
+  loadUnassignedUsers(): void {
+    const params: IFilteredUsersRequest = {
+      params: {
+        sortBy: 'lastName', 
+        sortDescending: false,
+        page: this.currentPageUnassignedUsers,
+        pageSize: this.pageSizeUnassignedUsers
+      }
+    };
+
+    this.userService.getUnassignedUsers(params).subscribe({
+      next: (response) => {
+        console.log('Unassigned users API response:', response);
+        const rawUnassignedUsers: IUser[] = response.data;
+        this.unassignedUsers = rawUnassignedUsers.map(user => this.mapToUserViewModel(user));
+        
+        this.totalPagesUnassignedUsers = response.totalPages;
+      },
+      error: (err) => {
+        console.error('Failed to fetch unassigned users:', err);
+      }
+    });
+  }
+
+  mapToUserViewModel(user: IUser): UserViewModel {
     user.managersIds?.forEach(element => {
       this.managersIds.add(element);
     });
 
-    if(user.roles.includes("Admin"))
-    { 
+    if(user.roles.includes("Admin")) { 
       this.adminsIds.add(user.id);
     }
 
@@ -55,10 +116,14 @@ export class AdminUserRelationships implements OnInit {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
-      jobTitle: user.jobTitleName || 'Unknown',
-      jobTitleId: user.jobTitleId || 0,
-      department: user.departmentName || 'Unknown',
-      departmentId: user.departmentId || 0,
+      jobTitle: user.jobTitleId ? {
+        id: user.jobTitleId,
+        name: user.jobTitleName || 'Unknown',
+        department: {
+          id: user.departmentId || 0,
+          name: user.departmentName || 'Unknown'
+        }
+      } : undefined,
       subordinatesIds: user.subordinatesIds || [],
       subordinatesNames: user.subordinatesNames || [],
       roles : user.roles || [],
@@ -69,20 +134,169 @@ export class AdminUserRelationships implements OnInit {
     };
   }
 
-  isManager(userId: number): boolean {
-    return this.managersIds.has(userId);
+  getMaxDisplayedResultManagers(): number {
+    return Math.min(this.currentPageManagers * this.pageSizeManagers, this.managers.length);
   }
 
-  isAdmin(user: number): boolean {
-    return this.adminsIds.has(user);
+  getStartResultIndexManagers(): number {
+    return ((this.currentPageManagers - 1) * this.pageSizeManagers) + 1;
+  }
+
+  goToPageManagers(page: number): void {
+    if (page >= 1 && page <= this.totalPagesManagers && page !== this.currentPageManagers) {
+      this.currentPageManagers = page;
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  goToNextPageManagers(): void {
+    if (this.currentPageManagers < this.totalPagesManagers) {
+      this.currentPageManagers++;
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  goToPreviousPageManagers(): void {
+    if (this.currentPageManagers > 1) {
+      this.currentPageManagers--;
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  goToFirstPageManagers(): void {
+    if (this.currentPageManagers !== 1) {
+      this.currentPageManagers = 1;
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  goToLastPageManagers(): void {
+    if (this.currentPageManagers !== this.totalPagesManagers) {
+      this.currentPageManagers = this.totalPagesManagers;
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  getPageNumbersManagers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    const half = Math.floor(maxVisiblePages / 2);
+    
+    let start = Math.max(1, this.currentPageManagers - half);
+    let end = Math.min(this.totalPagesManagers, start + maxVisiblePages - 1);
+
+    if (end - start + 1 < maxVisiblePages) {
+      start = Math.max(1, end - maxVisiblePages + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  goToPageUnassignedUsers(page: number): void {
+    if (page >= 1 && page <= this.totalPagesUnassignedUsers && page !== this.currentPageUnassignedUsers) {
+      this.currentPageUnassignedUsers = page;
+      this.loadUnassignedUsers();
+    }
+  }
+
+  goToNextPageUnassignedUsers(): void {
+    if (this.currentPageUnassignedUsers < this.totalPagesUnassignedUsers) {
+      this.currentPageUnassignedUsers++;
+      this.loadUnassignedUsers();
+    }
+  }
+
+  goToPreviousPageUnassignedUsers(): void {
+    if (this.currentPageUnassignedUsers > 1) {
+      this.currentPageUnassignedUsers--;
+      this.loadUnassignedUsers();
+    }
+  }
+
+  goToFirstPageUnassignedUsers(): void {
+    if (this.currentPageUnassignedUsers !== 1) {
+      this.currentPageUnassignedUsers = 1;
+      this.loadUnassignedUsers();
+    }
+  }
+
+  goToLastPageUnassignedUsers(): void {
+    if (this.currentPageUnassignedUsers !== this.totalPagesUnassignedUsers) {
+      this.currentPageUnassignedUsers = this.totalPagesUnassignedUsers;
+      this.loadUnassignedUsers();
+    }
+  }
+
+  getPageNumbersUnassignedUsers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    const half = Math.floor(maxVisiblePages / 2);
+    
+    let start = Math.max(1, this.currentPageUnassignedUsers - half);
+    let end = Math.min(this.totalPagesUnassignedUsers, start + maxVisiblePages - 1);
+    
+    if (end - start + 1 < maxVisiblePages) {
+      start = Math.max(1, end - maxVisiblePages + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  getMaxDisplayedResultUnassignedUsers(): number {
+    return Math.min(this.currentPageUnassignedUsers * this.pageSizeUnassignedUsers, this.unassignedUsers.length);
+  }
+
+  getStartResultIndexUnassignedUsers(): number {
+    return ((this.currentPageUnassignedUsers - 1) * this.pageSizeUnassignedUsers) + 1;
+  }
+
+  getSearchPlaceholder(): string {
+    return this.searchBy === 'lastName' 
+      ? 'Search managers by last name...' 
+      : 'Search managers by email...';
+  }
+
+  onSearch(): void {
+    this.currentPageManagers = 1; 
+    if(this.searchTerm !== '') {
+      this.loadManagersWithRelationships();
+    }
+  }
+
+  toggleSortOrder(): void {
+    this.sortDescending = !this.sortDescending;
+    this.currentPageManagers = 1; 
+    this.loadManagersWithRelationships();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.currentPageManagers = 1; 
+    this.loadManagersWithRelationships();
+  }
+
+  isManager(userId: number | undefined): boolean {
+    return userId !== undefined && this.managersIds.has(userId);
+  }
+
+  isAdmin(userId: number | undefined): boolean {
+    return userId !== undefined && this.adminsIds.has(userId);
   }
 
   areUnassignedUsers(): boolean {
-      return this.users.some(u => u.managersIds && u.managersIds.length > 0);
+    return this.unassignedUsers.length > 0;
   }
 
   getUnassignedUsersCount(): number {
-    return this.users.filter(u => u.managersIds && u.managersIds.length === 0).length;
+    return this.unassignedUsers.length;
   }
   
   getSubordinateCount(manager: any): number {
@@ -90,11 +304,11 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getAdminCount(): number {
-    return this.users.filter(user => user.roles?.includes("Admin")).length;
+    return this.admins.length;
   }
 
   getManagerCount(): number {
-    return this.users.filter(user => user.roles?.includes("Manager")).length;
+    return this.managers.filter(user => user.roles?.includes("Manager")).length;
   }
 
   assignManager(user: any): void {

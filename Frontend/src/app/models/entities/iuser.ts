@@ -1,4 +1,4 @@
-export interface User {
+export interface IUser {
   id: number;
   email: string;
   firstName: string;
@@ -14,4 +14,5 @@ export interface User {
   subordinatesJobTitles?: string[];
   subordinatesEmails?: string[];
   managersIds?: number[];
+  isActive?: boolean;
 }

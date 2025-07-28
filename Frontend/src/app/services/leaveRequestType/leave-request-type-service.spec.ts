@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { LeaveRequestTypeService } from './leave-request-type';
+import { LeaveRequestTypeService } from './leave-request-type-service';
 
 describe('LeaveRequestType', () => {
   let service: LeaveRequestTypeService;

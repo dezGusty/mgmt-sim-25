@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { EventEmitter, OnInit, Output, Input } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { Department } from '../../../models/entities/Department';
-import { DepartmentService } from '../../../services/departments/department';
+import { IDepartment } from '../../../models/entities/idepartment';
+import { DepartmentService } from '../../../services/departments/department-service';
 
 export interface UserFormData {
   firstName: string;

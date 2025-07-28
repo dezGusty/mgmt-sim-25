@@ -2,10 +2,16 @@ export interface UserViewModel {
   id: number;
   name: string;
   email: string;
-  jobTitle?: string;
-  jobTitleId?: number;
-  department?: string;
-  departmentId?: number;
+
+  jobTitle?: {
+    id: number;
+    name?: string;
+    department?: {
+      id: number;
+      name?: string;
+    };
+  }
+
   subordinatesIds?: number[];
   subordinatesNames?: string[];
   subordinatesJobTitleIds?: number[];

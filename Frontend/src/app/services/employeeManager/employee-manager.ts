@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { EmployeeManager } from '../../models/entities/EmployeeManager';
+import { IEmployeeManager } from '../../models/entities/iemployee-manager';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class EmployeeManagerService {
 
   }
 
-  getAllRelations(): Observable<EmployeeManager[]> {
-    return this.http.get<EmployeeManager[]>(`${this.baseUrl}/employeemanager`);
+  getAllRelations(): Observable<IEmployeeManager[]> {
+    return this.http.get<IEmployeeManager[]>(`${this.baseUrl}/employeemanager`);
   }
 }

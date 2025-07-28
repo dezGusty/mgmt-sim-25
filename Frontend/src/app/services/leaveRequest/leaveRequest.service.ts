@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { LeaveRequest } from "../../models/entities/LeaveRequest";
+import { LeaveRequest } from "../../models/entities/iLeave-request";
 import { environment } from "../../../environments/environment";
 
 

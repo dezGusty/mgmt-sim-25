@@ -2,11 +2,10 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
-import { LeaveRequest } from '../../../models/entities/LeaveRequest';
-import { LeaveRequestType } from '../../../models/entities/LeaveRequestType';
-import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type';
+import { LeaveRequest } from '../../../models/entities/iLeave-request';
+import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
+import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../../models/enums/RequestStatus';
-
 
 @Component({
   selector: 'app-user-request-form',
@@ -26,7 +25,7 @@ export class UserRequestForm {
   isSubmitting = false;
   errorMessage = '';
 
-  leaveRequestTypes: LeaveRequestType[] = [];
+  leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
 
   get todayDate() {

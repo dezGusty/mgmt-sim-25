@@ -2,9 +2,9 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
-import { LeaveRequest } from '../../../models/entities/LeaveRequest';
-import { LeaveRequestType } from '../../../models/entities/LeaveRequestType';
-import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type';
+import { LeaveRequest } from '../../../models/entities/iLeave-request';
+import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
+import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../../models/enums/RequestStatus';
 
 @Component({
@@ -27,7 +27,7 @@ export class UserRequestsList implements OnInit {
   showListModal = true;
   errorMessage = '';
 
-  leaveRequestTypes: LeaveRequestType[] = [];
+  leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
 
   constructor(
