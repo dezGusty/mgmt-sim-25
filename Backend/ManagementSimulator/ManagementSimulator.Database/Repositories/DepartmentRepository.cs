@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ManagementSimulator.Infrastructure.Exceptions;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using ManagementSimulator.Database.Extensions;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -29,6 +31,45 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.Departments
                 .Where(d => d.DeletedAt == null)
                 .FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters)
+        {
+            IQueryable<Department> query = GetRecords();
+
+            // Filtering
+            if (!string.IsNullOrEmpty(name))
+            {
+                var lowerName = name.ToLower();
+                query = query.Where(d => d.Name.ToLower().Contains(lowerName));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // Sorting
+            if (string.IsNullOrEmpty(parameters.SortBy))
+                query = query.OrderBy(d => d.Id);
+            else
+                query = query.ApplySorting<Department>(parameters.SortBy, parameters.SortDescending ?? false);
+
+            // Pagination
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                var allData = await query.ToListAsync();
+                return (allData, totalCount);
+            }
+            else
+            {
+                var pagedData = await query
+                    .Skip((int)parameters.PageSize * ((int)parameters.Page - 1))
+                    .Take((int)parameters.PageSize)
+                    .ToListAsync();
+
+                return (pagedData, totalCount);
+            }
         }
     }
 }

@@ -24,5 +24,7 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public List<int>? SubordinatesJobTitleIds { get; set; } = new List<int>();
         public List<int>? ManagersIds { get; set; } = new List<int>();
         public List<string>? SubordinatesEmails { get; set; } = new List<string>();
+        public int? EmployeeCount { get; set; } = 0;
+        public bool? IsActive { get; set; } = true;
     }
 }

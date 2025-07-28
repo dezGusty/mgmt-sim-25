@@ -1,0 +1,109 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { IUser } from '../../models/entities/iuser';
+import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-request';
+import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
+import { HttpParams } from '@angular/common/http';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UsersService {
+  private baseUrl: string = 'https://localhost:7275/api/users';
+
+  constructor(private http: HttpClient) {}
+
+  getAllUsersIncludeRelationships(): Observable<IUser[]> {
+    return this.http.get<IUser[]>(`${this.baseUrl}/includeRelationships`);
+  }
+
+  getAllUsersFiltered(params: IFilteredUsersRequest): Observable<IFilteredApiResponse<IUser>> {
+    let paramsToSend = new HttpParams();
+    
+    if (params?.lastName) {
+      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    }
+    
+    if (params?.email) {
+      paramsToSend = paramsToSend.set('email', params.email);
+    }
+    
+    if (params?.params.sortBy) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+    }
+    
+    if (params?.params.sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+    }
+    
+    if (params?.params.page) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+    }
+    
+    if (params?.params.pageSize) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+    }
+
+    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+  }
+
+  getAllAdmins() : Observable<IUser[]> {
+    return this.http.get<IUser[]>(`${this.baseUrl}/admins`);
+  }
+
+  getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IFilteredApiResponse<IUser>> {
+    let paramsToSend = new HttpParams();
+
+    if (params?.params.page) {
+      paramsToSend = paramsToSend.set('page', params.params.page.toString());
+    }
+    
+    if (params?.params.pageSize) {
+      paramsToSend = paramsToSend.set('pageSize', params.params.pageSize.toString());
+    }
+
+    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/unassignedUsers/queried`, { params: paramsToSend });
+  }
+
+  getUsersIncludeRelationshipsFiltered(params: IFilteredUsersRequest): Observable<IFilteredApiResponse<IUser>> {
+    let paramsToSend = new HttpParams();
+    
+    if (params?.lastName) {
+      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    }
+    
+    if (params?.email) {
+      paramsToSend = paramsToSend.set('email', params.email);
+    }
+    
+    if (params?.params.sortBy) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+    }
+    
+    if (params?.params.sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+    }
+    
+    if (params?.params.page) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+    }
+    
+    if (params?.params.pageSize) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+    }
+    
+    return this.http.get<IFilteredApiResponse<IUser>>(`${this.baseUrl}/includeRelationships/queried`, { params: paramsToSend });
+  }
+
+  restoreUser(userId: number): Observable<string> {
+    return this.http.patch<any>(`${this.baseUrl}/${userId}/restore`, {})
+      .pipe(map(response => response.message));
+  }
+
+  deleteUser(userId: number): Observable<string> {
+    return this.http.delete<any>(`${this.baseUrl}/${userId}`)
+      .pipe(map(response => response.message));
+  }
+}

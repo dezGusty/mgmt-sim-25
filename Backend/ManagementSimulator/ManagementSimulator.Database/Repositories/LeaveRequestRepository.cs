@@ -7,6 +7,9 @@ using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using Microsoft.IdentityModel.Tokens;
+using ManagementSimulator.Database.Extensions;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -16,6 +19,47 @@ namespace ManagementSimulator.Database.Repositories
         public LeaveRequestRepository(MGMTSimulatorDbContext dbcontext) : base(dbcontext)
         {
             _dbcontext = dbcontext;
+        }
+
+        public async Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters)
+        {
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests
+                                                        .Include(lr => lr.User)
+                                                        .Where(lr => employeeIds.Contains(lr.UserId));
+            // filtering
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                query = query.Where(lr => lr.User.LastName.Contains(lastName));
+            }
+            if (!string.IsNullOrEmpty(email))
+            {
+                query = query.Where(lr => lr.User.Email.Contains(email));
+            }
+
+            // Obține totalul ÎNAINTE de paginare
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<LeaveRequest>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(lr => lr.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
         }
     }
 }

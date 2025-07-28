@@ -1,5 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequestType;
+using ManagementSimulator.Core.Dtos.Requests.LeaveRequestTypes;
 using ManagementSimulator.Core.Dtos.Responses;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
@@ -108,6 +110,34 @@ namespace ManagementSimulator.Core.Services
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
                 AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
+            };
+        }
+
+        public async Task<PagedResponseDto<LeaveRequestTypeResponseDto>> GetAllLeaveRequestTypesFilteredAsync(QueriedLeaveRequestTypeRequestDto payload)
+        {
+            var (result, totalCount) = await _leaveRequestTypeRepository.GetAllLeaveRequestTypesFilteredAsync(payload.Description, payload.PagedQueryParams.ToQueryParams());
+
+            if (result == null || !result.Any())
+                return new PagedResponseDto<LeaveRequestTypeResponseDto>
+                {
+                    Data = new List<LeaveRequestTypeResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<LeaveRequestTypeResponseDto>
+            {
+                Data = result.Select(lrt => new LeaveRequestTypeResponseDto
+                {
+                    Id = lrt.Id,
+                    Description = lrt.Description,
+                    AdditionalDetails = lrt.AdditionalDetails ?? string.Empty,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
     }

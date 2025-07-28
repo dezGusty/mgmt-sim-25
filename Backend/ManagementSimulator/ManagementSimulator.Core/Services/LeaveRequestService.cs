@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
@@ -150,5 +151,43 @@ namespace ManagementSimulator.Core.Services
 
             return filtered;
        }
+
+        public async Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId, QueriedLeaveRequestRequestDto payload)
+        {
+            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+            var employeeIds = employees.Select(e => e.Id).ToList();
+
+            var (result, totalCount) = await _leaveRequestRepository.GetAllLeaveRequestsWithRelationshipsFilteredAsync(employeeIds, payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams());
+
+            if (result == null || !result.Any())
+                return new PagedResponseDto<LeaveRequestResponseDto>
+                {
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<LeaveRequestResponseDto>
+            {
+                Data = result.Select(lr => new LeaveRequestResponseDto
+                {
+                    Id = lr.Id,
+                    UserId = lr.UserId,
+                    FullName = lr.User?.FullName ?? string.Empty,
+                    ReviewerId = lr.ReviewerId,
+                    LeaveRequestTypeId = lr.LeaveRequestTypeId,
+                    StartDate = lr.StartDate,
+                    EndDate = lr.EndDate,
+                    Reason = lr.Reason ?? string.Empty,
+                    RequestStatus = lr.RequestStatus,
+                    ReviewerComment = lr.ReviewerComment ?? string.Empty,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
+            };
+        }
     }
 }

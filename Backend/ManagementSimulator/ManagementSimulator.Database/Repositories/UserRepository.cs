@@ -7,6 +7,9 @@ using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
+using ManagementSimulator.Database.Dtos.QueryParams;
+using Microsoft.IdentityModel.Tokens;
+using ManagementSimulator.Database.Extensions;
 
 
 namespace ManagementSimulator.Database.Repositories
@@ -30,11 +33,12 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<List<User>> GetAllUsersWithReferencesAsync()
         {
+            // Deleted included
             return await _dbContext.Users
-                .Where(u => u.DeletedAt == null)
                 .Include(u => u.Roles)
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
+                    .ThenInclude(jt => jt.Department)
                 .ToListAsync();
         }
 
@@ -109,6 +113,135 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Managers)
                     .ThenInclude(em => em.Manager)
                 .ToListAsync();
+        }
+
+        public async Task<List<User>> GetAllAdminsAsync(string? lastName, string? email)
+        {
+            var query = GetRecords()
+                .Where(u => u.Roles.Any(r => r.Role.Rolename == "Admin"));
+
+            // filtering 
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                query = query.Where(u => u.LastName.Contains(lastName));
+            }
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters)
+        {
+            IQueryable<User> query = GetRecords()
+                                     .Include(u => u.Subordinates)
+                                        .Where(u => u.Subordinates.Count > 0);
+            // filtering 
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                query = query.Where(u => u.LastName.Contains(lastName));
+            }
+            if (!string.IsNullOrEmpty(email))
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }
+
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, QueryParams parameters)
+        {
+            IQueryable<User> query = _dbContext.Users
+                .Include(u => u.Roles)
+                    .ThenInclude(u => u.Role)
+                .Include(u => u.Title)
+                    .ThenInclude(jt => jt.Department);
+            // filtering 
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                query = query.Where(u => u.LastName.Contains(lastName));
+            }
+            if (!string.IsNullOrEmpty(email))
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }
+
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters)
+        {
+            IQueryable<User> query = _dbContext.Users
+                .Include(u => u.Managers)
+                     .Where(u => u.Managers.Count == 0)
+                .Include(u => u.Roles)
+                    .ThenInclude(u => u.Role)
+                .Include(u => u.Title);
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
         }
     }
 }
