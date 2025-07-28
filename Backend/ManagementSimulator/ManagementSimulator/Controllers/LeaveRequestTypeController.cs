@@ -36,7 +36,6 @@ namespace ManagementSimulator.API.Controllers
                     Timestamp = DateTime.UtcNow
                 });
             }
-
             return Ok(new
             {
                 Message = "Leave request types retrieved successfully.",

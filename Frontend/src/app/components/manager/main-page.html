@@ -41,7 +41,7 @@
       <div class="mt-8" *ngIf="showAddRequestForm">
         <app-add-request-form
           (close)="showAddRequestForm = false"
-          (requestAdded)="onRequestAdded($event)"
+          (requestAdded)="onRequestAdded()"
         />
       </div>
 

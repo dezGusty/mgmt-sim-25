@@ -31,9 +31,8 @@ export class AddRequests implements OnInit {
 
   public loadRequests() {
     this.leaveRequests.fetchByManager().subscribe((apiData) => {
-      if (Array.isArray(apiData)) {
-        console.log(apiData);
-        this.requests = apiData
+      if (apiData.success && Array.isArray(apiData.data)) {
+        this.requests = apiData.data
           .map((item: any) => ({
             id: String(item.id),
             employeeName: item.fullName,
@@ -81,12 +80,8 @@ export class AddRequests implements OnInit {
       })
       .subscribe((res) => {
         if (res) {
-          const req = this.requests.find((r) => r.id === data.id);
-          if (req) {
-            req.status = 'Approved';
-            req.comment = data.comment;
-          }
           this.closeDetails();
+          this.loadRequests();
         }
       });
   }
@@ -100,41 +95,10 @@ export class AddRequests implements OnInit {
       })
       .subscribe((res) => {
         if (res) {
-          const req = this.requests.find((r) => r.id === data.id);
-          if (req) {
-            req.status = 'Rejected';
-            req.comment = data.comment;
-          }
           this.closeDetails();
+          this.loadRequests();
         }
       });
-  }
-
-  public addNewRequestToList(createdRequest: any) {
-    const newRequest: ILeaveRequest = {
-      id: String(createdRequest.id),
-      employeeName: createdRequest.fullName || 'Unknown Employee',
-      status: StatusUtils.mapStatus(createdRequest.requestStatus || 2),
-      from: DateUtils.formatDate(createdRequest.startDate),
-      to: DateUtils.formatDate(createdRequest.endDate),
-      days: DateUtils.calcDays(
-        createdRequest.startDate,
-        createdRequest.endDate
-      ),
-      reason: createdRequest.reason,
-      createdAt: DateUtils.formatDate(
-        createdRequest.createdAt || new Date().toISOString()
-      ),
-      comment: createdRequest.reviewerComment || '',
-      createdAtDate: new Date(
-        createdRequest.createdAt || new Date().toISOString()
-      ),
-    };
-
-    this.requests.unshift(newRequest);
-
-    const stats = this.calculateStats(this.requests);
-    this.statsUpdated.emit(stats);
   }
 
   get filteredRequests(): ILeaveRequest[] {

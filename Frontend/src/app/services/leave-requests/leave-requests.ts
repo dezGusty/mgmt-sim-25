@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, tap } from 'rxjs';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IUser } from '../../models/entities/iuser';
 import { ILeaveRequest } from '../../models/leave-request';
@@ -14,7 +14,9 @@ export class LeaveRequests {
   constructor(private http: HttpClient) {}
 
   fetchByManager(): Observable<IApiResponse<IUser[]>> {
-    return this.http.get<IApiResponse<IUser[]>>(`${this.apiUrl}/by-manager`, { withCredentials: true });
+    return this.http.get<IApiResponse<IUser[]>>(`${this.apiUrl}/by-manager`, {
+      withCredentials: true,
+    });
   }
 
   addLeaveRequest(data: {
@@ -23,10 +25,18 @@ export class LeaveRequests {
     startDate: string;
     endDate: string;
     reason: string;
-  }): Observable<IApiResponse<ILeaveRequest[]>> {
-    return this.http.post<IApiResponse<ILeaveRequest[]>>('https://localhost:7275/api/LeaveRequests', data, {
-      withCredentials: true,
-    });
+  }): Observable<IApiResponse<ILeaveRequest>> {
+    return this.http
+      .post<IApiResponse<ILeaveRequest>>(
+        'https://localhost:7275/api/LeaveRequests',
+        data,
+        {
+          withCredentials: true,
+        }
+      )
+      .pipe(
+        tap((response) => console.log('addLeaveRequest response:', response))
+      );
   }
 
   patchLeaveRequest(params: {
@@ -39,7 +49,10 @@ export class LeaveRequests {
       requestStatus,
       reviewerComment: reviewerComment || '',
     };
-    return this.http
-      .patch<IApiResponse<ILeaveRequest[]>>(`${this.apiUrl}/review/${id}`, body, { withCredentials: true });
+    return this.http.patch<IApiResponse<ILeaveRequest[]>>(
+      `${this.apiUrl}/review/${id}`,
+      body,
+      { withCredentials: true }
+    );
   }
 }

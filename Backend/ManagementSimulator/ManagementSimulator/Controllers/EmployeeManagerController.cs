@@ -160,7 +160,7 @@ namespace ManagementSimulator.API.Controllers
             }
 
             var employeeManagers = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
-
+            
             if (employeeManagers == null || !employeeManagers.Any())
             {
                 return NotFound(new

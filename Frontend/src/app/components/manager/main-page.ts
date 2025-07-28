@@ -39,8 +39,8 @@ export class ManagerMainPage {
     this.stats = newStats;
   }
 
-  onRequestAdded(createdRequest: any) {
-    this.addRequestsComponent.addNewRequestToList(createdRequest);
+  onRequestAdded() {
+    this.addRequestsComponent.loadRequests();
   }
 
   goBack() {

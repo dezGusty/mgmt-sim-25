@@ -10,6 +10,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\ManagementSimulator.Infrastructure\ManagementSimulator.Infrastructure.csproj" />
