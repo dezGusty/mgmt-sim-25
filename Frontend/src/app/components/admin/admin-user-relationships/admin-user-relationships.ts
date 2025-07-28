@@ -45,7 +45,7 @@ export class AdminUserRelationships implements OnInit {
   loadAdmins(): void {
     this.userService.getAllAdmins().subscribe({
       next: (response) => {
-        const rawAdmins: IUser[] = response;
+        const rawAdmins: IUser[] = response.data;
         this.admins = rawAdmins.map(admin => this.mapToUserViewModel(admin));
       },
       error: (err) => {
@@ -68,10 +68,10 @@ export class AdminUserRelationships implements OnInit {
     this.userService.getUsersIncludeRelationshipsFiltered(params).subscribe({
       next: (response) => {
         console.log('Managers API response:', response);
-        const rawUsers: IUser[] = response.data;
+        const rawUsers: IUser[] = response.data.data;
         this.managers = rawUsers.map(user => this.mapToUserViewModel(user));
         
-        this.totalPagesManagers = response.totalPages;
+        this.totalPagesManagers = response.data.totalPages;
       },
       error: (err) => {
         console.error('Failed to fetch managers with relationships:', err);
@@ -92,10 +92,10 @@ export class AdminUserRelationships implements OnInit {
     this.userService.getUnassignedUsers(params).subscribe({
       next: (response) => {
         console.log('Unassigned users API response:', response);
-        const rawUnassignedUsers: IUser[] = response.data;
+        const rawUnassignedUsers: IUser[] = response.data.data;
         this.unassignedUsers = rawUnassignedUsers.map(user => this.mapToUserViewModel(user));
         
-        this.totalPagesUnassignedUsers = response.totalPages;
+        this.totalPagesUnassignedUsers = response.data.totalPages;
       },
       error: (err) => {
         console.error('Failed to fetch unassigned users:', err);

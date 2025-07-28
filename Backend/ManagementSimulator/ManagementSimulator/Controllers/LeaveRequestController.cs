@@ -29,11 +29,11 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddLeaveRequestAsync([FromBody] CreateLeaveRequestRequestDto dto)
         {
-            var newRequestId = await _leaveRequestService.AddLeaveRequestAsync(dto);
-            return Created($"api/LeaveRequests/{newRequestId.Id}", new
+            var leaveRequest = await _leaveRequestService.AddLeaveRequestAsync(dto);
+            return Created($"api/LeaveRequests/{leaveRequest.Id}", new
             {
                 Message = "Leave request created successfully.",
-                Data = newRequestId,
+                Data = leaveRequest,
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });
@@ -194,11 +194,11 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateLeaveRequestAsync(int id, [FromBody] UpdateLeaveRequestDto dto)
         {
-            await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
+            var result = await _leaveRequestService.UpdateLeaveRequestAsync(id, dto);
             return Ok(new
             {
                 Message = "Leave request updated successfully.",
-                Data = new List<LeaveRequestResponseDto>(),
+                Data = result,
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });

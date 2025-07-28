@@ -48,8 +48,8 @@ export class AdminDepartmentsList implements OnInit {
     this.departmentService.getAllDepartmentsFiltered(params).subscribe({
       next: (response) => {
         console.log(response);
-        this.departments = response.data.map(d => this.mapToDepartmentViewModel(d));
-        this.totalPages = response.totalPages
+        this.departments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
+        this.totalPages = response.data.totalPages
         
         this.isLoading = false;
       },

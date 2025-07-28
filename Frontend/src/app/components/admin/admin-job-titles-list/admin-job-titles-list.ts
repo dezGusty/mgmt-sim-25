@@ -7,6 +7,7 @@ import { JobTitlesService } from '../../../services/jobTitles/job-titles-service
 import { JobTitleViewModel } from '../../../view-models/job-title-view-model';
 import { IFilteredJobTitlesRequest } from '../../../models/requests/ifiltered-job-titles-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
+import { IApiResponse } from '../../../models/responses/iapi-response';
 
 @Component({
   selector: 'app-admin-job-titles-list',
@@ -49,11 +50,11 @@ export class AdminJobTitlesList implements OnInit {
     };
 
     this.jobTitleService.getAllJobTitlesFiltered(filterRequest).subscribe({
-      next: (response: IFilteredApiResponse<IJobTitle>) => {
+      next: (response: IApiResponse<IFilteredApiResponse<IJobTitle>>) => {
         console.log('API response:', response);
-        const rawJobTitles: IJobTitle[] = response.data || [];
+        const rawJobTitles: IJobTitle[] = response.data.data || [];
         this.jobTitles = rawJobTitles.map(jobTitle => this.mapToJobTitleViewModel(jobTitle));
-        this.totalPages = response.totalPages;
+        this.totalPages = response.data.totalPages;
         this.isLoading = false;
       },
       error: (err) => {

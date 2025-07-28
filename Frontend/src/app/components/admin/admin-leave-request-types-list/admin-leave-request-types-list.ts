@@ -34,7 +34,7 @@ export class AdminLeaveTypesList implements OnInit {
       response => {
           console.log('API response:', response);
 
-          const rawLeaveTypes: ILeaveRequestType[] = response;
+          const rawLeaveTypes: ILeaveRequestType[] = response.data;
           this.leaveRequestTypes = rawLeaveTypes.map(leaveType => this.mapToLeaveTypeViewModel(leaveType));
           this.filteredLeaveTypes = [...this.leaveRequestTypes];
 
