@@ -21,6 +21,22 @@ export class JobTitlesService {
     return this.http.get<IApiResponse<IJobTitle[]>>(`${this.baseUrl}`);
   }
 
+  addJobTitle(jobTitle: IJobTitle): Observable<IApiResponse<IJobTitle>> {
+    return this.http.post<IApiResponse<IJobTitle>>(`${this.baseUrl}`, jobTitle);
+  }
+
+  updateJobTitle(jobTitle: IJobTitle): Observable<IApiResponse<IJobTitle>> {
+    return this.http.patch<IApiResponse<IJobTitle>>(`${this.baseUrl}/${jobTitle.id}`, jobTitle);
+  }
+
+  deleteJobTitle(id: number): Observable<IApiResponse<void>> {
+    return this.http.delete<IApiResponse<void>>(`${this.baseUrl}/${id}`);
+  }
+
+  getJobTitleById(id: number): Observable<IApiResponse<IJobTitle>> {
+    return this.http.get<IApiResponse<IJobTitle>>(`${this.baseUrl}/${id}`);
+  }
+
   getAllJobTitlesFiltered(params :IFilteredJobTitlesRequest) : Observable<IApiResponse<IFilteredApiResponse<IJobTitle>>> {
     let paramsToSend = new HttpParams();
     

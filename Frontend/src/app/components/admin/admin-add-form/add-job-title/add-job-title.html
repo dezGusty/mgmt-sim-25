@@ -1,61 +1,73 @@
-
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
-        <input type="text"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        placeholder="Senior Developer" required>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Job Code *</label>
-        <input type="text"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        placeholder="SD-001" required>
-    </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
-        <select
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        required>
-        <option value="">Select Department</option>
-        <option value="engineering">Engineering</option>
-        <option value="marketing">Marketing</option>
-        </select>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Level *</label>
-        <select
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        required>
-        <option value="">Select Level</option>
-        <option value="entry">Entry Level</option>
-        <option value="mid">Mid Level</option>
-        <option value="senior">Senior Level</option>
-        <option value="executive">Executive</option>
-        </select>
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        </select>
-    </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
-        <input type="number"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        placeholder="50000">
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
-        <input type="number"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-        placeholder="80000">
-    </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1"
+      >Job Title *</label
+    >
+    <input
+      type="text"
+      [(ngModel)]="name"
+      name="name"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+      placeholder="Senior Developer"
+      required
+    />
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1"
+      >Department *</label
+    >
+    <select
+      [(ngModel)]="departmentId"
+      name="departmentId"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+      required
+    >
+      <option value="0" disabled>Select a department</option>
+      <option *ngFor="let department of departments" [value]="department.id">
+        {{ department.name }}
+      </option>
+    </select>
+  </div>
+</div>
+
+<!-- Loading indicator -->
+<div *ngIf="isSubmitting" class="flex items-center justify-center py-4">
+  <div
+    class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"
+  ></div>
+  <span class="ml-2 text-gray-600">Processing...</span>
+</div>
+
+<!-- Success/Error message -->
+<div
+  *ngIf="onSubmitMessage && !isSubmitting"
+  class="mt-4 p-3 rounded-lg"
+  [ngClass]="{
+    'bg-green-100 text-green-700': onSubmitMessage.includes('successfully'),
+    'bg-red-100 text-red-700': !onSubmitMessage.includes('successfully')
+  }"
+>
+  {{ onSubmitMessage }}
+</div>
+
+<!-- Action Buttons -->
+<div class="flex justify-end gap-3 mt-6">
+  <button
+    type="button"
+    (click)="cancel()"
+    class="px-4 py-2 text-gray-700 bg-gray-200 border border-gray-300 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+    [disabled]="isSubmitting"
+  >
+    Cancel
+  </button>
+
+  <button
+    type="button"
+    (click)="onSubmit()"
+    class="px-4 py-2 text-white bg-[#20B486] border border-transparent rounded-lg hover:bg-[#1a9673] focus:ring-2 focus:ring-[#20B486] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    [disabled]="isSubmitting || !name.trim() || !departmentId"
+  >
+    <span *ngIf="isSubmitting">Adding...</span>
+    <span *ngIf="!isSubmitting">Add Job Title</span>
+  </button>
 </div>

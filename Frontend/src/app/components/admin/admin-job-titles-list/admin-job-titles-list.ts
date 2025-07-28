@@ -3,7 +3,7 @@ import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IJobTitle } from '../../../models/entities/ijob-title';
-import { JobTitlesService } from '../../../services/jobTitles/job-titles-service';
+import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
 import { JobTitleViewModel } from '../../../view-models/job-title-view-model';
 import { IFilteredJobTitlesRequest } from '../../../models/requests/ifiltered-job-titles-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
