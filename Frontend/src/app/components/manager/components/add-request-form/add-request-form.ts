@@ -20,6 +20,7 @@ export class AddRequestForm implements OnInit {
   endDate = '';
   reason = '';
   isSubmitting = false;
+  today: string = new Date().toISOString().slice(0, 10);
 
   leaveTypes: { id: number; description: string }[] = [];
   employees: { id: number; name: string }[] = [];

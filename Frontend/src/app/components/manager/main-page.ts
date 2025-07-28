@@ -33,6 +33,8 @@ export class ManagerMainPage {
     rejected: 0,
   };
 
+  viewMode: 'card' | 'table' | 'calendar' = 'card';
+
   onStatsUpdated(newStats: IRequestStats) {
     this.stats = newStats;
   }
@@ -47,5 +49,9 @@ export class ManagerMainPage {
 
   setFilter(filter: 'All' | 'Pending' | 'Approved' | 'Rejected') {
     this.currentFilter = filter;
+  }
+
+  setViewMode(mode: 'card' | 'table' | 'calendar') {
+    this.viewMode = mode;
   }
 }

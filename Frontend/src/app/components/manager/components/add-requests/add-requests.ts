@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output, OnInit, Input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { RequestDetail } from '../request-detail/request-detail';
+import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { IRequestStats } from '../../../../models/request-stats';
@@ -10,13 +11,14 @@ import { DateUtils } from '../../../../utils/date.utils';
 @Component({
   selector: 'app-add-requests',
   standalone: true,
-  imports: [CommonModule, NgClass, RequestDetail],
+  imports: [CommonModule, NgClass, RequestDetail, CalendarView],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
 export class AddRequests implements OnInit {
   @Output() statsUpdated = new EventEmitter<IRequestStats>();
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
+  @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;

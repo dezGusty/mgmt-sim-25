@@ -1,0 +1,38 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.calendar-day {
+  min-height: 140px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+  background-color: #f8fafc;
+}
+
+.leave-request-item {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.day-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.leave-requests-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
