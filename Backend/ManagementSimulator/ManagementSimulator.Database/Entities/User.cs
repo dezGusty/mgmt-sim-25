@@ -34,6 +34,9 @@ namespace ManagementSimulator.Database.Entities
         public string LastName { get; set; }
 
         public string PasswordHash { get; set; }
+        public int AnnuallyLeaveDays { get; set; } = 21;
+        public int LeaveDaysLeftCurrentYear { get; set; }
+        public DateTime DateOfEmployment { get; set; }
 
         public string FullName => $"{FirstName} {LastName}";
     }

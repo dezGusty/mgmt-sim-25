@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { DepartmentService } from '../../../../services/departments/department-service';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-add-department',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './add-department.html',
   styleUrl: './add-department.css'
 })
@@ -24,7 +25,7 @@ export class AddDepartment {
   onSubmit() : void{
     this.isSubmitting = true;
 
-    
+
 
   }
 

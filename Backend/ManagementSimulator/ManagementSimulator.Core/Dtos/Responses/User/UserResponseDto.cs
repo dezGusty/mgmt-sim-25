@@ -26,5 +26,8 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public List<string>? SubordinatesEmails { get; set; } = new List<string>();
         public int? EmployeeCount { get; set; } = 0;
         public bool? IsActive { get; set; } = true;
+        public int? AnnuallyLeaveDays { get; set; }
+        public int? LeaveDaysLeftCurrentYear { get; set; }
+        public DateTime? DateOfEmployment { get; set; }
     }
 }

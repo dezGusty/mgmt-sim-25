@@ -5,13 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { IUser } from '../../../models/entities/iuser';
 import { UserViewModel } from '../../../view-models/user-view-model';
 import { UsersService } from '../../../services/users/users-service';
-import { UserFilterPipe } from '../../../pipes/filterPipe/filter-pipe';
-import { UnassignedUsersPipe } from '../../../pipes/unassignedUsersPipe/unassigned-users-pipe';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 
 @Component({
   selector: 'app-admin-user-relationships',
-  imports: [CommonModule, FormsModule, UserFilterPipe, UnassignedUsersPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-user-relationships.html',
   styleUrl: './admin-user-relationships.css'
 })

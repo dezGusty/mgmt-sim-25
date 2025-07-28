@@ -4,6 +4,7 @@ using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
+using ManagementSimulator.Database.Enums;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
 using System;
@@ -31,6 +32,7 @@ namespace ManagementSimulator.Core.Services
                 Id = l.Id,
                 Description = l.Description ?? string.Empty,
                 AdditionalDetails = l.AdditionalDetails ?? string.Empty,
+                IsPaid = l.IsPaid
             }).ToList();
         }
 
@@ -40,7 +42,7 @@ namespace ManagementSimulator.Core.Services
             
             if (leaveRequestType == null)
             {
-                throw new EntryNotFoundException(nameof(LeaveRequestType), id);
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
             return new LeaveRequestTypeResponseDto
@@ -48,6 +50,7 @@ namespace ManagementSimulator.Core.Services
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
                 AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -57,16 +60,16 @@ namespace ManagementSimulator.Core.Services
             
             if (leaveRequestType == null)
             {
-                throw new EntryNotFoundException(nameof(LeaveRequestType), id);
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
             if(dto.Description != null && dto.Description != string.Empty && 
                 await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
             {
-                throw new UniqueConstraintViolationException(nameof(LeaveRequestType), nameof(LeaveRequestType.Description));
+                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Description));
             }
 
-            PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestTypeRequestDto, LeaveRequestType>(leaveRequestType, dto);
+            PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestTypeRequestDto, Database.Entities.LeaveRequestType>(leaveRequestType, dto);
             leaveRequestType.ModifiedAt = DateTime.UtcNow;
 
             await _leaveRequestTypeRepository.SaveChangesAsync();
@@ -75,7 +78,8 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -85,7 +89,7 @@ namespace ManagementSimulator.Core.Services
 
             if (leaveRequestType == null)
             { 
-                throw new EntryNotFoundException(nameof(LeaveRequestType), id);
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
             return await _leaveRequestTypeRepository.DeleteAsync(leaveRequestType.Id);
@@ -95,12 +99,14 @@ namespace ManagementSimulator.Core.Services
         {
             if(await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
             {
-                throw new UniqueConstraintViolationException(nameof(LeaveRequestType),nameof(LeaveRequestType.Description));
+                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType),nameof(Database.Entities.LeaveRequestType.Description));
             }
 
-            var leaveRequestType = new LeaveRequestType
+            var leaveRequestType = new Database.Entities.LeaveRequestType
             {
-                Description = dto.Description,
+                Description = dto.Description ?? string.Empty,
+                AdditionalDetails = dto.AdditionalDetails ?? string.Empty,
+                IsPaid = dto.IsPaid,
             };
 
             await _leaveRequestTypeRepository.AddAsync(leaveRequestType);
@@ -109,7 +115,8 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = leaveRequestType.Id,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty
+                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -133,6 +140,7 @@ namespace ManagementSimulator.Core.Services
                     Id = lrt.Id,
                     Description = lrt.Description,
                     AdditionalDetails = lrt.AdditionalDetails ?? string.Empty,
+                    IsPaid = lrt.IsPaid
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
