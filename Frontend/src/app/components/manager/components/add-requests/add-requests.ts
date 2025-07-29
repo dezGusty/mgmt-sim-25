@@ -7,6 +7,7 @@ import { ILeaveRequest } from '../../../../models/leave-request';
 import { IRequestStats } from '../../../../models/request-stats';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
+import { RequestUtils } from '../../../../utils/request.utils';
 
 @Component({
   selector: 'app-add-requests',
@@ -49,18 +50,14 @@ export class AddRequests implements OnInit {
             (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
           );
 
-        const stats = this.calculateStats(this.requests);
+        const stats = RequestUtils.calculateStats(this.requests);
         this.statsUpdated.emit(stats);
       }
     });
   }
 
   calculateStats(requests: ILeaveRequest[]): IRequestStats {
-    const total = requests.length;
-    const pending = requests.filter((r) => r.status === 'Pending').length;
-    const approved = requests.filter((r) => r.status === 'Approved').length;
-    const rejected = requests.filter((r) => r.status === 'Rejected').length;
-    return { total, pending, approved, rejected };
+    return RequestUtils.calculateStats(requests);
   }
 
   openDetails(req: ILeaveRequest) {
@@ -102,9 +99,6 @@ export class AddRequests implements OnInit {
   }
 
   get filteredRequests(): ILeaveRequest[] {
-    if (this.filter === 'All') {
-      return this.requests;
-    }
-    return this.requests.filter((request) => request.status === this.filter);
+    return RequestUtils.filterRequests(this.requests, this.filter);
   }
 }

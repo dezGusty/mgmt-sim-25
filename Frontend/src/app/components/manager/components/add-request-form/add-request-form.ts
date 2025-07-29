@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LeaveRequestTypeService } from '../../../../services/leave-request-type';
 import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
+import { FormUtils } from '../../../../utils/form.utils';
 
 @Component({
   selector: 'app-add-request-form',
@@ -20,7 +21,7 @@ export class AddRequestForm implements OnInit {
   endDate = '';
   reason = '';
   isSubmitting = false;
-  today: string = new Date().toISOString().slice(0, 10);
+  today: string = FormUtils.getTodayDateString();
 
   leaveTypes: { id: number; description: string }[] = [];
   employees: { id: number; name: string }[] = [];
@@ -45,11 +46,13 @@ export class AddRequestForm implements OnInit {
 
   handleSubmit() {
     if (
-      !this.userId ||
-      !this.leaveRequestTypeId ||
-      !this.startDate ||
-      !this.endDate ||
-      !this.reason
+      !FormUtils.validateLeaveRequestForm(
+        this.userId,
+        this.leaveRequestTypeId,
+        this.startDate,
+        this.endDate,
+        this.reason
+      )
     )
       return;
     this.isSubmitting = true;
