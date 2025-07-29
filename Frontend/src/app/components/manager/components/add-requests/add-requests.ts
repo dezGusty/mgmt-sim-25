@@ -20,6 +20,7 @@ export class AddRequests implements OnInit {
   @Output() statsUpdated = new EventEmitter<IRequestStats>();
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
+  @Input() searchTerm: string = '';
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
@@ -99,6 +100,16 @@ export class AddRequests implements OnInit {
   }
 
   get filteredRequests(): ILeaveRequest[] {
-    return RequestUtils.filterRequests(this.requests, this.filter);
+    let filtered = RequestUtils.filterRequests(this.requests, this.filter);
+
+    if (this.searchTerm) {
+      filtered = filtered.filter((request) =>
+        request.employeeName
+          .toLowerCase()
+          .includes(this.searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
   }
 }
