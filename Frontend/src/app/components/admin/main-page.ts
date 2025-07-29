@@ -8,7 +8,7 @@ import { AdminStatsCards } from './admin-stats-cards/admin-stats-cards';
 import { AdminUsersList } from './admin-users-list/admin-users-list'; 
 import { AdminDepartmentsList } from './admin-departments-list/admin-departments-list'; 
 import { AdminJobTitlesList } from './admin-job-titles-list/admin-job-titles-list'; 
-import { AdminUserRelationships } from './admin-user-relationships/admin-user-relationships'; 
+import { AdminUserRelationships } from './admin-user-relationships/admin-user-relationship-list/admin-user-relationships'; 
 import { AdminLeaveTypesList } from './admin-leave-request-types-list/admin-leave-request-types-list';
 import { AddForm } from './admin-add-form/form/admin-add-form';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
@@ -18,7 +18,6 @@ import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
   imports: [CommonModule,
     HttpClientModule,
     CustomNavbar,
-    AdminStatsCards,
     AdminUsersList,
     AdminDepartmentsList, 
     AdminJobTitlesList,
@@ -32,13 +31,6 @@ export class AdminMainPage implements OnInit {
   activeTab: string = 'users';
   showAddForm: boolean = false;
 
-  // Stats data
-  totalUsers: number = 247;
-  activeManagers: number = 23;
-  totalDepartments: number = 12;
-  totalJobTitles: number = 35;
-  pendingRequests: number = 18;
-
   constructor() { }
 
   ngOnInit(): void {
@@ -50,7 +42,6 @@ export class AdminMainPage implements OnInit {
   }
 
   private loadInitialData(): void {
-    // Load initial dashboard data
-    // This would typically come from services
+
   }
 }

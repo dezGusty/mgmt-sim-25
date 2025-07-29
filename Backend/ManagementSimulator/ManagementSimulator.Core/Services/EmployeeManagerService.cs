@@ -150,9 +150,7 @@ namespace ManagementSimulator.Core.Services
             var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdIncludeDeletedAsync(newEmployeeId, managerId);
             if (newEmployeeManager != null)
             {
-                if (newEmployeeManager.DeletedAt == null)
-                    throw new UniqueConstraintViolationException(nameof(Database.Entities.EmployeeManager), "Entry already exists");
-                else
+                if (newEmployeeManager.DeletedAt != null)
                 {
                     newEmployeeManager.DeletedAt = null;
                     newEmployeeManager.ModifiedAt = DateTime.UtcNow;
@@ -180,6 +178,74 @@ namespace ManagementSimulator.Core.Services
                 EmployeeId = employeeManagers.EmployeeId,
                 ManagerId = employeeManagers.ManagerId,
             }).ToList();
+        }
+
+        public async Task AddManagersForEmployeeAsync(int employeeId, List<int> managersIds)
+        {
+            if (await _userRepository.GetFirstOrDefaultAsync(employeeId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), employeeId);
+            }
+
+            foreach (var managerId in managersIds)
+            {
+                if (await _userRepository.GetFirstOrDefaultAsync(managerId) == null)
+                {
+                    throw new EntryNotFoundException(nameof(Database.Entities.User), managerId);
+                }
+
+                if (await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId) != null)
+                {
+                    throw new UniqueConstraintViolationException(nameof(EmployeeManager), "Entry already exists");
+                }
+
+                await _employeeManagerRepository.AddEmployeeManagersAsync(employeeId, managerId);
+            }
+        }
+
+        public async Task PatchManagersForEmployeeAsync(int employeeId, List<int>? managersIds)
+        {
+            List<EmployeeManager>? existingRelations = await _employeeManagerRepository.GetEMRelationshipForEmployeesByIdAsync(employeeId);
+
+            List<int> currentManagerIds = existingRelations
+                .Where(em => em.DeletedAt == null)
+                .Select(em => em.ManagerId)
+                .ToList();
+
+            List<int> managersToAdd = managersIds?.Except(currentManagerIds).ToList() ?? new List<int>();
+
+            var managersToRemove = currentManagerIds.Except(managersIds).ToList() ?? new List<int>();
+
+            foreach (var managerId in managersToRemove)
+            {
+                var relationToRemove = existingRelations.First(em => em.ManagerId == managerId && em.DeletedAt == null);
+                relationToRemove.DeletedAt = DateTime.UtcNow;
+                relationToRemove.ModifiedAt = DateTime.UtcNow;
+            }
+
+            foreach (var managerId in managersToAdd)
+            {
+                var existingDeletedRelation = existingRelations
+                    .FirstOrDefault(em => em.ManagerId == managerId && em.DeletedAt != null);
+
+                if (existingDeletedRelation != null)
+                {
+                    existingDeletedRelation.DeletedAt = null;
+                    existingDeletedRelation.ModifiedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    var newEmployeeManager = new Database.Entities.EmployeeManager
+                    {
+                        EmployeeId = employeeId,
+                        ManagerId = managerId,
+                        CreatedAt = DateTime.UtcNow,
+                        ModifiedAt = DateTime.UtcNow
+                    };
+                    await _employeeManagerRepository.AddEmployeeManagersAsync(newEmployeeManager.EmployeeId,newEmployeeManager.ManagerId);
+                }
+            }
+            await _employeeManagerRepository.SaveChangesAsync();
         }
     }
 }

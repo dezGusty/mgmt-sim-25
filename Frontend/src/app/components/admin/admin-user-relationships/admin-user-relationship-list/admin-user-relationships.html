@@ -141,6 +141,17 @@
                 <div *ngIf="isAdmin(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
                   <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
                 </div>
+              <div class="ml-3 flex-shrink-0">
+          <button class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors" 
+                  (click)="assignManager({
+                    id: manager.subordinatesIds?.[i] || 0,
+                    name: subordinateName,
+                    email: manager.subordinatesEmails?.[i] || '',
+                    managersIds: []
+                  }, false)">
+            Reassign
+          </button>
+        </div>
               </div>
             </div>
           </div>
@@ -271,7 +282,7 @@
             <div class="text-xs text-gray-500">{{ user.jobTitle?.name }}</div>
           </div>
         </div>
-        <button class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium" (click)="assignManager(user)">
+        <button class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium" (click)="assignManager(user, false)">
           Assign
         </button>
       </div>
@@ -403,3 +414,13 @@
     </div>
   </div>
 </div>
+
+<app-admin-assign-relationship
+  *ngIf="showAssignRelationShipComponent"
+  [employee]="selectedEmployee"
+  [managers]="managersToAssigned"
+  [currentManagerIds]="currentManagerIds"
+  [isUsedForPost]="postRelationship"
+  (onAssign)="onAssignManagers($event)"
+  (onClose)="closeAssignModal()">
+</app-admin-assign-relationship>

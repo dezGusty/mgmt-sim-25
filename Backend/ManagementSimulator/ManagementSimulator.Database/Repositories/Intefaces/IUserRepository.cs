@@ -23,6 +23,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<User?> GetUserByIdAsync(int id);
         Task<List<User>?> GetSubordinatesByUserIdsAsync(List<int> ids);
         Task<List<User>?> GetManagersByUserIdsAsync(List<int> ids);
-        Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters);
+        Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false);
     }
 }

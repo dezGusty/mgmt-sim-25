@@ -134,11 +134,16 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters)
+        public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = GetRecords()
                                      .Include(u => u.Subordinates)
-                                        .Where(u => u.Subordinates.Count > 0);
+                                        .ThenInclude(subordinates => subordinates.Employee)
+                                            .ThenInclude(e => e.Title)
+                                     .Where(u => u.Subordinates.Count > 0);
+            if (includeDeleted == false)
+                query = query.Where(u => u.DeletedAt == null);
+            
             // filtering 
             if (!string.IsNullOrEmpty(lastName))
             {

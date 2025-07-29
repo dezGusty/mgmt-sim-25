@@ -109,18 +109,6 @@ namespace ManagementSimulator.Database.Context
                 .HasForeignKey(eru => eru.UsersId);
 
             base.OnModelCreating(modelBuilder);
-
-            // Soft delete filters
-            //ApplySoftDeleteFilter<Department>(modelBuilder);
-            ApplySoftDeleteFilter<JobTitle>(modelBuilder);
-            ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
-            ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);
-            ApplySoftDeleteFilter<EmployeeRole>(modelBuilder);
-        }
-
-        private void ApplySoftDeleteFilter<T>(ModelBuilder modelBuilder) where T : class
-        {
-            modelBuilder.Entity<T>().HasQueryFilter(e => EF.Property<DateTime?>(e, "DeletedAt") == null);
         }
 
         public DbSet<Department> Departments { get; set; }

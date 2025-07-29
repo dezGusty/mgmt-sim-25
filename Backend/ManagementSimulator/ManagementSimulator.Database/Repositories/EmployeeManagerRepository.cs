@@ -58,6 +58,13 @@ namespace ManagementSimulator.Database.Repositories
                                  .ToListAsync();
         }
 
+        public async Task<List<EmployeeManager>> GetEMRelationshipForEmployeesByIdAsync(int subordinateId)
+        {
+            return await _context.EmployeeManagers
+                                 .Where(um => um.EmployeeId == subordinateId)
+                                 .ToListAsync();
+        }
+
         public async Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId)
         {
             return await _context.EmployeeManagers

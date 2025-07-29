@@ -115,4 +115,34 @@ export class UsersService {
   addUser(user: IAddUser): Observable<IApiResponse<IUser>> {
     return this.http.post<IApiResponse<IUser>>(this.baseUrl, user);
   }
+
+  getAllManagersFiltered(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
+    let paramsToSend = new HttpParams();
+        
+    if (params?.lastName) {
+      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    }
+    
+    if (params?.email) {
+      paramsToSend = paramsToSend.set('email', params.email);
+    }
+    
+    if (params?.params.sortBy) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+    }
+    
+    if (params?.params.sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+    }
+    
+    if (params?.params.page) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+    }
+    
+    if (params?.params.pageSize) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+    }
+    
+    return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/managers`, { params: paramsToSend });
+  }
 }

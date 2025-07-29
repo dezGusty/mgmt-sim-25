@@ -18,7 +18,7 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public string? JobTitleName { get; set; } = string.Empty;
         public int? DepartmentId { get; set; }
         public string? DepartmentName { get; set; } = string.Empty;
-        public List<int>? SubordinatesId { get; set; } = new List<int>();
+        public List<int>? SubordinatesIds { get; set; } = new List<int>();
         public List<string>? SubordinatesNames { get; set; } = new List<string>();
         public List<string>? SubordinatesJobTitles { get; set; } = new List<string>();
         public List<int>? SubordinatesJobTitleIds { get; set; } = new List<int>();

@@ -12,6 +12,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<EmployeeManager>> GetAllEmployeeManagersAsync();
         Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId);
         Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId);
+        Task<List<EmployeeManager>> GetEMRelationshipForEmployeesByIdAsync(int subordinateId);
         Task AddEmployeeManagersAsync(int subOrdinateId,int managersId);
         Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
         Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId);

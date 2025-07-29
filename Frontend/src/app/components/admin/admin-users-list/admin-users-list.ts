@@ -68,7 +68,7 @@ export class AdminUsersList implements OnInit {
         pageSize: this.itemsPerPage
       }
     };
-
+    console.log(this.searchBy);
     this.usersService.getAllUsersFiltered(filterRequest).subscribe({
       next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
         console.log('API response:', response);   

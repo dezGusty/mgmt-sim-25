@@ -290,7 +290,7 @@ namespace ManagementSimulator.Core.Services
                     DepartmentId = jobTitle?.DepartmentId ?? 0,
                     DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
 
-                    SubordinatesId = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
+                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
@@ -349,7 +349,7 @@ namespace ManagementSimulator.Core.Services
                     JobTitleName = jobTitle?.Name ?? string.Empty,
                     DepartmentId = jobTitle?.DepartmentId ?? 0,
                     DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
-                    SubordinatesId = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
+                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
@@ -439,6 +439,42 @@ namespace ManagementSimulator.Core.Services
                 PageSize = pageSize,
                 TotalPages = pageSize > 0 ?
                     (int)Math.Ceiling((double)totalCount / pageSize) : 1 
+            };
+        }
+
+        public async Task<PagedResponseDto<UserResponseDto>> GetAllManagersFilteredAsync(QueriedUserRequestDto payload)
+        {
+            (List<User>? managers, int totalCount) = await _userRepository.GetAllManagersFilteredAsync(payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams(), includeDeleted: false);
+
+            if (managers == null || !managers.Any())
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = new List<UserResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<UserResponseDto>
+            {
+                Data = managers.Select(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.Title?.DepartmentId ?? 0,
+                    DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                    SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
+                    IsActive = u.DeletedAt == null,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
     }

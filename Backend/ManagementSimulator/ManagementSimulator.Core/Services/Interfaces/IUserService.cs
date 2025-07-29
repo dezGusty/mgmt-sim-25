@@ -21,6 +21,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload);
         Task<List<UserResponseDto>> GetAllUsersIncludeRelationshipsAsync();
         Task<List<UserResponseDto>> GetAllUsersAsync();
+        Task<PagedResponseDto<UserResponseDto>> GetAllManagersFilteredAsync(QueriedUserRequestDto payload);
         Task<UserResponseDto?> GetUserByIdAsync(int id);
         Task<UserResponseDto> AddUserAsync(CreateUserRequestDto request);
         Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto request);
