@@ -1,5 +1,4 @@
 import { Component, signal, ViewChild, ElementRef } from '@angular/core';
-import { StatsCards } from './components/stats-cards/stats-cards';
 import { CommonModule } from '@angular/common';
 import { AddRequests } from './components/add-requests/add-requests';
 import { AddRequestForm } from './components/add-request-form/add-request-form';
@@ -9,13 +8,7 @@ import { IRequestStats } from '../../models/request-stats';
 
 @Component({
   selector: 'app-manager-main-page',
-  imports: [
-    CommonModule,
-    StatsCards,
-    AddRequests,
-    AddRequestForm,
-    CustomNavbar,
-  ],
+  imports: [CommonModule, AddRequests, AddRequestForm, CustomNavbar],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })

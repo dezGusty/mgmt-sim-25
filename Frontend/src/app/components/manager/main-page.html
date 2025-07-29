@@ -1,54 +1,6 @@
 <main class="min-h-screen bg-gray-50">
   <custom-navbar></custom-navbar>
 
-  <div
-    class="w-full bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] px-20 pt-4 shadow-lg relative"
-  >
-    <div>
-      <div
-        class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10"
-      >
-        <div>
-          <h2 class="text-3xl font-bold text-slate-900 mb-2">
-            Team Management
-          </h2>
-          <p class="text-slate-700 text-lg">
-            Manage employee leave requests and approvals efficiently with our
-            advanced dashboard
-          </p>
-        </div>
-
-        <button
-          class="bg-white hover:bg-slate-50 shadow-md text-slate-900 px-6 py-3 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium"
-          (click)="showAddRequestForm = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="w-5 h-5 text-[#20B486]"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          Add New Request
-        </button>
-      </div>
-
-      <div class="mt-8" *ngIf="showAddRequestForm">
-        <app-add-request-form
-          (close)="showAddRequestForm = false"
-          (requestAdded)="onRequestAdded()"
-        />
-      </div>
-
-      <app-stats-cards [stats]="stats" />
-    </div>
-  </div>
-
   <div class="p-6 container mx-auto">
     <div class="flex flex-wrap items-center justify-between mb-6">
       <div class="flex gap-2" *ngIf="viewMode !== 'calendar'">
@@ -99,6 +51,24 @@
       </div>
 
       <div class="flex gap-2 ml-auto">
+        <button
+          class="bg-[#20B486] hover:bg-[#1a9e75] shadow-md text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium"
+          (click)="showAddRequestForm = true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Add New Request
+        </button>
         <button
           class="px-3 py-2 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105"
           [ngClass]="{
@@ -169,6 +139,13 @@
           Calendar
         </button>
       </div>
+    </div>
+
+    <div class="mb-6" *ngIf="showAddRequestForm">
+      <app-add-request-form
+        (close)="showAddRequestForm = false"
+        (requestAdded)="onRequestAdded()"
+      />
     </div>
 
     <app-add-requests

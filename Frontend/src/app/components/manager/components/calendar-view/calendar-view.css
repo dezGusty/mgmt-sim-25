@@ -35,4 +35,20 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: 5rem; /* Adjust height as needed */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #d1d5db #f9fafb; /* For Firefox */
+}
+
+.leave-requests-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leave-requests-container::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 4px;
+}
+
+.leave-requests-container::-webkit-scrollbar-track {
+  background-color: #f9fafb;
 }

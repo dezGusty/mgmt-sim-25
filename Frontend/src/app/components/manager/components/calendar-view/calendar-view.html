@@ -1,7 +1,6 @@
 <div class="bg-white rounded-lg shadow-sm border">
-  <!-- Calendar Header -->
   <div
-    class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
+    class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
   >
     <h2 class="text-2xl font-bold text-slate-900">
       {{ monthNames[currentMonth] }} {{ currentYear }}
@@ -64,7 +63,6 @@
     </div>
   </div>
 
-  <!-- Calendar Grid -->
   <div class="grid grid-cols-7 calendar-grid">
     <div
       *ngFor="let day of calendarDays"
@@ -75,7 +73,6 @@
       }"
     >
       <div class="day-content">
-        <!-- Day Number -->
         <div class="flex justify-between items-start mb-2">
           <span
             class="text-sm font-medium"
@@ -95,21 +92,16 @@
           </span>
         </div>
 
-        <!-- Leave Requests -->
-        <div class="leave-requests-container space-y-1">
+        <div
+          class="leave-requests-container space-y-1 overflow-y-auto max-h-20"
+        >
           <div
-            *ngFor="let request of day.leaveRequests.slice(0, 3)"
+            *ngFor="let request of day.leaveRequests"
             class="text-xs p-1 rounded border truncate leave-request-item"
             [ngClass]="getStatusColor(request.status)"
             [title]="request.employeeName + ' - ' + request.reason"
           >
             <div class="font-medium truncate">{{ request.employeeName }}</div>
-          </div>
-          <div
-            *ngIf="day.leaveRequests.length > 3"
-            class="text-xs text-gray-500 font-medium"
-          >
-            +{{ day.leaveRequests.length - 3 }} more
           </div>
         </div>
       </div>
