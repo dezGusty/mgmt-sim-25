@@ -16,6 +16,20 @@ export class AdminLeaveTypesList implements OnInit {
   leaveRequestTypes: ILeaveRequestTypeViewModel[] = [];
   searchTerm: string = '';
 
+  // Edit modal properties
+  showEditModal = false;
+  leaveTypeToEdit: ILeaveRequestTypeViewModel | null = null;
+  
+  editForm = {
+    id: 0,
+    description: '',
+    additionalDetails: '',
+    isPaid: false
+  };
+  
+  isSubmitting = false;
+  errorMessage = '';
+
   constructor(
     private leaveRequestTypeService: LeaveRequestTypeService,
     private colorGenerator: ColorGenerator
@@ -64,5 +78,87 @@ export class AdminLeaveTypesList implements OnInit {
 
   trackByLeaveType(index: number, leaveType: ILeaveRequestTypeViewModel): string {
     return `${leaveType.id}-${leaveType.color}`;
+  }
+
+  editLeaveType(leaveType: ILeaveRequestTypeViewModel): void {
+    this.leaveTypeToEdit = { ...leaveType };
+    this.populateEditForm(leaveType);
+    this.showEditModal = true;
+  }
+
+  populateEditForm(leaveType: ILeaveRequestTypeViewModel): void {
+    this.editForm = {
+      id: leaveType.id,
+      description: leaveType.description || '',
+      additionalDetails: leaveType.additionalDetails || '',
+      isPaid: leaveType.isPaid || false
+    };
+    this.errorMessage = '';
+  }
+
+  onSubmitEdit(): void {
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    const leaveTypeToUpdate: ILeaveRequestType = {
+      id: this.editForm.id,
+      description: this.editForm.description,
+      additionalDetails: this.editForm.additionalDetails,
+      isPaid: this.editForm.isPaid
+    };
+
+    this.leaveRequestTypeService.updateLeaveRequestType(leaveTypeToUpdate).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        if (response.success) {
+          this.showEditModal = false;
+          this.loadLeaveTypes();
+          console.log('Leave request type updated successfully:', response.data);
+        } else {
+          this.errorMessage = response.message || 'Failed to update leave request type';
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = 'Error updating leave request type: ' + (error.error?.message || error.message);
+        console.error('Error updating leave request type:', error);
+      }
+    });
+  }
+
+  isFormValid(): boolean {
+    return !!(this.editForm.description.trim());
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.leaveTypeToEdit = null;
+    this.errorMessage = '';
+  }
+
+  deleteLeaveType(leaveType: ILeaveRequestTypeViewModel): void {
+    const confirmMessage = `Are you sure you want to delete the leave request type "${leaveType.description}"?`;
+    
+    if (confirm(confirmMessage)) {
+      this.leaveRequestTypeService.deleteLeaveRequestType(leaveType.id).subscribe({
+        next: (response) => {
+          if (response.success) {
+            console.log('Leave request type deleted successfully');
+            this.loadLeaveTypes(); // Reload the list
+          } else {
+            alert('Failed to delete leave request type: ' + (response.message || 'Unknown error'));
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting leave request type:', error);
+          alert('Error deleting leave request type: ' + (error.error?.message || error.message));
+        }
+      });
+    }
   }
 }

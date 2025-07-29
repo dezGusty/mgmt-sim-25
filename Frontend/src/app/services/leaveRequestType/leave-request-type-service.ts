@@ -19,6 +19,22 @@ export class LeaveRequestTypeService {
     return this.httpClient.get<IApiResponse<ILeaveRequestType[]>>(`${this.baseUrl}`);
   }
 
+  getLeaveRequestTypeById(id: number): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.get<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}/${id}`);
+  }
+
+  addLeaveRequestType(leaveRequestType: ILeaveRequestType): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.post<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}`, leaveRequestType);
+  }
+
+  updateLeaveRequestType(leaveRequestType: ILeaveRequestType): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.patch<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}/${leaveRequestType.id}`, leaveRequestType);
+  }
+
+  deleteLeaveRequestType(id: number): Observable<IApiResponse<boolean>> {
+    return this.httpClient.delete<IApiResponse<boolean>>(`${this.baseUrl}/${id}`);
+  }
+
   getAllLeaveRequestTypesFiltered() : Observable<IApiResponse<IFilteredJobTitlesRequest>> {
     return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(`${this.baseUrl}/queried`);
   }

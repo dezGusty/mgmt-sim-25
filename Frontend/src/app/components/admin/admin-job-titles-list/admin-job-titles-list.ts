@@ -8,6 +8,8 @@ import { IJobTitleViewModel } from '../../../view-models/job-title-view-model';
 import { IFilteredJobTitlesRequest } from '../../../models/requests/ifiltered-job-titles-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../../models/responses/iapi-response';
+import { DepartmentService } from '../../../services/departments/department-service';
+import { IDepartment } from '../../../models/entities/idepartment';
 
 @Component({
   selector: 'app-admin-job-titles-list',
@@ -29,10 +31,43 @@ export class AdminJobTitlesList implements OnInit {
   // Loading state
   isLoading: boolean = false;
 
-  constructor(private jobTitleService: JobTitlesService) { }
+  // Edit modal properties
+  showEditModal = false;
+  jobTitleToEdit: IJobTitleViewModel | null = null;
+  
+  editForm = {
+    id: 0,
+    name: '',
+    departmentId: 0
+  };
+  
+  isSubmitting = false;
+  errorMessage = '';
+  
+  // Departments for dropdown
+  departments: IDepartment[] = [];
+
+  constructor(
+    private jobTitleService: JobTitlesService,
+    private departmentService: DepartmentService
+  ) { }
 
   ngOnInit(): void {
     this.loadJobTitles();
+    this.loadDepartments();
+  }
+
+  loadDepartments(): void {
+    this.departmentService.getAllDepartments().subscribe({
+      next: (response: IApiResponse<IDepartment[]>) => {
+        if (response.success) {
+          this.departments = response.data;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch departments:', err);
+      }
+    });
   }
 
   loadJobTitles(): void {
@@ -169,12 +204,90 @@ export class AdminJobTitlesList implements OnInit {
     return pages;
   }
 
-  deleteJobTitle(jobTitle: IJobTitleViewModel) {
+  deleteJobTitle(jobTitle: IJobTitleViewModel): void {
+  const confirmMessage = `Are you sure you want to delete the job title "${jobTitle.name}"?`;
+  
+  if (confirm(confirmMessage)) {
+    this.isLoading = true;
+    
+    this.jobTitleService.deleteJobTitle(jobTitle.id).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success) {
+          console.log('Job title deleted successfully');
+          this.loadJobTitles(); // Reload the list
+        } else {
+          alert('Failed to delete job title: ' + (response.message || 'Unknown error'));
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Error deleting job title:', error);
+        alert('Error deleting job title: ' + (error.error?.message || error.message));
+      }
+    });
+  }
+}
 
+  editJobTitle(jobTitle: IJobTitleViewModel): void {
+    this.jobTitleToEdit = { ...jobTitle };
+    this.populateEditForm(jobTitle);
+    this.showEditModal = true;
   }
 
-  editJobTitle(jobTitle: IJobTitleViewModel) {
+  populateEditForm(jobTitle: IJobTitleViewModel): void {
+    this.editForm = {
+      id: jobTitle.id,
+      name: jobTitle.name || '',
+      departmentId: jobTitle.department?.id || 0
+    };
+    this.errorMessage = '';
+  }
 
+  onSubmitEdit(): void {
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    const jobTitleToUpdate: IJobTitle = {
+      id: this.editForm.id,
+      name: this.editForm.name,
+      departmentId: this.editForm.departmentId,
+      departmentName: '',
+      employeeCount: 0
+    };
+
+    this.jobTitleService.updateJobTitle(jobTitleToUpdate).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        if (response.success) {
+          this.showEditModal = false;
+          this.loadJobTitles();
+          console.log('Job title updated successfully:', response.data);
+        } else {
+          this.errorMessage = response.message || 'Failed to update job title';
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = 'Error updating job title: ' + (error.error?.message || error.message);
+        console.error('Error updating job title:', error);
+      }
+    });
+  }
+
+  isFormValid(): boolean {
+    return !!(this.editForm.name.trim() && this.editForm.departmentId > 0);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.jobTitleToEdit = null;
+    this.errorMessage = '';
   }
 
   trackByJobTitleId(index: number, item: IJobTitleViewModel): number {
