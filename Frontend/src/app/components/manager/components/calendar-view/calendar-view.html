@@ -5,6 +5,79 @@
     <h2 class="text-2xl font-bold text-slate-900">
       {{ monthNames[currentMonth] }} {{ currentYear }}
     </h2>
+
+    <div class="flex items-center gap-3">
+      <button
+        (click)="toggleFilter('pending')"
+        class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
+        [ngClass]="{
+          'bg-yellow-200 border-2 border-yellow-400 shadow-md':
+            calendarFilters.pending,
+          'bg-gray-100 border border-gray-300 opacity-50':
+            !calendarFilters.pending
+        }"
+      >
+        <div
+          class="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"
+        ></div>
+        <span
+          [ngClass]="{
+            'font-semibold text-yellow-800': calendarFilters.pending,
+            'text-gray-500': !calendarFilters.pending
+          }"
+          >Pending</span
+        >
+        <svg
+          *ngIf="calendarFilters.pending"
+          class="w-4 h-4 text-yellow-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </button>
+
+      <button
+        (click)="toggleFilter('approved')"
+        class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
+        [ngClass]="{
+          'bg-green-200 border-2 border-green-400 shadow-md':
+            calendarFilters.approved,
+          'bg-gray-100 border border-gray-300 opacity-50':
+            !calendarFilters.approved
+        }"
+      >
+        <div class="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
+        <span
+          [ngClass]="{
+            'font-semibold text-green-800': calendarFilters.approved,
+            'text-gray-500': !calendarFilters.approved
+          }"
+          >Approved</span
+        >
+        <svg
+          *ngIf="calendarFilters.approved"
+          class="w-4 h-4 text-green-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
     <div class="flex items-center gap-3">
       <button
         (click)="goToToday()"
@@ -104,80 +177,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="p-4 border-t bg-gray-50">
-    <div class="flex items-center justify-center gap-6 text-sm">
-      <button
-        (click)="toggleFilter('pending')"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 transform hover:scale-105"
-        [ngClass]="{
-          'bg-yellow-200 border-2 border-yellow-400 shadow-md':
-            calendarFilters.pending,
-          'bg-gray-100 border border-gray-300 opacity-50':
-            !calendarFilters.pending
-        }"
-      >
-        <div
-          class="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"
-        ></div>
-        <span
-          [ngClass]="{
-            'font-semibold text-yellow-800': calendarFilters.pending,
-            'text-gray-500': !calendarFilters.pending
-          }"
-          >Pending</span
-        >
-        <svg
-          *ngIf="calendarFilters.pending"
-          class="w-4 h-4 text-yellow-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
-      </button>
-
-      <button
-        (click)="toggleFilter('approved')"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 transform hover:scale-105"
-        [ngClass]="{
-          'bg-green-200 border-2 border-green-400 shadow-md':
-            calendarFilters.approved,
-          'bg-gray-100 border border-gray-300 opacity-50':
-            !calendarFilters.approved
-        }"
-      >
-        <div class="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
-        <span
-          [ngClass]="{
-            'font-semibold text-green-800': calendarFilters.approved,
-            'text-gray-500': !calendarFilters.approved
-          }"
-          >Approved</span
-        >
-        <svg
-          *ngIf="calendarFilters.approved"
-          class="w-4 h-4 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
-      </button>
     </div>
   </div>
 </div>
