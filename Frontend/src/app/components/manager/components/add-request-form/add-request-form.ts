@@ -67,13 +67,16 @@ export class AddRequestForm implements OnInit {
       .subscribe({
         next: (createdRequest) => {
           this.isSubmitting = false;
-          console.log('Request created successfully:', createdRequest);
+          console.log(
+            'Request created and auto-approved successfully:',
+            createdRequest
+          );
           this.requestAdded.emit(createdRequest);
           this.handleClose();
         },
         error: (err) => {
           this.isSubmitting = false;
-          console.error('Error creating request:', err);
+          console.error('Error creating or approving request:', err);
         },
       });
   }
