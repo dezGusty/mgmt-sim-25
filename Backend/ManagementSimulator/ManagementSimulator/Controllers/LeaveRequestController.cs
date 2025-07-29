@@ -53,6 +53,16 @@ namespace ManagementSimulator.API.Controllers
                     Timestamp = DateTime.UtcNow
                 });
             }
+            catch (InvalidDateRangeException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
         }
 
         [Authorize(Roles = "Employee")]
@@ -100,6 +110,16 @@ namespace ManagementSimulator.API.Controllers
                 });
             }
             catch (LeaveRequestOverlapException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (InvalidDateRangeException ex)
             {
                 return BadRequest(new
                 {

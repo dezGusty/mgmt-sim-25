@@ -72,6 +72,7 @@
             class="w-full px-3 py-2 border rounded bg-gray-50"
             [class.border-red-500]="!startDate && showValidationErrors"
             [min]="today"
+            (change)="onStartDateChange()"
           />
           <div
             *ngIf="!startDate && showValidationErrors"
@@ -91,6 +92,7 @@
             class="w-full px-3 py-2 border rounded bg-gray-50"
             [class.border-red-500]="!endDate && showValidationErrors"
             [min]="startDate ? startDate : today"
+            (change)="onEndDateChange()"
           />
           <div
             *ngIf="!endDate && showValidationErrors"

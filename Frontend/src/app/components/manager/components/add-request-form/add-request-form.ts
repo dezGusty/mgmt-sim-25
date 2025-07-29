@@ -46,6 +46,17 @@ export class AddRequestForm implements OnInit {
     });
   }
 
+  onStartDateChange() {
+    if (this.endDate && this.startDate && this.endDate < this.startDate) {
+      this.endDate = '';
+    }
+    this.errorMessage = '';
+  }
+
+  onEndDateChange() {
+    this.errorMessage = '';
+  }
+
   handleSubmit() {
     if (
       !this.userId ||

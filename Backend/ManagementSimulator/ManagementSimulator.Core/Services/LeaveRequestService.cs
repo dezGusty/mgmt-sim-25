@@ -39,6 +39,11 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
             }
 
+            if (dto.EndDate < dto.StartDate)
+            {
+                throw new InvalidDateRangeException("End date cannot be before start date.");
+            }
+
             var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(dto.UserId, dto.StartDate, dto.EndDate);
             var hasConflictingRequest = overlappingRequests.Any(r => r.RequestStatus == RequestStatus.Pending || r.RequestStatus == RequestStatus.Approved);
             
@@ -71,6 +76,11 @@ namespace ManagementSimulator.Core.Services
             if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
+            }
+
+            if (dto.EndDate < dto.StartDate)
+            {
+                throw new InvalidDateRangeException("End date cannot be before start date.");
             }
 
             var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(userId, dto.StartDate, dto.EndDate);
