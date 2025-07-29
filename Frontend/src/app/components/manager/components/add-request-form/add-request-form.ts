@@ -23,6 +23,7 @@ export class AddRequestForm implements OnInit {
   isSubmitting = false;
   today: string = FormUtils.getTodayDateString();
   showValidationErrors = false;
+  errorMessage = '';
 
   leaveTypes: { id: number; description: string }[] = [];
   employees: { id: number; name: string }[] = [];
@@ -58,6 +59,7 @@ export class AddRequestForm implements OnInit {
 
     this.isSubmitting = true;
     this.showValidationErrors = false;
+    this.errorMessage = '';
 
     this.leaveRequests
       .addLeaveRequest({
@@ -80,6 +82,13 @@ export class AddRequestForm implements OnInit {
         error: (err) => {
           this.isSubmitting = false;
           console.error('Error creating or approving request:', err);
+
+          if (err.status === 400 && err.error?.message) {
+            this.errorMessage = err.error.message;
+          } else {
+            this.errorMessage =
+              'An error occurred while creating the leave request. Please try again.';
+          }
         },
       });
   }
@@ -91,6 +100,7 @@ export class AddRequestForm implements OnInit {
     this.endDate = '';
     this.reason = '';
     this.showValidationErrors = false;
+    this.errorMessage = '';
     this.close.emit();
   }
 }

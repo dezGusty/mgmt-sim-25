@@ -39,6 +39,14 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
             }
 
+            var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(dto.UserId, dto.StartDate, dto.EndDate);
+            var hasConflictingRequest = overlappingRequests.Any(r => r.RequestStatus == RequestStatus.Pending || r.RequestStatus == RequestStatus.Approved);
+            
+            if (hasConflictingRequest)
+            {
+                throw new LeaveRequestOverlapException("Employee already has a pending or approved leave request for this period.");
+            }
+
             var leaveRequest = new LeaveRequest
             {
                 UserId = dto.UserId,
@@ -63,6 +71,14 @@ namespace ManagementSimulator.Core.Services
             if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
+            }
+
+            var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(userId, dto.StartDate, dto.EndDate);
+            var hasConflictingRequest = overlappingRequests.Any(r => r.RequestStatus == RequestStatus.Pending || r.RequestStatus == RequestStatus.Approved);
+            
+            if (hasConflictingRequest)
+            {
+                throw new LeaveRequestOverlapException("You already have a pending or approved leave request for this period.");
             }
 
             var leaveRequest = new LeaveRequest

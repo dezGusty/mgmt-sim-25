@@ -61,5 +61,13 @@ namespace ManagementSimulator.Database.Repositories
                 return (pagedData, totalCount);
             }
         }
+
+        public async Task<List<LeaveRequest>> GetOverlappingRequestsAsync(int userId, DateTime startDate, DateTime endDate)
+        {
+            return await _dbcontext.LeaveRequests
+                .Where(lr => lr.UserId == userId &&
+                             ((lr.StartDate <= endDate && lr.EndDate >= startDate)))
+                .ToListAsync();
+        }
     }
 }

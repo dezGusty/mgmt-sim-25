@@ -4,6 +4,7 @@ using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Services;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -27,23 +28,38 @@ namespace ManagementSimulator.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddLeaveRequestAsync([FromBody] CreateLeaveRequestRequestDto dto)
         {
-            var leaveRequest = await _leaveRequestService.AddLeaveRequestAsync(dto);
-            return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+            try
             {
-                Message = "Leave request created successfully.",
-                Data = leaveRequest,
-                Success = true,
-                Timestamp = DateTime.UtcNow
-            });
+                var leaveRequest = await _leaveRequestService.AddLeaveRequestAsync(dto);
+                return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+                {
+                    Message = "Leave request created successfully.",
+                    Data = leaveRequest,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (LeaveRequestOverlapException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
         }
 
         [Authorize(Roles = "Employee")]
         [HttpPost("by-employee")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddLeaveRequestByEmployeeAsync([FromBody] CreateLeaveRequestByEmployeeDto dto)
         {
@@ -71,15 +87,28 @@ namespace ManagementSimulator.API.Controllers
                 });
             }
 
-            var leaveRequest = await _leaveRequestService.AddLeaveRequestByEmployeeAsync(dto, userId);
-
-            return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+            try
             {
-                Message = "Leave request created successfully.",
-                Data = leaveRequest,
-                Success = true,
-                Timestamp = DateTime.UtcNow
-            });
+                var leaveRequest = await _leaveRequestService.AddLeaveRequestByEmployeeAsync(dto, userId);
+
+                return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+                {
+                    Message = "Leave request created successfully.",
+                    Data = leaveRequest,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (LeaveRequestOverlapException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
         }
 
 

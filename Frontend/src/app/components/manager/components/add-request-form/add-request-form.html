@@ -8,6 +8,14 @@
     </h2>
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
+      <!-- Error message display -->
+      <div
+        *ngIf="errorMessage"
+        class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4"
+      >
+        {{ errorMessage }}
+      </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1"
           >Employee *</label
