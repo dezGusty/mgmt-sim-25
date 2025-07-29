@@ -111,7 +111,7 @@ namespace ManagementSimulator.Database.Context
             base.OnModelCreating(modelBuilder);
 
             // Soft delete filters
-            ApplySoftDeleteFilter<Department>(modelBuilder);
+            //ApplySoftDeleteFilter<Department>(modelBuilder);
             ApplySoftDeleteFilter<JobTitle>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequest>(modelBuilder);
             ApplySoftDeleteFilter<LeaveRequestType>(modelBuilder);

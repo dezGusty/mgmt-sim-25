@@ -8,6 +8,8 @@ import { IUser } from '../../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../../models/responses/iapi-response';
+import { IJobTitle } from '../../../models/entities/ijob-title';
+import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -27,7 +29,27 @@ export class AdminUsersList implements OnInit {
   
   isLoading: boolean = false;
 
-  constructor(private usersService: UsersService) { }
+  showEditModal = false;
+  userToEdit: IUserViewModel | null = null;
+
+  editForm = {
+    id: 0,
+    firstName: '',
+    lastName: '',
+    email: '',
+    jobTitleId: 0,
+    dateOfEmployment: new Date(),
+    leaveDaysLeftCurrentYear: 0,
+    isAdmin: false,
+    isManager: false,
+    isEmployee: false
+  };
+
+  jobTitles: IJobTitle[] = [];
+  isSubmitting: boolean = false;
+  errorMessage: string = '';
+
+  constructor(private usersService: UsersService, private jobTitlesService: JobTitlesService) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -91,7 +113,6 @@ export class AdminUsersList implements OnInit {
     };
   }
 
-  // Search functionality
   getSearchPlaceholder(): string {
     switch (this.searchBy) {
       case 'name':
@@ -106,7 +127,7 @@ export class AdminUsersList implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 1; // Reset to first page
+    this.currentPage = 1;
     this.loadUsers();
   }
 
@@ -122,7 +143,6 @@ export class AdminUsersList implements OnInit {
     this.loadUsers();
   }
 
-  // Pagination methods
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
@@ -155,16 +175,13 @@ export class AdminUsersList implements OnInit {
     const maxVisiblePages = 5;
     
     if (this.totalPages <= maxVisiblePages) {
-      // Show all pages if total is less than max visible
       for (let i = 1; i <= this.totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show pages around current page
       let startPage = Math.max(1, this.currentPage - 2);
       let endPage = Math.min(this.totalPages, this.currentPage + 2);
       
-      // Adjust if we're near the beginning or end
       if (this.currentPage <= 3) {
         endPage = Math.min(this.totalPages, 5);
       }
@@ -189,8 +206,105 @@ export class AdminUsersList implements OnInit {
   }
 
   editUser(user: IUserViewModel): void {
-    console.log('Edit user:', user);
-    // Implement edit functionality - poate deschizi un modal sau navighezi la o pagină de edit
+    this.userToEdit = { ...user };
+    this.populateEditForm(user);
+    this.loadJobTitles();
+    this.showEditModal = true;
+  }
+
+  populateEditForm(user: IUserViewModel): void {
+    const nameParts = user.name.split(' ');
+    this.editForm = {
+      id: user.id,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      email: user.email,
+      jobTitleId: user.jobTitle?.id || 0,
+      dateOfEmployment: new Date(),
+      leaveDaysLeftCurrentYear: 0,
+      isAdmin: false,
+      isManager: false,
+      isEmployee: false
+    };
+    
+    this.errorMessage = '';
+  }
+
+  loadJobTitles(): void {
+    this.jobTitlesService.getAllJobTitles().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.jobTitles = response.data || [];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading job titles:', error);
+      }
+    });
+  }
+
+  onSubmitEdit(): void {
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    const userToUpdate: IUser = {
+      id: this.editForm.id,
+      email: this.editForm.email,
+      firstName: this.editForm.firstName,
+      lastName: this.editForm.lastName,
+      jobTitleId: this.editForm.jobTitleId,
+      dateOfEmployment: this.editForm.dateOfEmployment,
+      leaveDaysLeftCurrentYear: this.editForm.leaveDaysLeftCurrentYear,
+      roles: this.getSelectedRoles(),
+      isActive: true
+    };
+
+    this.usersService.updateUser(userToUpdate).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        if (response.success) {
+          this.showEditModal = false;
+          this.loadUsers();
+          console.log('User updated successfully:', response.data);
+        } else {
+          this.errorMessage = response.message || 'Failed to update user';
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = 'Error updating user: ' + (error.error?.message || error.message);
+        console.error('Error updating user:', error);
+      }
+    });
+  }
+
+  getSelectedRoles(): string[] {
+    const roles: string[] = [];
+    if (this.editForm.isAdmin) roles.push('Admin');
+    if (this.editForm.isManager) roles.push('Manager');
+    if (this.editForm.isEmployee) roles.push('Employee');
+    return roles;
+  }
+
+  isFormValid(): boolean {
+    return !!(
+      this.editForm.firstName.trim() &&
+      this.editForm.lastName.trim() &&
+      this.editForm.email.trim() &&
+      this.editForm.jobTitleId > 0 &&
+      (this.editForm.isAdmin || this.editForm.isManager || this.editForm.isEmployee)
+    );
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.userToEdit = null;
+    this.errorMessage = '';
   }
 
   deleteUser(user: IUserViewModel): void {
@@ -198,7 +312,6 @@ export class AdminUsersList implements OnInit {
       this.usersService.deleteUser(user.id).subscribe({
         next: (response) => {
           console.log('User deleted successfully:', response);
-          // Reload the current page to reflect changes
           this.loadUsers();
         },
         error: (err) => {
@@ -214,7 +327,6 @@ export class AdminUsersList implements OnInit {
       this.usersService.restoreUser(user.id).subscribe({
         next: () => {
           console.log('User restored successfully');
-          // Reload the current page to reflect changes
           this.loadUsers();
         },
         error: (err) => {
@@ -227,5 +339,13 @@ export class AdminUsersList implements OnInit {
 
   trackByUserId(index: number, user: IUserViewModel): number {
     return user.id;
+  }
+
+  getDateForInput(): string {
+    return this.editForm.dateOfEmployment.toISOString().split('T')[0];
+  }
+
+  setDateFromInput(dateString: string): void {
+    this.editForm.dateOfEmployment = new Date(dateString);
   }
 }

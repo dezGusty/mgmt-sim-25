@@ -15,6 +15,8 @@ export interface IUser {
   subordinatesEmails?: string[];
   managersIds?: number[];
   isActive?: boolean;
+  dateOfEmployment?: Date;
+  leaveDaysLeftCurrentYear?: number;
 }
 
 export interface IAddUser {

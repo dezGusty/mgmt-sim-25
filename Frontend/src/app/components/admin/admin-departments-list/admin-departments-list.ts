@@ -25,6 +25,19 @@ export class AdminDepartmentsList implements OnInit {
   totalPages: number = 0;
   sortDescending: boolean = false;
 
+  // Edit modal properties
+  showEditModal = false;
+  departmentToEdit: IDepartmentViewModel | null = null;
+  
+  editForm = {
+    id: 0,
+    name: '',
+    description: ''
+  };
+  
+  isSubmitting = false;
+  errorMessage = '';
+
   constructor(private departmentService: DepartmentService) { }
 
   ngOnInit(): void {
@@ -151,7 +164,62 @@ export class AdminDepartmentsList implements OnInit {
   }
 
   editDepartment(department: IDepartmentViewModel): void {
-    console.log('Edit department:', department);
+    this.departmentToEdit = { ...department };
+    this.populateEditForm(department);
+    this.showEditModal = true;
+  }
+
+  populateEditForm(department: IDepartmentViewModel): void {
+    this.editForm = {
+      id: department.id,
+      name: department.name || '',
+      description: department.description || ''
+    };
+    this.errorMessage = '';
+  }
+
+  onSubmitEdit(): void {
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    const departmentToUpdate: IDepartment = {
+      id: this.editForm.id,
+      name: this.editForm.name,
+      description: this.editForm.description
+    };
+
+    this.departmentService.updateDepartment(this.editForm.id, departmentToUpdate).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        if (response.success) {
+          this.showEditModal = false;
+          this.loadDepartments();
+          console.log('Department updated successfully:', response.data);
+        } else {
+          this.errorMessage = response.message || 'Failed to update department';
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = 'Error updating department: ' + (error.error?.message || error.message);
+        console.error('Error updating department:', error);
+      }
+    });
+  }
+
+  isFormValid(): boolean {
+    return !!(this.editForm.name.trim());
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.departmentToEdit = null;
+    this.errorMessage = '';
   }
 
   viewDepartment(department: IDepartmentViewModel): void {
@@ -159,7 +227,22 @@ export class AdminDepartmentsList implements OnInit {
   }
 
   deleteDepartment(department: IDepartmentViewModel): void {
-    console.log('Delete department:', department);
+    if (confirm(`Are you sure you want to delete the department "${department.name}"?`)) {
+      this.departmentService.deleteDepartment(department.id).subscribe({
+        next: (response) => {
+          if (response.success) {
+            console.log('Department deleted successfully:', response.data);
+            this.loadDepartments();
+          } else {
+            alert('Failed to delete department: ' + response.message);
+          }
+        },
+        error: (err) => {
+          console.error('Failed to delete department:', err);
+          alert('Failed to delete department. Please try again.');
+        }
+      });
+    }
   }
 
   onFormSubmit(event: { type: string, data: any }): void {

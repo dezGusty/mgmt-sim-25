@@ -98,6 +98,10 @@ export class UsersService {
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/includeRelationships/queried`, { params: paramsToSend });
   }
 
+  updateUser(user: IUser): Observable<IApiResponse<IUser>> {
+    return this.http.patch<IApiResponse<IUser>>(`${this.baseUrl}/${user.id}`, user);
+  }
+
   restoreUser(userId: number): Observable<string> {
     return this.http.patch<any>(`${this.baseUrl}/${userId}/restore`, {})
       .pipe(map(response => response.message));
