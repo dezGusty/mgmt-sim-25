@@ -1,6 +1,7 @@
 
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -25,6 +26,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Successfully authenticated." });
     }
 
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
@@ -32,6 +34,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Successfully logged out." });
     }
 
+    [Authorize]
     [HttpGet("me")]
     public IActionResult Me()
     {

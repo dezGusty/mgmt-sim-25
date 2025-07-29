@@ -22,6 +22,7 @@ export class AddRequestForm implements OnInit {
   reason = '';
   isSubmitting = false;
   today: string = FormUtils.getTodayDateString();
+  showValidationErrors = false;
 
   leaveTypes: { id: number; description: string }[] = [];
   employees: { id: number; name: string }[] = [];
@@ -46,23 +47,25 @@ export class AddRequestForm implements OnInit {
 
   handleSubmit() {
     if (
-      !FormUtils.validateLeaveRequestForm(
-        this.userId,
-        this.leaveRequestTypeId,
-        this.startDate,
-        this.endDate,
-        this.reason
-      )
-    )
+      !this.userId ||
+      !this.leaveRequestTypeId ||
+      !this.startDate ||
+      !this.endDate
+    ) {
+      this.showValidationErrors = true;
       return;
+    }
+
     this.isSubmitting = true;
+    this.showValidationErrors = false;
+
     this.leaveRequests
       .addLeaveRequest({
-        userId: this.userId!,
-        leaveRequestTypeId: this.leaveRequestTypeId!,
+        userId: this.userId,
+        leaveRequestTypeId: this.leaveRequestTypeId,
         startDate: this.startDate,
         endDate: this.endDate,
-        reason: this.reason,
+        reason: this.reason || '',
       })
       .subscribe({
         next: (createdRequest) => {
@@ -87,6 +90,7 @@ export class AddRequestForm implements OnInit {
     this.startDate = '';
     this.endDate = '';
     this.reason = '';
+    this.showValidationErrors = false;
     this.close.emit();
   }
 }
