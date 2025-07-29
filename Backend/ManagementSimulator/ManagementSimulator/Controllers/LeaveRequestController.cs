@@ -22,7 +22,8 @@ namespace ManagementSimulator.API.Controllers
             _leaveRequestService = leaveRequestService;
             _logger = logger;
         }
-
+        
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -38,6 +39,49 @@ namespace ManagementSimulator.API.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        [Authorize(Roles = "Employee")]
+        [HttpPost("by-employee")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddLeaveRequestByEmployeeAsync([FromBody] CreateLeaveRequestByEmployeeDto dto)
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            var leaveRequest = await _leaveRequestService.AddLeaveRequestByEmployeeAsync(dto, userId);
+
+            return Created($"api/LeaveRequests/{leaveRequest.Id}", new
+            {
+                Message = "Leave request created successfully.",
+                Data = leaveRequest,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -252,6 +296,60 @@ namespace ManagementSimulator.API.Controllers
             return Ok(new
             {
                 Message = "Manager's leave requests retrieved successfully.",
+                Data = requests,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpGet("by-employee")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetRequestsByEmployeeAsync()
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
+            if (requests == null || !requests.Any())
+            {
+                return NotFound(new
+                {
+                    Message = "No leave requests found for this user.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Leave requests retrieved successfully.",
                 Data = requests,
                 Success = true,
                 Timestamp = DateTime.UtcNow

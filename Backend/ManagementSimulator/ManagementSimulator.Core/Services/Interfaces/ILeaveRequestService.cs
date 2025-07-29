@@ -15,6 +15,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
     {
         Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId,QueriedLeaveRequestRequestDto payload);
         Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto);
+        Task<CreateLeaveRequestResponseDto> AddLeaveRequestByEmployeeAsync(CreateLeaveRequestByEmployeeDto dto, int userId);
         Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId);
         Task<List<LeaveRequestResponseDto>> GetAllRequestsAsync();
         Task<LeaveRequestResponseDto> GetRequestByIdAsync(int id);
@@ -22,6 +23,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto);
         Task<bool> DeleteLeaveRequestAsync(int id);
         Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId);
+
     }
 
 }

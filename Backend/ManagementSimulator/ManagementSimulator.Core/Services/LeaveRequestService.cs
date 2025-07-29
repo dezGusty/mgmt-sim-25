@@ -53,6 +53,33 @@ namespace ManagementSimulator.Core.Services
             return leaveRequest.ToCreateLeaveRequestResponseDto();
         }
 
+        public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestByEmployeeAsync(CreateLeaveRequestByEmployeeDto dto, int userId)
+        {
+            if (await _userRepository.GetFirstOrDefaultAsync(userId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), userId);
+            }
+
+            if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
+            }
+
+            var leaveRequest = new LeaveRequest
+            {
+                UserId = userId,
+                LeaveRequestTypeId = dto.LeaveRequestTypeId,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                Reason = dto.Reason,
+                RequestStatus = RequestStatus.Pending,
+            };
+
+            await _leaveRequestRepository.AddAsync(leaveRequest);
+            return leaveRequest.ToCreateLeaveRequestResponseDto();
+        }
+
+
         public async Task<List<LeaveRequestResponseDto>> GetRequestsByUserAsync(int userId)
         {
             var requests = await _leaveRequestRepository.GetAllAsync();
