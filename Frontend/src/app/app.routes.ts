@@ -7,12 +7,19 @@ import { ResetPassword } from './components/reset-password/reset-password';
 import { AdminMainPage } from './components/admin/main-page';
 import { AuthGuard } from './guards/auth.guard';
 import { LoginGuard } from './guards/login.guard';
+import { RoleSelector } from './components/shared/custom-navbar/role-selector-page/role-selector-page';
 
 export const routes: Routes = [
   {
     path: '',
     component: Login,
     canActivate: [LoginGuard],
+  },
+  {
+    path: 'role-selector',
+    component: RoleSelector,
+    canActivate: [AuthGuard],
+    data: { roles: ['Admin', 'Manager', 'Employee'] },
   },
   {
     path: 'manager',

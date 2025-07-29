@@ -17,7 +17,6 @@ export class User {
   showRequestsList = false;
   showLeaveBalance = false;
 
-  // ✅ Adăugați proprietăți pentru mesajul de succes
   showSuccessMessage = false;
   successMessage = '';
 

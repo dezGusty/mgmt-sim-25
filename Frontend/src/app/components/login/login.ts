@@ -26,23 +26,26 @@ export class Login {
       next: (_) => {
         this.auth.me().subscribe({
           next: (user: any) => {
-            const roles = user.Roles || user.roles || [];
-            const role = roles.length > 0 ? roles[0] : undefined;
-            switch (role) {
-              case 'Admin':
-                this.router.navigate(['/admin']);
-                break;
-              case 'Manager':
-                this.router.navigate(['/manager']);
-                break;
-              case 'Employee':
-                this.router.navigate(['/user']);
-                break;
-              default:
-                console.warn('Unknown role:', role);
-                this.router.navigate(['/']);
-                break;
-            }
+
+            this.router.navigate(['/role-selector']);
+
+            // const roles = user.Roles || user.roles || [];
+            // const role = roles.length > 0 ? roles[0] : undefined;
+            // switch (role) {
+            //   case 'Admin':
+            //     this.router.navigate(['/admin']);
+            //     break;
+            //   case 'Manager':
+            //     this.router.navigate(['/manager']);
+            //     break;
+            //   case 'Employee':
+            //     this.router.navigate(['/user']);
+            //     break;
+            //   default:
+            //     console.warn('Unknown role:', role);
+            //     this.router.navigate(['/']);
+            //     break;
+            // }
           },
           error: (err) => {
             console.error('Failed to get user info:', err);
