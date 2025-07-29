@@ -4,7 +4,6 @@ import { RequestDetail } from '../request-detail/request-detail';
 import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { ILeaveRequest } from '../../../../models/leave-request';
-import { IRequestStats } from '../../../../models/request-stats';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
@@ -17,7 +16,6 @@ import { RequestUtils } from '../../../../utils/request.utils';
   styleUrls: ['./add-requests.css'],
 })
 export class AddRequests implements OnInit {
-  @Output() statsUpdated = new EventEmitter<IRequestStats>();
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
   @Input() searchTerm: string = '';
@@ -50,15 +48,8 @@ export class AddRequests implements OnInit {
           .sort(
             (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
           );
-
-        const stats = RequestUtils.calculateStats(this.requests);
-        this.statsUpdated.emit(stats);
       }
     });
-  }
-
-  calculateStats(requests: ILeaveRequest[]): IRequestStats {
-    return RequestUtils.calculateStats(requests);
   }
 
   openDetails(req: ILeaveRequest) {

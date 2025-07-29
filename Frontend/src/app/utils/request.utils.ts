@@ -1,15 +1,6 @@
 import { ILeaveRequest } from '../models/leave-request';
-import { IRequestStats } from '../models/request-stats';
 
 export class RequestUtils {
-  static calculateStats(requests: ILeaveRequest[]): IRequestStats {
-    const total = requests.length;
-    const pending = requests.filter((r) => r.status === 'Pending').length;
-    const approved = requests.filter((r) => r.status === 'Approved').length;
-    const rejected = requests.filter((r) => r.status === 'Rejected').length;
-    return { total, pending, approved, rejected };
-  }
-
   static filterRequests(
     requests: ILeaveRequest[],
     filter: 'All' | 'Pending' | 'Approved' | 'Rejected'
