@@ -23,16 +23,18 @@ export class CalendarUtils {
     'December',
   ];
 
-  static readonly DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  static readonly DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  static generateCalendarDays(
+  static generateCalendarDaysWithMondayFirst(
     month: number,
     year: number,
     requests: ILeaveRequest[]
   ): CalendarDay[] {
     const firstDay = new Date(year, month, 1);
     const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    const dayOfWeek = (firstDay.getDay() + 6) % 7;
+    startDate.setDate(startDate.getDate() - dayOfWeek);
 
     const calendarDays: CalendarDay[] = [];
     const currentDate = new Date(startDate);

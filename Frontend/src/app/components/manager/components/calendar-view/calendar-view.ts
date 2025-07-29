@@ -25,13 +25,15 @@ export class CalendarView implements OnInit, OnChanges {
   currentYear = this.currentDate.getFullYear();
   calendarDays: CalendarDay[] = [];
   monthNames = CalendarUtils.MONTH_NAMES;
-  dayNames = CalendarUtils.DAY_NAMES;
+  dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   calendarFilters = {
-    pending: true,
+    pending: false,
     approved: true,
     rejected: false,
   };
+
+  hoveredRequest: ILeaveRequest | null = null;
 
   ngOnInit() {
     this.generateCalendar();
@@ -56,7 +58,7 @@ export class CalendarView implements OnInit, OnChanges {
   }
 
   generateCalendar() {
-    this.calendarDays = CalendarUtils.generateCalendarDays(
+    this.calendarDays = CalendarUtils.generateCalendarDaysWithMondayFirst(
       this.currentMonth,
       this.currentYear,
       this.filteredRequestsForCalendar
@@ -103,5 +105,25 @@ export class CalendarView implements OnInit, OnChanges {
 
   isToday(date: Date): boolean {
     return CalendarUtils.isToday(date);
+  }
+
+  onRequestHover(request: ILeaveRequest) {
+    this.hoveredRequest = request;
+  }
+
+  onRequestLeave() {
+    this.hoveredRequest = null;
+  }
+
+  isDateInHoveredRequest(date: Date): boolean {
+    if (!this.hoveredRequest) {
+      return false;
+    }
+
+    const fromDate = new Date(this.hoveredRequest.from);
+    const toDate = new Date(this.hoveredRequest.to);
+    const checkDate = new Date(date);
+
+    return checkDate >= fromDate && checkDate <= toDate;
   }
 }

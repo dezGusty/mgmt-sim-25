@@ -135,16 +135,19 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-7 calendar-grid">
+  <div class="grid grid-cols-7 auto-rows-fr grid-rows-6">
     <div
       *ngFor="let day of calendarDays"
-      class="calendar-day border-r border-b last:border-r-0 p-2"
+      class="min-h-[120px] h-[140px] flex flex-col transition-colors duration-300 border-r border-b last:border-r-0 p-2"
       [ngClass]="{
-        'bg-gray-50 text-gray-400': !day.isCurrentMonth,
-        'bg-white': day.isCurrentMonth
+        'bg-gray-50 text-gray-400':
+          !day.isCurrentMonth && !isDateInHoveredRequest(day.date),
+        'bg-white hover:bg-slate-50':
+          day.isCurrentMonth && !isDateInHoveredRequest(day.date),
+        'bg-blue-100': isDateInHoveredRequest(day.date)
       }"
     >
-      <div class="day-content">
+      <div class="flex-1 flex flex-col overflow-hidden">
         <div class="flex justify-between items-start mb-2">
           <span
             class="text-sm font-medium"
@@ -163,15 +166,15 @@
             {{ day.leaveRequests.length }}
           </span>
         </div>
-
         <div
-          class="leave-requests-container space-y-1 overflow-y-auto max-h-20"
+          class="leave-requests-container flex-1 space-y-1 overflow-y-auto overflow-x-hidden"
         >
           <div
             *ngFor="let request of day.leaveRequests"
-            class="text-xs p-1 rounded border truncate leave-request-item"
+            class="text-xs p-1 rounded border truncate whitespace-nowrap overflow-hidden text-ellipsis flex-shrink-0 cursor-default transition-all duration-300 hover:shadow-lg"
             [ngClass]="getStatusColor(request.status)"
-            [title]="request.employeeName + ' - ' + request.reason"
+            (mouseenter)="onRequestHover(request)"
+            (mouseleave)="onRequestLeave()"
           >
             <div class="font-medium truncate">{{ request.employeeName }}</div>
           </div>

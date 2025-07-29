@@ -21,7 +21,7 @@ import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 export class ManagerMainPage {
   @ViewChild('addRequestsRef') addRequestsComponent!: AddRequests;
   showAddRequestForm = false;
-  currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
+  currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'Pending';
   searchTerm: string = '';
 
   constructor(private router: Router) {}
