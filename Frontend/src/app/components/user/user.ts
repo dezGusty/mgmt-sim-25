@@ -95,9 +95,15 @@ export class User {
 
     this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
       next: (data) => {       
-        this.requests = data.data;
+        // Sortează cererile de la cea mai recentă la cea mai veche
+        this.requests = data.data.sort((a, b) => {
+          const dateA = new Date( a.startDate);
+          const dateB = new Date(b.startDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
         this.filteredRequests = [...this.requests];
-        this.updatePagination(); // Add this line
+        this.updatePagination();
         this.isLoading = false;
       },
       error: (err) => {
@@ -223,8 +229,14 @@ export class User {
     }
     
     this.filteredRequests = results;
-    this.currentPage = 1; // Reset to first page when filtering
+    this.currentPage = 1;
     this.updatePagination();
+  }
+
+  // Metodă pentru a obține numărul secvențial
+  getRequestNumber(request: LeaveRequest): number {
+    const index = this.filteredRequests.findIndex(r => r.id === request.id);
+    return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
   }
 
   updatePagination() {
