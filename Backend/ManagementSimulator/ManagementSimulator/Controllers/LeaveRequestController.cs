@@ -306,9 +306,31 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CancelLeaveRequestAsync(int id)
         {
-            var nameIdentifierClaim = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            await _leaveRequestService.CancelLeaveRequestAsync(id, nameIdentifierClaim);
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            await _leaveRequestService.CancelLeaveRequestAsync(id, userId);
 
             return Ok(new { Message = "Leave request canceled successfully." });
         }
