@@ -6,6 +6,12 @@ export class LoginGuard implements CanActivate {
   constructor(private router: Router) {}
 
   async canActivate(): Promise<boolean | UrlTree> {
+  const hasAuthCookies = this.hasAuthenticationCookies();
+      
+      if (!hasAuthCookies) {
+        return true;
+      }
+
     try {
       const response = await fetch('https://localhost:7275/api/Auth/me', {
         credentials: 'include',
@@ -32,5 +38,20 @@ export class LoginGuard implements CanActivate {
       // If there's an error, allow access to login page
       return true;
     }
+  }
+
+  private hasAuthenticationCookies(): boolean {
+    const cookies = document.cookie;
+    
+    const authCookieNames = [
+      '.AspNetCore.Identity.Application',
+      'auth-token',
+      'session-id',
+      'access-token'
+    ];
+
+    return authCookieNames.some(cookieName => 
+      cookies.includes(`${cookieName}=`)
+    );
   }
 }
