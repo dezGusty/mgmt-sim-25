@@ -3,11 +3,16 @@ import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../services/users/users-service';
-import { UserViewModel } from '../../../view-models/user-view-model';
-import { IUser } from '../../../models/entities/iuser';
+import { IUserViewModel } from '../../../view-models/user-view-model';
+import { IAddUser, IUpdateUser, IUser } from '../../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../../models/responses/iapi-response';
+import { IJobTitle } from '../../../models/entities/ijob-title';
+import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
+import { EmployeeRolesService } from '../../../services/employee-roles/employee-roles';
+import { IEmployeeManager } from '../../../models/entities/iemployee-manager';
+import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -16,25 +21,56 @@ import { IApiResponse } from '../../../models/responses/iapi-response';
   styleUrl: './admin-users-list.css'
 })
 export class AdminUsersList implements OnInit {
-  users: UserViewModel[] = [];
+  users: IUserViewModel[] = [];
   searchTerm: string = '';
   searchBy: string = 'name';
   sortDescending: boolean = false;
-  
+  userRoles: Map<string,number> = new Map();
+
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
   
   isLoading: boolean = false;
+  hasError: boolean = false;
+  errorMessage: string = '';
+  hasSearched: boolean = false;
 
-  constructor(private usersService: UsersService) { }
+  showEditModal = false;
+  userToEdit: IUserViewModel | null = null;
+
+  editForm = {
+    id: 0,
+    firstName: '',
+    lastName: '',
+    email: '',
+    jobTitleId: 0,
+    dateOfEmployment: new Date(),
+    isAdmin: false,
+    isManager: false,
+  };
+
+  jobTitles: IJobTitle[] = [];
+  isSubmitting: boolean = false;
+  editErrorMessage: string = '';
+
+  employeeRoleInfo: string = 'All the users are automatically set to employees.';
+
+  constructor(private usersService: UsersService,
+              private jobTitlesService: JobTitlesService,
+              private employeeRoleService: EmployeeRolesService) {
+
+  }
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadUserRoles();
   }
 
   loadUsers(): void {
     this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
     
     const filterRequest: IFilteredUsersRequest = {
       lastName: this.searchBy === 'name' ? this.searchTerm : undefined,
@@ -46,20 +82,88 @@ export class AdminUsersList implements OnInit {
         pageSize: this.itemsPerPage
       }
     };
-
+    
+    console.log('Search parameters:', this.searchBy, this.searchTerm);
+    
     this.usersService.getAllUsersFiltered(filterRequest).subscribe({
       next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
-        console.log('API response:', response);   
-        const rawUsers: IUser[] = response.data.data || [];
-        this.users = rawUsers.map(user => this.mapToUserViewModel(user));
-        this.totalPages = response.data.totalPages
+        console.log('API response:', response);
         this.isLoading = false;
+        
+        if (response.success && response.data) {
+          const rawUsers: IUser[] = response.data.data || [];
+          this.users = rawUsers.map(user => this.mapToUserViewModel(user));
+          this.totalPages = response.data.totalPages || 0;
+          
+          if (this.users.length === 0) {
+            if (this.searchTerm.trim()) {
+              this.hasError = true;
+              this.errorMessage = this.getNoResultsMessage();
+            } else if (this.hasSearched) {
+              this.hasError = true;
+              this.errorMessage = 'No users found in the system.';
+            }
+
+          } else {
+            this.hasError = false;
+            this.errorMessage = '';
+          }
+        } else {
+          this.handleError(response.message || 'Failed to load users. Please try again.');
+        }
       },
       error: (err) => {
         console.error('Failed to fetch users:', err);
         this.isLoading = false;
+        this.handleError(this.getErrorMessage(err));
       }
     });
+  }
+
+  loadUserRoles() {
+    this.employeeRoleService.getAllEmployeeRoles().subscribe({
+      next: (response: IApiResponse<IEmployeeRole[]>) => {
+        response.data.forEach(er => {
+          this.userRoles.set(er.rolename, er.id);
+        });
+      },
+      error: (error) => {
+        console.error('Error loading user roles:', error);
+      }
+    });
+  }
+
+  private handleError(message: string): void {
+    this.hasError = true;
+    this.errorMessage = message;
+    this.users = [];
+    this.totalPages = 0;
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.status === 0) {
+      return 'Unable to connect to the server. Please check your internet connection.';
+    } else if (error.status >= 500) {
+      return 'Server error occurred. Please try again later.';
+    } else if (error.status === 404) {
+      return 'The requested resource was not found.';
+    } else if (error.status === 403) {
+      return 'You do not have permission to view this data.';
+    } else if (error.error?.message) {
+      return error.error.message;
+    } else if (error.message) {
+      return error.message;
+    } else {
+      return 'An unexpected error occurred while loading users.';
+    }
+  }
+
+  private getNoResultsMessage(): string {
+    if (this.searchTerm.trim()) {
+      return `No users found matching "${this.searchTerm}". Try adjusting your search criteria.`;
+    } else {
+      return 'No users found. Try adjusting your search criteria.';
+    }
   }
 
   private getSortField(): string {
@@ -73,7 +177,7 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  private mapToUserViewModel(user: IUser): UserViewModel {
+  private mapToUserViewModel(user: IUser): IUserViewModel {
     return {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
@@ -86,12 +190,12 @@ export class AdminUsersList implements OnInit {
           name: user.departmentName || 'Unknown'
         }
       } : undefined,    
+      roles: user.roles,
       status: user.isActive ? 'active' : 'inactive',
       avatar: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=20B486&color=fff`
     };
   }
 
-  // Search functionality
   getSearchPlaceholder(): string {
     switch (this.searchBy) {
       case 'name':
@@ -106,13 +210,17 @@ export class AdminUsersList implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 1; // Reset to first page
+    this.currentPage = 1;
+    this.hasSearched = true;
     this.loadUsers();
   }
 
   clearSearch(): void {
     this.searchTerm = '';
     this.currentPage = 1;
+    this.hasSearched = false;
+    this.hasError = false;
+    this.errorMessage = '';
     this.loadUsers();
   }
 
@@ -122,7 +230,12 @@ export class AdminUsersList implements OnInit {
     this.loadUsers();
   }
 
-  // Pagination methods
+  retryLoad(): void {
+    this.hasError = false;
+    this.errorMessage = '';
+    this.loadUsers();
+  }
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
@@ -155,16 +268,13 @@ export class AdminUsersList implements OnInit {
     const maxVisiblePages = 5;
     
     if (this.totalPages <= maxVisiblePages) {
-      // Show all pages if total is less than max visible
       for (let i = 1; i <= this.totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show pages around current page
       let startPage = Math.max(1, this.currentPage - 2);
       let endPage = Math.min(this.totalPages, this.currentPage + 2);
       
-      // Adjust if we're near the beginning or end
       if (this.currentPage <= 3) {
         endPage = Math.min(this.totalPages, 5);
       }
@@ -188,17 +298,107 @@ export class AdminUsersList implements OnInit {
     return this.users.filter(user => user.status === 'inactive').length;
   }
 
-  editUser(user: UserViewModel): void {
-    console.log('Edit user:', user);
-    // Implement edit functionality - poate deschizi un modal sau navighezi la o pagină de edit
+  editUser(user: IUserViewModel): void {
+    this.userToEdit = { ...user };
+    this.populateEditForm(user);
+    this.loadJobTitles();
+    this.showEditModal = true;
   }
 
-  deleteUser(user: UserViewModel): void {
+  populateEditForm(user: IUserViewModel): void {
+    const nameParts = user.name.split(' ');
+    this.editForm = {
+      id: user.id,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      email: user.email,
+      jobTitleId: user.jobTitle?.id || 0,
+      dateOfEmployment: new Date(),
+      isAdmin: user.roles?.includes("Admin") ? true : false,
+      isManager: user.roles?.includes("Manager") ? true : false,
+    };
+    
+    this.editErrorMessage = '';
+  }
+
+  loadJobTitles(): void {
+    this.jobTitlesService.getAllJobTitles().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.jobTitles = response.data || [];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading job titles:', error);
+      }
+    });
+  }
+
+  onSubmitEdit(): void {
+    if (!this.isFormValid()) {
+      this.editErrorMessage = 'Please fill in all required fields.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.editErrorMessage = '';
+
+    const userToUpdate: IUpdateUser = {
+      id: this.editForm.id,
+      email: this.editForm.email,
+      firstName: this.editForm.firstName,
+      lastName: this.editForm.lastName,
+      jobTitleId: this.editForm.jobTitleId,
+      dateOfEmployment: this.editForm.dateOfEmployment,
+      employeeRolesIds: this.getSelectedRoles().map(rolename => this.userRoles.get(rolename) || 0),
+    };
+
+    this.usersService.updateUser(userToUpdate).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        if (response.success) {
+          this.showEditModal = false;
+          this.loadUsers();
+          console.log('User updated successfully:', response.data);
+        } else {
+          this.editErrorMessage = response.message || 'Failed to update user';
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.editErrorMessage = 'Error updating user: ' + (error.error?.message || error.message);
+        console.error('Error updating user:', error);
+      }
+    });
+  }
+
+  getSelectedRoles(): string[] {
+    const roles: string[] = [];
+    if (this.editForm.isAdmin) roles.push('Admin');
+    if (this.editForm.isManager) roles.push('Manager');
+    return roles;
+  }
+
+  isFormValid(): boolean {
+    return !!(
+      this.editForm.firstName.trim() &&
+      this.editForm.lastName.trim() &&
+      this.editForm.email.trim() &&
+      this.editForm.jobTitleId > 0
+    );
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.userToEdit = null;
+    this.editErrorMessage = '';
+  }
+
+  deleteUser(user: IUserViewModel): void {
     if (confirm(`Are you sure you want to delete ${user.name}?`)) {
       this.usersService.deleteUser(user.id).subscribe({
         next: (response) => {
           console.log('User deleted successfully:', response);
-          // Reload the current page to reflect changes
           this.loadUsers();
         },
         error: (err) => {
@@ -209,12 +409,11 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  restoreUser(user: UserViewModel): void {
+  restoreUser(user: IUserViewModel): void {
     if (confirm(`Are you sure you want to restore ${user.name}?`)) {
       this.usersService.restoreUser(user.id).subscribe({
         next: () => {
           console.log('User restored successfully');
-          // Reload the current page to reflect changes
           this.loadUsers();
         },
         error: (err) => {
@@ -225,7 +424,21 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  trackByUserId(index: number, user: UserViewModel): number {
+  onSearchKeypress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onSearch();
+    }
+  }
+
+  trackByUserId(index: number, user: IUserViewModel): number {
     return user.id;
+  }
+
+  getDateForInput(): string {
+    return this.editForm.dateOfEmployment.toISOString().split('T')[0];
+  }
+
+  setDateFromInput(dateString: string): void {
+    this.editForm.dateOfEmployment = new Date(dateString);
   }
 }

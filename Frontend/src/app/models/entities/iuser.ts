@@ -15,4 +15,25 @@ export interface IUser {
   subordinatesEmails?: string[];
   managersIds?: number[];
   isActive?: boolean;
+  dateOfEmployment?: Date;
+}
+
+export interface IAddUser {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  jobTitleId: number;
+  employeeRolesIds: number[];
+  dateOfEmployment: Date;
+}
+
+export interface IUpdateUser {
+  id: number;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  jobTitleId?: number;
+  employeeRolesIds?: number[];
+  dateOfEmployment?: Date;
 }

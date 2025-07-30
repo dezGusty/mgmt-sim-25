@@ -40,7 +40,7 @@ namespace ManagementSimulator.Database.Repositories
             var result = await _context.EmployeeManagers
                 .Where(em => em.ManagerId == managerId && em.EmployeeId == employeeId)
                 .FirstOrDefaultAsync();
-            result.DeletedAt = DateTime.UtcNow;
+            result!.DeletedAt = DateTime.UtcNow;
 
             await SaveChangesAsync();
         }
@@ -49,13 +49,25 @@ namespace ManagementSimulator.Database.Repositories
         {
             return await _context.EmployeeManagers
                                  .Where(em => em.DeletedAt == null)
-                                 .Where(um => um.EmployeeId == subordinateId)
-                                 .Include(um => um.Manager)
-                                 .Include(um => um.Manager.Title)
-                                 .Include(um => um.Manager.Roles)
+                                 .Where(em => em.EmployeeId == subordinateId)
+                                 .Include(em => em.Manager)
+                                 .Include(em => em.Manager.Title)
+                                 .Include(em => em.Manager.Roles)
                                      .ThenInclude(eru => eru.Role)
-                                 .Select(um => um.Manager)
+                                 .Where(em => em.Manager != null && em.Manager.DeletedAt == null)
+                                 .Select(em => em.Manager)
                                  .ToListAsync();
+        }
+
+        public async Task<List<EmployeeManager>> GetEMRelationshipForEmployeesByIdAsync(int subordinateId, bool includeDeleted = false)
+        {
+            IQueryable<EmployeeManager> query = _context.EmployeeManagers;
+            if (!includeDeleted)
+                query = query.Where(em => em.DeletedAt == null);
+
+            query = query.Where(um => um.EmployeeId == subordinateId);
+
+            return await query.ToListAsync();
         }
 
         public async Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId)
@@ -67,31 +79,30 @@ namespace ManagementSimulator.Database.Repositories
                                  .Include(um => um.Employee.Title)
                                  .Include(um => um.Employee.Roles)
                                      .ThenInclude(eru => eru.Role)
+                                 .Where(um => um.Employee != null && um.Employee.DeletedAt == null)
                                  .Select(um => um.Employee)
                                  .ToListAsync();
         }
 
-        public async Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId)
+        public async Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId, bool includeDeleted = false)
         {
-            return await _context.EmployeeManagers
-                                 .Where(em => em.DeletedAt == null)
-                                 .Where(em => em.EmployeeId == employeeId && em.ManagerId == managerId)
-                                 .FirstOrDefaultAsync();
+            IQueryable<EmployeeManager?> query = _context.EmployeeManagers;
+            if (!includeDeleted)
+                query = query.Where(em => em.DeletedAt == null);
+
+            query = query.Where(em => em.EmployeeId == employeeId && em.ManagerId == managerId);
+
+            return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<EmployeeManager?> GetEmployeeManagersByIdIncludeDeletedAsync(int employeeId, int managerId)
+        public async Task<List<EmployeeManager>> GetAllEmployeeManagersAsync(bool includeDeleted = false)
         {
-            return await _context.EmployeeManagers
-                     .Where(em => em.DeletedAt == null)
-                     .Where(em => em.EmployeeId == employeeId && em.ManagerId == managerId)
-                     .FirstOrDefaultAsync();
-        }
+            IQueryable<EmployeeManager> query = _context.EmployeeManagers;
 
-        public async Task<List<EmployeeManager>> GetAllEmployeeManagersAsync()
-        {
-            return await _context.EmployeeManagers
-                .Where(em => em.DeletedAt == null)
-                .ToListAsync();
+            if (!includeDeleted)
+                query = query.Where(em => em.DeletedAt == null);
+
+            return await query.ToListAsync();
         }
     }
 }

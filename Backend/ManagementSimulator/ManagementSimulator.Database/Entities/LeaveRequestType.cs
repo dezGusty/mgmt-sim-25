@@ -16,6 +16,7 @@ namespace ManagementSimulator.Database.Entities
         [MaxLength(100)]
         public string AdditionalDetails { get; set; }
         [MaxLength(50)]
-        public string Description { get; set; } 
+        public string Description { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

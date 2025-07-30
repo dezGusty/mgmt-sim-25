@@ -4,10 +4,12 @@ using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
+using ManagementSimulator.Core.Utils;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
+using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 
 namespace ManagementSimulator.Core.Services
@@ -18,22 +20,28 @@ namespace ManagementSimulator.Core.Services
         private readonly IJobTitleRepository _jobTitleRepository;
         private readonly IEmployeeRoleRepository _employeeRoleRepository;
         private readonly IDeparmentRepository _deparmentRepository;
+        private readonly IEmailService _emailService;
+        private readonly IMemoryCache _cache;
 
         public UserService(
             IUserRepository userRepository,
             IJobTitleRepository jobTitleRepository,
             IEmployeeRoleRepository employeeRoleRepository,
-            IDeparmentRepository deparmentRepository)
+            IDeparmentRepository deparmentRepository,
+            IEmailService emailService,
+            IMemoryCache cache)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
             _jobTitleRepository = jobTitleRepository;
             _deparmentRepository = deparmentRepository;
+            _emailService = emailService;
+            _cache = cache;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllUsersWithReferencesAsync();
+            var users = await _userRepository.GetAllUsersWithReferencesAsync(includeDeleted: true);
             return users.Select(u => new UserResponseDto
             {
                 Id = u.Id,
@@ -74,17 +82,29 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(JobTitle), dto.JobTitleId);
             }
 
+            string temporaryPassword = PasswordGenerator.GenerateSimpleCode();
+
             var user = new User
             {
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 JobTitleId = dto.JobTitleId,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Title = jt,
+                DateOfEmployment = dto.DateOfEmployment,
+                MustChangePassword = true,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword)
             };
 
             await _userRepository.AddAsync(user);
+
+            // User shall always be at least employee
+            EmployeeRoleUser eru = new EmployeeRoleUser
+            {
+                UsersId = user.Id,
+                RolesId = await _employeeRoleRepository.GetEmployeeRoleUserByNameAsync("Employee")
+            };
+            await _employeeRoleRepository.AddEmployeeRoleUserAsync(eru);
 
             foreach (var roleId in dto.EmployeeRolesId.Distinct())
             {
@@ -95,7 +115,7 @@ namespace ManagementSimulator.Core.Services
                 }
 
                 var existingRelation = await _employeeRoleRepository
-                    .GetEmployeeRoleUserAsync(user.Id, roleId);
+                    .GetEmployeeRoleUserAsync(user.Id, roleId, includeDeleted: true);
 
                 if (existingRelation == null)
                 {
@@ -109,9 +129,83 @@ namespace ManagementSimulator.Core.Services
                     };
                     await _employeeRoleRepository.AddEmployeeRoleUserAsync(employeeRoleUser);
                 }
+                else
+                {
+                    existingRelation.DeletedAt = null;
+                }
+            }
+
+            try
+            {
+                await _emailService.SendWelcomeEmailWithPasswordAsync(
+                    user.Email,
+                    user.FirstName,
+                    temporaryPassword
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new MailNotSentException(user.Email);        
             }
 
             return user.ToUserResponseDto();
+        }
+
+        public async Task<bool> SendPasswordResetCodeAsync(string email)
+        {
+            var user = await _userRepository.GetUserByEmail(email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var resetCode = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            var cacheKey = $"reset_code_{resetCode}";
+            _cache.Set(cacheKey, email, TimeSpan.FromMinutes(15));
+
+            try
+            {
+                await _emailService.SendPasswordResetCodeAsync(email, user.FirstName, resetCode);
+                return true;
+            }
+            catch (Exception)
+            {
+                _cache.Remove(cacheKey);
+                throw;
+            }
+        }
+
+        public async Task<bool> ResetPasswordWithCodeAsync(string verificationCode, string newPassword)
+        {
+            var cacheKey = $"reset_code_{verificationCode}";
+
+            if (_cache.TryGetValue(cacheKey, out string email))
+            {
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user != null)
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                    user.MustChangePassword = false; 
+                    user.ModifiedAt = DateTime.UtcNow;
+
+                    await _userRepository.SaveChangesAsync();
+
+                    _cache.Remove(cacheKey);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _userRepository.GetUserByEmail(email);
         }
 
         public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
@@ -163,7 +257,7 @@ namespace ManagementSimulator.Core.Services
                         throw new EntryNotFoundException(nameof(EmployeeRole), roleId);
                     }
 
-                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserIncludeDeletedAsync(existing.Id, roleId);
+                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true);
                     if(employeeRoleUser != null)
                     {
                         if (employeeRoleUser.DeletedAt != null)
@@ -208,7 +302,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task RestoreUserByIdAsync(int id)
         {
-            var userToRestore = await _userRepository.GetUserByIdIncludeDeletedAsync(id);
+            var userToRestore = await _userRepository.GetUserByIdAsync(id, includeDeleted: true);
             if (userToRestore == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
@@ -265,7 +359,7 @@ namespace ManagementSimulator.Core.Services
                     DepartmentId = jobTitle?.DepartmentId ?? 0,
                     DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
 
-                    SubordinatesId = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
+                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
@@ -324,7 +418,7 @@ namespace ManagementSimulator.Core.Services
                     JobTitleName = jobTitle?.Name ?? string.Empty,
                     DepartmentId = jobTitle?.DepartmentId ?? 0,
                     DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
-                    SubordinatesId = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
+                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
@@ -414,6 +508,42 @@ namespace ManagementSimulator.Core.Services
                 PageSize = pageSize,
                 TotalPages = pageSize > 0 ?
                     (int)Math.Ceiling((double)totalCount / pageSize) : 1 
+            };
+        }
+
+        public async Task<PagedResponseDto<UserResponseDto>> GetAllManagersFilteredAsync(QueriedUserRequestDto payload)
+        {
+            (List<User>? managers, int totalCount) = await _userRepository.GetAllManagersFilteredAsync(payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams(), includeDeleted: false);
+
+            if (managers == null || !managers.Any())
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = new List<UserResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<UserResponseDto>
+            {
+                Data = managers.Select(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.Title?.DepartmentId ?? 0,
+                    DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                    SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
+                    IsActive = u.DeletedAt == null,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
     }

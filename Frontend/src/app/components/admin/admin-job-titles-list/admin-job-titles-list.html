@@ -1,67 +1,118 @@
 <!-- Job Titles List Component -->
 <div class="space-y-6">
-  
   <!-- Search Bar Section - Single Row -->
   <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
     <div class="flex flex-wrap items-center gap-3">
       <!-- Search Input -->
       <div class="flex-1 min-w-60">
-        <input 
-          type="text" 
+        <input
+          type="text"
           [(ngModel)]="searchTerm"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
           [placeholder]="getSearchPlaceholder()"
-        >
+        />
       </div>
-      
+
       <!-- Search/Sort By Dropdown -->
       <div class="w-36">
-        <select 
+        <select
           [(ngModel)]="searchBy"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
-          >
-          <option value="jobTitle" [selected]="searchBy === 'jobTitle'">By Job Title</option>
-          <option value="department" [selected]="searchBy === 'department'" >By Department</option>
+        >
+          <option value="jobTitle" [selected]="searchBy === 'jobTitle'">
+            By Job Title
+          </option>
+          <option value="department" [selected]="searchBy === 'department'">
+            By Department
+          </option>
         </select>
       </div>
-      
+
       <!-- Sort Order Toggle -->
       <div class="flex items-center">
-        <button 
+        <button
           (click)="toggleSortOrder()"
           class="flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] transition-colors"
           [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'"
         >
-          <svg *ngIf="!sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+          <svg
+            *ngIf="!sortDescending"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 11l5-5m0 0l5 5m-5-5v12"
+            />
           </svg>
-          <svg *ngIf="sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+          <svg
+            *ngIf="sortDescending"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 13l-5 5m0 0l-5-5m5 5V6"
+            />
           </svg>
-          <span class="ml-1 text-xs text-gray-600">{{ sortDescending ? 'Z-A' : 'A-Z' }}</span>
+          <span class="ml-1 text-xs text-gray-600">{{
+            sortDescending ? "Z-A" : "A-Z"
+          }}</span>
         </button>
       </div>
-      
+
       <!-- Search Button -->
-      <button 
+      <button
         (click)="onSearch()"
         class="px-4 py-2 bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
         Search
       </button>
-      
+
       <!-- Clear Button -->
-      <button 
+      <button
         *ngIf="searchTerm"
         (click)="clearSearch()"
         class="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg text-sm transition-colors"
         title="Clear search"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </div>
@@ -72,47 +123,108 @@
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employees</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Job Title
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Department
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Employees
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let jobTitle of jobTitles; let i = index; trackBy: trackByJobTitleId" class="hover:bg-gray-50 transition-colors">
+        <tr
+          *ngFor="
+            let jobTitle of jobTitles;
+            let i = index;
+            trackBy: trackByJobTitleId
+          "
+          class="hover:bg-gray-50 transition-colors"
+        >
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div class="flex-shrink-0 h-10 w-10">
-                <div class="h-10 w-10 rounded-lg bg-[#20B486] flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
-                       class="w-5 h-5 text-white">
-                    <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+                <div
+                  class="h-10 w-10 rounded-lg bg-[#20B486] flex items-center justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-5 h-5 text-white"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z"
+                      clip-rule="evenodd"
+                    />
                   </svg>
                 </div>
               </div>
               <div class="ml-4">
-                <div class="text-sm font-medium text-gray-900">{{ jobTitle?.name }}</div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{ jobTitle?.name }}
+                </div>
               </div>
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{ jobTitle.department?.name }}</div>
+            <div class="text-sm text-gray-900">
+              {{ jobTitle.department?.name }}
+            </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+            <span
+              class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+            >
               {{ jobTitle.employeeCount }} employees
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <div class="flex space-x-2">
-              <button class="text-[#20B486] hover:text-[#1a9c75] transition-colors" (click)="editJobTitle(jobTitle)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+              <button
+                class="text-[#20B486] hover:text-[#1a9c75] transition-colors"
+                (click)="editJobTitle(jobTitle)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"
+                  />
                 </svg>
               </button>
-              <button class="text-red-600 hover:text-red-800 transition-colors" (click)="deleteJobTitle(jobTitle)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
+              <button
+                class="text-red-600 hover:text-red-800 transition-colors"
+                (click)="deleteJobTitle(jobTitle)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
             </div>
@@ -124,18 +236,32 @@
 
   <!-- Empty State -->
   <div *ngIf="jobTitles.length === 0" class="text-center py-12">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="mx-auto h-12 w-12 text-gray-400"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z"
+      />
     </svg>
     <h3 class="mt-2 text-sm font-medium text-gray-900">No job titles found</h3>
     <p class="mt-1 text-sm text-gray-500">Try adjusting your search criteria</p>
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="totalPages > 1" class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6">
+  <div
+    *ngIf="totalPages > 1"
+    class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6"
+  >
     <div class="flex-1 flex justify-between items-center sm:hidden">
-      <button 
-        (click)="goToPreviousPage()" 
+      <button
+        (click)="goToPreviousPage()"
         [disabled]="currentPage === 1"
         class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
       >
@@ -144,83 +270,241 @@
       <span class="text-sm text-gray-700">
         Page {{ currentPage }} of {{ totalPages }}
       </span>
-      <button 
-        (click)="goToNextPage()" 
+      <button
+        (click)="goToNextPage()"
         [disabled]="currentPage === totalPages"
         class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
       >
         Next
       </button>
     </div>
-    
+
     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
       <div>
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        <nav
+          class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+          aria-label="Pagination"
+        >
           <!-- First page button -->
-          <button 
-            (click)="goToFirstPage()" 
+          <button
+            (click)="goToFirstPage()"
             [disabled]="currentPage === 1"
             class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
             title="First page"
           >
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
 
           <!-- Previous page button -->
-          <button 
-            (click)="goToPreviousPage()" 
+          <button
+            (click)="goToPreviousPage()"
             [disabled]="currentPage === 1"
             class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
             title="Previous page"
           >
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
 
           <!-- Page numbers -->
-          <button 
-            *ngFor="let page of getPageNumbers()" 
+          <button
+            *ngFor="let page of getPageNumbers()"
             (click)="goToPage(page)"
-            [class]="page === currentPage 
-              ? 'relative inline-flex items-center px-4 py-2 border border-[#20B486] bg-[#20B486] text-sm font-medium text-white'
-              : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'"
+            [class]="
+              page === currentPage
+                ? 'relative inline-flex items-center px-4 py-2 border border-[#20B486] bg-[#20B486] text-sm font-medium text-white'
+                : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
+            "
           >
             {{ page }}
           </button>
 
           <!-- Show ellipsis if there are more pages -->
-          <span *ngIf="totalPages > 5 && currentPage < totalPages - 2" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+          <span
+            *ngIf="totalPages > 5 && currentPage < totalPages - 2"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+          >
             ...
           </span>
 
           <!-- Next page button -->
-          <button 
-            (click)="goToNextPage()" 
+          <button
+            (click)="goToNextPage()"
             [disabled]="currentPage === totalPages"
             class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
             title="Next page"
           >
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
 
           <!-- Last page button -->
-          <button 
-            (click)="goToLastPage()" 
+          <button
+            (click)="goToLastPage()"
             [disabled]="currentPage === totalPages"
             class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
             title="Last page"
           >
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            <svg
+              class="h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </nav>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Job Title Modal -->
+<div *ngIf="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <!-- Background overlay -->
+  <div
+    class="fixed inset-0 bg-opacity-20 backdrop-blur-md transition-opacity"
+    (click)="closeEditModal()"
+  ></div>
+
+  <!-- Modal dialog -->
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div
+      class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+    >
+      <!-- Modal header -->
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-200"
+      >
+        <h3 class="text-lg font-medium text-gray-900">
+          Edit Job Title: {{ jobTitleToEdit?.name }}
+        </h3>
+        <button
+          (click)="closeEditModal()"
+          class="text-gray-400 hover:text-gray-600"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal content -->
+      <form (ngSubmit)="onSubmitEdit()" class="p-6">
+        <div class="space-y-4">
+          <!-- Job Title Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Job Title Name *</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="editForm.name"
+              name="name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+              placeholder="Enter job title name"
+              required
+            />
+          </div>
+
+          <!-- Department Selection -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Department *</label
+            >
+            <select
+              [(ngModel)]="editForm.departmentId"
+              name="departmentId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+              required
+            >
+              <option value="0" disabled>Select a department</option>
+              <option
+                *ngFor="let department of departments"
+                [value]="department.id"
+              >
+                {{ department.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div
+          *ngIf="errorMessage"
+          class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <!-- Modal footer -->
+        <div
+          class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200"
+        >
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!isFormValid() || isSubmitting"
+          >
+            <span *ngIf="isSubmitting">Updating...</span>
+            <span *ngIf="!isSubmitting">Update Job Title</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

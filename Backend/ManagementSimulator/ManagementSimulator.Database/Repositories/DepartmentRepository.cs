@@ -21,21 +21,25 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = databaseContext;
         }
 
-        public async Task<Department?> GetDepartmentByNameAsync(string name)
+        public async Task<Department?> GetDepartmentByNameAsync(string name, bool includeDeleted = false)
         {
-            return await _dbContext.Departments.FirstOrDefaultAsync(d => d.Name == name);
+            IQueryable<Department> query = _dbContext.Departments;
+            if (!includeDeleted)
+                query = query.Where(d => d.DeletedAt == null);
+            return await query.FirstOrDefaultAsync(d => d.Name == name);
         }
 
-        public async Task<Department?> GetDepartmentByIdAsync(int id)
+        public async Task<Department?> GetDepartmentByIdAsync(int id, bool includeDeleted = false)
         {
-            return await _dbContext.Departments
-                .Where(d => d.DeletedAt == null)
-                .FirstOrDefaultAsync(d => d.Id == id);
+            IQueryable<Department> query = _dbContext.Departments;
+            if (!includeDeleted)
+                query = query.Where(d => d.DeletedAt == null);
+            return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters)
+        public async Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
         {
-            IQueryable<Department> query = GetRecords();
+            IQueryable<Department> query = GetRecords(includeDeletedEntities: includeDeleted);
 
             // Filtering
             if (!string.IsNullOrEmpty(name))
