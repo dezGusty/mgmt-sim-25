@@ -59,14 +59,14 @@ public class AuthController : ControllerBase
         {
             if (string.IsNullOrEmpty(request.Email))
             {
-                return BadRequest("Email is required");
+                return BadRequest(new { error = "Email is required" }); // JSON format
             }
 
             var success = await _userService.SendPasswordResetCodeAsync(request.Email);
 
             if (!success)
             {
-                return BadRequest("Email not found");
+                return BadRequest(new { error = "Email not found" }); // JSON format
             }
 
             return Ok(new { message = "Reset code sent successfully" });
@@ -74,7 +74,7 @@ public class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending reset code to {Email}", request.Email);
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, new { error = "Internal server error" }); // JSON format
         }
     }
 
@@ -87,19 +87,19 @@ public class AuthController : ControllerBase
                 string.IsNullOrEmpty(request.NewPassword) ||
                 string.IsNullOrEmpty(request.ConfirmPassword))
             {
-                return BadRequest("All fields are required");
+                return BadRequest(new { error = "All fields are required" }); // JSON format
             }
 
             if (request.NewPassword != request.ConfirmPassword)
             {
-                return BadRequest("Passwords do not match");
+                return BadRequest(new { error = "Passwords do not match" }); // JSON format
             }
 
             var success = await _userService.ResetPasswordWithCodeAsync(request.VerificationCode, request.NewPassword);
 
             if (!success)
             {
-                return BadRequest("Invalid or expired verification code");
+                return BadRequest(new { error = "Invalid or expired verification code" }); // JSON format
             }
 
             return Ok(new { message = "Password reset successfully" });
@@ -107,7 +107,7 @@ public class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error resetting password");
-            return StatusCode(500, "Internal server error");
+            return StatusCode(500, new { error = "Internal server error" }); // JSON format
         }
     }
 }
