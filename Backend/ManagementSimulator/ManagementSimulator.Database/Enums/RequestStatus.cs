@@ -14,5 +14,6 @@ namespace ManagementSimulator.Database.Enums
         Approved = 4,
         Rejected = 8,
         Expired = 16,
+        Canceled = 32,
     }
 }

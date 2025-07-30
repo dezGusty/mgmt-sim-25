@@ -35,25 +35,15 @@ export class LeaveRequestService {
         });
     }
 
-    getUserLeaveRequests(userId: number): Observable<IApiResponse<LeaveRequest[]>> {
-        return this.http.get<IApiResponse<LeaveRequest[]>>(`${this.apiUrl}/user/${userId}`, {
+    cancelLeaveRequestByEmployee(requestId: number): Observable<{Message: string}> {
+        return this.http.patch<{Message: string}>(`${this.apiUrl}/by-employee/${requestId}`, {}, {
             withCredentials: true
         });
     }
 
-    addLeaveRequest(request: LeaveRequest): Observable<IApiResponse<LeaveRequest>> {
-        return this.http.post<IApiResponse<LeaveRequest>>(this.apiUrl, request, {
-            withCredentials: true
-        });
-    }
+  
 
-    cancelLeaveRequest(requestId: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${requestId}`, {
-            withCredentials: true
-        });
-    }
-
-     getLeaveBalance(userId: number): Observable<any> {
+    getLeaveBalance(userId: number): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/balance/${userId}`, {
             withCredentials: true
         });

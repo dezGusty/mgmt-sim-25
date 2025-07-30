@@ -25,6 +25,10 @@ export class User {
   showSuccessMessage = false;
   successMessage = '';
 
+  showCancelModal = false;
+  requestToCancel: LeaveRequest | null = null;
+
+
   RequestStatus = RequestStatus;
   Math = Math;
   
@@ -64,8 +68,6 @@ export class User {
   toggleRequestForm() {
     this.showRequestForm = !this.showRequestForm;
   }
-
-  
 
   toggleLeaveBalance() {
     this.showLeaveBalance = !this.showLeaveBalance;
@@ -151,6 +153,8 @@ export class User {
           return 'Approved';
         case RequestStatus.REJECTED:
           return 'Rejected';
+        case RequestStatus.CANCELED:
+          return 'Canceled';
         default:
           return 'Unknown';
       }
@@ -172,31 +176,47 @@ export class User {
     return type ? type.description || type.description : 'Unknown';
   }
 
-  cancelRequest(request: LeaveRequest) {
-    if (confirm('Are you sure you want to cancel this request?')) {
-      if(!request.id) {
-        return;
-      }
 
-      this.leaveRequestService.cancelLeaveRequest(request.id).subscribe({
-        next: () => {
-          const index = this.requests.findIndex(r => r.id === request.id);
-          if (index !== -1) {
-            this.requests.splice(index, 1);
-            this.filterRequests();
-            
-            if (this.selectedRequest && this.selectedRequest.id === request.id) {
-              this.selectedRequest = null;
-              this.showListModal = true;
-            }
-          }
-        },
-        error: (err) => {
-          this.errorMessage = err.error?.message || 'Failed to cancel request.';
-        }
-      });
-    }
+  cancelRequest(request: LeaveRequest) {
+    this.requestToCancel = request;
+    this.showCancelModal = true;
   }
+
+  confirmCancelRequest() {
+    if (!this.requestToCancel?.id) {
+      return;
+    }
+
+    this.leaveRequestService.cancelLeaveRequestByEmployee(this.requestToCancel.id).subscribe({
+      next: (response) => {
+        this.loadRequests();
+
+        if (this.selectedRequest && this.selectedRequest.id === this.requestToCancel?.id) {
+          this.selectedRequest = null;
+          this.showListModal = true;
+        }
+
+        this.showSuccessMessage = true;
+        this.successMessage = 'Request cancelled successfully! 🚫';
+        setTimeout(() => {
+          this.showSuccessMessage = false;
+        }, 3000);
+
+        // Închide modalul
+        this.closeCancelModal();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to cancel request.';
+        this.closeCancelModal();
+      }
+    });
+  }
+
+   closeCancelModal() {
+    this.showCancelModal = false;
+    this.requestToCancel = null;
+  }
+  
 
   filterRequests() {
     let results = this.requests;

@@ -297,6 +297,23 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Employee")]
+        [HttpPatch("by-employee/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CancelLeaveRequestAsync(int id)
+        {
+            var nameIdentifierClaim = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            await _leaveRequestService.CancelLeaveRequestAsync(id, nameIdentifierClaim);
+
+            return Ok(new { Message = "Leave request canceled successfully." });
+        }
+
+
         [Authorize(Roles = "Manager")]
         [HttpGet("by-manager")]
         [ProducesResponseType(StatusCodes.Status200OK)]

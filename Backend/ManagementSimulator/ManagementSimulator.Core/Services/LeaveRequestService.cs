@@ -242,5 +242,24 @@ namespace ManagementSimulator.Core.Services
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
+        
+        public async Task CancelLeaveRequestAsync(int requestId, int userId)
+        {
+            var request = await _leaveRequestRepository.GetFirstOrDefaultAsync(requestId);
+            
+            if (request == null)
+                throw new EntryNotFoundException(nameof(LeaveRequest), requestId);
+            
+            if (request.UserId != userId)
+                throw new UnauthorizedAccessException("Cannot cancel other user's request");
+            
+            if (request.RequestStatus != RequestStatus.Pending)
+                throw new InvalidOperationException("Can only cancel pending requests");
+            
+            request.RequestStatus = RequestStatus.Canceled;
+            request.ModifiedAt = DateTime.UtcNow;
+            
+            await _leaveRequestRepository.UpdateAsync(request);
+        }
     }
 }

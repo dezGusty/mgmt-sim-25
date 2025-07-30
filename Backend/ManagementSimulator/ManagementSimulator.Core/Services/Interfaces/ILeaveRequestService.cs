@@ -24,6 +24,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<bool> DeleteLeaveRequestAsync(int id);
         Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId);
 
+        Task CancelLeaveRequestAsync(int requestId, int userId);
+
     }
 
 }

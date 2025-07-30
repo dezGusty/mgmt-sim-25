@@ -222,7 +222,8 @@
                 <span [ngClass]="{
                   'bg-yellow-100 text-yellow-800': request.requestStatus === RequestStatus.PENDING,
                   'bg-green-100 text-green-800': request.requestStatus === RequestStatus.APPROVED,
-                  'bg-red-100 text-red-800': request.requestStatus === RequestStatus.REJECTED
+                  'bg-red-100 text-red-800': request.requestStatus === RequestStatus.REJECTED,
+                  'bg-gray-100 text-gray-800': request.requestStatus === RequestStatus.CANCELED,
                 }" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
                    {{getStatusDisplayName(request.requestStatus)}}
                 </span>
@@ -309,7 +310,8 @@
               <span [ngClass]="{
                 'bg-yellow-100 text-yellow-800': selectedRequest.requestStatus === RequestStatus.PENDING,
                 'bg-green-100 text-green-800': selectedRequest.requestStatus === RequestStatus.APPROVED,
-                'bg-red-100 text-red-800': selectedRequest.requestStatus === RequestStatus.REJECTED
+                'bg-red-100 text-red-800': selectedRequest.requestStatus === RequestStatus.REJECTED,
+                'bg-gray-100 text-gray-800': selectedRequest.requestStatus === RequestStatus.CANCELED,
               }" class="px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full">
                    {{getStatusDisplayName(selectedRequest.requestStatus)}}
               </span>
@@ -354,6 +356,84 @@
         <button (click)="closeDetails()" 
             class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded transition-all duration-200 transform hover:scale-105">
           Back to List
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Confirmation Modal -->
+  <div *ngIf="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-fade-in transform transition-all duration-300">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Cancel Request</h3>
+            <p class="text-sm text-gray-500">This action will cancel your leave request</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6">
+        <div class="mb-4">
+          <p class="text-gray-700 mb-3">
+            Are you sure you want to cancel this leave request?
+          </p>
+          
+          <!-- Request details -->
+          <div *ngIf="requestToCancel" class="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Request ID:</span>
+              <span class="font-medium">#{{requestToCancel.id}}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Type:</span>
+              <span class="font-medium">{{getLeaveRequestTypeName(requestToCancel.leaveRequestTypeId)}}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Dates:</span>
+              <span class="font-medium">{{requestToCancel.startDate | date:'MMM d'}} - {{requestToCancel.endDate | date:'MMM d, y'}}</span>
+            </div>
+            <div class="flex justify-between text-sm" *ngIf="requestToCancel.reason">
+              <span class="text-gray-500">Reason:</span>
+              <span class="font-medium max-w-xs truncate" [title]="requestToCancel.reason">{{requestToCancel.reason}}</span>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="text-sm text-yellow-800">
+                <p class="font-medium">Important:</p>
+                <p>Once cancelled, this request cannot be reactivated. You'll need to submit a new request if needed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+        <button 
+          (click)="closeCancelModal()" 
+          class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200">
+          Keep Request
+        </button>
+        <button 
+          (click)="confirmCancelRequest()" 
+          class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Cancel Request
         </button>
       </div>
     </div>
