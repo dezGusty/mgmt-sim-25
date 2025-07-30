@@ -4,12 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../services/users/users-service';
 import { IUserViewModel } from '../../../view-models/user-view-model';
-import { IUser } from '../../../models/entities/iuser';
+import { IAddUser, IUpdateUser, IUser } from '../../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../../models/responses/iapi-response';
 import { IJobTitle } from '../../../models/entities/ijob-title';
 import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
+import { EmployeeRolesService } from '../../../services/employee-roles/employee-roles';
+import { IEmployeeManager } from '../../../models/entities/iemployee-manager';
+import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -22,7 +25,8 @@ export class AdminUsersList implements OnInit {
   searchTerm: string = '';
   searchBy: string = 'name';
   sortDescending: boolean = false;
-  
+  userRoles: Map<string,number> = new Map();
+
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
@@ -42,20 +46,25 @@ export class AdminUsersList implements OnInit {
     email: '',
     jobTitleId: 0,
     dateOfEmployment: new Date(),
-    leaveDaysLeftCurrentYear: 0,
     isAdmin: false,
     isManager: false,
-    isEmployee: false
   };
 
   jobTitles: IJobTitle[] = [];
   isSubmitting: boolean = false;
   editErrorMessage: string = '';
 
-  constructor(private usersService: UsersService, private jobTitlesService: JobTitlesService) { }
+  employeeRoleInfo: string = 'All the users are automatically set to employees.';
+
+  constructor(private usersService: UsersService,
+              private jobTitlesService: JobTitlesService,
+              private employeeRoleService: EmployeeRolesService) {
+
+  }
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadUserRoles();
   }
 
   loadUsers(): void {
@@ -111,6 +120,18 @@ export class AdminUsersList implements OnInit {
     });
   }
 
+  loadUserRoles() {
+    this.employeeRoleService.getAllEmployeeRoles().subscribe({
+      next: (response: IApiResponse<IEmployeeRole[]>) => {
+        response.data.forEach(er => {
+          this.userRoles.set(er.rolename, er.id);
+        });
+      },
+      error: (error) => {
+        console.error('Error loading user roles:', error);
+      }
+    });
+  }
 
   private handleError(message: string): void {
     this.hasError = true;
@@ -293,10 +314,8 @@ export class AdminUsersList implements OnInit {
       email: user.email,
       jobTitleId: user.jobTitle?.id || 0,
       dateOfEmployment: new Date(),
-      leaveDaysLeftCurrentYear: 0,
       isAdmin: user.roles?.includes("Admin") ? true : false,
       isManager: user.roles?.includes("Manager") ? true : false,
-      isEmployee: user.roles?.includes("Employee") ? true : false
     };
     
     this.editErrorMessage = '';
@@ -324,16 +343,14 @@ export class AdminUsersList implements OnInit {
     this.isSubmitting = true;
     this.editErrorMessage = '';
 
-    const userToUpdate: IUser = {
+    const userToUpdate: IUpdateUser = {
       id: this.editForm.id,
       email: this.editForm.email,
       firstName: this.editForm.firstName,
       lastName: this.editForm.lastName,
       jobTitleId: this.editForm.jobTitleId,
       dateOfEmployment: this.editForm.dateOfEmployment,
-      leaveDaysLeftCurrentYear: this.editForm.leaveDaysLeftCurrentYear,
-      roles: this.getSelectedRoles(),
-      isActive: true
+      employeeRolesIds: this.getSelectedRoles().map(rolename => this.userRoles.get(rolename) || 0),
     };
 
     this.usersService.updateUser(userToUpdate).subscribe({
@@ -359,7 +376,6 @@ export class AdminUsersList implements OnInit {
     const roles: string[] = [];
     if (this.editForm.isAdmin) roles.push('Admin');
     if (this.editForm.isManager) roles.push('Manager');
-    if (this.editForm.isEmployee) roles.push('Employee');
     return roles;
   }
 
@@ -368,8 +384,7 @@ export class AdminUsersList implements OnInit {
       this.editForm.firstName.trim() &&
       this.editForm.lastName.trim() &&
       this.editForm.email.trim() &&
-      this.editForm.jobTitleId > 0 &&
-      (this.editForm.isAdmin || this.editForm.isManager || this.editForm.isEmployee)
+      this.editForm.jobTitleId > 0
     );
   }
 

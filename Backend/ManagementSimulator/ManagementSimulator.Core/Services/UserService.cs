@@ -80,8 +80,6 @@ namespace ManagementSimulator.Core.Services
 
             string temporaryPassword = PasswordGenerator.GenerateSimpleCode();
 
-            double yearsOfEmployment = (DateTime.Now - dto.DateOfEmployment).TotalDays / 365.25;
-
             var user = new User
             {
                 Email = dto.Email,
@@ -89,8 +87,6 @@ namespace ManagementSimulator.Core.Services
                 LastName = dto.LastName,
                 JobTitleId = dto.JobTitleId,
                 Title = jt,
-                AnnuallyLeaveDays = 21 + (int)(yearsOfEmployment) / 10,
-                LeaveDaysLeftCurrentYear = dto.LeaveDaysLeftCurrentYear,
                 DateOfEmployment = dto.DateOfEmployment,
                 MustChangePassword = true,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword)

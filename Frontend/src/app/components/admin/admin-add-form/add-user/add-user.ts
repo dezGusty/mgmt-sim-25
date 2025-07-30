@@ -40,13 +40,11 @@ export class AddUser implements OnInit {
   readonly maxDate: string;
   dateOfEmployment: Date = new Date();
   leaveDaysLeftCurrentYear: number = 0;
-  readonly baseLeaveDays: number = 21; 
-  maxLeaveDays: number = 21;
   isAdmin = false;
   isManager = false;
-  isEmployee = false;
   
-  // Notification system
+  employeeRoleInfo: string = 'All the users are automatically set to employees.';
+  
   notification: NotificationMessage = {
     type: 'info',
     title: '',
@@ -91,7 +89,6 @@ export class AddUser implements OnInit {
     this.leaveDaysLeftCurrentYear = 0;
     this.isAdmin = false;
     this.isManager = false;
-    this.isEmployee = false;
     this.filteredJobTitles = [];
     this.closeDropdown();
   }
@@ -143,10 +140,6 @@ export class AddUser implements OnInit {
 
   isJobTitleFieldValid(): boolean {
     return this.selectedJobTitleId > 0;
-  }
-
-  isRoleFieldValid(): boolean {
-    return this.isAdmin || this.isManager || this.isEmployee;
   }
 
   onSearchTextChange(searchValue: string): void {
@@ -207,59 +200,11 @@ export class AddUser implements OnInit {
   setDateFromInput(dateString: string): void {
     if (dateString) {
       this.dateOfEmployment = new Date(dateString);
-      this.calculateMaxLeaveDays();
     }
-  }
-
-  private calculateMaxLeaveDays(): void {
-    const yearsOfExperience = this.calculateYearsOfExperience();
-    
-    const bonusYearPeriods = Math.floor(yearsOfExperience / 10);
-    const bonusDays = bonusYearPeriods * 4;
-    
-    this.maxLeaveDays = this.baseLeaveDays + bonusDays;
-    
-    console.log(`Years of experience: ${yearsOfExperience}, Bonus periods: ${bonusYearPeriods}, Max leave days: ${this.maxLeaveDays}`);
-  }
-
-  private calculateYearsOfExperience(): number {
-    if (!this.dateOfEmployment) {
-      return 0;
-    }
-    const currentDate = new Date();
-    const employmentDate = new Date(this.dateOfEmployment);
-    
-    let years = currentDate.getFullYear() - employmentDate.getFullYear();
-    
-    const currentMonthDay = currentDate.getMonth() * 100 + currentDate.getDate();
-    const employmentMonthDay = employmentDate.getMonth() * 100 + employmentDate.getDate();
-    
-    if (currentMonthDay < employmentMonthDay) {
-      years--;
-    }
-    
-    return Math.max(0, years);
-  }
-
-  getYearsOfExperienceDisplay(): string {
-    const years = this.calculateYearsOfExperience();
-    return years === 1 ? '1 year' : `${years} years`;
-  }
-
-  getBonusLeaveDaysDisplay(): string {
-    const years = this.calculateYearsOfExperience();
-    const bonusYearPeriods = Math.floor(years / 10);
-    const bonusDays = bonusYearPeriods * 4;
-    
-    if (bonusDays === 0) {
-      return '';
-    }
-    
-    return `(+${bonusDays} bonus days for ${bonusYearPeriods * 10}+ years of service)`;
   }
 
   submit(form: any): void {
-    if (!form.valid || !this.isJobTitleFieldValid() || !this.isRoleFieldValid()) {
+    if (!form.valid || !this.isJobTitleFieldValid()) {
       this.showNotification('error', 'Invalid form', 'Please fill all the mandatory fields!');
       return;
     }
@@ -270,7 +215,6 @@ export class AddUser implements OnInit {
     let roles: number[] = [];
     if (this.isAdmin) roles.push(3);
     if (this.isManager) roles.push(2);
-    if (this.isEmployee) roles.push(1);
     
     const userToAdd: IAddUser = {
       id: 0,
@@ -279,7 +223,6 @@ export class AddUser implements OnInit {
       email: this.email,
       jobTitleId: this.selectedJobTitleId,
       employeeRolesIds: roles,
-      leaveDaysLeftCurrentYear: this.leaveDaysLeftCurrentYear,
       dateOfEmployment: this.dateOfEmployment
     };
 

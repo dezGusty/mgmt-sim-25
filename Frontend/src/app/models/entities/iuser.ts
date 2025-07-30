@@ -16,7 +16,6 @@ export interface IUser {
   managersIds?: number[];
   isActive?: boolean;
   dateOfEmployment?: Date;
-  leaveDaysLeftCurrentYear?: number;
 }
 
 export interface IAddUser {
@@ -27,5 +26,14 @@ export interface IAddUser {
   jobTitleId: number;
   employeeRolesIds: number[];
   dateOfEmployment: Date;
-  leaveDaysLeftCurrentYear: number;
+}
+
+export interface IUpdateUser {
+  id: number;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  jobTitleId?: number;
+  employeeRolesIds?: number[];
+  dateOfEmployment?: Date;
 }
