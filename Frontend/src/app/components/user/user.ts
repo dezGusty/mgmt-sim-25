@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UserRequestForm } from './user-request-form/user-request-form';
 import { UserLeaveBalance } from './user-leave-balance/user-leave-balance';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
@@ -10,11 +11,12 @@ import { ILeaveRequestType } from '../../models/entities/ileave-request-type';
 import { LeaveRequestTypeService } from '../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../models/enums/RequestStatus';
 
+
 @Component({
   selector: 'app-user',
   templateUrl: './user.html',
   styleUrl: './user.css',
-  imports: [CommonModule, UserRequestForm, UserLeaveBalance, CustomNavbar],
+  imports: [CommonModule,FormsModule,  UserRequestForm, UserLeaveBalance, CustomNavbar],
 })
 export class User {
   showRequestForm = false;
@@ -24,6 +26,7 @@ export class User {
   successMessage = '';
 
   RequestStatus = RequestStatus;
+  Math = Math;
   
   requests: LeaveRequest[] = [];
   filteredRequests: LeaveRequest[] = [];
@@ -36,6 +39,12 @@ export class User {
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
+
+  // Pagination properties
+  currentPage = 1;
+  itemsPerPage = 5;
+  totalPages = 0;
+  paginatedRequests: LeaveRequest[] = [];
 
   constructor(
     private router: Router,
@@ -79,7 +88,7 @@ export class User {
     this.showSuccessMessage = false;
   }
 
-  // My Requests List
+  // My Requests List methods
   loadRequests() {
     this.isLoading = true;
     this.errorMessage = '';
@@ -88,6 +97,7 @@ export class User {
       next: (data) => {       
         this.requests = data.data;
         this.filteredRequests = [...this.requests];
+        this.updatePagination(); // Add this line
         this.isLoading = false;
       },
       error: (err) => {
@@ -146,6 +156,8 @@ export class User {
     this.showListModal = false;
   }
 
+ 
+
   getLeaveRequestTypeName(typeId: number): string {
     if (this.isLoadingTypes) {
       return 'Loading...';
@@ -185,13 +197,17 @@ export class User {
     let results = this.requests;
     
     // Apply status filter
-     if (this.statusFilter !== 'all') {
+    if (this.statusFilter !== 'all') {
       results = results.filter(req => {
         switch (this.statusFilter) {
-          case 'pending': return req.requestStatus === RequestStatus.PENDING;
-          case 'approved': return req.requestStatus === RequestStatus.APPROVED;
-          case 'rejected': return req.requestStatus === RequestStatus.REJECTED;
-          default: return true;
+          case 'pending':
+            return req.requestStatus === this.RequestStatus.PENDING;
+          case 'approved':
+            return req.requestStatus === this.RequestStatus.APPROVED;
+          case 'rejected':
+            return req.requestStatus === this.RequestStatus.REJECTED;
+          default:
+            return true;
         }
       });
     }
@@ -199,17 +215,81 @@ export class User {
     // Apply search term
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
-      results = results.filter(req => {
-          const typeName = this.getLeaveRequestTypeName(req.leaveRequestTypeId).toLowerCase();
-          return (
-            typeName.includes(term) ||
-            req.reason?.toLowerCase().includes(term) ||
-            req.id?.toString().includes(term)
-          );
-      });
+      results = results.filter(req => 
+        req.reason?.toLowerCase().includes(term) ||
+        req.id?.toString().includes(term) ||
+        this.getLeaveRequestTypeName(req.leaveRequestTypeId).toLowerCase().includes(term)
+      );
     }
     
     this.filteredRequests = results;
+    this.currentPage = 1; // Reset to first page when filtering
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredRequests.length / this.itemsPerPage);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    
+    this.paginatedRequests = this.filteredRequests.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  goToPreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  goToNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    
+    if (this.totalPages <= maxVisible) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (this.currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push(-1); // Ellipsis
+        pages.push(this.totalPages);
+      } else if (this.currentPage >= this.totalPages - 2) {
+        pages.push(1);
+        pages.push(-1); // Ellipsis
+        for (let i = this.totalPages - 3; i <= this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push(-1); // Ellipsis
+        for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(-1); // Ellipsis
+        pages.push(this.totalPages);
+      }
+    }
+    
+    return pages;
   }
 
   closeDetails() {
