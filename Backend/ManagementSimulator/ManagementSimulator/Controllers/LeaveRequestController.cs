@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
+using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Services;
 using ManagementSimulator.Core.Services.Interfaces;
@@ -59,6 +60,22 @@ namespace ManagementSimulator.API.Controllers
                 {
                     Message = ex.Message,
                     Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (InsufficientLeaveDaysException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = new
+                    {
+                        UserId = ex.UserId,
+                        LeaveRequestTypeId = ex.LeaveRequestTypeId,
+                        RequestedDays = ex.RequestedDays,
+                        RemainingDays = ex.RemainingDays
+                    },
                     Success = false,
                     Timestamp = DateTime.UtcNow
                 });
@@ -125,6 +142,22 @@ namespace ManagementSimulator.API.Controllers
                 {
                     Message = ex.Message,
                     Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (InsufficientLeaveDaysException ex)
+            {
+                return BadRequest(new
+                {
+                    Message = ex.Message,
+                    Data = new
+                    {
+                        UserId = ex.UserId,
+                        LeaveRequestTypeId = ex.LeaveRequestTypeId,
+                        RequestedDays = ex.RequestedDays,
+                        RemainingDays = ex.RemainingDays
+                    },
                     Success = false,
                     Timestamp = DateTime.UtcNow
                 });
@@ -403,6 +436,124 @@ namespace ManagementSimulator.API.Controllers
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });
+        }
+
+        [HttpGet("remaining-days/{userId}/{leaveRequestTypeId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetRemainingLeaveDaysAsync(int userId, int leaveRequestTypeId, [FromQuery] int? year = null)
+        {
+            try
+            {
+                var currentYear = year ?? DateTime.Now.Year;
+                var remainingDays = await _leaveRequestService.GetRemainingLeaveDaysAsync(userId, leaveRequestTypeId, currentYear);
+                
+                return Ok(new
+                {
+                    Message = "Remaining leave days retrieved successfully.",
+                    Data = remainingDays,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    Message = ex.Message,
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving remaining leave days");
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while retrieving remaining leave days.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpGet("remaining-days-for-period/{userId}/{leaveRequestTypeId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetRemainingLeaveDaysForPeriodAsync(int userId, int leaveRequestTypeId, [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            try
+            {
+                if (!DateTime.TryParse(startDate, out DateTime parsedStartDate))
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Invalid start date format. Please use YYYY-MM-DD format.",
+                        Data = new object(),
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                if (!DateTime.TryParse(endDate, out DateTime parsedEndDate))
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Invalid end date format. Please use YYYY-MM-DD format.",
+                        Data = new object(),
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                if (parsedEndDate < parsedStartDate)
+                {
+                    return BadRequest(new
+                    {
+                        Message = "End date cannot be before start date.",
+                        Data = new object(),
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var remainingDays = await _leaveRequestService.GetRemainingLeaveDaysForPeriodAsync(userId, leaveRequestTypeId, parsedStartDate, parsedEndDate);
+                
+                return Ok(new
+                {
+                    Message = "Remaining leave days for period calculated successfully.",
+                    Data = remainingDays,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    Message = ex.Message,
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while calculating remaining leave days for period");
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while calculating remaining leave days for the specified period.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
+import { LeaveRequestService } from '../../../../services/leaveRequest/leaveRequest.service';
 import { FormUtils } from '../../../../utils/form.utils';
 
 @Component({
@@ -11,7 +12,12 @@ import { FormUtils } from '../../../../utils/form.utils';
   imports: [CommonModule, FormsModule],
   templateUrl: './add-request-form.html',
   styleUrl: './add-request-form.css',
-  providers: [LeaveRequestTypeService, EmployeeService, LeaveRequests],
+  providers: [
+    LeaveRequestTypeService,
+    EmployeeService,
+    LeaveRequests,
+    LeaveRequestService,
+  ],
 })
 export class AddRequestForm implements OnInit {
   showForm = true;
@@ -25,16 +31,70 @@ export class AddRequestForm implements OnInit {
   showValidationErrors = false;
   errorMessage = '';
 
+  remainingDaysInfo: any = null;
+  isCalculatingBalance = false;
+  balanceCalculated = false;
+  private calculationTimeout: any;
+
   leaveTypes: { id: number; title: string }[] = [];
   employees: { id: number; name: string }[] = [];
+
+  Math = Math;
 
   @Output() close = new EventEmitter<void>();
   @Output() requestAdded = new EventEmitter<any>();
 
+  get canSubmitRequest(): boolean {
+    if (
+      !this.userId ||
+      !this.leaveRequestTypeId ||
+      !this.startDate ||
+      !this.endDate
+    ) {
+      return false;
+    }
+
+    if (this.isCalculatingBalance) {
+      return false;
+    }
+
+    if (!this.balanceCalculated) {
+      return false;
+    }
+
+    return true;
+  }
+
+  getSubmitButtonText(): string {
+    if (this.isSubmitting) {
+      return 'Adding Request...';
+    }
+
+    if (this.isCalculatingBalance) {
+      return 'Calculating...';
+    }
+
+    if (
+      !this.userId ||
+      !this.leaveRequestTypeId ||
+      !this.startDate ||
+      !this.endDate
+    ) {
+      return 'Add Request';
+    }
+
+    if (!this.balanceCalculated) {
+      return 'Validating...';
+    }
+
+    return 'Add Request';
+  }
+
   constructor(
     private leaveTypeService: LeaveRequestTypeService,
     private employeeService: EmployeeService,
-    private leaveRequests: LeaveRequests
+    private leaveRequests: LeaveRequests,
+    private leaveRequestService: LeaveRequestService
   ) {}
 
   ngOnInit() {
@@ -54,10 +114,68 @@ export class AddRequestForm implements OnInit {
       this.endDate = '';
     }
     this.errorMessage = '';
+    this.calculateRemainingDays();
   }
 
   onEndDateChange() {
     this.errorMessage = '';
+    this.calculateRemainingDays();
+  }
+
+  onUserChange() {
+    this.calculateRemainingDays();
+  }
+
+  onLeaveTypeChange() {
+    this.calculateRemainingDays();
+  }
+
+  calculateRemainingDays() {
+    if (this.calculationTimeout) {
+      clearTimeout(this.calculationTimeout);
+    }
+
+    this.remainingDaysInfo = null;
+    this.balanceCalculated = false;
+
+    if (
+      !this.userId ||
+      !this.leaveRequestTypeId ||
+      !this.startDate ||
+      !this.endDate
+    ) {
+      this.isCalculatingBalance = false;
+      return;
+    }
+
+    this.isCalculatingBalance = true;
+
+    this.calculationTimeout = setTimeout(() => {
+      this.leaveRequestService
+        .getRemainingLeaveDaysForPeriod(
+          this.userId!,
+          this.leaveRequestTypeId!,
+          this.startDate,
+          this.endDate
+        )
+        .subscribe({
+          next: (response) => {
+            this.isCalculatingBalance = false;
+            this.balanceCalculated = true;
+            if (response.success && response.data) {
+              this.remainingDaysInfo = response.data;
+            } else {
+              this.remainingDaysInfo = null;
+            }
+          },
+          error: (err) => {
+            this.isCalculatingBalance = false;
+            this.balanceCalculated = false;
+            console.error('Error calculating remaining days:', err);
+            this.remainingDaysInfo = null;
+          },
+        });
+    }, 300);
   }
 
   handleSubmit() {
@@ -108,6 +226,10 @@ export class AddRequestForm implements OnInit {
   }
 
   handleClose() {
+    if (this.calculationTimeout) {
+      clearTimeout(this.calculationTimeout);
+    }
+
     this.userId = null;
     this.leaveRequestTypeId = null;
     this.startDate = '';
@@ -115,6 +237,9 @@ export class AddRequestForm implements OnInit {
     this.reason = '';
     this.showValidationErrors = false;
     this.errorMessage = '';
+    this.remainingDaysInfo = null;
+    this.isCalculatingBalance = false;
+    this.balanceCalculated = false;
     this.close.emit();
   }
 }

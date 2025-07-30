@@ -8,7 +8,6 @@
     </h2>
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
-      <!-- Error message display -->
       <div
         *ngIf="errorMessage"
         class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4"
@@ -25,6 +24,7 @@
           name="userId"
           class="w-full px-3 py-2 border rounded bg-gray-50"
           [class.border-red-500]="!userId && showValidationErrors"
+          (change)="onUserChange()"
         >
           <option [value]="null" disabled selected>Select employee</option>
           <option *ngFor="let employee of employees" [value]="employee.id">
@@ -47,6 +47,7 @@
           name="leaveRequestTypeId"
           class="w-full px-3 py-2 border rounded bg-gray-50"
           [class.border-red-500]="!leaveRequestTypeId && showValidationErrors"
+          (change)="onLeaveTypeChange()"
         >
           <option [value]="null" disabled selected>Select leave type</option>
           <option *ngFor="let type of leaveTypes" [value]="type.id">
@@ -102,6 +103,93 @@
           </div>
         </div>
       </div>
+
+      <div
+        class="leave-balance-container"
+        [class.show]="isCalculatingBalance || balanceCalculated"
+      >
+        <div class="leave-balance-content p-4 border rounded-lg bg-gray-50">
+          <div
+            *ngIf="isCalculatingBalance"
+            class="flex items-center gap-2 text-blue-600 calculating-indicator"
+          >
+            <div
+              class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"
+            ></div>
+            <span class="text-sm">Calculating remaining days...</span>
+          </div>
+
+          <div
+            *ngIf="!isCalculatingBalance && remainingDaysInfo"
+            class="space-y-2"
+          >
+            <h4 class="font-semibold text-gray-700">
+              Leave Balance Information
+            </h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-gray-600">Leave Type:</span>
+                <span class="font-medium ml-2">{{
+                  remainingDaysInfo.leaveRequestTypeName
+                }}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">Max Days Allowed:</span>
+                <span class="font-medium ml-2">
+                  {{
+                    remainingDaysInfo.hasUnlimitedDays
+                      ? "Unlimited"
+                      : remainingDaysInfo.maxDaysAllowed
+                  }}
+                </span>
+              </div>
+              <div>
+                <span class="text-gray-600"
+                  >Days Used (including this request):</span
+                >
+                <span class="font-medium ml-2">{{
+                  remainingDaysInfo.daysUsed
+                }}</span>
+              </div>
+              <div
+                [class]="
+                  remainingDaysInfo.remainingDays < 0
+                    ? 'text-red-600'
+                    : 'text-green-600'
+                "
+              >
+                <span class="text-gray-600">Remaining Days:</span>
+                <span class="font-bold ml-2">
+                  {{
+                    remainingDaysInfo.hasUnlimitedDays
+                      ? "Unlimited"
+                      : remainingDaysInfo.remainingDays
+                  }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngIf="
+                !remainingDaysInfo.hasUnlimitedDays &&
+                remainingDaysInfo.remainingDays < 0
+              "
+              class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mt-2"
+            >
+              <strong>Warning:</strong> This request exceeds the available leave
+              days by {{ Math.abs(remainingDaysInfo.remainingDays) }} day(s).
+            </div>
+          </div>
+
+          <div
+            *ngIf="!isCalculatingBalance && !remainingDaysInfo"
+            class="text-red-600 text-sm"
+          >
+            Unable to calculate leave balance. Please check the selected values.
+          </div>
+        </div>
+      </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1"
           >Reason for Leave</label
@@ -114,13 +202,37 @@
           placeholder="Optional: Provide a reason for the leave request"
         ></textarea>
       </div>
+      <div
+        *ngIf="
+          userId &&
+          leaveRequestTypeId &&
+          startDate &&
+          endDate &&
+          (isCalculatingBalance || !balanceCalculated)
+        "
+        class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded"
+      >
+        <div class="flex items-center">
+          <div
+            class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"
+          ></div>
+          <span class="text-sm">
+            {{
+              isCalculatingBalance
+                ? "Calculating available leave days..."
+                : "Please wait for leave balance calculation..."
+            }}
+          </span>
+        </div>
+      </div>
+
       <div class="flex gap-3 pt-4 border-t">
         <button
           type="submit"
-          [disabled]="isSubmitting"
-          class="flex-1 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="isSubmitting || !canSubmitRequest"
+          class="flex-1 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {{ isSubmitting ? "Adding Request..." : "Add Request" }}
+          {{ getSubmitButtonText() }}
         </button>
         <button
           type="button"

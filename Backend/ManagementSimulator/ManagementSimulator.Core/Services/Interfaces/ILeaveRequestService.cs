@@ -1,5 +1,6 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
+using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Database.Entities;
@@ -23,7 +24,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto);
         Task<bool> DeleteLeaveRequestAsync(int id);
         Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId);
-
+        Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysAsync(int userId, int leaveRequestTypeId, int year);
+        Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysForPeriodAsync(int userId, int leaveRequestTypeId, DateTime startDate, DateTime endDate);
     }
 
 }
