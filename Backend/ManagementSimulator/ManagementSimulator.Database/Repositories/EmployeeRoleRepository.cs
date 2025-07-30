@@ -40,6 +40,15 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(eru => eru.UsersId == userId && eru.RolesId == roleId);
         }
 
+        public Task<int> GetEmployeeRoleUserByNameAsync(string name, bool includeDeleted = false)
+        {
+            IQueryable<EmployeeRole> query = _dbContext.EmployeeRoles;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            return query.Where(eru => eru.Rolename == name).Select(eru => eru.Id).FirstOrDefaultAsync();
+        }
+
         public async Task<List<EmployeeRoleUser>> GetEmployeeRoleUsersByUserIdAsync(int userId, bool includeDeleted = false)
         {
             IQueryable<EmployeeRoleUser> query = _dbContext.EmployeeRolesUsers;

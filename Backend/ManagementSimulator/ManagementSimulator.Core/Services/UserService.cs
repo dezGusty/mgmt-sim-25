@@ -98,6 +98,14 @@ namespace ManagementSimulator.Core.Services
 
             await _userRepository.AddAsync(user);
 
+            // User shall always be at least employee
+            EmployeeRoleUser eru = new EmployeeRoleUser
+            {
+                UsersId = user.Id,
+                RolesId = await _employeeRoleRepository.GetEmployeeRoleUserByNameAsync("Employee")
+            };
+            await _employeeRoleRepository.AddEmployeeRoleUserAsync(eru);
+
             foreach (var roleId in dto.EmployeeRolesId.Distinct())
             {
                 var role = await _employeeRoleRepository.GetFirstOrDefaultAsync(roleId);

@@ -162,6 +162,7 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
+                                     .Include(u => u.Roles)
                                      .Include(u => u.Subordinates)
                                         .ThenInclude(subordinates => subordinates.Employee)
                                             .ThenInclude(e => e.Title)

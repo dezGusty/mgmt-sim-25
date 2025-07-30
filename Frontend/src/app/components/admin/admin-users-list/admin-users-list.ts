@@ -30,7 +30,7 @@ export class AdminUsersList implements OnInit {
   isLoading: boolean = false;
   hasError: boolean = false;
   errorMessage: string = '';
-  hasSearched: boolean = false; // Track if a search has been performed
+  hasSearched: boolean = false;
 
   showEditModal = false;
   userToEdit: IUserViewModel | null = null;
@@ -169,6 +169,7 @@ export class AdminUsersList implements OnInit {
           name: user.departmentName || 'Unknown'
         }
       } : undefined,    
+      roles: user.roles,
       status: user.isActive ? 'active' : 'inactive',
       avatar: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=20B486&color=fff`
     };
@@ -293,9 +294,9 @@ export class AdminUsersList implements OnInit {
       jobTitleId: user.jobTitle?.id || 0,
       dateOfEmployment: new Date(),
       leaveDaysLeftCurrentYear: 0,
-      isAdmin: false,
-      isManager: false,
-      isEmployee: false
+      isAdmin: user.roles?.includes("Admin") ? true : false,
+      isManager: user.roles?.includes("Manager") ? true : false,
+      isEmployee: user.roles?.includes("Employee") ? true : false
     };
     
     this.editErrorMessage = '';
