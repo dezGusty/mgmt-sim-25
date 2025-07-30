@@ -9,6 +9,7 @@ using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
+using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 
 namespace ManagementSimulator.Core.Services
@@ -20,19 +21,22 @@ namespace ManagementSimulator.Core.Services
         private readonly IEmployeeRoleRepository _employeeRoleRepository;
         private readonly IDeparmentRepository _deparmentRepository;
         private readonly IEmailService _emailService;
+        private readonly IMemoryCache _cache;
 
         public UserService(
             IUserRepository userRepository,
             IJobTitleRepository jobTitleRepository,
             IEmployeeRoleRepository employeeRoleRepository,
             IDeparmentRepository deparmentRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            IMemoryCache cache)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
             _jobTitleRepository = jobTitleRepository;
             _deparmentRepository = deparmentRepository;
             _emailService = emailService;
+            _cache = cache;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -149,6 +153,63 @@ namespace ManagementSimulator.Core.Services
             }
 
             return user.ToUserResponseDto();
+        }
+
+        public async Task<bool> SendPasswordResetCodeAsync(string email)
+        {
+            var user = await _userRepository.GetUserByEmail(email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var resetCode = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            var cacheKey = $"reset_code_{resetCode}";
+            _cache.Set(cacheKey, email, TimeSpan.FromMinutes(15));
+
+            try
+            {
+                await _emailService.SendPasswordResetCodeAsync(email, user.FirstName, resetCode);
+                return true;
+            }
+            catch (Exception)
+            {
+                _cache.Remove(cacheKey);
+                throw;
+            }
+        }
+
+        public async Task<bool> ResetPasswordWithCodeAsync(string verificationCode, string newPassword)
+        {
+            var cacheKey = $"reset_code_{verificationCode}";
+
+            if (_cache.TryGetValue(cacheKey, out string email))
+            {
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user != null)
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                    user.MustChangePassword = false; 
+                    user.ModifiedAt = DateTime.UtcNow;
+
+                    await _userRepository.SaveChangesAsync();
+
+                    _cache.Remove(cacheKey);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _userRepository.GetUserByEmail(email);
         }
 
         public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)

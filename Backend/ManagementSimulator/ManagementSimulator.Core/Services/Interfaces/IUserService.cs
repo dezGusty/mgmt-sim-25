@@ -27,5 +27,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto request);
         Task<bool> DeleteUserAsync(int id);
         Task RestoreUserByIdAsync(int id);
+        Task<bool> SendPasswordResetCodeAsync(string email);
+        Task<bool> ResetPasswordWithCodeAsync(string verificationCode, string newPassword);
+        Task<User?> GetUserByEmailAsync(string email);
     }
 }

@@ -56,7 +56,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task SendWelcomeEmailWithPasswordAsync(string email, string firstName, string temporaryPassword)
         {
-            var subject = "Contul dvs. a fost creat - Schimbați parola";
+            var subject = "Contul dvs. a fost creat";
 
             var body = $@"
         <!DOCTYPE html>
@@ -106,19 +106,17 @@ namespace ManagementSimulator.Core.Services
                     <p><strong>Account details:</strong></p>
                     <ul>
                         <li><strong>Email:</strong> {email}</li>
-                        <li><strong>Temporary password:</strong></li>
                     </ul>
             
-                    <div class='password-box'>
-                        {temporaryPassword}
-                    </div>
-            
-                    <p><strong>Steps for first login:</strong></p>
+                    <p><strong>Steps for login:</strong></p>
                     <ol>
-                        <li>Access the system using the email and password above</li>
-                        <li>Enter a new and secure password</li>
-                        <li>Confirm the new password</li>
+                        <li>Access the application and click on <strong>Reset password</strong> in the bottom-right corner</li>
+                        <li>Enter the email address on which you received this message</li>
+                        <li>Click on the <strong>Send Reset Code</strong> button</li>
+                        <li>Enter the code received along with your new password</li>
+                        <li>After redirection, enter your email and new password on the login page</li>
                     </ol>
+
             
                     <p>If you have any questions or issues, please contact us.</p>
             
@@ -131,6 +129,82 @@ namespace ManagementSimulator.Core.Services
             </div>
         </body>
         </html>";
+
+            await SendEmailAsync(email, subject, body);
+        }
+
+        // ...existing code...
+
+        public async Task SendPasswordResetCodeAsync(string email, string firstName, string resetCode)
+        {
+            var subject = "Cod de resetare parolă - Siemens MGMT";
+
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background-color: #f8f9fa; padding: 20px; text-align: center; }}
+            .content {{ padding: 20px; }}
+            .password-box {{ 
+                background-color: #e9ecef; 
+                border: 1px solid #ced4da; 
+                padding: 15px; 
+                margin: 20px 0; 
+                font-family: monospace; 
+                font-size: 16px;
+                border-radius: 5px;
+            }}
+            .warning {{ 
+                background-color: #fff3cd; 
+                border: 1px solid #ffeaa7; 
+                padding: 15px; 
+                margin: 20px 0; 
+                border-radius: 5px;
+            }}
+            .footer {{ 
+                background-color: #f8f9fa; 
+                padding: 15px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: #6c757d;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Password Reset - Siemens MGMT</h2>
+            </div>
+    
+            <div class='content'>
+                <p>Hello <strong>{firstName}</strong>,</p>
+        
+                <p>You have requested to reset your password.</p>
+        
+                <p><strong>Your verification code:</strong></p>
+        
+                <div class='password-box'>
+                    {resetCode}
+                </div>
+        
+                <div class='warning'>
+                    <strong>Important:</strong> This code is valid for 15 minutes.
+                </div>
+        
+                <p>Use this code on the reset password page to set your new password.</p>
+        
+                <p>Best regards,<br>The Siemens MGMT Team</p>
+            </div>
+    
+            <div class='footer'>
+                <p>This email was generated automatically. Please do not reply to this message.</p>
+            </div>
+        </div>
+    </body>
+    </html>";
 
             await SendEmailAsync(email, subject, body);
         }
