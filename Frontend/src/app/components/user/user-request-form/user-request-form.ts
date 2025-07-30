@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
+import { CreateLeaveRequestByEmployeeDto, LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
 import { LeaveRequest } from '../../../models/entities/iLeave-request';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
@@ -47,7 +47,6 @@ export class UserRequestForm {
 
   onStartDateChange() {
     if (this.endDate && this.endDate < this.startDate) {
-      console.log('⚠️ End date is before start date, resetting...');
       this.endDate = '';
     }
   }
@@ -136,29 +135,29 @@ export class UserRequestForm {
       return;
     }
 
+    if (!this.leaveRequestTypeId || this.leaveRequestTypeId === 0) {
+      this.errorMessage = 'Please select a leave request type.';
+      return;
+    }
 
     this.isSubmitting = true;
     this.errorMessage = '';
-    
-    const userId = 1; 
-    console.log('Using userId:', userId);
-    
-    const newRequest: LeaveRequest = {
-      id: 0, 
-      userId,
+
+    const requestDto: CreateLeaveRequestByEmployeeDto = {
       leaveRequestTypeId: this.leaveRequestTypeId,
-      startDate: new Date(this.startDate),
-      endDate: new Date(this.endDate),
-      reason: this.reason,
+      startDate: this.startDate, 
+      endDate: this.endDate,    
+      reason: this.reason || undefined,
       requestStatus: RequestStatus.PENDING, 
     };
     
-    this.leaveRequestService.addLeaveRequest(newRequest).subscribe({
-      next: (createdRequest) => {
+   
+    this.leaveRequestService.addLeaveRequestByEmployee(requestDto).subscribe({
+      next: (response) => {
         this.isSubmitting = false;
-        
-        this.requestSubmitted.emit(createdRequest.data);
-        
+
+        this.requestSubmitted.emit(response.data);
+
         setTimeout(() => {
           this.resetFormSmooth();
         }, 300); 
@@ -175,7 +174,16 @@ export class UserRequestForm {
           error: err.error
         });
         this.isSubmitting = false;
-        this.errorMessage = err.error?.message || 'An error occurred while submitting the request.';
+
+        if (err.status === 401) {
+          this.errorMessage = 'You are not authorized. Please log in again.';
+        } else if (err.status === 400) {
+          this.errorMessage = err.error?.message || 'Invalid request data.';
+        } else if (err.status === 404) {
+          this.errorMessage = 'Service not found. Please contact support.';
+        } else {
+          this.errorMessage = err.error?.message || 'An error occurred while submitting the request.';
+        }
       }
     });
   }
