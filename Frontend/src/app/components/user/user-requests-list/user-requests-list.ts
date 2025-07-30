@@ -33,28 +33,23 @@ export class UserRequestsList implements OnInit {
   constructor(
     private leaveRequestService: LeaveRequestService,
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {
-    console.log('📋 UserRequestsList component initialized');
-  }
+  ) 
+  {}
 
   ngOnInit() {
-    console.log('🎯 UserRequestsList ngOnInit called');
     this.loadLeaveRequestTypes();
     this.loadRequests();
   }
 
   loadLeaveRequestTypes() {
-    console.log('📥 Loading leave request types from database...');
     this.isLoadingTypes = true;
     
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
-        console.log('✅ Leave request types loaded:', types);
         this.leaveRequestTypes = types.data;
         this.isLoadingTypes = false;
       },
       error: (err) => {
-        console.error('❌ Error loading leave request types:', err);
         this.isLoadingTypes = false;
         this.errorMessage = 'Failed to load leave request types.';
       }
@@ -71,44 +66,49 @@ export class UserRequestsList implements OnInit {
   }
 
   loadRequests() {
-    console.log('📥 Loading user requests...');
     this.isLoading = true;
-    const userId = 1; 
-    console.log('👤 Loading requests for userId:', userId);
+    this.errorMessage = '';
 
-    this.leaveRequestService.getUserLeaveRequests(userId).subscribe({
-      next: (data) => {
-        console.log('✅ Requests loaded successfully!', data);
-        console.log('📊 Number of requests:', data.data.length);
+    this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
+      next: (data) => {       
         this.requests = data.data;
         this.filteredRequests = [...this.requests];
         this.isLoading = false;
-        console.log('📋 Filtered requests:', this.filteredRequests);
       },
       error: (err) => {
-        console.error('❌ Error loading requests:', err);
-        console.error('❌ Error details:', {
+        console.error('Error loading requests:', err);
+        console.error('Error details:', {
           message: err.message,
           status: err.status,
           statusText: err.statusText,
           error: err.error
         });
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Failed to load requests.';
+
+        if (err.status === 401) {
+          this.errorMessage = 'You are not authorized. Please log in again.';
+        } else if (err.status === 404) {
+          this.errorMessage = 'No leave requests found.';
+        } else if (err.status === 400) {
+          this.errorMessage = err.error?.message || 'Invalid request.';
+        } else {
+          this.errorMessage = err.error?.message || 'Failed to load requests.';
+        }
       }
     })
   }
 
+  refreshRequests() {
+    this.loadRequests();
+  }
+
   setStatusFilter(status: 'all' | 'pending' | 'approved' | 'rejected') {
-    console.log('🔍 Setting status filter to:', status);
     this.statusFilter = status;
     this.filterRequests();
   }
 
-  
 
   filterRequests() {
-    console.log('🔍 Filtering requests with status:', this.statusFilter, 'and search term:', this.searchTerm);
     let results = this.requests;
     
     // Apply status filter
@@ -137,7 +137,6 @@ export class UserRequestsList implements OnInit {
     }
     
     this.filteredRequests = results;
-    console.log('📊 Filtered results count:', this.filteredRequests.length);
   }
 
   getStatusDisplayName(status: RequestStatus): string {
@@ -154,32 +153,25 @@ export class UserRequestsList implements OnInit {
     }
 
   viewDetails(request: LeaveRequest) {
-    console.log('👁️ Viewing details for request:', request);
     this.selectedRequest = {...request};
     this.showListModal = false;
   }
 
   closeDetails() {
-    console.log('❌ Closing request details');
     this.selectedRequest = null;
     this.showListModal = true;
   }
 
   cancelRequest(request: LeaveRequest) {
-    console.log('🗑️ Attempting to cancel request:', request);
     if (confirm('Are you sure you want to cancel this request?')) {
       if(!request.id) {
-        console.error('❌ Cannot cancel request - no ID found');
         return;
       }
 
-      console.log('🔗 Calling leaveRequestService.cancelLeaveRequest() for ID:', request.id);
       this.leaveRequestService.cancelLeaveRequest(request.id).subscribe({
         next: () => {
-          console.log('✅ Request cancelled successfully');
           const index = this.requests.findIndex(r => r.id === request.id);
           if (index !== -1) {
-            console.log('🔄 Removing request from local array at index:', index);
             this.requests.splice(index, 1);
             this.filterRequests();
             
@@ -190,7 +182,6 @@ export class UserRequestsList implements OnInit {
           }
         },
         error: (err) => {
-          console.error('❌ Error cancelling request:', err);
           this.errorMessage = err.error?.message || 'Failed to cancel request.';
         }
       });
