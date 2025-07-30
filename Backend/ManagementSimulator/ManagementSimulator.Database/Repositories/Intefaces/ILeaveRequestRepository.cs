@@ -10,7 +10,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface ILeaveRequestRepository : IBaseRepostory<LeaveRequest>
     {
-        Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters);
+        Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters, bool includeDeleted = false);
         Task<List<LeaveRequest>> GetOverlappingRequestsAsync(int userId, DateTime startDate, DateTime endDate);
     }
 }

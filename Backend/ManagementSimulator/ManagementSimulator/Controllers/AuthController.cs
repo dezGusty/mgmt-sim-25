@@ -5,6 +5,7 @@ using ManagementSimulator.Core.Dtos.Requests.ResetPassword;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
