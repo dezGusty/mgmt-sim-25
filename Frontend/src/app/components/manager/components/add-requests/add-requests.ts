@@ -7,6 +7,7 @@ import { ILeaveRequest } from '../../../../models/leave-request';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
+import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 
 @Component({
   selector: 'app-add-requests',
@@ -23,7 +24,10 @@ export class AddRequests implements OnInit {
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
 
-  constructor(private leaveRequests: LeaveRequests) {}
+  constructor(
+    private leaveRequests: LeaveRequests,
+    private leaveRequestTypeService: LeaveRequestTypeService
+  ) {}
 
   ngOnInit() {
     this.loadRequests();
@@ -32,22 +36,32 @@ export class AddRequests implements OnInit {
   public loadRequests() {
     this.leaveRequests.fetchByManager().subscribe((apiData) => {
       if (apiData.success && Array.isArray(apiData.data)) {
-        this.requests = apiData.data
-          .map((item: any) => ({
-            id: String(item.id),
-            employeeName: item.fullName,
-            status: StatusUtils.mapStatus(item.requestStatus),
-            from: DateUtils.formatDate(item.startDate),
-            to: DateUtils.formatDate(item.endDate),
-            days: DateUtils.calcDays(item.startDate, item.endDate),
-            reason: item.reason,
-            createdAt: DateUtils.formatDate(item.createdAt),
-            comment: item.reviewerComment,
-            createdAtDate: new Date(item.createdAt),
-          }))
-          .sort(
-            (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-          );
+        const requestsRaw = apiData.data;
+        this.requests = [];
+        requestsRaw.forEach((item: any) => {
+          this.leaveRequestTypeService
+            .getLeaveRequestTypeById(item.leaveRequestTypeId)
+            .subscribe((typeRes) => {
+              const leaveTypeDescription = typeRes?.data?.description || '';
+              this.requests.push({
+                id: String(item.id),
+                employeeName: item.fullName,
+                status: StatusUtils.mapStatus(item.requestStatus),
+                from: DateUtils.formatDate(item.startDate),
+                to: DateUtils.formatDate(item.endDate),
+                days: DateUtils.calcDays(item.startDate, item.endDate),
+                reason: item.reason,
+                createdAt: DateUtils.formatDate(item.createdAt),
+                comment: item.reviewerComment,
+                createdAtDate: new Date(item.createdAt),
+                leaveTypeDescription: leaveTypeDescription,
+              });
+
+              this.requests.sort(
+                (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
+              );
+            });
+        });
       }
     });
   }
