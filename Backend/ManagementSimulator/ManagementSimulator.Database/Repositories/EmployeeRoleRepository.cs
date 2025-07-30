@@ -31,6 +31,15 @@ namespace ManagementSimulator.Database.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<List<EmployeeRole>> GetAllUserRolesAsync(bool includeDeleted = false)
+        {
+            IQueryable<EmployeeRole> query = _dbContext.EmployeeRoles;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            return await query.ToListAsync();
+        }
+
         public async Task<EmployeeRoleUser?> GetEmployeeRoleUserAsync(int userId, int roleId, bool includeDeleted = false)
         {
             IQueryable<EmployeeRoleUser> query = _dbContext.EmployeeRolesUsers;

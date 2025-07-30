@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IAddUser, IUser } from '../../models/entities/iuser';
+import { IAddUser, IUpdateUser, IUser } from '../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
@@ -98,7 +98,7 @@ export class UsersService {
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/includeRelationships/queried`, { params: paramsToSend });
   }
 
-  updateUser(user: IUser): Observable<IApiResponse<IUser>> {
+  updateUser(user: IUpdateUser): Observable<IApiResponse<IUser>> {
     return this.http.patch<IApiResponse<IUser>>(`${this.baseUrl}/${user.id}`, user);
   }
 

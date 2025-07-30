@@ -179,13 +179,6 @@
                    style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
                    required>
             
-            <!-- Experience Info -->
-            <div *ngIf="dateOfEmployment" 
-                 class="mt-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded"
-                 style="color: #2563eb; font-size: 0.75rem; margin-top: 4px; background: #eff6ff; padding: 4px 8px; border-radius: 4px; border: 1px solid #dbeafe;">
-                Experience: {{getYearsOfExperienceDisplay()}} {{getBonusLeaveDaysDisplay()}}
-            </div>
-            
             <div *ngIf="isFieldInvalid(DateOfEmploymentField)" 
                  class="mt-1 text-sm text-red-600 animate-pulse"
                  style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
@@ -356,35 +349,12 @@
                         Manager
                     </label>
                 </div>
-                
-                <!-- Employee Checkbox -->
-                <div class="flex items-center bg-white p-3 rounded-lg border border-gray-200 hover:border-[#20B486] transition-all duration-200"
-                     style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
-                    <input type="checkbox"
-                           id="employeeRole"
-                           name="employeeRole"
-                           [(ngModel)]="isEmployee"
-                           #employeeRoleField="ngModel"
-                           class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
-                           style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
-                    <label for="employeeRole" 
-                           class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
-                           style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
-                        Employee
-                    </label>
-                </div>
             </div>
-            
-            <!-- Role Error Messages -->
-            <div *ngIf="!isRoleFieldValid() && (adminRoleField.touched || managerRoleField.touched || employeeRoleField.touched)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse bg-red-50 p-2 rounded border border-red-200"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out; background: #fef2f2; padding: 8px; border-radius: 6px; border: 1px solid #fecaca;">
-                <div style="display: flex; align-items: center;">
-                    <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                    </svg>
-                    Please select at least one role
-                </div>
+
+            <div 
+                class="mt-1 text-sm text-green-600 animate-pulse bg-green-50 p-2 rounded border border-green-200 w-80"
+                style="color: #26a2dc; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out; background: #f0fdf4; padding: 8px; border-radius: 6px; border: 1px solid #bbf7d0;">
+                {{ employeeRoleInfo }}
             </div>
         </div>
     </div>
@@ -403,7 +373,7 @@
         
         <!-- Submit Button -->
         <button type="submit" 
-                [disabled]="userForm.invalid || !isJobTitleFieldValid() || !isRoleFieldValid() || isSubmitting" 
+                [disabled]="userForm.invalid || !isJobTitleFieldValid() || isSubmitting" 
                 class="px-6 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center shadow-lg"
                 style="padding: 8px 24px; background: linear-gradient(135deg, #20B486 0%, #1a9870 100%); color: white; border-radius: 8px; font-weight: 500; transition: all 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(32, 180, 134, 0.3); border: none; cursor: pointer;">
             
