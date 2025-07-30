@@ -33,6 +33,10 @@ namespace ManagementSimulator.Infrastructure.Middleware
             {
                 await HandleExceptionAsync(context, notFoundEx, HttpStatusCode.NotFound);
             }
+            catch(MailNotSentException mailEx)
+            {
+                await HandleExceptionAsync(context, mailEx, HttpStatusCode.InternalServerError);
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex, HttpStatusCode.InternalServerError);

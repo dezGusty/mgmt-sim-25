@@ -1,4 +1,5 @@
-﻿using ManagementSimulator.Core.Dtos.Requests.EmployeeManagers;
+﻿using Azure.Core;
+using ManagementSimulator.Core.Dtos.Requests.EmployeeManagers;
 using ManagementSimulator.Core.Dtos.Requests.UserManagers;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
@@ -30,9 +31,44 @@ namespace ManagementSimulator.API.Controllers
         {
             await _employeeManagerService.AddEmployeeManagerAsync(request.EmployeeId, request.ManagerId);
 
-            return Created($"/api/employeemanager/{request.EmployeeId}/{request.ManagerId}", new
+            return Created($"/api/employeemanager/", new
             {
                 Message = "Employee-Manager relationship created successfully.",
+                Data = new EmployeeManagerResponseDto(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [HttpPost("addManagersForEmployee")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddManagersForEmployeeAsync([FromBody] CreateManagersForEmployeeRequest payload)
+        {
+            await _employeeManagerService.AddManagersForEmployeeAsync(payload.EmployeeId, payload.ManagersIds);
+            return Created($"/api/employeemanager/addManagersForEmployee", new
+            {
+                Message = "Employee-Manager relationships created successfully.",
+                Data = new EmployeeManagerResponseDto(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+
+        [HttpPatch("patchManagersForEmployee")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PatchManagersForEmployeeAsync([FromBody] CreateManagersForEmployeeRequest payload)
+        {
+            await _employeeManagerService.PatchManagersForEmployeeAsync(payload.EmployeeId, payload.ManagersIds);
+            return Created($"/api/employeemanager/addManagersForEmployee", new
+            {
+                Message = "Employee-Manager relationships created successfully.",
                 Data = new EmployeeManagerResponseDto(),
                 Success = true,
                 Timestamp = DateTime.UtcNow

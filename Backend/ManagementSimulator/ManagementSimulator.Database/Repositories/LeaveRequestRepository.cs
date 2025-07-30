@@ -21,11 +21,16 @@ namespace ManagementSimulator.Database.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, QueryParams parameters)
+        public async Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, 
+            QueryParams parameters, bool includeDeleted = false)
         {
-            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests
-                                                        .Include(lr => lr.User)
-                                                        .Where(lr => employeeIds.Contains(lr.UserId));
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!includeDeleted)
+                query = query.Where(lr => lr.DeletedAt == null);
+            query = query.Include(lr => lr.User)
+                         .Where(lr => employeeIds.Contains(lr.UserId));
+
             // filtering
             if (!string.IsNullOrEmpty(lastName))
             {
@@ -36,7 +41,6 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(lr => lr.User.Email.Contains(email));
             }
 
-            // Obține totalul ÎNAINTE de paginare
             var totalCount = await query.CountAsync();
 
             if (parameters == null)

@@ -26,4 +26,18 @@ export class Auth {
       { withCredentials: true }
     );
   }
+
+  sendResetCode(email: string) {
+    return this.http.post(`${this.apiUrl}/send-reset-code`, { email },
+      { withCredentials: true }
+    );
+  }
+
+  resetPassword(verificationCode: string, newPassword: string, confirmPassword: string) {
+    return this.http.post(`${this.apiUrl}/reset-password`, {
+      verificationCode,
+      newPassword,
+      confirmPassword
+    }, { withCredentials: true });
+  }
 }

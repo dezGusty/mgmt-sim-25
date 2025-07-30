@@ -31,35 +31,55 @@ namespace ManagementSimulator.Database.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<EmployeeRoleUser?> GetEmployeeRoleUserIncludeDeletedAsync(int userId, int roleId)
+        public async Task<List<EmployeeRole>> GetAllUserRolesAsync(bool includeDeleted = false)
         {
-            return await _dbContext.EmployeeRolesUsers
-                .FirstOrDefaultAsync(eru => eru.UsersId == userId && eru.RolesId == roleId);
+            IQueryable<EmployeeRole> query = _dbContext.EmployeeRoles;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<EmployeeRoleUser?> GetEmployeeRoleUserAsync(int userId, int roleId)
+        public async Task<EmployeeRoleUser?> GetEmployeeRoleUserAsync(int userId, int roleId, bool includeDeleted = false)
         {
-            return await _dbContext.EmployeeRolesUsers
-                .Where(eru => eru.DeletedAt == null)
-                .FirstOrDefaultAsync(eru => eru.UsersId == userId && eru.RolesId == roleId);
+            IQueryable<EmployeeRoleUser> query = _dbContext.EmployeeRolesUsers;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            return await query.FirstOrDefaultAsync(eru => eru.UsersId == userId && eru.RolesId == roleId);
         }
 
-        public async Task<List<EmployeeRoleUser>> GetEmployeeRoleUsersByUserIdAsync(int userId)
+        public Task<int> GetEmployeeRoleUserByNameAsync(string name, bool includeDeleted = false)
         {
-            return await _dbContext.EmployeeRolesUsers
-                .Where(eru => eru.DeletedAt == null)
-                .Where(eru => eru.UsersId == userId)
-                .Include(eru => eru.Role)
-                .ToListAsync(); 
+            IQueryable<EmployeeRole> query = _dbContext.EmployeeRoles;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            return query.Where(eru => eru.Rolename == name).Select(eru => eru.Id).FirstOrDefaultAsync();
         }
 
-        public async Task<List<EmployeeRoleUser>?> GetEmployeeRoleUsersByUserIdsAsync(List<int> userIds)
+        public async Task<List<EmployeeRoleUser>> GetEmployeeRoleUsersByUserIdAsync(int userId, bool includeDeleted = false)
         {
-            return await _dbContext.EmployeeRolesUsers
-                .Where(eru => eru.DeletedAt == null)
-                .Where(eru => userIds.Contains(eru.UsersId))
-                .Include(eru => eru.Role)
-                .ToListAsync();
+            IQueryable<EmployeeRoleUser> query = _dbContext.EmployeeRolesUsers;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            query = query.Where(eru => eru.UsersId == userId)
+                .Include(eru => eru.Role);
+            
+            return await query.ToListAsync();
+        }
+
+        public async Task<List<EmployeeRoleUser>?> GetEmployeeRoleUsersByUserIdsAsync(List<int> userIds, bool includeDeleted = false)
+        {
+            IQueryable<EmployeeRoleUser> query = _dbContext.EmployeeRolesUsers;
+            if (!includeDeleted)
+                query = query.Where(eru => eru.DeletedAt == null);
+
+            query = query.Where(eru => userIds.Contains(eru.UsersId))
+                .Include(eru => eru.Role);
+
+            return await query.ToListAsync();
         }
     }
 }

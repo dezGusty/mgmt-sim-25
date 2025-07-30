@@ -4,11 +4,11 @@
   <!-- Header Section with modern design -->
   <div
     class="w-full bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] px-6 pt-10 shadow-lg relative overflow-hidden">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 pb-8">
       <!-- Header Text -->
       <div>
         <h2 class="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h2>
-        <p class="text-slate-700 max-w-xl text-lg">
+        <p class="text-slate-700 max-w-xl text-lg ">
           Manage system users, departments, roles, and organizational structure
         </p>
       </div>
@@ -31,8 +31,6 @@
       <app-admin-add-form (close)="showAddForm = false" />
     </div>
 
-    <!-- Stats cards -->
-    <app-admin-stats-cards />
   </div>
 
   <div class="p-6">

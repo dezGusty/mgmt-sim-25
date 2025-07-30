@@ -9,6 +9,8 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequestType
     public class CreateLeaveRequestTypeRequestDto
     {
         public string Description { get; set; } = string.Empty;
+        public string AdditionalDetails {  get; set; } = string.Empty;
+        public bool IsPaid { get; set; }
 
     }
 }

@@ -1,4 +1,4 @@
-export interface JobTitleViewModel {
+export interface IJobTitleViewModel {
     id: number;
     name?: string;
     department?: {

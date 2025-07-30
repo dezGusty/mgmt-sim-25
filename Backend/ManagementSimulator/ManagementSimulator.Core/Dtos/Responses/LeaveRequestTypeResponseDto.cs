@@ -11,5 +11,6 @@ namespace ManagementSimulator.Core.Dtos.Responses
         public int Id { get; set; }
         public string? Description { get; set; } = string.Empty;
         public string? AdditionalDetails { get; set; }
+        public bool? IsPaid { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Users;
+using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -46,11 +47,39 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [HttpGet("managers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllManagersFilteredAsync([FromQuery] QueriedUserRequestDto payload)
+        {
+            PagedResponseDto<UserResponseDto>? managers = await _userService.GetAllManagersFilteredAsync(payload);
+
+            if (managers.Data == null || !managers.Data.Any())
+            {
+                return NotFound(new
+                {
+                    Message = "No managers found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Managers retrieved successfully.",
+                Data = managers,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
         [HttpGet("unassignedUsers/queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllUnassignedUsersFiltered([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetAllUnassignedUsersFilteredAsync([FromQuery] int page, [FromQuery] int pageSize)
         {
             var unassignedUsers = await _userService.GetAllUnassignedUsersFilteredAsync(page, pageSize);
             if (unassignedUsers == null || unassignedUsers.Data == null || !unassignedUsers.Data.Any())

@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { ILeaveRequestType } from '../models/entities/ileave-request-type';
+import { IApiResponse } from '../models/responses/iapi-response';
 
-interface LeaveRequestTypeResponse {
-  data: { id: number; description: string; additionalDetails: string }[];
-}
-
-@Injectable()
+@Injectable({
+  providedIn : "root"
+})
 export class LeaveRequestTypeService {
+  private baseUrl: string = "https://localhost:7275/api/leaveRequestType";
+
   constructor(private http: HttpClient) {}
 
   getLeaveTypes(): Observable<
@@ -33,5 +35,9 @@ export class LeaveRequestTypeService {
           return [];
         })
       );
+  }
+
+  postLeaveRequestType(lrt: ILeaveRequestType) : Observable<IApiResponse<ILeaveRequestType>> {
+    return this.http.post<IApiResponse<ILeaveRequestType>>(this.baseUrl, lrt);
   }
 }

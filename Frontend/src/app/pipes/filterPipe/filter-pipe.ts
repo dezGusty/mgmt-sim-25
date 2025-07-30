@@ -1,12 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { UserViewModel } from '../../view-models/user-view-model'; 
+import { IUserViewModel } from '../../view-models/user-view-model'; 
 
 @Pipe({
   name: 'userFilter'
 })
 export class UserFilterPipe implements PipeTransform {
 
-  transform(items: UserViewModel[], role: string): any[] {
+  transform(items: IUserViewModel[], role: string): any[] {
     if(role === undefined || role === null || role.trim() === '') {
       return items;
     }

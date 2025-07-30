@@ -14,6 +14,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<List<UserResponseDto>> GetManagersByEmployeeIdAsync(int employeeId);
         Task<List<UserResponseDto>> GetEmployeesByManagerIdAsync(int managerId);
         Task AddEmployeeManagerAsync(int employeeId, int managerId);
+        Task AddManagersForEmployeeAsync(int employeeId, List<int> managersIds);
+        Task PatchManagersForEmployeeAsync(int employeeId, List<int> managersIds);
         Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
         Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId);
         Task<EmployeeManagerResponseDto> UpdateManagerForEmployeeAsync(int employeeId, int managerId, int newManagerId);

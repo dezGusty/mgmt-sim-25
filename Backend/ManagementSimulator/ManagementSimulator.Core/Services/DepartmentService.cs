@@ -48,7 +48,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<DepartmentResponseDto> AddDepartmentAsync(CreateDepartmentRequestDto request)
         {
-            if (await _repository.GetDepartmentByNameAsync(request.Name) != null)
+            if (await _repository.GetDepartmentByNameAsync(request.Name, includeDeleted: true) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(Department), nameof(Department.Name));
             }

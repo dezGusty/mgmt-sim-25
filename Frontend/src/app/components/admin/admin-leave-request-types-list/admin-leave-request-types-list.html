@@ -1,7 +1,24 @@
-<!-- Leave Types List Component -->
 <div class="space-y-6">
-  <!-- Search and Filter Bar -->
-  <div class="flex flex-col sm:flex-row gap-4">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"></div>
+    <span class="ml-2 text-gray-600">Loading leave types...</span>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <div class="flex-1">
+        <p class="text-red-800">{{ errorMessage }}</p>
+      </div>  
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex flex-col sm:flex-row gap-4" *ngIf="!isLoading">
     <div class="flex-1">
       <div class="relative">
         <input
@@ -9,96 +26,241 @@
           placeholder="Search leave types..."
           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
           [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
         />
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-gray-400 absolute left-3 top-2.5">
-          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="w-5 h-5 text-gray-400 absolute left-3 top-2.5"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+            clip-rule="evenodd"
+          />
         </svg>
       </div>
     </div>
+    <div class="flex gap-2">
+      <button
+        (click)="onSearch()"
+        class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+        [disabled]="isLoading"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+        </svg>
+        Search
+      </button>
+    </div>
+  </div>
+
+  <!-- No results message -->
+  <div *ngIf="!isLoading && !errorMessage && leaveRequestTypes.length === 0" class="text-center py-8">
+    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No leave types found</h3>
+    <p class="text-gray-500">No leave request types match your search criteria.</p>
   </div>
 
   <!-- Leave Types Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let leaveType of leaveRequestTypes; let i = index; trackBy: trackByLeaveType" 
-         class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-[#20B486]">
-      
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!isLoading && !errorMessage && leaveRequestTypes.length > 0">
+    <div
+      *ngFor="
+        let leaveType of leaveRequestTypes;
+        let i = index;
+        trackBy: trackByLeaveType
+      "
+      class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-[#20B486]"
+    >
       <!-- Leave Type Header -->
       <div class="flex items-start justify-between mb-4">
         <div class="flex items-center space-x-3">
-          <div class="p-3 rounded-lg" [style.background-color]="leaveType.color + '20'">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
-                 class="w-6 h-6" [style.color]="leaveType.color">
-              <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
-              <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+          <div
+            class="p-3 rounded-lg"
+            [style.background-color]="leaveType.color + '20'"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="w-6 h-6"
+              [style.color]="leaveType.color"
+            >
+              <path
+                d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ leaveType.description }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ leaveType.description }}
+            </h3>
+            <!-- Paid/Unpaid Status Badge -->
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+              [ngClass]="{
+                'bg-green-100 text-green-800': leaveType.isPaid,
+                'bg-gray-100 text-gray-800': !leaveType.isPaid
+              }"
+            >
+              {{ leaveType.isPaid ? "Paid" : "Unpaid" }}
+            </span>
           </div>
         </div>
       </div>
-
       <!-- Description -->
-      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ leaveType.additionalDetails }}</p>
-
-      <!-- Leave Details -->
-      <!-- <div class="space-y-3 mb-4">
-        <div *ngIf="leaveType.requiresDocumentation" class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">Documentation:</span>
-          <span class="font-medium text-blue-600">Required</span>
-        </div>
-      </div> -->
-
-      <!-- Usage Statistics -->
-      <!-- <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-lg font-bold text-gray-900">{{ leaveType.requestsThisYear || 0 }}</div>
-          <div class="text-xs text-gray-500">Requests This Year</div>
-        </div>
-        <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <div class="text-lg font-bold text-gray-900">{{ leaveType.averageDuration || 0 }}</div>
-          <div class="text-xs text-gray-500">Avg Duration (days)</div>
-        </div>
-      </div> -->
-
-      <!-- Action Buttons --> 
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+        {{ leaveType.additionalDetails }}
+      </p>
+      <!-- Action Buttons -->
       <div class="flex space-x-2">
-        <button class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
+        <button
+          (click)="editLeaveType(leaveType)"
+          class="flex-1 bg-[#20B486] hover:bg-[#1a9c75] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
           Edit
         </button>
-        <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clip-rule="evenodd" />
+        <button
+          (click)="deleteLeaveType(leaveType)"
+          class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-4 h-4"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z"
+              clip-rule="evenodd"
+            />
           </svg>
         </button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Leave Types Statistics -->
-  <!-- <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-gray-900">{{ getTotalLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Total Leave Types</div>
+<!-- Edit Leave Request Type Modal -->
+<div *ngIf="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <!-- Background overlay -->
+  <div
+    class="fixed inset-0 bg-opacity-20 backdrop-blur-md transition-opacity"
+    (click)="closeEditModal()"
+  ></div>
+  <!-- Modal dialog -->
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div
+      class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+    >
+      <!-- Modal header -->
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-200"
+      >
+        <h3 class="text-lg font-medium text-gray-900">
+          Edit Leave Request Type: {{ leaveTypeToEdit?.description }}
+        </h3>
+        <button
+          (click)="closeEditModal()"
+          class="text-gray-400 hover:text-gray-600"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Modal content -->
+      <form (ngSubmit)="onSubmitEdit()" class="p-6">
+        <div class="space-y-4">
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Description *</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="editForm.description"
+              name="description"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+              placeholder="Enter leave request type description"
+              required
+            />
+          </div>
+          <!-- Additional Details -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Additional Details</label
+            >
+            <textarea
+              [(ngModel)]="editForm.additionalDetails"
+              name="additionalDetails"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+              placeholder="Enter additional details (optional)"
+            ></textarea>
+          </div>
+          <!-- Is Paid Checkbox -->
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              [(ngModel)]="editForm.isPaid"
+              name="isPaid"
+              id="isPaid"
+              class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded"
+            />
+            <label for="isPaid" class="ml-2 block text-sm text-gray-900">
+              This is a paid leave type
+            </label>
+          </div>
+        </div>
+        <!-- Error Message -->
+        <div
+          *ngIf="errorMessage"
+          class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded"
+        >
+          {{ errorMessage }}
+        </div>
+        <!-- Modal footer -->
+        <div
+          class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200"
+        >
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            [disabled]="isSubmitting"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!isFormValid() || isSubmitting"
+          >
+            <span *ngIf="isSubmitting">Updating...</span>
+            <span *ngIf="!isSubmitting">Update Leave Type</span>
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-green-600">{{ getActiveLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Active Types</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-blue-600">{{ getPaidLeaveTypes() }}</div>
-      <div class="text-sm text-gray-500">Paid Leave Types</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-orange-600">{{ getTotalRequestsThisYear() }}</div>
-      <div class="text-sm text-gray-500">Requests This Year</div>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-gray-200">
-      <div class="text-2xl font-bold text-purple-600">{{ getAverageDuration() }}</div>
-      <div class="text-sm text-gray-500">Avg Duration (days)</div>
-    </div>
-  </div> -->
-
-  <!-- Quick Actions -->
+  </div>
 </div>

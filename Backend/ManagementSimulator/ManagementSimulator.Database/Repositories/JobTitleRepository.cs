@@ -22,42 +22,59 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = databaseContext;
         }
 
-        public async Task<JobTitle?> GetJobTitleByNameAsync(string name)
+        public async Task<JobTitle?> GetJobTitleByNameAsync(string name, bool includeDeleted = false)
         {
-            return await _dbContext.JobTitles.FirstOrDefaultAsync(jt => jt.Name == name);
+            IQueryable<JobTitle?> query = _dbContext.JobTitles;
+            if (!includeDeleted)
+                query = query.Where(jt => jt.DeletedAt == null);
+            return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>> GetAllJobTitlesWithDepartmentAsync()
+        public async Task<List<JobTitle>?> GetAllJobTitlesWithDepartmentAsync(bool includeDeleted = false)
         {
-            return await _dbContext.JobTitles
-                .Where(jt => jt.DeletedAt == null)
-                .Include(jt => jt.Department)
-                .Include(jt => jt.Users)
-                .ToListAsync();
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
+            if (!includeDeleted)
+                query = query.Where(jt => jt.DeletedAt == null);
+
+            query = query.Include(jt => jt.Department)
+                .Include(jt => jt.Users);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id)
+        public async Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id, bool includeDeleted = false)
         {
-            return await _dbContext.JobTitles
-                .Include(jt => jt.Department)
-                .FirstOrDefaultAsync(jt => jt.Id == id);
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
+            if (!includeDeleted)
+                query = query.Where(jt => jt.DeletedAt == null);
+            
+            query = query.Include(jt => jt.Department);
+
+            return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids)
+        public async Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids, bool includeDeleted = false)
         {
-            return await _dbContext.JobTitles
-                .Where(jt => jt.DeletedAt == null)
-                .Where(jt => ids.Contains(jt.Id))
-                .Include(jt => jt.Department)
-                .ToListAsync();
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
+            if (!includeDeleted)
+                query = query.Where(jt => jt.DeletedAt == null);
+
+            query = query.Where(jt => ids.Contains(jt.Id))
+                .Include(jt => jt.Department);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<(List<JobTitle>? Data, int TotalCount)> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName, string? jobTitleName, QueryParams parameters)
+        public async Task<(List<JobTitle>? Data, int TotalCount)> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName, string? jobTitleName, QueryParams parameters,
+            bool includeDeleted = false)
         {
-            IQueryable<JobTitle> query = _dbContext.JobTitles
-                                                    .Where(jt => jt.DeletedAt == null)
-                                                    .Include(jt => jt.Department)
-                                                    .Include(jt => jt.Users);
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
+            if (!includeDeleted)
+                query = query.Where(jt => jt.DeletedAt == null);
+
+            query = query.Include(jt => jt.Department)
+                         .Include(jt => jt.Users);
+
             // Filtering 
             if (!string.IsNullOrEmpty(departmentName))
             {

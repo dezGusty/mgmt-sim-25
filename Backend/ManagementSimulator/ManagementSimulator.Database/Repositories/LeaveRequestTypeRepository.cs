@@ -22,16 +22,15 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters)
+        public async Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters, bool includeDeleted = false)
         {
-            IQueryable<LeaveRequestType> query = GetRecords();
+            IQueryable<LeaveRequestType> query = GetRecords(includeDeletedEntities: includeDeleted);
             // Filtering
             if (!string.IsNullOrEmpty(description))
             {
                 query = query.Where(lrt => lrt.Description.Contains(description));
             }
 
-            // Obține totalul ÎNAINTE de paginare
             var totalCount = await query.CountAsync();
 
             if (parameters == null)
@@ -61,9 +60,13 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description)
+        public async Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description, bool includeDeleted = false)
         {
-            return await _dbContext.LeaveRequestTypes.FirstOrDefaultAsync(lrt => lrt.Description == description);
+            IQueryable<LeaveRequestType?> query = _dbContext.LeaveRequestTypes;
+            if (!includeDeleted)
+                query = query.Where(lrt => lrt.DeletedAt == null);
+
+            return await query.FirstOrDefaultAsync(lrt => lrt.Description == description);
         }
     }
 }

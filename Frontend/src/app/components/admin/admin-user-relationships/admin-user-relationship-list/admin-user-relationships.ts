@@ -2,25 +2,26 @@ import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IUser } from '../../../models/entities/iuser';
-import { UserViewModel } from '../../../view-models/user-view-model';
-import { UsersService } from '../../../services/users/users-service';
-import { UserFilterPipe } from '../../../pipes/filterPipe/filter-pipe';
-import { UnassignedUsersPipe } from '../../../pipes/unassignedUsersPipe/unassigned-users-pipe';
-import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
+import { IUser } from '../../../../models/entities/iuser';
+import { IUserViewModel } from '../../../../view-models/user-view-model';
+import { UsersService } from '../../../../services/users/users-service';
+import { IFilteredUsersRequest } from '../../../../models/requests/ifiltered-users-request';
+import { AdminAssignRelationship } from '../admin-assign-relationship/admin-assign-relationship';
+import { IApiResponse } from '../../../../models/responses/iapi-response';
+import { IFilteredApiResponse } from '../../../../models/responses/ifiltered-api-response';
 
 @Component({
   selector: 'app-admin-user-relationships',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminAssignRelationship],
   templateUrl: './admin-user-relationships.html',
   styleUrl: './admin-user-relationships.css',
 })
 export class AdminUserRelationships implements OnInit {
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
-  managers: UserViewModel[] = [];
-  admins: UserViewModel[] = [];
-  unassignedUsers: UserViewModel[] = [];
+  managers: IUserViewModel[] = []; 
+  admins: IUserViewModel[] = [];
+  unassignedUsers: IUserViewModel[] = [];
 
   searchTerm: string = '';
   searchBy: 'lastName' | 'email' = 'lastName';
@@ -34,7 +35,26 @@ export class AdminUserRelationships implements OnInit {
   currentPageUnassignedUsers: number = 1;
   totalPagesUnassignedUsers: number = 0;
 
-  constructor(private userService: UsersService) {}
+  showAssignRelationShipComponent: boolean = false;
+  selectedEmployee!: {
+    id: number,
+    name: string,
+    email: string,
+  };
+  managersToAssigned: {
+    id: number,
+    firstName: string,  
+    lastName: string,
+    email: string,
+    jobTitleName: string,
+    subordinatesIds: number[]
+  }[] = [];
+  currentManagerIds: number[] = [];
+  postRelationship: boolean = false;
+
+  constructor(private userService: UsersService) {
+
+  }
 
   ngOnInit(): void {
     this.loadManagersWithRelationships();
@@ -105,8 +125,8 @@ export class AdminUserRelationships implements OnInit {
     });
   }
 
-  mapToUserViewModel(user: IUser): UserViewModel {
-    user.managersIds?.forEach((element) => {
+  mapToUserViewModel(user: IUser): IUserViewModel {
+    user.managersIds?.forEach(element => {
       this.managersIds.add(element);
     });
 
@@ -335,8 +355,43 @@ export class AdminUserRelationships implements OnInit {
       .length;
   }
 
-  assignManager(user: any): void {
-    console.log('Assign manager to:', user);
+  assignManager(user: IUserViewModel, isPost: boolean = false): void {
+    this.postRelationship = isPost;
+    
+    this.selectedEmployee = {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    };
+
+    const params: IFilteredUsersRequest = {
+      params: {
+        page: 1,
+        pageSize: 10
+      }
+    };
+
+    this.userService.getAllManagersFiltered(params).subscribe({
+      next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
+        this.managersToAssigned = response.data.data.map(user => ({
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          jobTitleName: user.jobTitleName || 'Unknown job title',
+          subordinatesIds: user.subordinatesIds || []
+        }));
+
+        this.currentManagerIds = [];
+        this.managersToAssigned.forEach(element => {
+          if(element.subordinatesIds.includes(user.id)) {
+            this.currentManagerIds.push(element.id);  
+          }
+        });
+
+        this.showAssignRelationShipComponent = true;
+      }
+    });
   }
 
   editRelationship(relationship: any): void {
@@ -356,5 +411,13 @@ export class AdminUserRelationships implements OnInit {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  onAssignManagers(selectedManagerIds: number[]) {
+    this.closeAssignModal();
+  }
+
+  closeAssignModal() {
+    this.showAssignRelationShipComponent = false;
   }
 }
