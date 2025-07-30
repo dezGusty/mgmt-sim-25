@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-gradient-to-r from-[#88f8be] via-[#7ee3db] to-[#7ee3db] flex flex-col">
+  <!-- Navbar -->
+  <custom-navbar></custom-navbar>
+  
+  <!-- Main Content -->
+  <div class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl">
+      
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-[#020126] mx-auto mb-4"></div>
+        <p class="text-[#020126] text-lg font-medium">Loading your roles...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="!isLoading && errorMessage" class="text-center">
+        <div class="bg-white rounded-lg shadow-xl p-8 mx-auto max-w-md">
+          <div class="text-red-500 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Access Restricted</h3>
+          <p class="text-gray-600 mb-6">{{ errorMessage }}</p>
+          <button (click)="goToLogin()" 
+                  class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-6 py-2 rounded transition-all duration-200 transform hover:scale-105">
+            Back to Login
+          </button>
+        </div>
+      </div>
+
+      <!-- Role Selection -->
+      <div *ngIf="!isLoading && !errorMessage && userRoles.length > 0" class="text-center">
+        <!-- Welcome Header -->
+        <div class="mb-8">
+          <h1 class="text-4xl font-bold text-[#020126] mb-2">Welcome, {{ userName }}!</h1>
+          <div class="h-1 w-24 bg-[#020126] mx-auto mb-4"></div>
+          <p class="text-[#020126] text-lg font-medium">Choose your workspace to continue</p>
+        </div>
+
+        <!-- Role Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div *ngFor="let role of userRoles" 
+               (click)="selectRole(role)"
+               class="group cursor-pointer transform transition-all duration-300 hover:scale-105">
+            
+            <!-- Role Card -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-2xl transition-shadow duration-300 ">
+              
+              <!-- Card Header with Gradient -->
+              <div class="bg-gradient-to-r {{ role.bgGradient }} p-6 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 transform translate-x-16 -translate-y-16"></div>
+                <div class="relative z-10">
+                  <div class="w-16 h-16 mx-auto mb-4">
+                    <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="role.icon"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold">{{ role.displayName }}</h3>
+                </div>
+              </div>
+
+              <!-- Card Body -->
+              <div class="p-6">
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">{{ role.description }}</p>
+                
+                <!-- Action Button -->
+                <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105">
+                  Enter {{ role.displayName }} Dashboard
+                  <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="mt-12 text-center">
+          <p class="text-[#020126] text-sm opacity-80">
+            You can switch between roles anytime from the navigation menu
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
