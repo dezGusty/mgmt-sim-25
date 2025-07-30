@@ -77,7 +77,7 @@ export class User {
     
     this.showRequestForm = false;
     
-    
+    this.loadRequests();
     
     setTimeout(() => {
       this.showSuccessMessage = false;
@@ -95,7 +95,6 @@ export class User {
 
     this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
       next: (data) => {       
-        // Sortează cererile de la cea mai recentă la cea mai veche
         this.requests = data.data.sort((a, b) => {
           const dateA = new Date( a.startDate);
           const dateB = new Date(b.startDate);
@@ -233,7 +232,6 @@ export class User {
     this.updatePagination();
   }
 
-  // Metodă pentru a obține numărul secvențial
   getRequestNumber(request: LeaveRequest): number {
     const index = this.filteredRequests.findIndex(r => r.id === request.id);
     return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
@@ -282,21 +280,21 @@ export class User {
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
-        pages.push(-1); // Ellipsis
+        pages.push(-1); 
         pages.push(this.totalPages);
       } else if (this.currentPage >= this.totalPages - 2) {
         pages.push(1);
-        pages.push(-1); // Ellipsis
+        pages.push(-1);
         for (let i = this.totalPages - 3; i <= this.totalPages; i++) {
           pages.push(i);
         }
       } else {
         pages.push(1);
-        pages.push(-1); // Ellipsis
+        pages.push(-1);
         for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
           pages.push(i);
         }
-        pages.push(-1); // Ellipsis
+        pages.push(-1);
         pages.push(this.totalPages);
       }
     }
