@@ -1,5 +1,6 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
+using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Mapping;
@@ -34,7 +35,8 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.User), dto.UserId);
             }
 
-            if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId);
+            if (leaveRequestType == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
             }
@@ -50,6 +52,23 @@ namespace ManagementSimulator.Core.Services
             if (hasConflictingRequest)
             {
                 throw new LeaveRequestOverlapException("Employee already has a pending or approved leave request for this period.");
+            }
+
+            if (leaveRequestType.MaxDays.HasValue)
+            {
+                var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
+                var currentYear = DateTime.Now.Year;
+                var remainingDaysInfo = await GetRemainingLeaveDaysAsync(dto.UserId, dto.LeaveRequestTypeId, currentYear);
+                
+                if (remainingDaysInfo.RemainingDays.HasValue && requestedDays > remainingDaysInfo.RemainingDays.Value)
+                {
+                    throw new InsufficientLeaveDaysException(
+                        dto.UserId, 
+                        dto.LeaveRequestTypeId, 
+                        requestedDays, 
+                        remainingDaysInfo.RemainingDays.Value,
+                        $"Insufficient leave days. Requested: {requestedDays}, Available: {remainingDaysInfo.RemainingDays.Value}");
+                }
             }
 
             var leaveRequest = new LeaveRequest
@@ -73,7 +92,8 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.User), userId);
             }
 
-            if (await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId) == null)
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(dto.LeaveRequestTypeId);
+            if (leaveRequestType == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
             }
@@ -89,6 +109,23 @@ namespace ManagementSimulator.Core.Services
             if (hasConflictingRequest)
             {
                 throw new LeaveRequestOverlapException("You already have a pending or approved leave request for this period.");
+            }
+
+            if (leaveRequestType.MaxDays.HasValue)
+            {
+                var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
+                var currentYear = DateTime.Now.Year;
+                var remainingDaysInfo = await GetRemainingLeaveDaysAsync(userId, dto.LeaveRequestTypeId, currentYear);
+                
+                if (remainingDaysInfo.RemainingDays.HasValue && requestedDays > remainingDaysInfo.RemainingDays.Value)
+                {
+                    throw new InsufficientLeaveDaysException(
+                        userId, 
+                        dto.LeaveRequestTypeId, 
+                        requestedDays, 
+                        remainingDaysInfo.RemainingDays.Value,
+                        $"Insufficient leave days. Requested: {requestedDays}, Available: {remainingDaysInfo.RemainingDays.Value}");
+                }
             }
 
             var leaveRequest = new LeaveRequest
@@ -241,6 +278,137 @@ namespace ManagementSimulator.Core.Services
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
+        }
+
+        public async Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysAsync(int userId, int leaveRequestTypeId, int year)
+        {
+            var user = await _userRepository.GetFirstOrDefaultAsync(userId);
+            if (user == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), userId);
+            }
+
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(leaveRequestTypeId);
+            if (leaveRequestType == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), leaveRequestTypeId);
+            }
+
+            var leaveRequests = await _leaveRequestRepository.GetLeaveRequestsByUserAndTypeAsync(userId, leaveRequestTypeId, year);
+
+            int daysUsed = 0;
+            var usedLeaveRequests = new List<LeaveRequestSummaryDto>();
+
+            foreach (var request in leaveRequests)
+            {
+                var requestDays = CalculateLeaveDays(request.StartDate, request.EndDate);
+                daysUsed += requestDays;
+
+                usedLeaveRequests.Add(new LeaveRequestSummaryDto
+                {
+                    Id = request.Id,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate,
+                    DaysCount = requestDays,
+                    Status = request.RequestStatus.ToString()
+                });
+            }
+
+            int? remainingDays = null;
+            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+
+            if (!hasUnlimitedDays)
+            {
+                remainingDays = leaveRequestType.MaxDays - daysUsed;
+            }
+
+            return new RemainingLeaveDaysResponseDto
+            {
+                UserId = userId,
+                LeaveRequestTypeId = leaveRequestTypeId,
+                LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
+                MaxDaysAllowed = leaveRequestType.MaxDays,
+                DaysUsed = daysUsed,
+                RemainingDays = remainingDays,
+                HasUnlimitedDays = hasUnlimitedDays,
+                UsedLeaveRequests = usedLeaveRequests
+            };
+        }
+
+        public async Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysForPeriodAsync(int userId, int leaveRequestTypeId, DateTime startDate, DateTime endDate)
+        {
+            var user = await _userRepository.GetFirstOrDefaultAsync(userId);
+            if (user == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), userId);
+            }
+
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(leaveRequestTypeId);
+            if (leaveRequestType == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), leaveRequestTypeId);
+            }
+
+            var year = startDate.Year;
+
+            var existingLeaveRequests = await _leaveRequestRepository.GetLeaveRequestsByUserAndTypeAsync(userId, leaveRequestTypeId, year);
+
+            int daysUsed = 0;
+            var usedLeaveRequests = new List<LeaveRequestSummaryDto>();
+
+            foreach (var request in existingLeaveRequests)
+            {
+                var requestDays = CalculateLeaveDays(request.StartDate, request.EndDate);
+                daysUsed += requestDays;
+
+                usedLeaveRequests.Add(new LeaveRequestSummaryDto
+                {
+                    Id = request.Id,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate,
+                    DaysCount = requestDays,
+                    Status = request.RequestStatus.ToString()
+                });
+            }
+
+            var requestedDays = CalculateLeaveDays(startDate, endDate);
+
+            int? remainingDays = null;
+            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+
+            if (!hasUnlimitedDays)
+            {
+                remainingDays = leaveRequestType.MaxDays - daysUsed - requestedDays;
+            }
+
+            return new RemainingLeaveDaysResponseDto
+            {
+                UserId = userId,
+                LeaveRequestTypeId = leaveRequestTypeId,
+                LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
+                MaxDaysAllowed = leaveRequestType.MaxDays,
+                DaysUsed = daysUsed + requestedDays, 
+                RemainingDays = remainingDays,
+                HasUnlimitedDays = hasUnlimitedDays,
+                UsedLeaveRequests = usedLeaveRequests
+            };
+        }
+
+        private int CalculateLeaveDays(DateTime startDate, DateTime endDate)
+        {
+            int workingDays = 0;
+            DateTime currentDate = startDate;
+
+            while (currentDate <= endDate)
+            {
+                if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    workingDays++;
+                }
+                currentDate = currentDate.AddDays(1);
+            }
+
+            return workingDays;
         }
     }
 }

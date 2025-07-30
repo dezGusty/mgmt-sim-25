@@ -60,9 +60,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<LeaveRequestType>()
                 .Property(lrt => lrt.Description)
                 .HasMaxLength(50);
-            modelBuilder.Entity<LeaveRequestType>()
-                .HasIndex(lrt => lrt.Description)
-                .IsUnique();
 
             modelBuilder.Entity<LeaveRequest>()
                 .HasOne(lr => lr.User)

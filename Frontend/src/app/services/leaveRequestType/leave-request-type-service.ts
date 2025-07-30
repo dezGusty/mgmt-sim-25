@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ILeaveRequestType } from '../../models/entities/ileave-request-type';
 import { IFilteredLeaveRequestTypeRequest } from '../../models/requests/ifiltered-leave-request-types-request';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { HttpParams } from '@angular/common/http';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
+import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-titles-request';
 
 @Injectable({
   providedIn: 'root',
@@ -21,45 +22,129 @@ export class LeaveRequestTypeService {
     );
   }
 
-  getAllLeaveTypesFiltered(params: IFilteredLeaveRequestTypeRequest) : Observable<IApiResponse<IFilteredApiResponse<ILeaveRequestType>>> {
+  getAllLeaveRequestTypesFiltered(): Observable<
+    IApiResponse<IFilteredJobTitlesRequest>
+  > {
+    return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(
+      `${this.baseUrl}/queried`
+    );
+  }
+
+  // getLeaveRequestTypeById(
+  //   id: number
+  // ): Observable<IApiResponse<ILeaveRequestType>> {
+  //   return this.httpClient.get<IApiResponse<ILeaveRequestType>>(
+  //     `${this.baseUrl}/${id}`
+  //   );
+  // }
+
+  getAllLeaveTypesFiltered(
+    params: IFilteredLeaveRequestTypeRequest
+  ): Observable<IApiResponse<IFilteredApiResponse<ILeaveRequestType>>> {
     let paramsToSend = new HttpParams();
-    
+
     if (params?.name) {
       paramsToSend = paramsToSend.set('Description', params.name);
     }
-    
+
     if (params?.params.sortBy) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+      paramsToSend = paramsToSend.set(
+        'PagedQueryParams.SortBy',
+        params.params.sortBy
+      );
     }
-    
+
     if (params?.params.sortDescending !== undefined) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+      paramsToSend = paramsToSend.set(
+        'PagedQueryParams.SortDescending',
+        params.params.sortDescending.toString()
+      );
     }
-    
+
     if (params?.params.page) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+      paramsToSend = paramsToSend.set(
+        'PagedQueryParams.Page',
+        params.params.page.toString()
+      );
     }
-    
+
     if (params?.params.pageSize) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+      paramsToSend = paramsToSend.set(
+        'PagedQueryParams.PageSize',
+        params.params.pageSize.toString()
+      );
     }
 
-    return this.httpClient.get<IApiResponse<IFilteredApiResponse<ILeaveRequestType>>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+    return this.httpClient.get<
+      IApiResponse<IFilteredApiResponse<ILeaveRequestType>>
+    >(`${this.baseUrl}/queried`, { params: paramsToSend });
   }
 
-  getLeaveRequestTypeById(id: number): Observable<IApiResponse<ILeaveRequestType>> {
-    return this.httpClient.get<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}/${id}`);
+  getLeaveRequestTypeById(
+    id: number
+  ): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.get<IApiResponse<ILeaveRequestType>>(
+      `${this.baseUrl}/${id}`
+    );
   }
 
-  addLeaveRequestType(leaveRequestType: ILeaveRequestType): Observable<IApiResponse<ILeaveRequestType>> {
-    return this.httpClient.post<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}`, leaveRequestType);
+  addLeaveRequestType(
+    leaveRequestType: ILeaveRequestType
+  ): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.post<IApiResponse<ILeaveRequestType>>(
+      `${this.baseUrl}`,
+      leaveRequestType
+    );
   }
 
-  updateLeaveRequestType(leaveRequestType: ILeaveRequestType): Observable<IApiResponse<ILeaveRequestType>> {
-    return this.httpClient.patch<IApiResponse<ILeaveRequestType>>(`${this.baseUrl}/${leaveRequestType.id}`, leaveRequestType);
+  postLeaveRequestType(
+    leaveRequestType: ILeaveRequestType
+  ): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.addLeaveRequestType(leaveRequestType);
+  }
+
+  updateLeaveRequestType(
+    leaveRequestType: ILeaveRequestType
+  ): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.patch<IApiResponse<ILeaveRequestType>>(
+      `${this.baseUrl}/${leaveRequestType.id}`,
+      leaveRequestType
+    );
   }
 
   deleteLeaveRequestType(id: number): Observable<IApiResponse<boolean>> {
-    return this.httpClient.delete<IApiResponse<boolean>>(`${this.baseUrl}/${id}`);
+    return this.httpClient.delete<IApiResponse<boolean>>(
+      `${this.baseUrl}/${id}`
+    );
+  }
+
+  getLeaveTypes(): Observable<
+    { id: number; title: string; description: string; maxDays?: number }[]
+  > {
+    return this.httpClient
+      .get<{
+        data: {
+          id: number;
+          title: string;
+          description: string;
+          maxDays?: number;
+        }[];
+      }>(`${this.baseUrl}`, {
+        withCredentials: true,
+      })
+      .pipe(
+        map((response) => {
+          if (response.data && Array.isArray(response.data)) {
+            return response.data.map((t) => ({
+              id: t.id,
+              title: t.title,
+              description: t.title,
+              maxDays: t.maxDays,
+            }));
+          }
+          console.error('Unexpected response format:', response);
+          return [];
+        })
+      );
   }
 }

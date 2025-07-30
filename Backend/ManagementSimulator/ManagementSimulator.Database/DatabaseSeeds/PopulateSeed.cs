@@ -70,22 +70,22 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             var leaveTypes = new List<LeaveRequestType>
             {
-                new() { Description = "Vacation", AdditionalDetails = "Standard annual leave" },
-                new() { Description = "Sick Leave", AdditionalDetails = "Medical certificate required" },
-                new() { Description = "Parental Leave", AdditionalDetails = "Applicable for new parents" },
-                new() { Description = "Unpaid Leave", AdditionalDetails = "Requires manager approval" },
-                new() { Description = "Personal Leave", AdditionalDetails = "Personal time off for individual matters" },
-                new() { Description = "Bereavement Leave", AdditionalDetails = "Leave for death of family member" },
-                new() { Description = "Emergency Leave", AdditionalDetails = "Urgent personal or family emergencies" },
-                new() { Description = "Medical Leave", AdditionalDetails = "Extended medical treatment or recovery" },
-                new() { Description = "Study Leave", AdditionalDetails = "Educational purposes and training" },
-                new() { Description = "Jury Duty", AdditionalDetails = "Legal obligation for court service" },
-                new() { Description = "Military Leave", AdditionalDetails = "Military service obligations" },
-                new() { Description = "Sabbatical", AdditionalDetails = "Extended leave for personal development" },
-                new() { Description = "Compensatory Time", AdditionalDetails = "Time off in lieu of overtime pay" },
-                new() { Description = "Religious Leave", AdditionalDetails = "Religious observances and holidays" },
-                new() { Description = "Volunteer Leave", AdditionalDetails = "Approved volunteer activities" },
-                new() { Description = "Mental Health Leave", AdditionalDetails = "Mental health and wellness support" }
+                new() { Title = "Vacation", Description = "Standard annual leave" },
+                new() { Title = "Sick Leave", Description = "Medical certificate required" },
+                new() { Title = "Parental Leave", Description = "Applicable for new parents" },
+                new() { Title = "Unpaid Leave", Description = "Requires manager approval" },
+                new() { Title = "Personal Leave", Description = "Personal time off for individual matters" },
+                new() { Title = "Bereavement Leave", Description = "Leave for death of family member" },
+                new() { Title = "Emergency Leave", Description = "Urgent personal or family emergencies" },
+                new() { Title = "Medical Leave", Description = "Extended medical treatment or recovery" },
+                new() { Title = "Study Leave", Description = "Educational purposes and training" },
+                new() { Title = "Jury Duty", Description = "Legal obligation for court service" },
+                new() { Title = "Military Leave", Description = "Military service obligations" },
+                new() { Title = "Sabbatical", Description = "Extended leave for personal development" },
+                new() { Title = "Compensatory Time", Description = "Time off in lieu of overtime pay" },
+                new() { Title = "Religious Leave", Description = "Religious observances and holidays" },
+                new() { Title = "Volunteer Leave", Description = "Approved volunteer activities" },
+                new() { Title = "Mental Health Leave", Description = "Mental health and wellness support" }
             };
 
             foreach (var leaveType in leaveTypes)

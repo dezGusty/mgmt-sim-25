@@ -8,8 +8,8 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequestType
 {
     public class UpdateLeaveRequestTypeRequestDto
     {
-        public string? Description { get; set; } = string.Empty;
-        public string? AdditionalDetails { get; set; } = string.Empty;
-        public bool IsPaid { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public int? MaxDays { get; set; }
     }
 }
