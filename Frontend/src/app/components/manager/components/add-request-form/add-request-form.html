@@ -50,7 +50,7 @@
         >
           <option [value]="null" disabled selected>Select leave type</option>
           <option *ngFor="let type of leaveTypes" [value]="type.id">
-            {{ type.description }}
+            {{ type.title }}
           </option>
         </select>
         <div

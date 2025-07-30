@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LeaveRequestTypeService } from '../../../../services/leave-request-type';
+import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { FormUtils } from '../../../../utils/form.utils';
@@ -25,7 +25,7 @@ export class AddRequestForm implements OnInit {
   showValidationErrors = false;
   errorMessage = '';
 
-  leaveTypes: { id: number; description: string }[] = [];
+  leaveTypes: { id: number; title: string }[] = [];
   employees: { id: number; name: string }[] = [];
 
   @Output() close = new EventEmitter<void>();
@@ -39,7 +39,10 @@ export class AddRequestForm implements OnInit {
 
   ngOnInit() {
     this.leaveTypeService.getLeaveTypes().subscribe((types) => {
-      this.leaveTypes = types;
+      this.leaveTypes = types.map((type) => ({
+        id: type.id,
+        title: type.title,
+      }));
     });
     this.employeeService.getEmployees().subscribe((users) => {
       this.employees = users;
