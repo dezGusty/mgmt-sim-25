@@ -26,10 +26,4 @@ export class Auth {
       { withCredentials: true }
     );
   }
-
-  getCurrentUser() {
-  return this.me();
-}
-
-  
 }
