@@ -30,25 +30,25 @@
   </div>
 </div>
 
-<!-- Loading indicator -->
-<div *ngIf="isSubmitting" class="flex items-center justify-center py-4">
-  <div
-    class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"
-  ></div>
-  <span class="ml-2 text-gray-600">Processing...</span>
-</div>
+  <!-- Loading indicator -->
+  <div *ngIf="isSubmitting" class="flex items-center justify-center py-4">
+    <div
+      class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"
+    ></div>
+    <span class="ml-2 text-gray-600">Processing...</span>
+  </div>
 
-<!-- Success/Error message -->
-<div
-  *ngIf="onSubmitMessage && !isSubmitting"
-  class="mt-4 p-3 rounded-lg"
-  [ngClass]="{
-    'bg-green-100 text-green-700': onSubmitMessage.includes('successfully'),
-    'bg-red-100 text-red-700': !onSubmitMessage.includes('successfully')
-  }"
->
-  {{ onSubmitMessage }}
-</div>
+  <!-- Success/Error message -->
+  <div
+    *ngIf="onSubmitMessage && !isSubmitting"
+    class="mt-4 p-3 rounded-lg"
+    [ngClass]="{
+      'bg-green-100 text-green-700': onSubmitMessage.includes('successfully'),
+      'bg-red-100 text-red-700': !onSubmitMessage.includes('successfully')
+    }"
+  >
+    {{ onSubmitMessage }}
+  </div>
 
 <!-- Action Buttons -->
 <div class="flex justify-end gap-3 mt-6">

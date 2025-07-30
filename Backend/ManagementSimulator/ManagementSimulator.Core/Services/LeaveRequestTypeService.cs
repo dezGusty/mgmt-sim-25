@@ -64,7 +64,7 @@ namespace ManagementSimulator.Core.Services
             }
 
             if(dto.Description != null && dto.Description != string.Empty && 
-                await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
+                await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null && id != leaveRequestType.Id)
             {
                 throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Description));
             }

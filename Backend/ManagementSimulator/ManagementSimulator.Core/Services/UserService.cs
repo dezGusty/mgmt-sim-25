@@ -244,9 +244,11 @@ namespace ManagementSimulator.Core.Services
                 var existingRelations = await _employeeRoleRepository
                     .GetEmployeeRoleUsersByUserIdAsync(existing.Id);
 
+                int employeeRole = await _employeeRoleRepository.GetEmployeeRoleUserByNameAsync("Employee");
                 foreach (var relation in existingRelations)
                 {
-                    await _employeeRoleRepository.DeleteEmployeeUserRoleAsync(relation);
+                    if(relation.RolesId != employeeRole)
+                        await _employeeRoleRepository.DeleteEmployeeUserRoleAsync(relation);
                 }
 
                 foreach (var roleId in dto.EmployeeRolesId.Distinct())

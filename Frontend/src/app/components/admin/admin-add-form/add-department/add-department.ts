@@ -54,7 +54,7 @@ export class AddDepartment {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.onSubmitMessage = 'Error adding department: ' + (error.error?.message || error.message);
+        this.onSubmitMessage = 'Error adding department: department already exists';
       }
     });
   }

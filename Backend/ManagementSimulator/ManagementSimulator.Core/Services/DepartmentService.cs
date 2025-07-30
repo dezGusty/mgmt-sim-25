@@ -77,11 +77,6 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Department), id); 
             }
 
-            if (await _repository.GetDepartmentByNameAsync(request.Name) != null)
-            {
-                throw new UniqueConstraintViolationException(nameof(Department), nameof(Department.Name));
-            }
-
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateDepartmentRequestDto, Department>(existing, request);
             existing.ModifiedAt = DateTime.UtcNow;
 

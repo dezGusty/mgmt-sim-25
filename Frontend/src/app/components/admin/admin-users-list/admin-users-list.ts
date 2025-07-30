@@ -124,6 +124,7 @@ export class AdminUsersList implements OnInit {
     this.employeeRoleService.getAllEmployeeRoles().subscribe({
       next: (response: IApiResponse<IEmployeeRole[]>) => {
         response.data.forEach(er => {
+          console.log(`rolename :${er.rolename}, ${er.id}`);
           this.userRoles.set(er.rolename, er.id);
         });
       },
@@ -350,7 +351,7 @@ export class AdminUsersList implements OnInit {
       lastName: this.editForm.lastName,
       jobTitleId: this.editForm.jobTitleId,
       dateOfEmployment: this.editForm.dateOfEmployment,
-      employeeRolesIds: this.getSelectedRoles().map(rolename => this.userRoles.get(rolename) || 0),
+      employeeRolesId: this.getSelectedRoles().map(rolename => this.userRoles.get(rolename) || 0),
     };
 
     this.usersService.updateUser(userToUpdate).subscribe({

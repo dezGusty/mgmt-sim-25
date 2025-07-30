@@ -11,7 +11,7 @@ namespace ManagementSimulator.Infrastructure.Exceptions
         public string EntityName { get; }
         public string ViolatedPropertyName { get; }
         public UniqueConstraintViolationException(string entityName, string violatedPropertyName) :
-            base($"A unique constraint violation occurred on the '{violatedPropertyName}' property of the '{entityName}' entity.")
+            base($"The {entityName} '{violatedPropertyName}' already exists")
         {
             EntityName = entityName;
             ViolatedPropertyName = violatedPropertyName;

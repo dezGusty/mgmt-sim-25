@@ -16,8 +16,6 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public string? JobTitleName { get; set; } = string.Empty;
         public int? DepartmentId { get; set; }
         public string? DepartmentName { get; set; } = string.Empty;
-        public int? AnnuallyLeaveDays { get; set; }
-        public int? LeaveDaysLeftCurrentYear { get; set; }
         public DateTime? DateOfEmployment { get; set; }
     }
 }

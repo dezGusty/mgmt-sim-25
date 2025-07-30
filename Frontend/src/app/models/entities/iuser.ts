@@ -24,7 +24,7 @@ export interface IAddUser {
   firstName: string;
   lastName: string;
   jobTitleId: number;
-  employeeRolesIds: number[];
+  employeeRolesId: number[];
   dateOfEmployment: Date;
 }
 
@@ -34,6 +34,6 @@ export interface IUpdateUser {
   firstName?: string;
   lastName?: string;
   jobTitleId?: number;
-  employeeRolesIds?: number[];
+  employeeRolesId?: number[];
   dateOfEmployment?: Date;
 }

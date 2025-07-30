@@ -25,7 +25,7 @@ namespace ManagementSimulator.Core.Services
             var result = await _employeeRoleRepository.GetAllUserRolesAsync();
             return result.Select(er => new EmployeeRoleResponseDto
             {
-                EmployeeRoleId = er.Id,
+                Id = er.Id,
                 Rolename = er.Rolename
             }).ToList();
         }

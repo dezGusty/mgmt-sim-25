@@ -179,7 +179,7 @@ export class AdminDepartmentsList implements OnInit {
 
   clearSearch(): void {
     this.searchTerm = '';
-    this.currentSearchTerm = ''; // Resetează și termenul curent
+    this.currentSearchTerm = '';
     this.currentPage = 1; 
     this.loadDepartments();
   }

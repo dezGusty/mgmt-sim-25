@@ -16,10 +16,7 @@ export class AddLeaveRequestType {
   leaveTypeDescription: string = '';                
   isPaid: boolean = false;
   
-  // Proprietăți pentru mesaje
-  showSuccessMessage: boolean = false;
-  showErrorMessage: boolean = false;
-  errorMessage: string = '';
+  onSubmitMessage: string = '';
   isSubmitting: boolean = false;
 
   constructor(private leaveRequestTypeService: LeaveRequestTypeService) {}
@@ -31,7 +28,7 @@ export class AddLeaveRequestType {
   onSubmit(form: any) {
     if (form.valid) {
       this.isSubmitting = true;
-      this.hideMessages(); // Ascunde mesajele anterioare
+      this.hideMessages();
 
       const lrt: ILeaveRequestType = {
         id: 0,
@@ -43,30 +40,23 @@ export class AddLeaveRequestType {
       this.leaveRequestTypeService.postLeaveRequestType(lrt).subscribe({
         next: (response: IApiResponse<ILeaveRequestType>) => {
           this.isSubmitting = false;
-          this.showSuccessMessage = true;
-          this.showErrorMessage = false;
-          console.log("Leave type added successfully");
+          console.log("Leave type added successfully.");
           
-          // Auto-hide success message după 5 secunde
-          setTimeout(() => {
-            this.showSuccessMessage = false;
-          }, 5000);
 
-          // Opțional: resetează formularul după succes
+        this.onSubmitMessage = "Leave type added successfully."; 
           this.onReset(form);
         },
         error: (error) => {
           this.isSubmitting = false;
-          this.showErrorMessage = true;
-          this.showSuccessMessage = false;
+          this.onSubmitMessage = "Error adding a leave request type."; 
           
           // Setează mesajul de eroare bazat pe răspunsul serverului
           if (error.error && error.error.message) {
-            this.errorMessage = error.error.message;
+            this.onSubmitMessage = error.error.message;
           } else if (error.message) {
-            this.errorMessage = error.message;
+            this.onSubmitMessage = error.message;
           } else {
-            this.errorMessage = 'An error occurred while saving the leave type. Please try again.';
+            this.onSubmitMessage = 'An error occurred while saving the leave type. Please try again.';
           }
           
           console.error('Error adding leave type:', error);
@@ -84,16 +74,6 @@ export class AddLeaveRequestType {
   }
 
   hideMessages() {
-    this.showSuccessMessage = false;
-    this.showErrorMessage = false;
-    this.errorMessage = '';
-  }
-
-  dismissSuccessMessage() {
-    this.showSuccessMessage = false;
-  }
-
-  dismissErrorMessage() {
-    this.showErrorMessage = false;
+    this.onSubmitMessage = '';
   }
 }
