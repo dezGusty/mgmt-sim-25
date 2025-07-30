@@ -158,6 +158,13 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
     this.resetAndLoadManagers();
   }
 
+  onCheckboxChange(event: Event, managerId: number): void {
+  const target = event.target as HTMLInputElement;
+  if (target) {
+    this.onManagerToggle(managerId, target.checked);
+  }
+}
+
   onManagerToggle(managerId: number, isChecked: boolean) {
     if (isChecked) {
       if (!this.selectedManagerIds.includes(managerId)) {
