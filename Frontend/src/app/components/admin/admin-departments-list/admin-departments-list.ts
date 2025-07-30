@@ -15,8 +15,8 @@ import { IDepartmentViewModel } from '../../../view-models/department-view-model
 })
 export class AdminDepartmentsList implements OnInit {
   departments: IDepartmentViewModel[] = [];
-
   searchTerm: string = '';
+  currentSearchTerm: string = ''; // Termenul folosit pentru ultima căutare
   isLoading: boolean = true;
   error: string = '';
   
@@ -37,6 +37,7 @@ export class AdminDepartmentsList implements OnInit {
   
   isSubmitting = false;
   errorMessage = '';
+  hasInitiallyLoaded = false;
 
   constructor(private departmentService: DepartmentService) { }
 
@@ -47,9 +48,9 @@ export class AdminDepartmentsList implements OnInit {
   loadDepartments(): void {
     this.isLoading = true;
     this.error = '';
-
+    console.log(`current name:this.${this.currentSearchTerm}`)
     const params: IFilteredDepartmentsRequest = {
-      name: this.searchTerm,
+      name: this.currentSearchTerm,
       params: {
         sortBy: "name", 
         sortDescending: this.sortDescending,
@@ -62,17 +63,34 @@ export class AdminDepartmentsList implements OnInit {
       next: (response) => {
         console.log(response);
         this.departments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
-        this.totalPages = response.data.totalPages
-        
+        this.totalPages = response.data.totalPages;
+        this.hasInitiallyLoaded = true;
         this.isLoading = false;
       },
       error: (err) => {
         this.isLoading = false;
+        this.hasInitiallyLoaded = true;
         this.error = 'Failed to load departments. Please try again later.';
         console.error('Error loading departments:', err);
         this.departments = [];
       }
     });
+  }
+
+  getEmptyStateMessage(): string {
+    if (!this.hasInitiallyLoaded) {
+      return '';
+    }
+    
+    if (this.currentSearchTerm.trim()) {
+      return `No departments match your search for "${this.currentSearchTerm}".`;
+    }
+    
+    return 'No departments found. Get started by creating a new department.';
+  }
+
+  shouldShowEmptyState(): boolean {
+    return !this.isLoading && !this.error && this.departments.length === 0 && this.hasInitiallyLoaded;
   }
 
   mapToDepartmentViewModel(department: IDepartment): IDepartmentViewModel {
@@ -91,8 +109,15 @@ export class AdminDepartmentsList implements OnInit {
   }
 
   onSearch(): void {
+    this.currentSearchTerm = this.searchTerm;
     this.currentPage = 1; 
     this.loadDepartments();
+  }
+
+  onSearchKeypress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onSearch();
+    }
   }
 
   goToNextPage(): void {
@@ -146,11 +171,6 @@ export class AdminDepartmentsList implements OnInit {
     return ((this.currentPage - 1) * this.pageSize) + 1;
   }
 
-  onSearchChange(): void {
-    this.currentPage = 1; 
-    this.loadDepartments();
-  }
-
   toggleSortOrder(): void {
     this.sortDescending = !this.sortDescending;
     this.currentPage = 1; 
@@ -159,6 +179,7 @@ export class AdminDepartmentsList implements OnInit {
 
   clearSearch(): void {
     this.searchTerm = '';
+    this.currentSearchTerm = ''; // Resetează și termenul curent
     this.currentPage = 1; 
     this.loadDepartments();
   }

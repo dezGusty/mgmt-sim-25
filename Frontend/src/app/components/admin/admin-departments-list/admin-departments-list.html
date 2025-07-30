@@ -7,7 +7,7 @@
         <input
           type="text"
           [(ngModel)]="searchTerm"
-          (input)="onSearchChange()"
+          (keypress)="onSearchKeypress($event)"
           placeholder="Search departments by name..."
           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
         />
@@ -271,7 +271,7 @@
 
   <!-- Empty State -->
   <div
-    *ngIf="!isLoading && !error && departments.length === 0"
+    *ngIf="shouldShowEmptyState()"
     class="text-center py-12"
   >
     <svg
@@ -289,11 +289,7 @@
     </svg>
     <h3 class="mt-2 text-sm font-medium text-gray-900">No departments found</h3>
     <p class="mt-1 text-sm text-gray-500">
-      {{
-        searchTerm
-          ? "No departments match your search criteria."
-          : "Get started by creating a new department."
-      }}
+      {{ getEmptyStateMessage() }}
     </p>
   </div>
 

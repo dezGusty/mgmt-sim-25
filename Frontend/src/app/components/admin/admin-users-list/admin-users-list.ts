@@ -28,6 +28,9 @@ export class AdminUsersList implements OnInit {
   totalPages: number = 0;
   
   isLoading: boolean = false;
+  hasError: boolean = false;
+  errorMessage: string = '';
+  hasSearched: boolean = false; // Track if a search has been performed
 
   showEditModal = false;
   userToEdit: IUserViewModel | null = null;
@@ -47,7 +50,7 @@ export class AdminUsersList implements OnInit {
 
   jobTitles: IJobTitle[] = [];
   isSubmitting: boolean = false;
-  errorMessage: string = '';
+  editErrorMessage: string = '';
 
   constructor(private usersService: UsersService, private jobTitlesService: JobTitlesService) { }
 
@@ -57,6 +60,8 @@ export class AdminUsersList implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
     
     const filterRequest: IFilteredUsersRequest = {
       lastName: this.searchBy === 'name' ? this.searchTerm : undefined,
@@ -68,20 +73,76 @@ export class AdminUsersList implements OnInit {
         pageSize: this.itemsPerPage
       }
     };
-    console.log(this.searchBy);
+    
+    console.log('Search parameters:', this.searchBy, this.searchTerm);
+    
     this.usersService.getAllUsersFiltered(filterRequest).subscribe({
       next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
-        console.log('API response:', response);   
-        const rawUsers: IUser[] = response.data.data || [];
-        this.users = rawUsers.map(user => this.mapToUserViewModel(user));
-        this.totalPages = response.data.totalPages
+        console.log('API response:', response);
         this.isLoading = false;
+        
+        if (response.success && response.data) {
+          const rawUsers: IUser[] = response.data.data || [];
+          this.users = rawUsers.map(user => this.mapToUserViewModel(user));
+          this.totalPages = response.data.totalPages || 0;
+          
+          if (this.users.length === 0) {
+            if (this.searchTerm.trim()) {
+              this.hasError = true;
+              this.errorMessage = this.getNoResultsMessage();
+            } else if (this.hasSearched) {
+              this.hasError = true;
+              this.errorMessage = 'No users found in the system.';
+            }
+
+          } else {
+            this.hasError = false;
+            this.errorMessage = '';
+          }
+        } else {
+          this.handleError(response.message || 'Failed to load users. Please try again.');
+        }
       },
       error: (err) => {
         console.error('Failed to fetch users:', err);
         this.isLoading = false;
+        this.handleError(this.getErrorMessage(err));
       }
     });
+  }
+
+
+  private handleError(message: string): void {
+    this.hasError = true;
+    this.errorMessage = message;
+    this.users = [];
+    this.totalPages = 0;
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.status === 0) {
+      return 'Unable to connect to the server. Please check your internet connection.';
+    } else if (error.status >= 500) {
+      return 'Server error occurred. Please try again later.';
+    } else if (error.status === 404) {
+      return 'The requested resource was not found.';
+    } else if (error.status === 403) {
+      return 'You do not have permission to view this data.';
+    } else if (error.error?.message) {
+      return error.error.message;
+    } else if (error.message) {
+      return error.message;
+    } else {
+      return 'An unexpected error occurred while loading users.';
+    }
+  }
+
+  private getNoResultsMessage(): string {
+    if (this.searchTerm.trim()) {
+      return `No users found matching "${this.searchTerm}". Try adjusting your search criteria.`;
+    } else {
+      return 'No users found. Try adjusting your search criteria.';
+    }
   }
 
   private getSortField(): string {
@@ -128,18 +189,28 @@ export class AdminUsersList implements OnInit {
 
   onSearch(): void {
     this.currentPage = 1;
+    this.hasSearched = true;
     this.loadUsers();
   }
 
   clearSearch(): void {
     this.searchTerm = '';
     this.currentPage = 1;
+    this.hasSearched = false;
+    this.hasError = false;
+    this.errorMessage = '';
     this.loadUsers();
   }
 
   toggleSortOrder(): void {
     this.sortDescending = !this.sortDescending;
     this.currentPage = 1;
+    this.loadUsers();
+  }
+
+  retryLoad(): void {
+    this.hasError = false;
+    this.errorMessage = '';
     this.loadUsers();
   }
 
@@ -227,7 +298,7 @@ export class AdminUsersList implements OnInit {
       isEmployee: false
     };
     
-    this.errorMessage = '';
+    this.editErrorMessage = '';
   }
 
   loadJobTitles(): void {
@@ -245,12 +316,12 @@ export class AdminUsersList implements OnInit {
 
   onSubmitEdit(): void {
     if (!this.isFormValid()) {
-      this.errorMessage = 'Please fill in all required fields.';
+      this.editErrorMessage = 'Please fill in all required fields.';
       return;
     }
 
     this.isSubmitting = true;
-    this.errorMessage = '';
+    this.editErrorMessage = '';
 
     const userToUpdate: IUser = {
       id: this.editForm.id,
@@ -272,12 +343,12 @@ export class AdminUsersList implements OnInit {
           this.loadUsers();
           console.log('User updated successfully:', response.data);
         } else {
-          this.errorMessage = response.message || 'Failed to update user';
+          this.editErrorMessage = response.message || 'Failed to update user';
         }
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = 'Error updating user: ' + (error.error?.message || error.message);
+        this.editErrorMessage = 'Error updating user: ' + (error.error?.message || error.message);
         console.error('Error updating user:', error);
       }
     });
@@ -304,7 +375,7 @@ export class AdminUsersList implements OnInit {
   closeEditModal(): void {
     this.showEditModal = false;
     this.userToEdit = null;
-    this.errorMessage = '';
+    this.editErrorMessage = '';
   }
 
   deleteUser(user: IUserViewModel): void {
@@ -334,6 +405,12 @@ export class AdminUsersList implements OnInit {
           alert('Failed to restore user. Please try again.');
         }
       });
+    }
+  }
+
+  onSearchKeypress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onSearch();
     }
   }
 

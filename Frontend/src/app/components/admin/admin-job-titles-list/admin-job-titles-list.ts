@@ -28,10 +28,8 @@ export class AdminJobTitlesList implements OnInit {
   totalJobTitles: number = 0;
   totalPages: number = 0;
   
-  // Loading state
   isLoading: boolean = false;
 
-  // Edit modal properties
   showEditModal = false;
   jobTitleToEdit: IJobTitleViewModel | null = null;
   
@@ -44,13 +42,13 @@ export class AdminJobTitlesList implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   
-  // Departments for dropdown
   departments: IDepartment[] = [];
 
   constructor(
     private jobTitleService: JobTitlesService,
-    private departmentService: DepartmentService
-  ) { }
+    private departmentService: DepartmentService) {
+
+  }
 
   ngOnInit(): void {
     this.loadJobTitles();
@@ -70,34 +68,56 @@ export class AdminJobTitlesList implements OnInit {
     });
   }
 
-  loadJobTitles(): void {
-    this.isLoading = true;
-    
-    const filterRequest: IFilteredJobTitlesRequest = {
-      jobTitleName: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
-      departmentName: this.searchBy === 'department' ? this.searchTerm : undefined,
-      params: {
-        sortBy: this.getSortField(),
-        sortDescending: this.sortDescending,
-        page: this.currentPage,
-        pageSize: this.itemsPerPage
-      }
-    };
+ loadJobTitles(): void {
+  this.isLoading = true;
+  this.errorMessage = ''; // Resetăm mesajul de eroare
+  
+  const filterRequest: IFilteredJobTitlesRequest = {
+    jobTitleName: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
+    departmentName: this.searchBy === 'department' ? this.searchTerm : undefined,
+    params: {
+      sortBy: this.getSortField(),
+      sortDescending: this.sortDescending,
+      page: this.currentPage,
+      pageSize: this.itemsPerPage
+    }
+  };
 
-    this.jobTitleService.getAllJobTitlesFiltered(filterRequest).subscribe({
-      next: (response: IApiResponse<IFilteredApiResponse<IJobTitle>>) => {
-        console.log('API response:', response);
+  this.jobTitleService.getAllJobTitlesFiltered(filterRequest).subscribe({
+    next: (response: IApiResponse<IFilteredApiResponse<IJobTitle>>) => {
+      console.log('API response:', response);
+      
+      if (response.success) {
         const rawJobTitles: IJobTitle[] = response.data.data || [];
         this.jobTitles = rawJobTitles.map(jobTitle => this.mapToJobTitleViewModel(jobTitle));
         this.totalPages = response.data.totalPages;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Failed to fetch job titles:', err);
-        this.isLoading = false;
+      } else {
+
+        this.errorMessage = response.message || 'Error loading the job titles.';
+        this.jobTitles = [];
+        this.totalPages = 0;
       }
-    });
-  }
+      
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('Failed to fetch job titles:', err);
+      this.isLoading = false;
+      
+      if (err.status >= 400 && err.status < 500) {
+        this.errorMessage = err.error?.message || 'The request could not be handled properly.';
+      } else if (err.status >= 500) {
+        this.errorMessage = 'Server error, try again later.';
+      } else {
+        this.errorMessage = 'Unexpected error happened';
+      }
+      
+      this.jobTitles = [];
+      this.totalPages = 0;
+      this.currentPage = 1;
+    }
+  });
+}
 
   private getSortField(): string {
     switch (this.searchBy) {
@@ -215,7 +235,7 @@ export class AdminJobTitlesList implements OnInit {
         this.isLoading = false;
         if (response.success) {
           console.log('Job title deleted successfully');
-          this.loadJobTitles(); // Reload the list
+          this.loadJobTitles(); 
         } else {
           alert('Failed to delete job title: ' + (response.message || 'Unknown error'));
         }

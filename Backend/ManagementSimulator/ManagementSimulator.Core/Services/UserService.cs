@@ -37,7 +37,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllUsersWithReferencesAsync();
+            var users = await _userRepository.GetAllUsersWithReferencesAsync(includeDeleted: true);
             return users.Select(u => new UserResponseDto
             {
                 Id = u.Id,
@@ -107,7 +107,7 @@ namespace ManagementSimulator.Core.Services
                 }
 
                 var existingRelation = await _employeeRoleRepository
-                    .GetEmployeeRoleUserAsync(user.Id, roleId);
+                    .GetEmployeeRoleUserAsync(user.Id, roleId, includeDeleted: true);
 
                 if (existingRelation == null)
                 {
@@ -120,6 +120,10 @@ namespace ManagementSimulator.Core.Services
                         CreatedAt = DateTime.UtcNow
                     };
                     await _employeeRoleRepository.AddEmployeeRoleUserAsync(employeeRoleUser);
+                }
+                else
+                {
+                    existingRelation.DeletedAt = null;
                 }
             }
 
@@ -188,7 +192,7 @@ namespace ManagementSimulator.Core.Services
                         throw new EntryNotFoundException(nameof(EmployeeRole), roleId);
                     }
 
-                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserIncludeDeletedAsync(existing.Id, roleId);
+                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true);
                     if(employeeRoleUser != null)
                     {
                         if (employeeRoleUser.DeletedAt != null)
@@ -233,7 +237,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task RestoreUserByIdAsync(int id)
         {
-            var userToRestore = await _userRepository.GetUserByIdIncludeDeletedAsync(id);
+            var userToRestore = await _userRepository.GetUserByIdAsync(id, includeDeleted: true);
             if (userToRestore == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);

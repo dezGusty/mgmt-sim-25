@@ -54,9 +54,13 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request)
         {
-            if (await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!) != null)
+            JobTitle? jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!, includeDeleted: true);
+            if (jt != null)
             {
-                throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
+                if (jt.DeletedAt == null)
+                { 
+                    throw new UniqueConstraintViolationException(nameof(JobTitle),nameof(JobTitle.Name));
+                }
             }
 
             if(await _departmentRepository.GetFirstOrDefaultAsync(request.DepartmentId) == null)
@@ -88,9 +92,18 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Department), request.DepartmentId);
             }
 
-            if (request.Name != null && request.Name != string.Empty && await _jobTitleRepository.GetJobTitleByNameAsync(request.Name) != null)
+            if (request.Name != null && request.Name != string.Empty)
             {
-                throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
+                var jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name);
+                if(jt != null)
+                {
+                    if (jt.DeletedAt != null)
+                        jt.DeletedAt = null;
+                    else
+                        throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
+                }
+                else
+                    throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
             var jobTitle = await _jobTitleRepository.GetJobTitleWithDepartmentAsync(id);

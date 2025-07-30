@@ -10,7 +10,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface ILeaveRequestTypeRepository : IBaseRepostory<LeaveRequestType>
     {
-        Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description);
-        Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters);
+        Task<LeaveRequestType?> GetLeaveRequestTypesByDescriptionAsync(string description, bool includeDeleted = false);
+        Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? description, QueryParams parameters, bool includeDeleted = false);
     }
 }

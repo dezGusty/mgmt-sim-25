@@ -27,7 +27,7 @@ export class DepartmentService {
     let paramsToSend = new HttpParams();
     
     if (params?.name) {
-      paramsToSend = paramsToSend.set('lastName', params.name);
+      paramsToSend = paramsToSend.set('name', params.name);
     }
     
     if (params?.params.sortBy) {

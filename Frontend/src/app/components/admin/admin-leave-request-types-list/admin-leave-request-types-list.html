@@ -1,6 +1,24 @@
 <div class="space-y-6">
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"></div>
+    <span class="ml-2 text-gray-600">Loading leave types...</span>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <div class="flex-1">
+        <p class="text-red-800">{{ errorMessage }}</p>
+      </div>  
+    </div>
+  </div>
+
   <!-- Search Bar -->
-  <div class="flex flex-col sm:flex-row gap-4">
+  <div class="flex flex-col sm:flex-row gap-4" *ngIf="!isLoading">
     <div class="flex-1">
       <div class="relative">
         <input
@@ -8,6 +26,7 @@
           placeholder="Search leave types..."
           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
           [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
         />
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -23,13 +42,34 @@
         </svg>
       </div>
     </div>
+    <div class="flex gap-2">
+      <button
+        (click)="onSearch()"
+        class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+        [disabled]="isLoading"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 mr-2">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd" />
+        </svg>
+        Search
+      </button>
+    </div>
+  </div>
+
+  <!-- No results message -->
+  <div *ngIf="!isLoading && !errorMessage && leaveRequestTypes.length === 0" class="text-center py-8">
+    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No leave types found</h3>
+    <p class="text-gray-500">No leave request types match your search criteria.</p>
   </div>
 
   <!-- Leave Types Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="!isLoading && !errorMessage && leaveRequestTypes.length > 0">
     <div
       *ngFor="
-        let leaveType of filteredLeaveTypes;
+        let leaveType of leaveRequestTypes;
         let i = index;
         trackBy: trackByLeaveType
       "
@@ -76,12 +116,10 @@
           </div>
         </div>
       </div>
-
       <!-- Description -->
       <p class="text-gray-600 text-sm mb-4 line-clamp-2">
         {{ leaveType.additionalDetails }}
       </p>
-
       <!-- Action Buttons -->
       <div class="flex space-x-2">
         <button
@@ -119,7 +157,6 @@
     class="fixed inset-0 bg-opacity-20 backdrop-blur-md transition-opacity"
     (click)="closeEditModal()"
   ></div>
-
   <!-- Modal dialog -->
   <div class="flex min-h-full items-center justify-center p-4">
     <div
@@ -151,7 +188,6 @@
           </svg>
         </button>
       </div>
-
       <!-- Modal content -->
       <form (ngSubmit)="onSubmitEdit()" class="p-6">
         <div class="space-y-4">
@@ -169,7 +205,6 @@
               required
             />
           </div>
-
           <!-- Additional Details -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -183,7 +218,6 @@
               placeholder="Enter additional details (optional)"
             ></textarea>
           </div>
-
           <!-- Is Paid Checkbox -->
           <div class="flex items-center">
             <input
@@ -198,7 +232,6 @@
             </label>
           </div>
         </div>
-
         <!-- Error Message -->
         <div
           *ngIf="errorMessage"
@@ -206,7 +239,6 @@
         >
           {{ errorMessage }}
         </div>
-
         <!-- Modal footer -->
         <div
           class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200"

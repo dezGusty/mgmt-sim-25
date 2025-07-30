@@ -5,6 +5,9 @@ import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leav
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { ILeaveRequestTypeViewModel } from '../../../view-models/leave-request-type-view-model';
 import { ColorGenerator } from '../../../services/colorGenerator/color-generator';
+import { IFilteredLeaveRequestTypeRequest } from '../../../models/requests/ifiltered-leave-request-types-request';
+import { IApiResponse } from '../../../models/responses/iapi-response';
+import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
 
 @Component({
   selector: 'app-admin-leave-request-types-list',
@@ -16,7 +19,6 @@ export class AdminLeaveTypesList implements OnInit {
   leaveRequestTypes: ILeaveRequestTypeViewModel[] = [];
   searchTerm: string = '';
 
-  // Edit modal properties
   showEditModal = false;
   leaveTypeToEdit: ILeaveRequestTypeViewModel | null = null;
   
@@ -39,19 +41,54 @@ export class AdminLeaveTypesList implements OnInit {
     this.loadLeaveTypes();
   }
 
+  isLoading: boolean = false;
+
   loadLeaveTypes(): void {
-    this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe(
-      response => {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    let params: IFilteredLeaveRequestTypeRequest = {
+      name: this.searchTerm,
+      params: {
+        page: 1,
+        pageSize: 100,
+        sortBy: "id",
+        sortDescending: false
+      }
+    };
+    
+    this.leaveRequestTypeService.getAllLeaveTypesFiltered(params).subscribe({
+      next: (response: IApiResponse<IFilteredApiResponse<ILeaveRequestType>>) => {
         console.log('API response:', response);
         
-        const rawLeaveTypes: ILeaveRequestType[] = response.data;
-        this.leaveRequestTypes = rawLeaveTypes.map(leaveType => 
-          this.mapToLeaveTypeViewModel(leaveType)
-        );
+        if (response.success) {
+          const rawLeaveTypes: ILeaveRequestType[] = response.data.data || [];
+          this.leaveRequestTypes = rawLeaveTypes.map(leaveType => 
+            this.mapToLeaveTypeViewModel(leaveType)
+          );
+          console.log('Mapped Leave Types:', this.leaveRequestTypes);
+        } else {
+          this.errorMessage = response.message || 'Could not load all the leave request types.';
+          this.leaveRequestTypes = [];
+        }
         
-        console.log('Mapped Leave Types:', this.leaveRequestTypes);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to fetch leave request types:', err);
+        this.isLoading = false;
+        
+        if (err.status >= 400 && err.status < 500) {
+          this.errorMessage = err.error?.message || 'Error processing the request.';
+        } else if (err.status >= 500) {
+          this.errorMessage = 'Server error, try again later.';
+        } else {
+          this.errorMessage = 'Unexpected error happened.';
+        }
+        
+        this.leaveRequestTypes = [];
       }
-    );
+    });
   }
   
   private mapToLeaveTypeViewModel(leaveType: ILeaveRequestType): ILeaveRequestTypeViewModel {
@@ -133,6 +170,10 @@ export class AdminLeaveTypesList implements OnInit {
 
   isFormValid(): boolean {
     return !!(this.editForm.description.trim());
+  }
+
+  onSearch() {
+    this.loadLeaveTypes();
   }
 
   closeEditModal(): void {

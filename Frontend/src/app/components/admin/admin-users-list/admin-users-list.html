@@ -8,6 +8,7 @@
         <input
           type="text"
           [(ngModel)]="searchTerm"
+          (keypress)="onSearchKeypress($event)"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
           [placeholder]="getSearchPlaceholder()"
         />

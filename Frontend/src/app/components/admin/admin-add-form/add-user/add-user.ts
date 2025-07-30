@@ -10,6 +10,13 @@ import { IAddUser } from '../../../../models/entities/iuser';
 import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IUser } from '../../../../models/entities/iuser';
 
+interface NotificationMessage {
+  type: 'success' | 'error' | 'info';
+  title: string;
+  message: string;
+  show: boolean;
+}
+
 @Component({
   selector: 'app-add-user',
   imports: [FormsModule, CommonModule],
@@ -30,16 +37,24 @@ export class AddUser implements OnInit {
   pageSize: number = 5;
   canLoadMore: boolean = false;
   isLoading: boolean = false;
-
   readonly maxDate: string;
   dateOfEmployment: Date = new Date();
   leaveDaysLeftCurrentYear: number = 0;
   readonly baseLeaveDays: number = 21; 
   maxLeaveDays: number = 21;
-
   isAdmin = false;
   isManager = false;
   isEmployee = false;
+  
+  // Notification system
+  notification: NotificationMessage = {
+    type: 'info',
+    title: '',
+    message: '',
+    show: false
+  };
+  
+  isSubmitting: boolean = false;
 
   constructor(
     private userService: UsersService,
@@ -49,7 +64,36 @@ export class AddUser implements OnInit {
   }
 
   ngOnInit(): void {
+  }
 
+  showNotification(type: 'success' | 'error' | 'info', title: string, message: string): void {
+    this.notification = { type, title, message, show: true };
+    
+    if (type === 'success') {
+      setTimeout(() => {
+        this.hideNotification();
+      }, 5000);
+    }
+  }
+
+  hideNotification(): void {
+    this.notification.show = false;
+  }
+
+  resetForm(): void {
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.searchText = '';
+    this.selectedJobTitleId = 0;
+    this.selectedJobTitleName = '';
+    this.dateOfEmployment = new Date();
+    this.leaveDaysLeftCurrentYear = 0;
+    this.isAdmin = false;
+    this.isManager = false;
+    this.isEmployee = false;
+    this.filteredJobTitles = [];
+    this.closeDropdown();
   }
 
   private loadJobTitles(resetPage: boolean = true): void {
@@ -57,7 +101,6 @@ export class AddUser implements OnInit {
       this.currentPage = 1;
       this.filteredJobTitles = [];
     }
-
     this.isLoading = true;
     
     const params = {
@@ -69,7 +112,6 @@ export class AddUser implements OnInit {
         sortDescending: false
       }
     };
-
     this.jobTitleService.getAllJobTitlesFiltered(params).subscribe({
       next: (response) => {
         console.log('API Response:', response);
@@ -90,6 +132,7 @@ export class AddUser implements OnInit {
         console.error('Error loading job titles:', error);
         this.isLoading = false;
         this.canLoadMore = false;
+        this.showNotification('error', 'Eroare', 'Nu s-au putut încărca job title-urile. Vă rugăm să încercați din nou.');
       }
     });
   }
@@ -136,11 +179,11 @@ export class AddUser implements OnInit {
 
   loadMore(): void {
     if (this.canLoadMore && !this.isLoading) {
-      console.log('Loading more - current page:', this.currentPage); // Debug log
+      console.log('Loading more - current page:', this.currentPage);
       this.currentPage++;
       this.loadJobTitles(false);
     } else {
-      console.log('Cannot load more. canLoadMore:', this.canLoadMore, 'isLoading:', this.isLoading); // Debug log
+      console.log('Cannot load more. canLoadMore:', this.canLoadMore, 'isLoading:', this.isLoading);
     }
   }
 
@@ -183,7 +226,6 @@ export class AddUser implements OnInit {
     if (!this.dateOfEmployment) {
       return 0;
     }
-
     const currentDate = new Date();
     const employmentDate = new Date(this.dateOfEmployment);
     
@@ -217,33 +259,70 @@ export class AddUser implements OnInit {
   }
 
   submit(form: any): void {
-    if (form.valid && this.isJobTitleFieldValid()) {
-      let roles: number[]= [];
-      if(this.isAdmin)
-        roles.push(3);
-      if(this.isManager)
-        roles.push(2);
-      if(this.isEmployee)
-        roles.push(1);
-      
-      const userToAdd: IAddUser = {
-        id: 0,
-        firstName: this.firstName,
-        lastName: this.lastName,
-        email: this.email,
-        jobTitleId: this.selectedJobTitleId,
-        employeeRolesIds: roles,
-        leaveDaysLeftCurrentYear: this.leaveDaysLeftCurrentYear,
-        dateOfEmployment: this.dateOfEmployment
-      };
-
-      this.userService.addUser(userToAdd).subscribe({
-        next(response: IApiResponse<IUser>) {
-          console.log(response);
-        }
-      })
-    } else {
-      console.log('Form is invalid');
+    if (!form.valid || !this.isJobTitleFieldValid() || !this.isRoleFieldValid()) {
+      this.showNotification('error', 'Invalid form', 'Please fill all the mandatory fields!');
+      return;
     }
+
+    this.isSubmitting = true;
+    this.hideNotification();
+
+    let roles: number[] = [];
+    if (this.isAdmin) roles.push(3);
+    if (this.isManager) roles.push(2);
+    if (this.isEmployee) roles.push(1);
+    
+    const userToAdd: IAddUser = {
+      id: 0,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      jobTitleId: this.selectedJobTitleId,
+      employeeRolesIds: roles,
+      leaveDaysLeftCurrentYear: this.leaveDaysLeftCurrentYear,
+      dateOfEmployment: this.dateOfEmployment
+    };
+
+    this.userService.addUser(userToAdd).subscribe({
+      next: (response: IApiResponse<IUser>) => {
+        this.isSubmitting = false;
+        console.log('User added successfully:', response);
+        
+        if (response.success) {
+          this.showNotification(
+            'success',
+            response.message,
+            `${this.firstName} ${this.lastName} added in our system with email: ${this.email}.`
+          );
+          
+          this.resetForm();
+          form.resetForm();
+        } else {
+          this.showNotification(
+            'error',
+            'Error during adding a new user',
+            response.message || 'Unexpected error'
+          );
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        console.error('Error adding user:', error);
+        
+        let errorMessage = 'An error occured during adding a new user';
+        
+        if (error.status === 400) {
+          errorMessage = 'Fill all the mandatory fields!';
+        } else if (error.status === 409) {
+          errorMessage = 'This mail is already used.';
+        } else if (error.status === 500) {
+          errorMessage = 'Server error, try later.';
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.showNotification('error', 'Error', errorMessage);
+      }
+    });
   }
 }

@@ -150,7 +150,7 @@ namespace ManagementSimulator.Core.Services
                 .ToList();
 
             return filtered;
-       }
+        }
 
         public async Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId, QueriedLeaveRequestRequestDto payload)
         {
