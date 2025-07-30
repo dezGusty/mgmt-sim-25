@@ -28,7 +28,6 @@ export class User {
   showCancelModal = false;
   requestToCancel: LeaveRequest | null = null;
 
-
   RequestStatus = RequestStatus;
   Math = Math;
   
@@ -40,6 +39,9 @@ export class User {
   searchTerm = '';
   showListModal = true;
   errorMessage = '';
+
+  // Adaugă această proprietate pentru a controla afișarea request-urilor anulate
+  showCancelledRequests = false;
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
@@ -221,6 +223,11 @@ export class User {
   filterRequests() {
     let results = this.requests;
     
+    // Filtrează request-urile anulate dacă nu sunt activate
+    if (!this.showCancelledRequests) {
+      results = results.filter(req => req.requestStatus !== this.RequestStatus.CANCELED);
+    }
+    
     // Apply status filter
     if (this.statusFilter !== 'all') {
       results = results.filter(req => {
@@ -250,6 +257,11 @@ export class User {
     this.filteredRequests = results;
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  // Adaugă această metodă pentru a gestiona schimbarea checkbox-ului
+  onShowCancelledToggle() {
+    this.filterRequests();
   }
 
   getRequestNumber(request: LeaveRequest): number {

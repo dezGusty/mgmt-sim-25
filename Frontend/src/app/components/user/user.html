@@ -126,6 +126,7 @@
       <!-- Filter and search options -->
       <div class="p-3 border-b bg-gray-50 flex-shrink-0">
         <div class="flex flex-wrap gap-2 items-center">
+          <!-- Status filter buttons -->
           <div class="flex flex-wrap gap-1">
             <button [class]="statusFilter === 'all' ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900' : 'bg-white text-gray-700 border border-gray-300'" 
                     class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 transform hover:scale-105" 
@@ -162,7 +163,31 @@
             <span class="text-xs text-gray-700">per page</span>
           </div>
 
-          <div class="ml-auto">
+          <!-- Right side: Search and Show cancelled -->
+          <div class="ml-auto flex items-center gap-3">
+            <!-- Show cancelled requests checkbox -->
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1 cursor-pointer group">
+                <div class="relative">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="showCancelledRequests"
+                    (change)="onShowCancelledToggle()"
+                    class="sr-only">
+                  <div [class]="showCancelledRequests ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] border-slate-500' : 'bg-white border-gray-300'"
+                       class="w-4 h-4 border-2 rounded transition-all duration-200 flex items-center justify-center group-hover:scale-110">
+                    <svg *ngIf="showCancelledRequests" class="w-2.5 h-2.5 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                </div>
+                <span class="text-xs text-gray-700 select-none group-hover:text-gray-900 transition-colors duration-200">
+                  Show cancelled
+                </span>
+              </label>
+            </div>
+
+            <!-- Search input -->
             <div class="relative">
               <input type="text" placeholder="Search requests..." 
                      class="pl-7 pr-3 py-1 border border-gray-300 rounded-md text-xs focus:ring-blue-500 focus:border-blue-500 w-full sm:w-48"
