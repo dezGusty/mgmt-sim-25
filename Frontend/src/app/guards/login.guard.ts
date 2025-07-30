@@ -21,14 +21,7 @@ export class LoginGuard implements CanActivate {
         const data = await response.json();
 
         if (data && data.userId && data.email && data.roles) {
-          const roles: string[] = data.roles;
-
-          // User is authenticated, redirect to appropriate dashboard
-          if (roles.includes('Admin')) return this.router.parseUrl('/admin');
-          if (roles.includes('Manager'))
-            return this.router.parseUrl('/manager');
-          if (roles.includes('Employee')) return this.router.parseUrl('/user');
-          return this.router.parseUrl('/');
+          return this.router.parseUrl('/role-selector');
         }
       }
 
