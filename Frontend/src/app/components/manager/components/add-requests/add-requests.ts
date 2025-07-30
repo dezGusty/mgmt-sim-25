@@ -4,9 +4,10 @@ import { RequestDetail } from '../request-detail/request-detail';
 import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { ILeaveRequest } from '../../../../models/leave-request';
-import { IRequestStats } from '../../../../models/request-stats';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
+import { RequestUtils } from '../../../../utils/request.utils';
+import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 
 @Component({
   selector: 'app-add-requests',
@@ -16,14 +17,17 @@ import { DateUtils } from '../../../../utils/date.utils';
   styleUrls: ['./add-requests.css'],
 })
 export class AddRequests implements OnInit {
-  @Output() statsUpdated = new EventEmitter<IRequestStats>();
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
+  @Input() searchTerm: string = '';
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
 
-  constructor(private leaveRequests: LeaveRequests) {}
+  constructor(
+    private leaveRequests: LeaveRequests,
+    private leaveRequestTypeService: LeaveRequestTypeService
+  ) {}
 
   ngOnInit() {
     this.loadRequests();
@@ -32,35 +36,34 @@ export class AddRequests implements OnInit {
   public loadRequests() {
     this.leaveRequests.fetchByManager().subscribe((apiData) => {
       if (apiData.success && Array.isArray(apiData.data)) {
-        this.requests = apiData.data
-          .map((item: any) => ({
-            id: String(item.id),
-            employeeName: item.fullName,
-            status: StatusUtils.mapStatus(item.requestStatus),
-            from: DateUtils.formatDate(item.startDate),
-            to: DateUtils.formatDate(item.endDate),
-            days: DateUtils.calcDays(item.startDate, item.endDate),
-            reason: item.reason,
-            createdAt: DateUtils.formatDate(item.createdAt),
-            comment: item.reviewerComment,
-            createdAtDate: new Date(item.createdAt),
-          }))
-          .sort(
-            (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-          );
+        const requestsRaw = apiData.data;
+        this.requests = [];
+        requestsRaw.forEach((item: any) => {
+          this.leaveRequestTypeService
+            .getLeaveRequestTypeById(item.leaveRequestTypeId)
+            .subscribe((typeRes) => {
+              const leaveTypeDescription = typeRes?.data?.description || '';
+              this.requests.push({
+                id: String(item.id),
+                employeeName: item.fullName,
+                status: StatusUtils.mapStatus(item.requestStatus),
+                from: DateUtils.formatDate(item.startDate),
+                to: DateUtils.formatDate(item.endDate),
+                days: DateUtils.calcDays(item.startDate, item.endDate),
+                reason: item.reason,
+                createdAt: DateUtils.formatDate(item.createdAt),
+                comment: item.reviewerComment,
+                createdAtDate: new Date(item.createdAt),
+                leaveTypeDescription: leaveTypeDescription,
+              });
 
-        const stats = this.calculateStats(this.requests);
-        this.statsUpdated.emit(stats);
+              this.requests.sort(
+                (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
+              );
+            });
+        });
       }
     });
-  }
-
-  calculateStats(requests: ILeaveRequest[]): IRequestStats {
-    const total = requests.length;
-    const pending = requests.filter((r) => r.status === 'Pending').length;
-    const approved = requests.filter((r) => r.status === 'Approved').length;
-    const rejected = requests.filter((r) => r.status === 'Rejected').length;
-    return { total, pending, approved, rejected };
   }
 
   openDetails(req: ILeaveRequest) {
@@ -102,9 +105,16 @@ export class AddRequests implements OnInit {
   }
 
   get filteredRequests(): ILeaveRequest[] {
-    if (this.filter === 'All') {
-      return this.requests;
+    let filtered = RequestUtils.filterRequests(this.requests, this.filter);
+
+    if (this.searchTerm) {
+      filtered = filtered.filter((request) =>
+        request.employeeName
+          .toLowerCase()
+          .includes(this.searchTerm.toLowerCase())
+      );
     }
-    return this.requests.filter((request) => request.status === this.filter);
+
+    return filtered;
   }
 }

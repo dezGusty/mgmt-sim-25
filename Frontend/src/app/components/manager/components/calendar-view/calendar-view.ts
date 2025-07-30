@@ -7,13 +7,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ILeaveRequest } from '../../../../models/leave-request';
-
-interface CalendarDay {
-  date: Date;
-  dayNumber: number;
-  isCurrentMonth: boolean;
-  leaveRequests: ILeaveRequest[];
-}
+import { CalendarUtils, CalendarDay } from '../../../../utils/calendar.utils';
+import { RequestUtils } from '../../../../utils/request.utils';
 
 @Component({
   selector: 'app-calendar-view',
@@ -29,28 +24,16 @@ export class CalendarView implements OnInit, OnChanges {
   currentMonth = this.currentDate.getMonth();
   currentYear = this.currentDate.getFullYear();
   calendarDays: CalendarDay[] = [];
-  monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  monthNames = CalendarUtils.MONTH_NAMES;
+  dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // Independent calendar filters - remove rejected
   calendarFilters = {
-    pending: true,
+    pending: false,
     approved: true,
     rejected: false,
   };
+
+  hoveredRequest: ILeaveRequest | null = null;
 
   ngOnInit() {
     this.generateCalendar();
@@ -63,14 +46,10 @@ export class CalendarView implements OnInit, OnChanges {
   }
 
   get filteredRequestsForCalendar(): ILeaveRequest[] {
-    return this.requests.filter((request) => {
-      if (request.status === 'Pending' && this.calendarFilters.pending)
-        return true;
-      if (request.status === 'Approved' && this.calendarFilters.approved)
-        return true;
-      // Remove rejected filter completely
-      return false;
-    });
+    return RequestUtils.filterRequestsForCalendar(
+      this.requests,
+      this.calendarFilters
+    );
   }
 
   toggleFilter(status: 'pending' | 'approved') {
@@ -79,33 +58,18 @@ export class CalendarView implements OnInit, OnChanges {
   }
 
   generateCalendar() {
-    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-    this.calendarDays = [];
-    const currentDate = new Date(startDate);
-
-    for (let i = 0; i < 42; i++) {
-      const day: CalendarDay = {
-        date: new Date(currentDate),
-        dayNumber: currentDate.getDate(),
-        isCurrentMonth: currentDate.getMonth() === this.currentMonth,
-        leaveRequests: this.getLeaveRequestsForDate(currentDate),
-      };
-      this.calendarDays.push(day);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+    this.calendarDays = CalendarUtils.generateCalendarDaysWithMondayFirst(
+      this.currentMonth,
+      this.currentYear,
+      this.filteredRequestsForCalendar
+    );
   }
 
   getLeaveRequestsForDate(date: Date): ILeaveRequest[] {
-    return this.filteredRequestsForCalendar.filter((request) => {
-      const fromDate = new Date(request.from);
-      const toDate = new Date(request.to);
-      const checkDate = new Date(date);
-
-      return checkDate >= fromDate && checkDate <= toDate;
-    });
+    return CalendarUtils.getLeaveRequestsForDate(
+      date,
+      this.filteredRequestsForCalendar
+    );
   }
 
   previousMonth() {
@@ -136,20 +100,30 @@ export class CalendarView implements OnInit, OnChanges {
   }
 
   getStatusColor(status: string): string {
-    switch (status) {
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Approved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+    return CalendarUtils.getStatusColor(status);
   }
 
   isToday(date: Date): boolean {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
+    return CalendarUtils.isToday(date);
+  }
+
+  onRequestHover(request: ILeaveRequest) {
+    this.hoveredRequest = request;
+  }
+
+  onRequestLeave() {
+    this.hoveredRequest = null;
+  }
+
+  isDateInHoveredRequest(date: Date): boolean {
+    if (!this.hoveredRequest) {
+      return false;
+    }
+
+    const fromDate = new Date(this.hoveredRequest.from);
+    const toDate = new Date(this.hoveredRequest.to);
+    const checkDate = new Date(date);
+
+    return checkDate >= fromDate && checkDate <= toDate;
   }
 }

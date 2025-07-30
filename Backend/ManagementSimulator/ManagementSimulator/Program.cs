@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MGMTSimulatorDbContext>();
     SetupSeed.Seed(dbContext);
-    PopulateSeed.Seed(dbContext);
+    // PopulateSeed.Seed(dbContext);
 }
 
 if (app.Environment.IsDevelopment())

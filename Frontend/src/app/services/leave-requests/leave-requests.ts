@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, of, tap, switchMap } from 'rxjs';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IUser } from '../../models/entities/iuser';
 import { ILeaveRequest } from '../../models/leave-request';
@@ -35,7 +35,20 @@ export class LeaveRequests {
         }
       )
       .pipe(
-        tap((response) => console.log('addLeaveRequest response:', response))
+        tap((response) => console.log('addLeaveRequest response:', response)),
+        switchMap((response) => {
+          if (response.data && response.data.id) {
+            return this.patchLeaveRequest({
+              id: response.data.id.toString(),
+              requestStatus: 4,
+              reviewerComment: 'Auto-approved by manager',
+            }).pipe(
+              tap(() => console.log('Request auto-approved')),
+              switchMap(() => of(response))
+            );
+          }
+          return of(response);
+        })
       );
   }
 

@@ -1,4 +1,4 @@
-import { RequestStatus } from '../enums/RequestStatus'
+import { RequestStatus } from '../enums/RequestStatus';
 
 export interface LeaveRequest {
   id: number;

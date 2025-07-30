@@ -9,4 +9,5 @@ export interface ILeaveRequest {
   createdAt: string;
   createdAtDate: Date;
   comment?: string;
+  leaveTypeDescription: string;
 }

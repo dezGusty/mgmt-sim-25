@@ -24,7 +24,6 @@ namespace ManagementSimulator.Database.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        [MaxLength(50)]
         public string? Reason { get; set; }
 
         public RequestStatus RequestStatus { get; set; }
@@ -33,3 +32,4 @@ namespace ManagementSimulator.Database.Entities
         public string? ReviewerComment { get; set; }
     }
 }
+

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LeaveRequestTypeService } from '../../../../services/leave-request-type';
 import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
+import { FormUtils } from '../../../../utils/form.utils';
 
 @Component({
   selector: 'app-add-request-form',
@@ -20,7 +21,9 @@ export class AddRequestForm implements OnInit {
   endDate = '';
   reason = '';
   isSubmitting = false;
-  today: string = new Date().toISOString().slice(0, 10);
+  today: string = FormUtils.getTodayDateString();
+  showValidationErrors = false;
+  errorMessage = '';
 
   leaveTypes: { id: number; description: string }[] = [];
   employees: { id: number; name: string }[] = [];
@@ -43,34 +46,60 @@ export class AddRequestForm implements OnInit {
     });
   }
 
+  onStartDateChange() {
+    if (this.endDate && this.startDate && this.endDate < this.startDate) {
+      this.endDate = '';
+    }
+    this.errorMessage = '';
+  }
+
+  onEndDateChange() {
+    this.errorMessage = '';
+  }
+
   handleSubmit() {
     if (
       !this.userId ||
       !this.leaveRequestTypeId ||
       !this.startDate ||
-      !this.endDate ||
-      !this.reason
-    )
+      !this.endDate
+    ) {
+      this.showValidationErrors = true;
       return;
+    }
+
     this.isSubmitting = true;
+    this.showValidationErrors = false;
+    this.errorMessage = '';
+
     this.leaveRequests
       .addLeaveRequest({
-        userId: this.userId!,
-        leaveRequestTypeId: this.leaveRequestTypeId!,
+        userId: this.userId,
+        leaveRequestTypeId: this.leaveRequestTypeId,
         startDate: this.startDate,
         endDate: this.endDate,
-        reason: this.reason,
+        reason: this.reason || '',
       })
       .subscribe({
         next: (createdRequest) => {
           this.isSubmitting = false;
-          console.log('Request created successfully:', createdRequest);
+          console.log(
+            'Request created and auto-approved successfully:',
+            createdRequest
+          );
           this.requestAdded.emit(createdRequest);
           this.handleClose();
         },
         error: (err) => {
           this.isSubmitting = false;
-          console.error('Error creating request:', err);
+          console.error('Error creating or approving request:', err);
+
+          if (err.status === 400 && err.error?.message) {
+            this.errorMessage = err.error.message;
+          } else {
+            this.errorMessage =
+              'An error occurred while creating the leave request. Please try again.';
+          }
         },
       });
   }
@@ -81,6 +110,8 @@ export class AddRequestForm implements OnInit {
     this.startDate = '';
     this.endDate = '';
     this.reason = '';
+    this.showValidationErrors = false;
+    this.errorMessage = '';
     this.close.emit();
   }
 }

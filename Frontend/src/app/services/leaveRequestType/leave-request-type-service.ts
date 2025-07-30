@@ -6,20 +6,32 @@ import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-t
 import { IApiResponse } from '../../models/responses/iapi-response';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LeaveRequestTypeService {
   private baseUrl: string = 'https://localhost:7275/api/leaverequesttype';
 
-  constructor(private httpClient : HttpClient){
+  constructor(private httpClient: HttpClient) {}
 
+  getAllLeaveRequestTypes(): Observable<IApiResponse<ILeaveRequestType[]>> {
+    return this.httpClient.get<IApiResponse<ILeaveRequestType[]>>(
+      `${this.baseUrl}`
+    );
   }
 
-  getAllLeaveRequestTypes() : Observable<IApiResponse<ILeaveRequestType[]>> {
-    return this.httpClient.get<IApiResponse<ILeaveRequestType[]>>(`${this.baseUrl}`);
+  getAllLeaveRequestTypesFiltered(): Observable<
+    IApiResponse<IFilteredJobTitlesRequest>
+  > {
+    return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(
+      `${this.baseUrl}/queried`
+    );
   }
 
-  getAllLeaveRequestTypesFiltered() : Observable<IApiResponse<IFilteredJobTitlesRequest>> {
-    return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(`${this.baseUrl}/queried`);
+  getLeaveRequestTypeById(
+    id: number
+  ): Observable<IApiResponse<ILeaveRequestType>> {
+    return this.httpClient.get<IApiResponse<ILeaveRequestType>>(
+      `${this.baseUrl}/${id}`
+    );
   }
 }
