@@ -39,7 +39,6 @@ export class UserRequestForm {
   // Subject for debouncing API calls
   private updateRemainingDaysSubject = new Subject<void>();
 
-  // Math object for template
   Math = Math;
 
   get todayDate() {
