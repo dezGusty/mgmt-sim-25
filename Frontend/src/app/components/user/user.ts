@@ -25,6 +25,9 @@ export class User {
   showSuccessMessage = false;
   successMessage = '';
 
+  showCancelModal = false;
+  requestToCancel: LeaveRequest | null = null;
+
   RequestStatus = RequestStatus;
   Math = Math;
   
@@ -36,6 +39,9 @@ export class User {
   searchTerm = '';
   showListModal = true;
   errorMessage = '';
+
+  // Adaugă această proprietate pentru a controla afișarea request-urilor anulate
+  showCancelledRequests = false;
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
@@ -64,8 +70,6 @@ export class User {
   toggleRequestForm() {
     this.showRequestForm = !this.showRequestForm;
   }
-
-  
 
   toggleLeaveBalance() {
     this.showLeaveBalance = !this.showLeaveBalance;
@@ -151,6 +155,8 @@ export class User {
           return 'Approved';
         case RequestStatus.REJECTED:
           return 'Rejected';
+        case RequestStatus.CANCELED:
+          return 'Canceled';
         default:
           return 'Unknown';
       }
@@ -169,37 +175,58 @@ export class User {
     }
     
     const type = this.leaveRequestTypes.find(t => t.id === typeId);
-    return type ? type.description || type.description : 'Unknown';
+    return type ? type.title || type.title : 'Unknown';
   }
+
 
   cancelRequest(request: LeaveRequest) {
-    if (confirm('Are you sure you want to cancel this request?')) {
-      if(!request.id) {
-        return;
-      }
-
-      this.leaveRequestService.cancelLeaveRequest(request.id).subscribe({
-        next: () => {
-          const index = this.requests.findIndex(r => r.id === request.id);
-          if (index !== -1) {
-            this.requests.splice(index, 1);
-            this.filterRequests();
-            
-            if (this.selectedRequest && this.selectedRequest.id === request.id) {
-              this.selectedRequest = null;
-              this.showListModal = true;
-            }
-          }
-        },
-        error: (err) => {
-          this.errorMessage = err.error?.message || 'Failed to cancel request.';
-        }
-      });
-    }
+    this.requestToCancel = request;
+    this.showCancelModal = true;
   }
+
+  confirmCancelRequest() {
+    if (!this.requestToCancel?.id) {
+      return;
+    }
+
+    this.leaveRequestService.cancelLeaveRequestByEmployee(this.requestToCancel.id).subscribe({
+      next: (response) => {
+        this.loadRequests();
+
+        if (this.selectedRequest && this.selectedRequest.id === this.requestToCancel?.id) {
+          this.selectedRequest = null;
+          this.showListModal = true;
+        }
+
+        this.showSuccessMessage = true;
+        this.successMessage = 'Request cancelled successfully! 🚫';
+        setTimeout(() => {
+          this.showSuccessMessage = false;
+        }, 3000);
+
+        // Închide modalul
+        this.closeCancelModal();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to cancel request.';
+        this.closeCancelModal();
+      }
+    });
+  }
+
+   closeCancelModal() {
+    this.showCancelModal = false;
+    this.requestToCancel = null;
+  }
+  
 
   filterRequests() {
     let results = this.requests;
+    
+    // Filtrează request-urile anulate dacă nu sunt activate
+    if (!this.showCancelledRequests) {
+      results = results.filter(req => req.requestStatus !== this.RequestStatus.CANCELED);
+    }
     
     // Apply status filter
     if (this.statusFilter !== 'all') {
@@ -230,6 +257,11 @@ export class User {
     this.filteredRequests = results;
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  // Adaugă această metodă pentru a gestiona schimbarea checkbox-ului
+  onShowCancelledToggle() {
+    this.filterRequests();
   }
 
   getRequestNumber(request: LeaveRequest): number {

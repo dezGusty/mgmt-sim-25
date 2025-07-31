@@ -39,7 +39,7 @@
         </div>
 
         <!-- Role Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
           <div *ngFor="let role of userRoles" 
                (click)="selectRole(role)"
                class="group cursor-pointer transform transition-all duration-300 hover:scale-105">

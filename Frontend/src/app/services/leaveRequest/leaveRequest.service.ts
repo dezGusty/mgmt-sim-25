@@ -14,6 +14,14 @@ export interface CreateLeaveRequestByEmployeeDto {
   requestStatus?: RequestStatus;
 }
 
+
+export interface RemainingLeaveDaysResponse {
+  remainingDays: number;
+  totalDays: number;
+  usedDays: number;
+  leaveRequestTypeId: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -43,6 +51,37 @@ export class LeaveRequestService {
     );
   }
 
+  cancelLeaveRequestByEmployee(requestId: number): Observable<{Message: string}> {
+        return this.http.patch<{Message: string}>(`${this.apiUrl}/by-employee/${requestId}`, {}, {
+            withCredentials: true
+        });
+  }
+
+  getCurrentUserRemainingLeaveDays(leaveRequestTypeId: number, year?: number): Observable<IApiResponse<RemainingLeaveDaysResponse>> {
+  const yearParam = year ? `?year=${year}` : '';
+  const url = `${this.apiUrl}/by-employee/remaining-days/${leaveRequestTypeId}${yearParam}`;
+  
+ 
+  
+  return this.http.get<IApiResponse<RemainingLeaveDaysResponse>>(url, {
+    withCredentials: true,
+  });
+}
+
+  getCurrentUserRemainingLeaveDaysForPeriod(
+    leaveRequestTypeId: number, 
+    startDate: string, 
+    endDate: string
+  ): Observable<IApiResponse<RemainingLeaveDaysResponse>> {
+    const url = `${this.apiUrl}/by-employee/remaining-days-for-period/${leaveRequestTypeId}?startDate=${startDate}&endDate=${endDate}`;
+  
+   
+  
+    return this.http.get<IApiResponse<RemainingLeaveDaysResponse>>(url, {
+      withCredentials: true,
+    });
+  }
+   
   getUserLeaveRequests(
     userId: number
   ): Observable<IApiResponse<LeaveRequest[]>> {

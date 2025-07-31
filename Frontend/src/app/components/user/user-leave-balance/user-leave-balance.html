@@ -33,31 +33,91 @@
         </div>
       </div>
       
-      <!-- Balance summary -->
-      <div class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg p-4 mb-6 border border-purple-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-purple-700">Total leave days</p>
-            <h5 class="text-2xl font-bold text-purple-900">{{ getTotalDays() }} days</h5>
-          </div>
-          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
-          <div>
-            <p class="text-sm font-medium text-purple-700">Used</p>
-            <h5 class="text-2xl font-bold text-purple-900">{{ getUsedDays() }} days</h5>
-          </div>
-          <div class="hidden sm:block h-12 w-0.5 bg-gray-100"></div>
-          <div>
-            <p class="text-sm font-medium text-purple-700">Remaining</p>
-            <h5 class="text-2xl font-bold text-purple-900">{{ getRemainingDays() }} days</h5>
+      <div class="mb-6 flex items-center justify-between">
+        <h4 class="text-lg font-medium text-gray-900">Leave Type:</h4>
+        <div class="relative w-48">
+          <select 
+            [(ngModel)]="selectedLeaveRequestTypeId" 
+            (change)="onLeaveTypeChange()"
+            [disabled]="isLoadingTypes"
+            class="w-full py-2 pl-3 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7EE3DB] focus:border-[#7EE3DB] hover:border-gray-400 transition-colors duration-200 bg-white text-gray-900">
+            <option value="0" disabled>
+              {{ isLoadingTypes ? 'Loading types...' : 'Select leave type' }}
+            </option>
+            <option 
+              *ngFor="let type of leaveRequestTypes" 
+              [value]="type.id">
+              {{ type.title }}
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
           </div>
         </div>
-        <!-- Progress bar -->
-        <div class="w-full h-2.5 bg-gray-100 rounded-full mt-3">
-          <div class="h-2.5 rounded-full" [style.width.%]="getUsagePercentage()" [ngClass]="{
-            'bg-green-500': getUsagePercentage() < 50,
-            'bg-yellow-500': getUsagePercentage() >= 50 && getUsagePercentage() < 80,
-            'bg-red-500': getUsagePercentage() >= 80
-          }"></div>
+      </div>
+
+      <!-- Balance summary - folosește metodele corecte -->
+      <div *ngIf="selectedLeaveRequestTypeId > 0" class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg p-4 mb-6 border border-gray-200">
+        
+        <!-- Loading state -->
+        <div *ngIf="isLoadingRemainingDays" class="flex items-center justify-center py-4">
+          <div class="animate-spin rounded-full h-6 w-6 border-2 border-slate-900 border-t-transparent mr-3"></div>
+          <span class="text-slate-900 font-medium">Loading balance for {{ selectedYear }}...</span>
+        </div>
+
+        <!-- Error state -->
+        <div *ngIf="remainingDaysError && !isLoadingRemainingDays" class="text-center py-4">
+          <svg class="w-8 h-8 text-red-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-red-600 font-medium">{{ remainingDaysError }}</p>
+          <p class="text-red-500 text-sm mt-1">Year: {{ selectedYear }}</p>
+        </div>
+
+        <!-- Balance info pentru tipul și anul selectat -->
+        <div *ngIf="!isLoadingRemainingDays && !remainingDaysError && remainingDaysInfo">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-lg font-semibold text-slate-900">{{ getSelectedLeaveTypeName() }}</h4>
+            <span class="text-sm font-medium text-slate-700 bg-white/20 px-2 py-1 rounded">{{ selectedYear }}</span>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-700">Total leave days</p>
+              <h5 class="text-2xl font-bold text-slate-900">{{ getSelectedLeaveTypeMaxDays() }} days</h5>
+            </div>
+            <div class="hidden sm:block h-12 w-0.5 bg-white/30"></div>
+            <div>
+              <p class="text-sm font-medium text-slate-700">Used</p>
+              <h5 class="text-2xl font-bold text-slate-900">{{ getSelectedTypeUsedDays() }} days</h5>
+            </div>
+            <div class="hidden sm:block h-12 w-0.5 bg-white/30"></div>
+            <div>
+              <p class="text-sm font-medium text-slate-700">Remaining</p>
+              <h5 class="text-2xl font-bold text-slate-900">{{ getSelectedTypeRemainingDays() }} days</h5>
+            </div>
+          </div>
+          
+          <!-- Progress bar -->
+          <div class="w-full h-2.5 bg-white/30 rounded-full mt-4">
+            <div 
+              class="h-2.5 rounded-full transition-all duration-300"
+              [style.width.%]="getSelectedTypeUsagePercentage()"
+              [ngClass]="{
+                'bg-green-600': getSelectedTypeUsagePercentage() < 50,
+                'bg-yellow-600': getSelectedTypeUsagePercentage() >= 50 && getSelectedTypeUsagePercentage() < 80,
+                'bg-red-600': getSelectedTypeUsagePercentage() >= 80
+              }">
+            </div>
+          </div>
+          <p class="text-xs text-slate-700 mt-1 text-center">
+            {{ getSelectedTypeUsagePercentage().toFixed(1) }}% used in {{ selectedYear }}
+          </p>
+        </div>
+
+        <!-- Mesaj când nu sunt date -->
+        <div *ngIf="!isLoadingRemainingDays && !remainingDaysError && !remainingDaysInfo" class="text-center py-4">
+          <p class="text-slate-700 font-medium">No data available for {{ getSelectedLeaveTypeName() }} in {{ selectedYear }}</p>
+          <p class="text-slate-600 text-sm mt-1">Try selecting a different year or leave type</p>
         </div>
       </div>
       

@@ -1,11 +1,12 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CreateLeaveRequestByEmployeeDto, LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
+import { CreateLeaveRequestByEmployeeDto, LeaveRequestService, RemainingLeaveDaysResponse } from '../../../services/leaveRequest/leaveRequest.service';
 import { LeaveRequest } from '../../../models/entities/iLeave-request';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../../models/enums/RequestStatus';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-user-request-form',
@@ -17,7 +18,6 @@ export class UserRequestForm {
   @Output() close = new EventEmitter<void>();
   @Output() requestSubmitted = new EventEmitter<LeaveRequest>();
 
-
   startDate = '';
   endDate = '';
   reason = '';
@@ -27,6 +27,19 @@ export class UserRequestForm {
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
+  
+  // New properties for remaining days
+  remainingDaysInfo: any | null = null;
+  isLoadingRemainingDays = false;
+  remainingDaysError = '';
+  balanceCalculated = false;
+
+   
+  
+  // Subject for debouncing API calls
+  private updateRemainingDaysSubject = new Subject<void>();
+
+  Math = Math;
 
   get todayDate() {
     return new Date().toISOString().split('T')[0];
@@ -39,7 +52,15 @@ export class UserRequestForm {
   constructor(
     private leaveRequestService: LeaveRequestService, 
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {}
+  ) {
+    // Setup debounced remaining days update
+    this.updateRemainingDaysSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.updateRemainingDays();
+    });
+  }
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
@@ -49,9 +70,57 @@ export class UserRequestForm {
     if (this.endDate && this.endDate < this.startDate) {
       this.endDate = '';
     }
+    this.triggerRemainingDaysUpdate();
   }
 
-   validateDates(): boolean {
+  onEndDateChange() {
+    this.triggerRemainingDaysUpdate();
+  }
+
+  onLeaveTypeChange() {
+    this.triggerRemainingDaysUpdate();
+  }
+
+  private triggerRemainingDaysUpdate() {
+    if (this.leaveRequestTypeId && this.leaveRequestTypeId > 0 && this.startDate && this.endDate) {
+      this.updateRemainingDaysSubject.next();
+    } else {
+      this.remainingDaysInfo = null;
+      this.remainingDaysError = '';
+      this.balanceCalculated = false;
+    }
+  }
+
+  private updateRemainingDays() {
+    if (!this.leaveRequestTypeId || this.leaveRequestTypeId === 0 || !this.startDate || !this.endDate) {
+      return;
+    }
+
+    this.isLoadingRemainingDays = true;
+    this.remainingDaysError = '';
+    this.balanceCalculated = false;
+
+    this.leaveRequestService.getCurrentUserRemainingLeaveDaysForPeriod(
+      this.leaveRequestTypeId, 
+      this.startDate, 
+      this.endDate
+    ).subscribe({
+      next: (response) => {
+        this.remainingDaysInfo = response.data;
+        this.isLoadingRemainingDays = false;
+        this.balanceCalculated = true;
+      },
+      error: (err) => {
+        this.isLoadingRemainingDays = false;
+        this.remainingDaysInfo = null;
+        this.remainingDaysError = 'Failed to load remaining days information.';
+        this.balanceCalculated = false;
+        console.error('Error loading remaining days:', err);
+      }
+    });
+  }
+
+  validateDates(): boolean {
     const today = new Date().toISOString().split('T')[0];
     
     if (this.startDate < today) {
@@ -82,6 +151,7 @@ export class UserRequestForm {
         
         if (types.data.length > 0) {
           this.leaveRequestTypeId = types.data[0].id;
+          this.triggerRemainingDaysUpdate();
         }
       },
       error: (err) => {
@@ -90,8 +160,11 @@ export class UserRequestForm {
       }
     });
   }
-  
-  
+
+  getSelectedLeaveTypeName(): string {
+    const selectedType = this.leaveRequestTypes.find(type => type.id === this.leaveRequestTypeId);
+    return selectedType ? selectedType.title : '';
+  }
 
   resetFormSmooth() {
     const formElement = document.querySelector('.form-container');
@@ -105,6 +178,9 @@ export class UserRequestForm {
       this.reason = '';
       this.leaveRequestTypeId = this.leaveRequestTypes.length > 0 ? this.leaveRequestTypes[0].id : 0;
       this.errorMessage = '';
+      this.remainingDaysInfo = null;
+      this.remainingDaysError = '';
+      this.balanceCalculated = false;
       
       if (formElement) {
         formElement.classList.remove('fade-out');
@@ -123,6 +199,9 @@ export class UserRequestForm {
     this.reason = '';
     this.leaveRequestTypeId = this.leaveRequestTypes.length > 0 ? this.leaveRequestTypes[0].id : 0;
     this.errorMessage = '';
+    this.remainingDaysInfo = null;
+    this.remainingDaysError = '';
+    this.balanceCalculated = false;
   }
 
   closeForm() {
@@ -130,13 +209,18 @@ export class UserRequestForm {
   }
   
   submitForm() {
-
     if (!this.validateDates()) {
       return;
     }
 
     if (!this.leaveRequestTypeId || this.leaveRequestTypeId === 0) {
       this.errorMessage = 'Please select a leave request type.';
+      return;
+    }
+
+    // Additional validation: check if user has enough remaining days
+    if (this.remainingDaysInfo && this.remainingDaysInfo.remainingDays < 0) {
+      this.errorMessage = 'You do not have enough remaining days for this leave type.';
       return;
     }
 
@@ -151,11 +235,9 @@ export class UserRequestForm {
       requestStatus: RequestStatus.PENDING, 
     };
     
-   
     this.leaveRequestService.addLeaveRequestByEmployee(requestDto).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-
         this.requestSubmitted.emit(response.data);
 
         setTimeout(() => {

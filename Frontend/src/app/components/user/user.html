@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 ">
+<div class="min-h-screen bg-gray-50 flex flex-col">
   <custom-navbar></custom-navbar>
 
   <div *ngIf="showSuccessMessage" 
@@ -15,54 +15,51 @@
     </button>
   </div>
 
-  <!-- Gradient container -->
-  <div class="w-full h-52 bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] shadow-lg relative overflow-hidden">
+  <!-- Compact gradient header -->
+  <div class="w-full h-32 bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] shadow-lg relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
       <div class="text-white max-w-md">
-        <h2 class="text-4xl font-semibold text-[#020126]">Ready to take that well-deserved break?</h2>
+        <h2 class="text-2xl font-semibold text-[#020126]">Ready to take that well-deserved break?</h2>
       </div>
 
-      <div class="hidden sm:block w-60 h-52 relative">
-      <!-- Plane icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="w-36 h-36 absolute right-24 bottom-6 text-slate-900 opacity-65 transform -rotate-12">
-        <path fill="currentColor" d="M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56.2 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.3-14-14c0-1.3 .2-2.6 .5-3.9L32 256 .5 145.9c-.4-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.6 0 181.2 0l56.2 0c11.5 0 22.1 6.2 27.8 16.1L365.7 192l116.6 0z"/>
-      </svg>
-    </div>
+      <div class="hidden sm:block w-40 h-32 relative">
+        <!-- Smaller plane icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="w-24 h-24 absolute right-8 bottom-2 text-slate-900 opacity-65 transform -rotate-12">
+          <path fill="currentColor" d="M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56.2 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.3-14-14c0-1.3 .2-2.6 .5-3.9L32 256 .5 145.9c-.4-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.6 0 181.2 0l56.2 0c11.5 0 22.1 6.2 27.8 16.1L365.7 192l116.6 0z"/>
+        </svg>
+      </div>
     </div>
   </div>
 
-
-  <div class="max-w-7xl mx-auto p-6 ">
+  <!-- Main content area with flex layout -->
+  <div class="flex-1 max-w-7xl mx-auto w-full p-4 flex flex-col gap-4">
     
-
-    <!-- Modern horizontal cards -->
-<div class="flex justify-center mb-2"> <!-- mb-2 în loc de mb-4 -->
-  <div class="max-w-6xl w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Submit request Card -->
-      <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 group relative overflow-hidden">
+    <!-- Compact action cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Submit request Card - More compact -->
+      <div class="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 border border-gray-200 group relative overflow-hidden">
         <!-- Background decoration -->
-        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#88F8BF] to-[#7EE3DB] rounded-full opacity-10 transform translate-x-12 -translate-y-12 group-hover:scale-125 transition-transform duration-500"></div>
+        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#88F8BF] to-[#7EE3DB] rounded-full opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-125 transition-transform duration-500"></div>
         
         <div class="relative z-10">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
-              <svg class="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
+              <svg class="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </div>
             <div>
-              <h3 class="text-xl font-bold text-gray-900">Submit Request</h3>
-              <p class="text-gray-500 text-sm">Quick & Easy</p>
+              <h3 class="text-lg font-bold text-gray-900">Submit Request</h3>
+              <p class="text-gray-500 text-xs">Quick & Easy</p>
             </div>
           </div>
           
-          <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-            Submit your leave request with just a few clicks and track your request status.
+          <p class="text-gray-600 mb-3 text-xs leading-relaxed">
+            Submit your leave request with just a few clicks.
           </p>
           
           <button 
-            class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-semibold px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md border border-slate-300" 
+            class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-semibold px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md border border-slate-300 text-sm" 
             (click)="toggleRequestForm()"
           >
             Create New Request
@@ -70,63 +67,55 @@
         </div>
       </div>
 
-      <!-- Leave Balance Card -->
-      <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 group relative overflow-hidden">
+      <!-- Leave Balance Card - More compact -->
+      <div class="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 border border-gray-200 group relative overflow-hidden">
         <!-- Background decoration -->
-        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#88F8BF] to-[#7EE3DB] rounded-full opacity-10 transform translate-x-12 -translate-y-12 group-hover:scale-125 transition-transform duration-500"></div>
+        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[#88F8BF] to-[#7EE3DB] rounded-full opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-125 transition-transform duration-500"></div>
         
         <div class="relative z-10">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
-              <svg class="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded-lg flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
+              <svg class="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
             <div>
-              <h3 class="text-xl font-bold text-gray-900">Leave Balance</h3>
-              <p class="text-gray-500 text-sm">Track Your Days</p>
+              <h3 class="text-lg font-bold text-gray-900">Leave Balance</h3>
+              <p class="text-gray-500 text-xs">Track Your Days</p>
             </div>
           </div>
           
-          <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-            Monitor your available vacation days and other time-off allowances.
+          <p class="text-gray-600 mb-3 text-xs leading-relaxed">
+            Monitor your available vacation days and allowances.
           </p>
           
           <button 
-            class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-semibold px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md border border-slate-300" 
+            class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-semibold px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md border border-slate-300 text-sm" 
             (click)="toggleLeaveBalance()">
             Check Balance
           </button>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-    
 
     <!-- Leave request form that appears when showRequestForm is true -->
     <app-user-request-form
       *ngIf="showRequestForm"
       (close)="toggleRequestForm()"
       (requestSubmitted)="onRequestSubmitted()"
-
     ></app-user-request-form>
 
     <!-- User leave balance component that appears when showLeaveBalance is true -->
     <app-user-leave-balance
       *ngIf="showLeaveBalance"
       (close)="toggleLeaveBalance()"
-      
     ></app-user-leave-balance>
-  </div>
-  
-  <div class="max-w-7xl mx-auto px-6 pb-6 -mt-2"> <!-- Adaugă -mt-2 pentru a trage tabelul și mai sus -->
-    <!-- Modern table section -->
-    <div class="bg-white rounded-lg shadow-xl w-full flex flex-col">
+
+    <!-- Requests table - takes remaining space -->
+    <div class="flex-1 bg-white rounded-lg shadow-xl flex flex-col min-h-0">
       <!-- Table header -->
-      <div class="flex items-center justify-between p-6 border-b">
-        <h3 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+      <div class="flex items-center justify-between p-4 border-b flex-shrink-0">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <svg class="w-5 h-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <path fill="currentColor" d="M152.1 38.2c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 113C-2.3 103.6-2.3 88.4 7 79s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zm0 160c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 273c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zM224 96c0-17.7 14.3-32 32-32H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H256c-17.7 0-32-14.3-32-32zm0 160c0-17.7 14.3-32 32-32H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H256c-17.7 0-32-14.3-32-32zM160 416c0-17.7 14.3-32 32-32H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H192c-17.7 0-32-14.3-32-32zM48 368c0-26.5 21.5-48 48-48s48 21.5 48 48s-21.5 48-48 48s-48-21.5-48-48z"/>
           </svg>
@@ -135,52 +124,77 @@
       </div>
 
       <!-- Filter and search options -->
-      <div class="p-4 border-b bg-gray-50">
-        <div class="flex flex-wrap gap-3 items-center">
-          <div class="flex flex-wrap gap-2">
+      <div class="p-3 border-b bg-gray-50 flex-shrink-0">
+        <div class="flex flex-wrap gap-2 items-center">
+          <!-- Status filter buttons -->
+          <div class="flex flex-wrap gap-1">
             <button [class]="statusFilter === 'all' ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900' : 'bg-white text-gray-700 border border-gray-300'" 
-                    class="px-3 py-1 rounded text-sm font-medium transition-all duration-200 transform hover:scale-105" 
+                    class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 transform hover:scale-105" 
                     (click)="statusFilter = 'all'; filterRequests()">
               All
             </button>
             <button [class]="statusFilter === 'pending' ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900' : 'bg-white text-gray-700 border border-gray-300'"
-                    class="px-3 py-1 rounded text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                    class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 transform hover:scale-105"
                     (click)="statusFilter = 'pending'; filterRequests()">
               Pending
             </button>
             <button [class]="statusFilter === 'approved' ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900' : 'bg-white text-gray-700 border border-gray-300'"
-                    class="px-3 py-1 rounded text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                    class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 transform hover:scale-105"
                     (click)="statusFilter = 'approved'; filterRequests()">
               Approved
             </button>
             <button [class]="statusFilter === 'rejected' ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900' : 'bg-white text-gray-700 border border-gray-300'"
-                    class="px-3 py-1 rounded text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                    class="px-2 py-1 rounded text-xs font-medium transition-all duration-200 transform hover:scale-105"
                     (click)="statusFilter = 'rejected'; filterRequests()">
               Rejected
             </button>
           </div>
           
           <!-- Items per page selector -->
-          <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-700">Show:</label>
+          <div class="flex items-center gap-1">
+            <label class="text-xs text-gray-700">Show:</label>
             <select [(ngModel)]="itemsPerPage" (change)="currentPage = 1; updatePagination()" 
-                    class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    class="border border-gray-300 rounded px-1 py-1 text-xs">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>
               <option value="50">50</option>
             </select>
-            <span class="text-sm text-gray-700">per page</span>
+            <span class="text-xs text-gray-700">per page</span>
           </div>
 
-          <div class="ml-auto">
+          <!-- Right side: Search and Show cancelled -->
+          <div class="ml-auto flex items-center gap-3">
+            <!-- Show cancelled requests checkbox -->
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1 cursor-pointer group">
+                <div class="relative">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="showCancelledRequests"
+                    (change)="onShowCancelledToggle()"
+                    class="sr-only">
+                  <div [class]="showCancelledRequests ? 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] border-slate-500' : 'bg-white border-gray-300'"
+                       class="w-4 h-4 border-2 rounded transition-all duration-200 flex items-center justify-center group-hover:scale-110">
+                    <svg *ngIf="showCancelledRequests" class="w-2.5 h-2.5 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                </div>
+                <span class="text-xs text-gray-700 select-none group-hover:text-gray-900 transition-colors duration-200">
+                  Show cancelled
+                </span>
+              </label>
+            </div>
+
+            <!-- Search input -->
             <div class="relative">
               <input type="text" placeholder="Search requests..." 
-                     class="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
+                     class="pl-7 pr-3 py-1 border border-gray-300 rounded-md text-xs focus:ring-blue-500 focus:border-blue-500 w-full sm:w-48"
                      [(ngModel)]="searchTerm"
                      (input)="filterRequests()">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                <svg class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
@@ -189,8 +203,8 @@
         </div>
       </div>
       
-      <!-- Table content -->
-      <div class="overflow-y-auto flex-grow max-h-96">
+      <!-- Table content with proper scrolling -->
+      <div class="flex-1 overflow-auto min-h-0">
         <!-- Loading state -->
         <div *ngIf="isLoading" class="flex items-center justify-center py-8">
           <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
@@ -211,67 +225,69 @@
         <table *ngIf="!isLoading && paginatedRequests.length > 0" class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50 sticky top-0">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nr</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Reason</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr *ngFor="let request of paginatedRequests; let i = index" [ngClass]="{'bg-gray-50': request.selected}" class="hover:bg-gray-50 transition-colors duration-200">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{getLeaveRequestTypeName(request.leaveRequestTypeId)}}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{getLeaveRequestTypeName(request.leaveRequestTypeId)}}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                 {{request.startDate | date:'MMM d'}} - {{request.endDate | date:'MMM d, y'}}
               </td>
-              <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" [title]="request.reason">
-                {{request.reason || 'No reason provided'}}
+              <td class="px-4 py-3 text-sm text-gray-900 w-48">
+                <div class="max-w-[12rem] truncate" [title]="request.reason || 'No reason provided'">
+                  {{request.reason || 'No reason provided'}}
+                </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 <span [ngClass]="{
                   'bg-yellow-100 text-yellow-800': request.requestStatus === RequestStatus.PENDING,
                   'bg-green-100 text-green-800': request.requestStatus === RequestStatus.APPROVED,
-                  'bg-red-100 text-red-800': request.requestStatus === RequestStatus.REJECTED
-                }" class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  'bg-red-100 text-red-800': request.requestStatus === RequestStatus.REJECTED,
+                  'bg-gray-100 text-gray-800': request.requestStatus === RequestStatus.CANCELED,
+                }" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
                    {{getStatusDisplayName(request.requestStatus)}}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <button class="text-blue-600 hover:text-blue-900 font-medium mr-3 transition-colors duration-200" (click)="viewDetails(request)">View</button>
-                <button *ngIf="request.requestStatus === RequestStatus.PENDING" class="text-red-600 hover:text-red-900 font-medium transition-colors duration-200" (click)="cancelRequest(request)">Cancel</button>
+              <td class="px-4 py-3 whitespace-nowrap text-sm">
+                <button class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-medium mr-2 transition-all duration-200 transform hover:scale-105 px-2 py-1 rounded text-xs border border-slate-300" (click)="viewDetails(request)">View</button>
+                <button *ngIf="request.requestStatus === RequestStatus.PENDING" class="bg-gray-200 hover:bg-gray-400 text-black font-medium transition-all duration-200 transform hover:scale-105 px-2 py-1 rounded text-xs" (click)="cancelRequest(request)">Cancel</button>
               </td>
             </tr>
           </tbody>
         </table>
-
       </div>
 
       <!-- Pagination footer -->
-      <div *ngIf="!isLoading && filteredRequests.length > 0" class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+      <div *ngIf="!isLoading && filteredRequests.length > 0" class="px-4 py-3 border-t bg-gray-50 flex items-center justify-between flex-shrink-0">
         <!-- Results info -->
-        <div class="text-sm text-gray-700">
+        <div class="text-xs text-gray-700">
           Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to 
           {{ Math.min(currentPage * itemsPerPage, filteredRequests.length) }} of 
           {{ filteredRequests.length }} results
         </div>
 
         <!-- Pagination controls -->
-        <div class="flex items-center space-x-2" *ngIf="totalPages > 1">
+        <div class="flex items-center space-x-1" *ngIf="totalPages > 1">
           <!-- Previous button -->
           <button 
             (click)="goToPreviousPage()" 
             [disabled]="currentPage === 1"
             [class]="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            class="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md transition-colors duration-200">
+            class="px-2 py-1 text-xs font-medium border border-gray-300 rounded-md transition-colors duration-200">
             Previous
           </button>
 
           <!-- Page numbers -->
           <ng-container *ngFor="let page of getPageNumbers()">
             <!-- Ellipsis -->
-            <span *ngIf="page === -1" class="px-3 py-2 text-sm text-gray-500">...</span>
+            <span *ngIf="page === -1" class="px-2 py-1 text-xs text-gray-500">...</span>
             
             <!-- Page number -->
             <button 
@@ -280,7 +296,7 @@
               [class]="page === currentPage ? 
                 'bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] border-slate-500 text-slate-900' : 
                 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'"
-              class="px-3 py-2 text-sm font-medium border rounded-md transition-all duration-200 transform hover:scale-105">
+              class="px-2 py-1 text-xs font-medium border rounded-md transition-all duration-200 transform hover:scale-105">
               {{ page }}
             </button>
           </ng-container>
@@ -290,7 +306,7 @@
             (click)="goToNextPage()" 
             [disabled]="currentPage === totalPages"
             [class]="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'"
-            class="px-3 py-2 text-sm font-medium border border-gray-300 rounded-md transition-colors duration-200">
+            class="px-2 py-1 text-xs font-medium border border-gray-300 rounded-md transition-colors duration-200">
             Next
           </button>
         </div>
@@ -300,76 +316,155 @@
 
   <!-- Request details modal -->
   <div *ngIf="!showListModal && selectedRequest" class="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 animate-fade-in">
-    <div class="p-4 border-b flex justify-between items-center">
-      <h3 class="text-lg font-medium">Request Details</h3>
-      <button (click)="closeDetails()" class="text-gray-400 hover:text-gray-500">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-    <div class="p-4 max-h-96 overflow-y-auto">
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <p class="text-sm text-gray-500">Request ID</p>
-          <p class="font-medium">#{{selectedRequest.id}}</p>
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg mx-4 animate-fade-in">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h3 class="text-lg font-medium">Request Details</h3>
+        <button (click)="closeDetails()" class="text-gray-400 hover:text-gray-500">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="p-4 max-h-96 overflow-y-auto">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <p class="text-sm text-gray-500">Request ID</p>
+            <p class="font-medium">#{{selectedRequest.id}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Status</p>
+            <p>
+              <span [ngClass]="{
+                'bg-yellow-100 text-yellow-800': selectedRequest.requestStatus === RequestStatus.PENDING,
+                'bg-green-100 text-green-800': selectedRequest.requestStatus === RequestStatus.APPROVED,
+                'bg-red-100 text-red-800': selectedRequest.requestStatus === RequestStatus.REJECTED,
+                'bg-gray-100 text-gray-800': selectedRequest.requestStatus === RequestStatus.CANCELED,
+              }" class="px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full">
+                   {{getStatusDisplayName(selectedRequest.requestStatus)}}
+              </span>
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Leave Type</p>
+            <p class="font-medium">{{getLeaveRequestTypeName(selectedRequest.leaveRequestTypeId)}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Duration</p>
+            <p class="font-medium">{{selectedRequest.duration}} days</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Start Date</p>
+            <p class="font-medium">{{selectedRequest.startDate | date:'MMM d, y'}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">End Date</p>
+            <p class="font-medium">{{selectedRequest.endDate | date:'MMM d, y'}}</p>
+          </div>
         </div>
-        <div>
-          <p class="text-sm text-gray-500">Status</p>
-          <p>
-            <span [ngClass]="{
-              'bg-yellow-100 text-yellow-800': selectedRequest.requestStatus === RequestStatus.PENDING,
-              'bg-green-100 text-green-800': selectedRequest.requestStatus === RequestStatus.APPROVED,
-              'bg-red-100 text-red-800': selectedRequest.requestStatus === RequestStatus.REJECTED
-            }" class="px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full">
-                 {{getStatusDisplayName(selectedRequest.requestStatus)}}
-            </span>
+        
+        <div class="mb-4">
+          <p class="text-sm text-gray-500">Reason</p>
+          <p class="mt-1 text-gray-700">{{selectedRequest.reason}}</p>
+        </div>
+        
+        <div *ngIf="selectedRequest.reviewerComment">
+          <p class="text-sm text-gray-500">Manager Comment</p>
+          <p class="mt-1 p-3 bg-gray-50 rounded text-gray-700 italic">
+            "{{selectedRequest.reviewerComment}}"
           </p>
         </div>
-        <div>
-          <p class="text-sm text-gray-500">Leave Type</p>
-          <p class="font-medium">{{getLeaveRequestTypeName(selectedRequest.leaveRequestTypeId)}}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Duration</p>
-          <p class="font-medium">{{selectedRequest.duration}} days</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Start Date</p>
-          <p class="font-medium">{{selectedRequest.startDate | date:'MMM d, y'}}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">End Date</p>
-          <p class="font-medium">{{selectedRequest.endDate | date:'MMM d, y'}}</p>
-        </div>
       </div>
-      
-      <div class="mb-4">
-        <p class="text-sm text-gray-500">Reason</p>
-        <p class="mt-1 text-gray-700">{{selectedRequest.reason}}</p>
+      <div class="p-4 border-t bg-gray-50 flex justify-between">
+        <button *ngIf="selectedRequest.requestStatus === RequestStatus.PENDING" 
+                (click)="cancelRequest(selectedRequest)" 
+                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105">
+          Cancel Request
+        </button>
+        <button (click)="closeDetails()" 
+                class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-semibold px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 border border-slate-300">
+          Back to List
+        </button>
       </div>
-      
-      <div *ngIf="selectedRequest.reviewerComment">
-        <p class="text-sm text-gray-500">Manager Comment</p>
-        <p class="mt-1 p-3 bg-gray-50 rounded text-gray-700 italic">
-          "{{selectedRequest.reviewerComment}}"
-        </p>
-      </div>
-    </div>
-    <div class="p-4 border-t bg-gray-50 flex justify-between">
-      <button *ngIf="selectedRequest.requestStatus === RequestStatus.PENDING" 
-              (click)="cancelRequest(selectedRequest)" 
-              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium">
-        Cancel Request
-      </button>
-      <button (click)="closeDetails()" 
-          class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded transition-all duration-200 transform hover:scale-105">
-        Back to List
-      </button>
     </div>
   </div>
-</div>
+
+  <!-- Cancel Confirmation Modal -->
+  <div *ngIf="showCancelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-fade-in transform transition-all duration-300">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Cancel Request</h3>
+            <p class="text-sm text-gray-500">This action will cancel your leave request</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6">
+        <div class="mb-4">
+          <p class="text-gray-700 mb-3">
+            Are you sure you want to cancel this leave request?
+          </p>
+          
+          <!-- Request details -->
+          <div *ngIf="requestToCancel" class="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Request ID:</span>
+              <span class="font-medium">#{{requestToCancel.id}}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Type:</span>
+              <span class="font-medium">{{getLeaveRequestTypeName(requestToCancel.leaveRequestTypeId)}}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Dates:</span>
+              <span class="font-medium">{{requestToCancel.startDate | date:'MMM d'}} - {{requestToCancel.endDate | date:'MMM d, y'}}</span>
+            </div>
+            <div class="flex justify-between text-sm" *ngIf="requestToCancel.reason">
+              <span class="text-gray-500">Reason:</span>
+              <span class="font-medium max-w-xs truncate" [title]="requestToCancel.reason">{{requestToCancel.reason}}</span>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="text-sm text-yellow-800">
+                <p class="font-medium">Important:</p>
+                <p>Once cancelled, this request cannot be reactivated. You'll need to submit a new request if needed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+        <button 
+          (click)="closeCancelModal()" 
+          class="bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:from-[#6DD3CE] hover:to-[#7EF0B7] text-slate-900 font-medium px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 border border-slate-300">
+          Keep Request
+        </button>
+        <button 
+          (click)="confirmCancelRequest()" 
+          class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Cancel Request
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 

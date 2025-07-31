@@ -3,5 +3,6 @@ export enum RequestStatus {
   PENDING = 2,
   APPROVED = 4,
   REJECTED = 8,
-  EXPIRED = 16
+  EXPIRED = 16,
+  CANCELED = 32,
 }
