@@ -15,6 +15,7 @@ export class AddLeaveRequestType {
   leaveTypeName: string = '';
   leaveTypeDescription: string = '';
   isPaid: boolean = false;
+  maxDays: number = 0;
 
   onSubmitMessage: string = '';
   isSubmitting: boolean = false;
@@ -32,10 +33,10 @@ export class AddLeaveRequestType {
 
       const lrt: ILeaveRequestType = {
         id: 0,
-        description: this.leaveTypeName,
-        title: this.leaveTypeDescription,
+        description: this.leaveTypeDescription,
+        title: this.leaveTypeName,
         isPaid: this.isPaid,
-        maxDays: 0,
+        maxDays: this.maxDays,
       };
 
       this.leaveRequestTypeService.postLeaveRequestType(lrt).subscribe({
@@ -50,7 +51,6 @@ export class AddLeaveRequestType {
           this.isSubmitting = false;
           this.onSubmitMessage = 'Error adding a leave request type.';
 
-          // Setează mesajul de eroare bazat pe răspunsul serverului
           if (error.error && error.error.message) {
             this.onSubmitMessage = error.error.message;
           } else if (error.message) {
@@ -70,6 +70,7 @@ export class AddLeaveRequestType {
     this.leaveTypeName = '';
     this.leaveTypeDescription = '';
     this.isPaid = false;
+    this.maxDays = 0;
     this.hideMessages();
     form.resetForm();
   }

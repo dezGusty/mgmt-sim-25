@@ -1,11 +1,13 @@
 <div class="max-w-2xl mx-auto p-6">
   <form #leaveForm="ngForm" (ngSubmit)="onSubmit(leaveForm)" class="space-y-6">
-    
-    <!-- Leave Type Name and Code -->
+    <!-- Leave Type Name and Maximum Days -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Leave Type Name -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Leave Type Name *</label>
-        <input 
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Leave Type Name *</label
+        >
+        <input
           type="text"
           name="leaveTypeName"
           [(ngModel)]="leaveTypeName"
@@ -17,49 +19,111 @@
           [disabled]="isSubmitting"
           required
           minlength="2"
-          maxlength="50">
+          maxlength="50"
+        />
 
         <!-- Error messages -->
-        <div *ngIf="isFieldInvalid(leaveTypeNameField)" class="mt-1 text-sm text-red-600">
-          <span *ngIf="leaveTypeNameField.errors?.['required']">Leave Type Name is required</span>
-          <span *ngIf="leaveTypeNameField.errors?.['minlength']">Minimum 2 characters required</span>
-          <span *ngIf="leaveTypeNameField.errors?.['maxlength']">Maximum 50 characters</span>
+        <div
+          *ngIf="isFieldInvalid(leaveTypeNameField)"
+          class="mt-1 text-sm text-red-600"
+        >
+          <span *ngIf="leaveTypeNameField.errors?.['required']"
+            >Leave Type Name is required</span
+          >
+          <span *ngIf="leaveTypeNameField.errors?.['minlength']"
+            >Minimum 2 characters required</span
+          >
+          <span *ngIf="leaveTypeNameField.errors?.['maxlength']"
+            >Maximum 50 characters</span
+          >
+        </div>
+      </div>
+
+      <!-- Maximum Days - ADĂUGAT -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Maximum Days *</label
+        >
+        <input
+          type="number"
+          name="maxDays"
+          [(ngModel)]="maxDays"
+          #maxDaysField="ngModel"
+          placeholder="Enter maximum days..."
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200"
+          [class.border-red-500]="isFieldInvalid(maxDaysField)"
+          [class.border-gray-300]="!isFieldInvalid(maxDaysField)"
+          [disabled]="isSubmitting"
+          required
+          min="1"
+          max="365"
+        />
+
+        <!-- Error messages for maxDays -->
+        <div
+          *ngIf="isFieldInvalid(maxDaysField)"
+          class="mt-1 text-sm text-red-600"
+        >
+          <span *ngIf="maxDaysField.errors?.['required']"
+            >Maximum Days is required</span
+          >
+          <span *ngIf="maxDaysField.errors?.['min']"
+            >Minimum 1 day required</span
+          >
+          <span *ngIf="maxDaysField.errors?.['max']"
+            >Maximum 365 days allowed</span
+          >
         </div>
       </div>
     </div>
 
     <!-- Description -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"
+        >Description *</label
+      >
       <textarea
         name="leaveTypeDescription"
         [(ngModel)]="leaveTypeDescription"
         #leaveTypeDescriptionField="ngModel"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200"
-        rows="3" 
+        [class.border-red-500]="isFieldInvalid(leaveTypeDescriptionField)"
+        [class.border-gray-300]="!isFieldInvalid(leaveTypeDescriptionField)"
+        rows="3"
         placeholder="Leave type description..."
         [disabled]="isSubmitting"
         minlength="5"
         maxlength="150"
-        required>
+        required
+      >
       </textarea>
 
-      <div *ngIf="isFieldInvalid(leaveTypeDescriptionField)" class="mt-1 text-sm text-red-600">
-        <div *ngIf="leaveTypeDescriptionField.hasError('required')">Description is required</div>
-        <div *ngIf="leaveTypeDescriptionField.hasError('minlength')">Minimum 5 characters required</div>
-        <div *ngIf="leaveTypeDescriptionField.hasError('maxlength')">Maximum 150 characters allowed</div>
+      <div
+        *ngIf="isFieldInvalid(leaveTypeDescriptionField)"
+        class="mt-1 text-sm text-red-600"
+      >
+        <div *ngIf="leaveTypeDescriptionField.hasError('required')">
+          Description is required
+        </div>
+        <div *ngIf="leaveTypeDescriptionField.hasError('minlength')">
+          Minimum 5 characters required
+        </div>
+        <div *ngIf="leaveTypeDescriptionField.hasError('maxlength')">
+          Maximum 150 characters allowed
+        </div>
       </div>
     </div>
 
     <!-- Checkboxes -->
     <div class="flex flex-wrap gap-4">
       <label class="flex items-center">
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           name="isPaid"
           [(ngModel)]="isPaid"
           [disabled]="isSubmitting"
-          class="rounded border-gray-300 text-[#20B486] focus:ring-[#20B486]">
+          class="rounded border-gray-300 text-[#20B486] focus:ring-[#20B486]"
+        />
         <span class="ml-2 text-sm text-gray-700">Is paid</span>
       </label>
     </div>
@@ -76,22 +140,26 @@
       {{ onSubmitMessage }}
     </div>
 
-
     <!-- Action Buttons -->
     <div class="flex gap-4 pt-4">
-      <button 
+      <button
         type="submit"
         [disabled]="!leaveForm.valid || isSubmitting"
-        class="px-6 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9470] disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2">
-        <span *ngIf="isSubmitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-        <span>{{ isSubmitting ? 'Saving...' : 'Save Leave Type' }}</span>
+        class="px-6 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9470] disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+      >
+        <span
+          *ngIf="isSubmitting"
+          class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+        ></span>
+        <span>{{ isSubmitting ? "Saving..." : "Save Leave Type" }}</span>
       </button>
-      
-      <button 
+
+      <button
         type="button"
         (click)="onReset(leaveForm)"
         [disabled]="isSubmitting"
-        class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200">
+        class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200"
+      >
         Reset Form
       </button>
     </div>
