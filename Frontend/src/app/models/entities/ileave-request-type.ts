@@ -3,4 +3,5 @@ export interface ILeaveRequestType {
   title: string;
   description: string;
   isPaid: boolean;
+  maxDays: number;
 }

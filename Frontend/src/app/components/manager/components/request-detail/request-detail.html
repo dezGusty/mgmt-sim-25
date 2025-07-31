@@ -137,24 +137,38 @@
           {{ request.createdAt }}
         </p>
       </div>
-      <div>
-        <label
-          class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-2"
+    </div>
+
+    <div>
+      <label
+        class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-2"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        Leave Type
+      </label>
+      <div class="bg-gray-50 px-3 py-2 rounded-md">
+        <div *ngIf="request.leaveType" class="flex justify-between items-start">
+          <h4 class="font-semibold text-gray-900">
+            {{ request.leaveType.title }}
+          </h4>
+          <span
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-800': request.leaveType.isPaid,
+              'bg-gray-100 text-gray-800': !request.leaveType.isPaid
+            }"
           >
-            <circle cx="12" cy="12" r="10"></circle>
-          </svg>
-          Leave Type
-        </label>
-        <p class="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
-          {{ request.leaveTypeDescription || "-" }}
-        </p>
+            {{ request.leaveType.isPaid ? "Paid" : "Unpaid" }}
+          </span>
+        </div>
       </div>
     </div>
 

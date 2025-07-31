@@ -3,5 +3,6 @@ export interface ILeaveRequestTypeViewModel {
     title?: string;
     description?: string;
     isPaid?: boolean;
+    maxDays?: number;
     color?: string;
 }

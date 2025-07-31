@@ -8,6 +8,7 @@ import { ColorGenerator } from '../../../services/colorGenerator/color-generator
 import { IFilteredLeaveRequestTypeRequest } from '../../../models/requests/ifiltered-leave-request-types-request';
 import { IApiResponse } from '../../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
+import { max } from 'rxjs';
 
 @Component({
   selector: 'app-admin-leave-request-types-list',
@@ -26,7 +27,8 @@ export class AdminLeaveTypesList implements OnInit {
     id: 0,
     description: '',
     title: '',
-    isPaid: false
+    isPaid: false,
+    maxDays: 0
   };
   
   isSubmitting = false;
@@ -97,6 +99,7 @@ export class AdminLeaveTypesList implements OnInit {
       title: leaveType.title || '',
       description: leaveType.description || '',
       isPaid: leaveType.isPaid,
+      maxDays: leaveType.maxDays || 0,
       color: this.colorGenerator.generateColorFromId(leaveType.id)
     };
   }
@@ -128,7 +131,8 @@ export class AdminLeaveTypesList implements OnInit {
       id: leaveType.id,
       description: leaveType.description || '',
       title: leaveType.title || '',
-      isPaid: leaveType.isPaid || false
+      isPaid: leaveType.isPaid || false,
+      maxDays: leaveType.maxDays || 0
     };
     this.errorMessage = '';
   }
@@ -146,7 +150,8 @@ export class AdminLeaveTypesList implements OnInit {
       id: this.editForm.id,
       description: this.editForm.description,
       title: this.editForm.title,
-      isPaid: this.editForm.isPaid
+      isPaid: this.editForm.isPaid,
+      maxDays: this.editForm.maxDays
     };
 
     this.leaveRequestTypeService.updateLeaveRequestType(leaveTypeToUpdate).subscribe({
@@ -169,7 +174,11 @@ export class AdminLeaveTypesList implements OnInit {
   }
 
   isFormValid(): boolean {
-    return !!(this.editForm.description.trim());
+    return !!(
+    this.editForm.description.trim() && 
+    this.editForm.title.trim() &&
+    this.editForm.maxDays > 0
+  );
   }
 
   onSearch() {
@@ -181,6 +190,7 @@ export class AdminLeaveTypesList implements OnInit {
     this.leaveTypeToEdit = null;
     this.errorMessage = '';
   }
+  
 
   deleteLeaveType(leaveType: ILeaveRequestTypeViewModel): void {
     const confirmMessage = `Are you sure you want to delete the leave request type "${leaveType.description}"?`;

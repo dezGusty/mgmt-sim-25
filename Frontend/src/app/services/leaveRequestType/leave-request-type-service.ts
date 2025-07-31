@@ -6,7 +6,6 @@ import { IFilteredLeaveRequestTypeRequest } from '../../models/requests/ifiltere
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { HttpParams } from '@angular/common/http';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
-import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-titles-request';
 
 @Injectable({
   providedIn: 'root',
@@ -21,14 +20,6 @@ export class LeaveRequestTypeService {
       `${this.baseUrl}`
     );
   }
-
-  // getLeaveRequestTypeById(
-  //   id: number
-  // ): Observable<IApiResponse<ILeaveRequestType>> {
-  //   return this.httpClient.get<IApiResponse<ILeaveRequestType>>(
-  //     `${this.baseUrl}/${id}`
-  //   );
-  // }
 
   getAllLeaveTypesFiltered(
     params: IFilteredLeaveRequestTypeRequest

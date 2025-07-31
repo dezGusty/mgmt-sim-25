@@ -83,6 +83,37 @@
               {{ req.days }} days
             </span>
           </div>
+          <div
+            class="flex items-start gap-2 text-sm text-slate-700"
+            *ngIf="req.leaveType"
+          >
+            <svg
+              class="w-4 h-4 mt-0.5 flex-shrink-0 text-[#7EE3DB]"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+            >
+              <path
+                fill="currentColor"
+                d="M184 48H328c4.4 0 8 3.6 8 8V96H176V56c0-4.4 3.6-8 8-8zm-56 8V96H64C28.7 96 0 124.7 0 160v96H192 320 512V160c0-35.3-28.7-64-64-64H384V56c0-30.9-25.1-56-56-56H184c-30.9 0-56 25.1-56 56zM512 288H320v32c0 17.7-14.3 32-32 32H224c-17.7 0-32-14.3-32-32V288H0V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V288z"
+              />
+            </svg>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-medium text-slate-800">{{
+                  req.leaveType.title
+                }}</span>
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-700': req.leaveType.isPaid,
+                    'bg-gray-100 text-gray-700': !req.leaveType.isPaid
+                  }"
+                >
+                  {{ req.leaveType.isPaid ? "Paid" : "Unpaid" }}
+                </span>
+              </div>
+            </div>
+          </div>
           <div class="flex items-start gap-2 text-sm text-slate-700">
             <svg
               class="w-4 h-4 mt-0.5 flex-shrink-0 text-[#7EE3DB]"
