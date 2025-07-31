@@ -110,6 +110,7 @@ namespace ManagementSimulator.Core.Services
                 Title = dto.Title ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
                 MaxDays = dto.MaxDays,
+                IsPaid = dto.IsPaid
             };
 
             await _leaveRequestTypeRepository.AddAsync(leaveRequestType);

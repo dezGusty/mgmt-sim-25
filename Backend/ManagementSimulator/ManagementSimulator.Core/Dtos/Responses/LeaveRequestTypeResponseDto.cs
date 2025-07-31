@@ -13,5 +13,6 @@ namespace ManagementSimulator.Core.Dtos.Responses
         public string? Description { get; set; } = string.Empty;
         public bool? IsPaid {  get; set; }
         public int? MaxDays { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

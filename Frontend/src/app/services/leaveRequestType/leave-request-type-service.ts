@@ -111,7 +111,13 @@ export class LeaveRequestTypeService {
   }
 
   getLeaveTypes(): Observable<
-    { id: number; title: string; description: string; maxDays?: number }[]
+    {
+      id: number;
+      title: string;
+      description: string;
+      maxDays?: number;
+      isPaid: boolean;
+    }[]
   > {
     return this.httpClient
       .get<{
@@ -120,6 +126,7 @@ export class LeaveRequestTypeService {
           title: string;
           description: string;
           maxDays?: number;
+          isPaid: boolean;
         }[];
       }>(`${this.baseUrl}`, {
         withCredentials: true,
@@ -132,6 +139,7 @@ export class LeaveRequestTypeService {
               title: t.title,
               description: t.title,
               maxDays: t.maxDays,
+              isPaid: t.isPaid,
             }));
           }
           console.error('Unexpected response format:', response);

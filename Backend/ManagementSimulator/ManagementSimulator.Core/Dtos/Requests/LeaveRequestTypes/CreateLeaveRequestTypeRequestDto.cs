@@ -11,5 +11,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.LeaveRequestType
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int? MaxDays { get; set; }
+        public bool IsPaid { get; set; } = false;
     }
 }
