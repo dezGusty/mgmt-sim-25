@@ -25,7 +25,7 @@ export class AdminLeaveTypesList implements OnInit {
   editForm = {
     id: 0,
     description: '',
-    additionalDetails: '',
+    title: '',
     isPaid: false
   };
   
@@ -94,7 +94,7 @@ export class AdminLeaveTypesList implements OnInit {
   private mapToLeaveTypeViewModel(leaveType: ILeaveRequestType): ILeaveRequestTypeViewModel {
     return {
       id: leaveType.id,
-      additionalDetails: leaveType.additionalDetails || '',
+      title: leaveType.title || '',
       description: leaveType.description || '',
       isPaid: leaveType.isPaid,
       color: this.colorGenerator.generateColorFromId(leaveType.id)
@@ -109,7 +109,7 @@ export class AdminLeaveTypesList implements OnInit {
     const searchLower = this.searchTerm.toLowerCase();
     return this.leaveRequestTypes.filter(leaveType => 
       leaveType.description?.toLowerCase().includes(searchLower) ||
-      leaveType.additionalDetails?.toLowerCase().includes(searchLower)
+      leaveType.title?.toLowerCase().includes(searchLower)
     );
   }
 
@@ -127,7 +127,7 @@ export class AdminLeaveTypesList implements OnInit {
     this.editForm = {
       id: leaveType.id,
       description: leaveType.description || '',
-      additionalDetails: leaveType.additionalDetails || '',
+      title: leaveType.title || '',
       isPaid: leaveType.isPaid || false
     };
     this.errorMessage = '';
@@ -145,7 +145,7 @@ export class AdminLeaveTypesList implements OnInit {
     const leaveTypeToUpdate: ILeaveRequestType = {
       id: this.editForm.id,
       description: this.editForm.description,
-      additionalDetails: this.editForm.additionalDetails,
+      title: this.editForm.title,
       isPaid: this.editForm.isPaid
     };
 

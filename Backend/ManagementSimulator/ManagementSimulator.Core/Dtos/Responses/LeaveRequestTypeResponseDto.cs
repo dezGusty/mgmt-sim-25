@@ -9,8 +9,9 @@ namespace ManagementSimulator.Core.Dtos.Responses
     public class LeaveRequestTypeResponseDto
     {
         public int Id { get; set; }
+        public string? Title { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
-        public string? AdditionalDetails { get; set; }
-        public bool? IsPaid { get; set; }
+        public bool? IsPaid {  get; set; }
+        public int? MaxDays { get; set; }
     }
 }

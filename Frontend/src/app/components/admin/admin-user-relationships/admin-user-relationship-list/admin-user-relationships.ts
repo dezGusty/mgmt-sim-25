@@ -52,29 +52,61 @@ export class AdminUserRelationships implements OnInit {
   currentManagerIds: number[] = [];
   postRelationship: boolean = false;
 
-  constructor(private userService: UsersService) {
+  isLoadingManagers: boolean = false;
+  isLoadingAdmins: boolean = false;
+  isLoadingUnassignedUsers: boolean = false;
+  
+  managersErrorMessage: string = '';
+  adminsErrorMessage: string = '';
+  unassignedUsersErrorMessage: string = '';
+  
+  hasInitialDataLoaded: boolean = false;
 
-  }
+  constructor(private userService: UsersService) {}
 
   ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  private loadInitialData(): void {
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
   }
 
   loadAdmins(): void {
+    this.isLoadingAdmins = true;
+    this.adminsErrorMessage = '';
+
     this.userService.getAllAdmins().subscribe({
       next: (response) => {
+        this.isLoadingAdmins = false;
         const rawAdmins: IUser[] = response.data;
-        this.admins = rawAdmins.map((admin) => this.mapToUserViewModel(admin));
+        
+        if (!rawAdmins || rawAdmins.length === 0) {
+          this.adminsErrorMessage = 'No admins were found.';
+          this.admins = [];
+        } else {
+          this.admins = rawAdmins.map((admin) => this.mapToUserViewModel(admin));
+          this.adminsErrorMessage = '';
+        }
+        
+        this.checkIfInitialDataLoaded();
       },
       error: (err) => {
+        this.isLoadingAdmins = false;
+        this.adminsErrorMessage = 'Error during retrieving admins.';
+        this.admins = [];
         console.error('Failed to fetch admins:', err);
+        this.checkIfInitialDataLoaded();
       },
     });
   }
 
   loadManagersWithRelationships(): void {
+    this.isLoadingManagers = true;
+    this.managersErrorMessage = '';
+
     const params: IFilteredUsersRequest = {
       [this.searchBy === 'email' ? 'email' : 'lastName']: this.searchTerm,
       params: {
@@ -87,19 +119,41 @@ export class AdminUserRelationships implements OnInit {
 
     this.userService.getUsersIncludeRelationshipsFiltered(params).subscribe({
       next: (response) => {
+        this.isLoadingManagers = false;
         console.log('Managers API response:', response);
         const rawUsers: IUser[] = response.data.data;
-        this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
-
-        this.totalPagesManagers = response.data.totalPages;
+        
+        if (!rawUsers || rawUsers.length === 0) {
+          if (this.searchTerm) {
+            this.managersErrorMessage = `No admins found for your specified criteria.`;
+          } else {
+            this.managersErrorMessage = 'No admins found.';
+          }
+          this.managers = [];
+          this.totalPagesManagers = 0;
+        } else {
+          this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
+          this.totalPagesManagers = response.data.totalPages;
+          this.managersErrorMessage = '';
+        }
+        
+        this.checkIfInitialDataLoaded();
       },
       error: (err) => {
+        this.isLoadingManagers = false;
+        this.managersErrorMessage = 'Error retrieving the managers.';
+        this.managers = [];
+        this.totalPagesManagers = 0;
         console.error('Failed to fetch managers with relationships:', err);
+        this.checkIfInitialDataLoaded();
       },
     });
   }
 
   loadUnassignedUsers(): void {
+    this.isLoadingUnassignedUsers = true;
+    this.unassignedUsersErrorMessage = '';
+
     const params: IFilteredUsersRequest = {
       params: {
         sortBy: 'lastName',
@@ -111,18 +165,39 @@ export class AdminUserRelationships implements OnInit {
 
     this.userService.getUnassignedUsers(params).subscribe({
       next: (response) => {
+        this.isLoadingUnassignedUsers = false;
         console.log('Unassigned users API response:', response);
         const rawUnassignedUsers: IUser[] = response.data.data;
-        this.unassignedUsers = rawUnassignedUsers.map((user) =>
-          this.mapToUserViewModel(user)
-        );
-
-        this.totalPagesUnassignedUsers = response.data.totalPages;
+        
+        if (!rawUnassignedUsers || rawUnassignedUsers.length === 0) {
+          this.unassignedUsersErrorMessage = 'No unassigned users.';
+          this.unassignedUsers = [];
+          this.totalPagesUnassignedUsers = 0;
+        } else {
+          this.unassignedUsers = rawUnassignedUsers.map((user) =>
+            this.mapToUserViewModel(user)
+          );
+          this.totalPagesUnassignedUsers = response.data.totalPages;
+          this.unassignedUsersErrorMessage = '';
+        }
+        
+        this.checkIfInitialDataLoaded();
       },
       error: (err) => {
+        this.isLoadingUnassignedUsers = false;
+        this.unassignedUsersErrorMessage = 'Eroare loading the unassigned users.';
+        this.unassignedUsers = [];
+        this.totalPagesUnassignedUsers = 0;
         console.error('Failed to fetch unassigned users:', err);
+        this.checkIfInitialDataLoaded();
       },
     });
+  }
+
+  private checkIfInitialDataLoaded(): void {
+    if (!this.isLoadingManagers && !this.isLoadingAdmins && !this.isLoadingUnassignedUsers) {
+      this.hasInitialDataLoaded = true;
+    }
   }
 
   mapToUserViewModel(user: IUser): IUserViewModel {
@@ -156,6 +231,34 @@ export class AdminUserRelationships implements OnInit {
       managersIds: user.managersIds || [],
       subordinatesEmails: user.subordinatesEmails || [],
     };
+  }
+
+  hasManagersError(): boolean {
+    return !!this.managersErrorMessage;
+  }
+
+  hasAdminsError(): boolean {
+    return !!this.adminsErrorMessage;
+  }
+
+  hasUnassignedUsersError(): boolean {
+    return !!this.unassignedUsersErrorMessage;
+  }
+
+  hasSearchResults(): boolean {
+    return this.managers.length > 0;
+  }
+
+  retryLoadManagers(): void {
+    this.loadManagersWithRelationships();
+  }
+
+  retryLoadAdmins(): void {
+    this.loadAdmins();
+  }
+
+  retryLoadUnassignedUsers(): void {
+    this.loadUnassignedUsers();
   }
 
   getMaxDisplayedResultManagers(): number {
@@ -309,9 +412,7 @@ export class AdminUserRelationships implements OnInit {
 
   onSearch(): void {
     this.currentPageManagers = 1;
-    if (this.searchTerm !== '') {
-      this.loadManagersWithRelationships();
-    }
+    this.loadManagersWithRelationships();
   }
 
   toggleSortOrder(): void {
@@ -415,6 +516,14 @@ export class AdminUserRelationships implements OnInit {
 
   onAssignManagers(selectedManagerIds: number[]) {
     this.closeAssignModal();
+    this.loadAdmins();
+    this.loadUnassignedUsers();
+  }
+
+  onSearchKeypress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onSearch();
+    }
   }
 
   closeAssignModal() {

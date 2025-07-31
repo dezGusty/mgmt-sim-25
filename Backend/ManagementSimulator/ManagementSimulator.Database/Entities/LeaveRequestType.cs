@@ -13,10 +13,11 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
 
         // fields
-        [MaxLength(100)]
-        public string AdditionalDetails { get; set; }
         [MaxLength(50)]
-        public string Description { get; set; }
-        public bool IsPaid { get; set; }
+        public string Title { get; set; }
+        [MaxLength(100)]
+        public string? Description { get; set; }
+        public int? MaxDays { get; set; }
+        public bool IsPaid { get; set; } = false;
     }
 }

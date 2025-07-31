@@ -299,6 +299,12 @@ export class AdminJobTitlesList implements OnInit {
       }
     });
   }
+  
+  onSearchKeypress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onSearch();
+    }
+  }
 
   isFormValid(): boolean {
     return !!(this.editForm.name.trim() && this.editForm.departmentId > 0);

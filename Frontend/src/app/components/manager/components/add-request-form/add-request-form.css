@@ -1,0 +1,68 @@
+.leave-balance-container {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0;
+  transform: translateY(-8px);
+}
+
+.leave-balance-container.show {
+  max-height: 500px;
+  opacity: 1;
+  margin-bottom: 1rem;
+  transform: translateY(0);
+}
+
+.leave-balance-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.95);
+}
+
+.leave-balance-container.show .leave-balance-content {
+  transform: scale(1);
+}
+
+.leave-balance-content > * {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+.calculating-indicator {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.text-red-600, .text-green-600 {
+  transition: color 0.3s ease-in-out;
+}
+
+.leave-balance-content {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.leave-balance-container.show .leave-balance-content {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+button[disabled] {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+button[disabled]:hover {
+  background: #e5e7eb !important;
+  transform: none !important;
+}

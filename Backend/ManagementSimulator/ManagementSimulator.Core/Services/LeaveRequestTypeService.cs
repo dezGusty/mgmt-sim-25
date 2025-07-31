@@ -30,8 +30,9 @@ namespace ManagementSimulator.Core.Services
             return leaveRequestTypes.Select(l => new LeaveRequestTypeResponseDto
             {
                 Id = l.Id,
+                Title = l.Title ?? string.Empty,
                 Description = l.Description ?? string.Empty,
-                AdditionalDetails = l.AdditionalDetails ?? string.Empty,
+                MaxDays = l.MaxDays,
                 IsPaid = l.IsPaid
             }).ToList();
         }
@@ -48,8 +49,9 @@ namespace ManagementSimulator.Core.Services
             return new LeaveRequestTypeResponseDto
             {
                 Id = leaveRequestType.Id,
+                Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                MaxDays = leaveRequestType.MaxDays,
                 IsPaid = leaveRequestType.IsPaid
             };
         }
@@ -63,10 +65,10 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
-            if(dto.Description != null && dto.Description != string.Empty && 
-                await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
+            if(dto.Title != null && dto.Title != string.Empty && 
+                await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title) != null)
             {
-                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Description));
+                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Title));
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestTypeRequestDto, Database.Entities.LeaveRequestType>(leaveRequestType, dto);
@@ -77,8 +79,9 @@ namespace ManagementSimulator.Core.Services
             return new LeaveRequestTypeResponseDto
             {
                 Id = leaveRequestType.Id,
+                Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                MaxDays = leaveRequestType.MaxDays,
                 IsPaid = leaveRequestType.IsPaid
             };
         }
@@ -97,16 +100,17 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<LeaveRequestTypeResponseDto> AddLeaveRequestTypeAsync(CreateLeaveRequestTypeRequestDto dto)
         {
-            if(await _leaveRequestTypeRepository.GetLeaveRequestTypesByDescriptionAsync(dto.Description) != null)
+            if(await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title) != null)
             {
-                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType),nameof(Database.Entities.LeaveRequestType.Description));
+                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType),nameof(Database.Entities.LeaveRequestType.Title));
             }
 
             var leaveRequestType = new Database.Entities.LeaveRequestType
             {
+                Title = dto.Title ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
-                AdditionalDetails = dto.AdditionalDetails ?? string.Empty,
-                IsPaid = dto.IsPaid,
+                MaxDays = dto.MaxDays,
+                IsPaid = dto.IsPaid
             };
 
             await _leaveRequestTypeRepository.AddAsync(leaveRequestType);
@@ -114,15 +118,16 @@ namespace ManagementSimulator.Core.Services
             return new LeaveRequestTypeResponseDto
             {
                 Id = leaveRequestType.Id,
+                Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                AdditionalDetails = leaveRequestType.AdditionalDetails ?? string.Empty,
+                MaxDays = leaveRequestType.MaxDays,
                 IsPaid = leaveRequestType.IsPaid
             };
         }
 
         public async Task<PagedResponseDto<LeaveRequestTypeResponseDto>> GetAllLeaveRequestTypesFilteredAsync(QueriedLeaveRequestTypeRequestDto payload)
         {
-            var (result, totalCount) = await _leaveRequestTypeRepository.GetAllLeaveRequestTypesFilteredAsync(payload.Description, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _leaveRequestTypeRepository.GetAllLeaveRequestTypesFilteredAsync(payload.Title, payload.PagedQueryParams.ToQueryParams());
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<LeaveRequestTypeResponseDto>
@@ -138,8 +143,9 @@ namespace ManagementSimulator.Core.Services
                 Data = result.Select(lrt => new LeaveRequestTypeResponseDto
                 {
                     Id = lrt.Id,
-                    Description = lrt.Description,
-                    AdditionalDetails = lrt.AdditionalDetails ?? string.Empty,
+                    Title = lrt.Title,
+                    Description = lrt.Description ?? string.Empty,
+                    MaxDays = lrt.MaxDays,
                     IsPaid = lrt.IsPaid
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,

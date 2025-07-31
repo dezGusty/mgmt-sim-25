@@ -143,7 +143,7 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<List<User>> GetAllAdminsAsync(string? lastName, string? email, bool includeDeleted = false)
         {
             var query = GetRecords(includeDeletedEntities: includeDeleted)
-                .Where(u => u.Roles.Any(r => r.Role.Rolename == "Admin"));
+                .Where(u => u.Roles.Where(r => r.DeletedAt == null).Any(r => r.Role.Rolename == "Admin"));
 
             // filtering 
             if (!string.IsNullOrEmpty(lastName))
@@ -162,8 +162,9 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
-                                     .Include(u => u.Roles)
-                                     .Include(u => u.Subordinates)
+                                     .Include(u => u.Roles.Where(r => r.DeletedAt == null))
+                                        .ThenInclude(u => u.Role)
+                                     .Include(u => u.Subordinates.Where(s => s.DeletedAt == null))
                                         .ThenInclude(subordinates => subordinates.Employee)
                                             .ThenInclude(e => e.Title)
                                      .Where(u => u.Subordinates.Count > 0);
@@ -209,7 +210,7 @@ namespace ManagementSimulator.Database.Repositories
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
 
-            query = query.Include(u => u.Roles)
+            query = query.Include(u => u.Roles.Where(r => r.DeletedAt == null))
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
                     .ThenInclude(jt => jt.Department);

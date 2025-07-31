@@ -133,8 +133,6 @@ namespace ManagementSimulator.Core.Services
             await SendEmailAsync(email, subject, body);
         }
 
-        // ...existing code...
-
         public async Task SendPasswordResetCodeAsync(string email, string firstName, string resetCode)
         {
             var subject = "Cod de resetare parolă - Siemens MGMT";

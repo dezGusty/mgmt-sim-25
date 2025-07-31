@@ -45,14 +45,10 @@ export class AddUser implements OnInit {
   
   employeeRoleInfo: string = 'All the users are automatically set to employees.';
   
-  notification: NotificationMessage = {
-    type: 'info',
-    title: '',
-    message: '',
-    show: false
-  };
-  
   isSubmitting: boolean = false;
+
+  onSubmitMessage: string = '';
+
 
   constructor(
     private userService: UsersService,
@@ -62,20 +58,6 @@ export class AddUser implements OnInit {
   }
 
   ngOnInit(): void {
-  }
-
-  showNotification(type: 'success' | 'error' | 'info', title: string, message: string): void {
-    this.notification = { type, title, message, show: true };
-    
-    if (type === 'success') {
-      setTimeout(() => {
-        this.hideNotification();
-      }, 5000);
-    }
-  }
-
-  hideNotification(): void {
-    this.notification.show = false;
   }
 
   resetForm(): void {
@@ -129,7 +111,7 @@ export class AddUser implements OnInit {
         console.error('Error loading job titles:', error);
         this.isLoading = false;
         this.canLoadMore = false;
-        this.showNotification('error', 'Eroare', 'Nu s-au putut încărca job title-urile. Vă rugăm să încercați din nou.');
+        this.onSubmitMessage = 'Error retrieving the job titles.';
       }
     });
   }
@@ -205,12 +187,11 @@ export class AddUser implements OnInit {
 
   submit(form: any): void {
     if (!form.valid || !this.isJobTitleFieldValid()) {
-      this.showNotification('error', 'Invalid form', 'Please fill all the mandatory fields!');
+      this.onSubmitMessage = 'Please fill all the required fields.';
       return;
     }
 
     this.isSubmitting = true;
-    this.hideNotification();
 
     let roles: number[] = [];
     if (this.isAdmin) roles.push(3);
@@ -222,7 +203,7 @@ export class AddUser implements OnInit {
       lastName: this.lastName,
       email: this.email,
       jobTitleId: this.selectedJobTitleId,
-      employeeRolesIds: roles,
+      employeeRolesId: roles,
       dateOfEmployment: this.dateOfEmployment
     };
 
@@ -232,39 +213,28 @@ export class AddUser implements OnInit {
         console.log('User added successfully:', response);
         
         if (response.success) {
-          this.showNotification(
-            'success',
-            response.message,
-            `${this.firstName} ${this.lastName} added in our system with email: ${this.email}.`
-          );
-          
+          this.onSubmitMessage = 'User added successfully.'
           this.resetForm();
           form.resetForm();
         } else {
-          this.showNotification(
-            'error',
-            'Error during adding a new user',
-            response.message || 'Unexpected error'
-          );
+          this.onSubmitMessage = 'Error adding user:' + response.message;
         }
       },
       error: (error) => {
         this.isSubmitting = false;
         console.error('Error adding user:', error);
         
-        let errorMessage = 'An error occured during adding a new user';
+        this.onSubmitMessage = 'An error occured during adding a new user';
         
         if (error.status === 400) {
-          errorMessage = 'Fill all the mandatory fields!';
+          this.onSubmitMessage = 'Fill all the mandatory fields!';
         } else if (error.status === 409) {
-          errorMessage = 'This mail is already used.';
+          this.onSubmitMessage = 'This mail is already used.';
         } else if (error.status === 500) {
-          errorMessage = 'Server error, try later.';
+          this.onSubmitMessage = 'Server error, try later.';
         } else if (error.error && error.error.message) {
-          errorMessage = error.error.message;
+          this.onSubmitMessage = error.error.message;
         }
-        
-        this.showNotification('error', 'Error', errorMessage);
       }
     });
   }

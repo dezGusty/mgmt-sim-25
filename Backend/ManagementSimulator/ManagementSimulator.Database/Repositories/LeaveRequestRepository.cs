@@ -73,5 +73,25 @@ namespace ManagementSimulator.Database.Repositories
                              ((lr.StartDate <= endDate && lr.EndDate >= startDate)))
                 .ToListAsync();
         }
+
+        public async Task<List<LeaveRequest>> GetLeaveRequestsByUserAndTypeAsync(int userId, int leaveRequestTypeId, int year, bool includeDeleted = false)
+        {
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!includeDeleted)
+                query = query.Where(lr => lr.DeletedAt == null);
+
+            var startOfYear = new DateTime(year, 1, 1);
+            var endOfYear = new DateTime(year, 12, 31);
+
+            return await query
+                .Include(lr => lr.LeaveRequestType)
+                .Where(lr => lr.UserId == userId && 
+                            lr.LeaveRequestTypeId == leaveRequestTypeId &&
+                            (lr.RequestStatus == Database.Enums.RequestStatus.Pending || 
+                             lr.RequestStatus == Database.Enums.RequestStatus.Approved) &&
+                            lr.StartDate <= endOfYear && lr.EndDate >= startOfYear)
+                .ToListAsync();
+        }
     }
 }
