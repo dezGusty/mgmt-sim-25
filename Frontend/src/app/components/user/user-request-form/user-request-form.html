@@ -24,6 +24,7 @@
           id="type"
           [(ngModel)]="leaveRequestTypeId"
           name="type"
+          (change)="onLeaveTypeChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required>
           <option value="" disabled>Select leave type</option>
@@ -63,6 +64,8 @@
           [(ngModel)]="endDate"
           name="toDate"
           [min]="minEndDate"
+          (change)="onEndDateChange()"
+          (change)="onEndDateChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required />
         <!-- Conditional help message -->
@@ -74,6 +77,84 @@
             Select start date first
           </ng-template>
         </p>
+      </div>
+
+      <!-- Remaining Days Info -->
+      <div 
+        class="leave-balance-container mb-4"
+        [class.show]="isLoadingRemainingDays || balanceCalculated">
+        <div class="leave-balance-content p-4 border rounded-lg bg-gray-50">
+          <div
+            *ngIf="isLoadingRemainingDays"
+            class="flex items-center gap-2 text-blue-600 calculating-indicator">
+            <div
+              class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span class="text-sm">Calculating remaining days...</span>
+          </div>
+
+          <div
+            *ngIf="!isLoadingRemainingDays && remainingDaysInfo"
+            class="space-y-2">
+            <h4 class="font-semibold text-gray-700">
+              Leave Balance Information
+            </h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-gray-600">Leave Type:</span>
+                <span class="font-medium ml-2">{{
+                  remainingDaysInfo.leaveRequestTypeName || getSelectedLeaveTypeName()
+                }}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">Max Days Allowed:</span>
+                <span class="font-medium ml-2">
+                  {{
+                    remainingDaysInfo.hasUnlimitedDays
+                      ? "Unlimited"
+                      : remainingDaysInfo.maxDaysAllowed || remainingDaysInfo.totalDays
+                  }}
+                </span>
+              </div>
+              <div>
+                <span class="text-gray-600">Days Used (including this request):</span>
+                <span class="font-medium ml-2">{{
+                  remainingDaysInfo.daysUsed || remainingDaysInfo.usedDays
+                }}</span>
+              </div>
+              <div
+                [class]="
+                  remainingDaysInfo.remainingDays < 0
+                    ? 'text-red-600'
+                    : 'text-green-600'
+                ">
+                <span class="text-gray-600">Remaining Days:</span>
+                <span class="font-bold ml-2">
+                  {{
+                    remainingDaysInfo.hasUnlimitedDays
+                      ? "Unlimited"
+                      : remainingDaysInfo.remainingDays
+                  }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngIf="
+                !remainingDaysInfo.hasUnlimitedDays &&
+                remainingDaysInfo.remainingDays < 0
+              "
+              class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mt-2">
+              <strong>Warning:</strong> This request exceeds the available leave
+              days by {{ Math.abs(remainingDaysInfo.remainingDays) }} day(s).
+            </div>
+          </div>
+
+          <div
+            *ngIf="!isLoadingRemainingDays && !remainingDaysInfo && remainingDaysError"
+            class="text-red-600 text-sm">
+            Unable to calculate leave balance. Please check the selected values.
+          </div>
+        </div>
       </div>
 
       <!-- Reason -->
@@ -111,7 +192,7 @@
         <button
           type="submit"
           class="submit-button bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded flex items-center gap-2"
-          [disabled]="isSubmitting || isLoadingTypes">
+          [disabled]="isSubmitting || isLoadingTypes || (remainingDaysInfo && remainingDaysInfo.remainingDays < 0)">
           
           <span *ngIf="isSubmitting" class="loading-spinner"></span>
           {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
