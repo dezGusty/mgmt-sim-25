@@ -175,7 +175,7 @@ export class User {
     }
     
     const type = this.leaveRequestTypes.find(t => t.id === typeId);
-    return type ? type.description || type.description : 'Unknown';
+    return type ? type.title || type.title : 'Unknown';
   }
 
 
