@@ -56,19 +56,23 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        public async Task<LeaveRequestTypeResponseDto?> UpdateLeaveRequestTypeAsync(int id,UpdateLeaveRequestTypeRequestDto dto)
+        public async Task<LeaveRequestTypeResponseDto?> UpdateLeaveRequestTypeAsync(int id, UpdateLeaveRequestTypeRequestDto dto)
         {
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
-            
+
             if (leaveRequestType == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
-            if(dto.Title != null && dto.Title != string.Empty && 
-                await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title) != null)
+            if (dto.Title != null && dto.Title != string.Empty)
             {
-                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Title));
+                var existingWithSameTitle = await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title);
+
+                if (existingWithSameTitle != null && existingWithSameTitle.Id != id)
+                {
+                    throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Title));
+                }
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestTypeRequestDto, Database.Entities.LeaveRequestType>(leaveRequestType, dto);
