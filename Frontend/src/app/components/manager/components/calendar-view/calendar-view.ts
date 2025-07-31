@@ -9,11 +9,13 @@ import { CommonModule } from '@angular/common';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { CalendarUtils, CalendarDay } from '../../../../utils/calendar.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
+import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
+import { RequestDetail } from '../request-detail/request-detail';
 
 @Component({
   selector: 'app-calendar-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RequestDetail],
   templateUrl: './calendar-view.html',
   styleUrls: ['./calendar-view.css'],
 })
@@ -34,6 +36,9 @@ export class CalendarView implements OnInit, OnChanges {
   };
 
   hoveredRequest: ILeaveRequest | null = null;
+  selectedRequest: ILeaveRequest | null = null;
+
+  constructor(private leaveRequests: LeaveRequests) {}
 
   ngOnInit() {
     this.generateCalendar();
@@ -125,5 +130,43 @@ export class CalendarView implements OnInit, OnChanges {
     const checkDate = new Date(date);
 
     return checkDate >= fromDate && checkDate <= toDate;
+  }
+
+  openDetails(req: ILeaveRequest) {
+    this.selectedRequest = req;
+  }
+
+  closeDetails() {
+    this.selectedRequest = null;
+  }
+
+  onApprove(data: { id: string; comment?: string }) {
+    this.leaveRequests
+      .patchLeaveRequest({
+        id: data.id,
+        requestStatus: 4,
+        reviewerComment: data.comment,
+      })
+      .subscribe((res) => {
+        if (res) {
+          this.closeDetails();
+          this.generateCalendar();
+        }
+      });
+  }
+
+  onReject(data: { id: string; comment?: string }) {
+    this.leaveRequests
+      .patchLeaveRequest({
+        id: data.id,
+        requestStatus: 8,
+        reviewerComment: data.comment,
+      })
+      .subscribe((res) => {
+        if (res) {
+          this.closeDetails();
+          this.generateCalendar();
+        }
+      });
   }
 }
