@@ -32,7 +32,8 @@ namespace ManagementSimulator.Core.Services
                 Id = l.Id,
                 Title = l.Title ?? string.Empty,
                 Description = l.Description ?? string.Empty,
-                MaxDays = l.MaxDays
+                MaxDays = l.MaxDays,
+                IsPaid = l.IsPaid
             }).ToList();
         }
 
@@ -50,7 +51,8 @@ namespace ManagementSimulator.Core.Services
                 Id = leaveRequestType.Id,
                 Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                MaxDays = leaveRequestType.MaxDays
+                MaxDays = leaveRequestType.MaxDays,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -79,7 +81,8 @@ namespace ManagementSimulator.Core.Services
                 Id = leaveRequestType.Id,
                 Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                MaxDays = leaveRequestType.MaxDays
+                MaxDays = leaveRequestType.MaxDays,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -107,6 +110,7 @@ namespace ManagementSimulator.Core.Services
                 Title = dto.Title ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
                 MaxDays = dto.MaxDays,
+                IsPaid = dto.IsPaid
             };
 
             await _leaveRequestTypeRepository.AddAsync(leaveRequestType);
@@ -116,7 +120,8 @@ namespace ManagementSimulator.Core.Services
                 Id = leaveRequestType.Id,
                 Title = leaveRequestType.Title ?? string.Empty,
                 Description = leaveRequestType.Description ?? string.Empty,
-                MaxDays = leaveRequestType.MaxDays
+                MaxDays = leaveRequestType.MaxDays,
+                IsPaid = leaveRequestType.IsPaid
             };
         }
 
@@ -140,7 +145,8 @@ namespace ManagementSimulator.Core.Services
                     Id = lrt.Id,
                     Title = lrt.Title,
                     Description = lrt.Description ?? string.Empty,
-                    MaxDays = lrt.MaxDays
+                    MaxDays = lrt.MaxDays,
+                    IsPaid = lrt.IsPaid
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,

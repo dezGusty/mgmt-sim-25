@@ -438,6 +438,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet("remaining-days/{userId}/{leaveRequestTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -481,6 +482,7 @@ namespace ManagementSimulator.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet("remaining-days-for-period/{userId}/{leaveRequestTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -554,6 +556,76 @@ namespace ManagementSimulator.API.Controllers
                     Timestamp = DateTime.UtcNow
                 });
             }
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpGet("by-employee/remaining-days/{leaveRequestTypeId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetRemainingLeaveDaysForEmployeeAsync(int leaveRequestTypeId, [FromQuery] int? year = null)
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return await GetRemainingLeaveDaysAsync(userId, leaveRequestTypeId, year);
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpGet("by-employee/remaining-days-for-period/{leaveRequestTypeId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetRemainingLeaveDaysForPeriodForEmployeeAsync(int leaveRequestTypeId, [FromQuery] string startDate, [FromQuery] string endDate)
+        {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new object(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return await GetRemainingLeaveDaysForPeriodAsync(userId, leaveRequestTypeId, startDate, endDate);
         }
     }
 }
