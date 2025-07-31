@@ -36,7 +36,7 @@ export class AddRequestForm implements OnInit {
   balanceCalculated = false;
   private calculationTimeout: any;
 
-  leaveTypes: { id: number; title: string }[] = [];
+  leaveTypes: { id: number; title: string; isPaid: boolean }[] = [];
   employees: { id: number; name: string }[] = [];
 
   Math = Math;
@@ -63,6 +63,10 @@ export class AddRequestForm implements OnInit {
     }
 
     return true;
+  }
+
+  getSelectedLeaveType() {
+    return this.leaveTypes.find((type) => type.id === this.leaveRequestTypeId);
   }
 
   getSubmitButtonText(): string {
@@ -102,6 +106,7 @@ export class AddRequestForm implements OnInit {
       this.leaveTypes = types.map((type) => ({
         id: type.id,
         title: type.title,
+        isPaid: type.isPaid,
       }));
     });
     this.employeeService.getEmployees().subscribe((users) => {

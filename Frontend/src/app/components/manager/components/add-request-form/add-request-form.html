@@ -51,7 +51,7 @@
         >
           <option [value]="null" disabled selected>Select leave type</option>
           <option *ngFor="let type of leaveTypes" [value]="type.id">
-            {{ type.title }}
+            {{ type.title }} ({{ type.isPaid ? "Paid" : "Unpaid" }})
           </option>
         </select>
         <div
