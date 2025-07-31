@@ -42,7 +42,8 @@ export class AddRequests implements OnInit {
           this.leaveRequestTypeService
             .getLeaveRequestTypeById(item.leaveRequestTypeId)
             .subscribe((typeRes) => {
-              const leaveTypeDescription = typeRes?.data?.description || '';
+              const leaveTypeData = typeRes?.data;
+              const leaveTypeDescription = leaveTypeData?.description || '';
               this.requests.push({
                 id: String(item.id),
                 employeeName: item.fullName,
@@ -55,6 +56,15 @@ export class AddRequests implements OnInit {
                 comment: item.reviewerComment,
                 createdAtDate: new Date(item.createdAt),
                 leaveTypeDescription: leaveTypeDescription,
+                leaveType: leaveTypeData
+                  ? {
+                      id: leaveTypeData.id,
+                      title: leaveTypeData.title,
+                      description: leaveTypeData.description,
+                      maxDays: leaveTypeData.maxDays,
+                      isPaid: leaveTypeData.isPaid,
+                    }
+                  : undefined,
               });
 
               this.requests.sort(

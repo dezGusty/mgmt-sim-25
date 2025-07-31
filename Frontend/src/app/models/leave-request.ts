@@ -10,4 +10,11 @@ export interface ILeaveRequest {
   createdAtDate: Date;
   comment?: string;
   leaveTypeDescription: string;
+  leaveType?: {
+    id: number;
+    title: string;
+    description: string;
+    maxDays: number;
+    isPaid: boolean;
+  };
 }
