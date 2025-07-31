@@ -1,6 +1,6 @@
 export interface ILeaveRequestTypeViewModel {
     id: number;
-    additionalDetails?: string;
+    title?: string;
     description?: string;
     isPaid?: boolean;
     color?: string;

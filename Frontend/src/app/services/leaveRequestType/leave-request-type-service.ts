@@ -22,14 +22,6 @@ export class LeaveRequestTypeService {
     );
   }
 
-  getAllLeaveRequestTypesFiltered(): Observable<
-    IApiResponse<IFilteredJobTitlesRequest>
-  > {
-    return this.httpClient.get<IApiResponse<IFilteredJobTitlesRequest>>(
-      `${this.baseUrl}/queried`
-    );
-  }
-
   // getLeaveRequestTypeById(
   //   id: number
   // ): Observable<IApiResponse<ILeaveRequestType>> {

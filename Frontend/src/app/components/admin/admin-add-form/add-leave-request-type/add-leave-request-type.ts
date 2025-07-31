@@ -33,7 +33,7 @@ export class AddLeaveRequestType {
       const lrt: ILeaveRequestType = {
         id: 0,
         description: this.leaveTypeName,
-        additionalDetails: this.leaveTypeDescription,
+        title: this.leaveTypeDescription,
         isPaid: this.isPaid,
       };
 

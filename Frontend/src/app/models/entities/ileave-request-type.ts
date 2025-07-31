@@ -1,6 +1,6 @@
 export interface ILeaveRequestType {
   id: number;
-  additionalDetails: string;
+  title: string;
   description: string;
   isPaid: boolean;
 }

@@ -17,6 +17,7 @@ namespace ManagementSimulator.Database.Entities
         public string Title { get; set; }
         [MaxLength(100)]
         public string Description { get; set; }
+        public bool IsPaid { get; set; }
         public int? MaxDays { get; set; }
     }
 }
