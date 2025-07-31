@@ -35,6 +35,7 @@ export class AddLeaveRequestType {
         description: this.leaveTypeName,
         title: this.leaveTypeDescription,
         isPaid: this.isPaid,
+        maxDays: 0,
       };
 
       this.leaveRequestTypeService.postLeaveRequestType(lrt).subscribe({
