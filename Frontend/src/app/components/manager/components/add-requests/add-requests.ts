@@ -39,6 +39,10 @@ export class AddRequests implements OnInit {
         const requestsRaw = apiData.data;
         this.requests = [];
         requestsRaw.forEach((item: any) => {
+          if (item.requestStatus === 32) {
+            return;
+          }
+
           this.leaveRequestTypeService
             .getLeaveRequestTypeById(item.leaveRequestTypeId)
             .subscribe((typeRes) => {
