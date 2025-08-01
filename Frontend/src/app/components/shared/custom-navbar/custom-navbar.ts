@@ -28,4 +28,8 @@ export class CustomNavbar {
       },
     });
   }
+
+  goHome(){
+    this.router.navigate(['/role-selector']);
+  }
 }

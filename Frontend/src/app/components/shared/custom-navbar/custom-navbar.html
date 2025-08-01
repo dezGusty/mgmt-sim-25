@@ -14,7 +14,15 @@
         </svg>
         <h1 class="text-2xl font-bold text-white">SIEMENS Leave Management</h1>
       </div>
+
       <div class="flex gap-2">
+        <button
+          (click)="goHome()"
+          class="flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold transition-all duration-200 transform hover:scale-105 text-sm"
+        >
+          Home
+        </button>
+
         <button
           (click)="logout()"
           class="flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold transition-all duration-200 transform hover:scale-105 text-sm"
