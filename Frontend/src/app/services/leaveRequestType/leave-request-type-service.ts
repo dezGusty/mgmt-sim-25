@@ -27,7 +27,7 @@ export class LeaveRequestTypeService {
     let paramsToSend = new HttpParams();
 
     if (params?.name) {
-      paramsToSend = paramsToSend.set('Description', params.name);
+      paramsToSend = paramsToSend.set('Title', params.name);
     }
 
     if (params?.params.sortBy) {
