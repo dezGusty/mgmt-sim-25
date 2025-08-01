@@ -26,7 +26,20 @@ export class Login {
       next: (_) => {
         this.auth.me().subscribe({
           next: (user: any) => {
-            this.router.navigate(['/role-selector']); 
+            console.log('User data:', user);
+            
+            if (user && user.roles && user.roles.length === 1) {
+              const singleRole = user.roles[0];
+              this.redirectToRoleSpecificPage(singleRole);
+            } else if (user && user.roles && user.roles.length > 1) {
+              this.router.navigate(['/role-selector']);
+            } else {
+              this.router.navigate(['/role-selector']);
+            }
+          },
+          error: (err) => {
+            console.error('Error getting user info:', err);
+            this.router.navigate(['/role-selector']);
           }
         });
       },
@@ -44,5 +57,25 @@ export class Login {
         alert("Login failed: " + errorMessage);
       }
     });
+  }
+
+  private redirectToRoleSpecificPage(role: string): void {
+    console.log('Redirecting for single role:', role); 
+    
+    switch (role.toLowerCase()) {
+      case 'admin':
+        this.router.navigate(['/admin']);
+        break;
+      case 'manager':
+        this.router.navigate(['/manager']);
+        break;
+      case 'employee':
+        this.router.navigate(['/user']);
+        break;
+      default:
+        console.warn('Unknown role:', role);
+        this.router.navigate(['/role-selector']);
+        break;
+    }
   }
 }
