@@ -105,15 +105,7 @@ export class AdminLeaveTypesList implements OnInit {
   }
 
   get filteredLeaveTypes(): ILeaveRequestTypeViewModel[] {
-    if (!this.searchTerm) {
-      return this.leaveRequestTypes;
-    }
-    
-    const searchLower = this.searchTerm.toLowerCase();
-    return this.leaveRequestTypes.filter(leaveType => 
-      leaveType.description?.toLowerCase().includes(searchLower) ||
-      leaveType.title?.toLowerCase().includes(searchLower)
-    );
+    return this.leaveRequestTypes;
   }
 
   trackByLeaveType(index: number, leaveType: ILeaveRequestTypeViewModel): string {
@@ -182,6 +174,12 @@ export class AdminLeaveTypesList implements OnInit {
   }
 
   onSearch() {
+    console.log('Search term:', this.searchTerm);
+    this.loadLeaveTypes();
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
     this.loadLeaveTypes();
   }
 

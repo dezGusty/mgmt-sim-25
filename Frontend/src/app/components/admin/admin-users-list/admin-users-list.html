@@ -24,6 +24,15 @@
           <option value="email" [selected]="searchBy === 'email'">
             By Email
           </option>
+          <option value="department" [selected]="searchBy === 'department'">
+            By Department
+          </option>
+          <option value="jobTitle" [selected]="searchBy === 'jobTitle'">
+            By Job Title
+          </option>
+          <option value="globalSearch" [selected]="searchBy === 'globalSearch'">
+            Global Search
+          </option>
         </select>
       </div>
 
@@ -585,11 +594,21 @@
                 >
               </div>
 
-              <div 
+              <div
                 class="mt-1 text-sm text-green-600 animate-pulse bg-green-50 p-2 rounded border border-green-200 w-80"
-                style="color: #26a2dc; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out; background: #f0fdf4; padding: 8px; border-radius: 6px; border: 1px solid #bbf7d0;">
+                style="
+                  color: #26a2dc;
+                  font-size: 0.875rem;
+                  margin-top: 4px;
+                  animation: fadeIn 0.3s ease-out;
+                  background: #f0fdf4;
+                  padding: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #bbf7d0;
+                "
+              >
                 {{ employeeRoleInfo }}
-             </div>
+              </div>
             </div>
           </div>
         </div>

@@ -23,7 +23,7 @@ import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 export class AdminUsersList implements OnInit {
   users: IUserViewModel[] = [];
   searchTerm: string = '';
-  searchBy: string = 'name';
+  searchBy: string = 'globalSearch';
   sortDescending: boolean = false;
   userRoles: Map<string,number> = new Map();
 
@@ -75,6 +75,9 @@ export class AdminUsersList implements OnInit {
     const filterRequest: IFilteredUsersRequest = {
       lastName: this.searchBy === 'name' ? this.searchTerm : undefined,
       email: this.searchBy === 'email' ? this.searchTerm : undefined,
+      department: this.searchBy === 'department' ? this.searchTerm : undefined,
+      jobTitle: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
+      globalSearch: this.searchBy === 'globalSearch' ? this.searchTerm : undefined,
       params: {
         sortBy: this.getSortField(),
         sortDescending: this.sortDescending,
@@ -173,6 +176,12 @@ export class AdminUsersList implements OnInit {
         return 'lastName';
       case 'email':
         return 'email';
+      case 'department':
+        return 'departmentName';
+      case 'jobTitle':
+        return 'jobTitleName';
+      case 'globalSearch':
+        return 'lastName';
       default:
         return 'lastName';
     }
@@ -205,6 +214,10 @@ export class AdminUsersList implements OnInit {
         return 'Search by email...';
       case 'department':
         return 'Search by department...';
+      case 'jobTitle':
+        return 'Search by job title...';
+      case 'globalSearch':
+        return 'Search across all fields...';
       default:
         return 'Search users...';
     }
