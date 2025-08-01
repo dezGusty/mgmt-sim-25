@@ -49,7 +49,6 @@ export class AddUser implements OnInit {
 
   onSubmitMessage: string = '';
 
-
   constructor(
     private userService: UsersService,
     private jobTitleService: JobTitlesService

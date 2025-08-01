@@ -10,8 +10,9 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IDeparmentRepository : IBaseRepostory<Department>
     {
+        Task<List<Department>> GetAllDepartmentsAsync(List<int> ids,bool includeDeleted = false);
         Task<Department?> GetDepartmentByIdAsync(int id, bool includeDeleted = false);
         Task<Department?> GetDepartmentByNameAsync(string name, bool includeDeleted = false);
-        Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string departmentName, QueryParams parameters, bool includeDeleted = false);
+        Task<(List<Department> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string departmentName, QueryParams parameters, bool includeDeleted = false);
     }
 }

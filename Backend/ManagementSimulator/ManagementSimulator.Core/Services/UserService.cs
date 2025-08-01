@@ -51,8 +51,8 @@ namespace ManagementSimulator.Core.Services
                 Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
                 JobTitleId = u.JobTitleId,
                 JobTitleName = u.Title?.Name ?? string.Empty,
-                DepartmentId = u.Title?.DepartmentId ?? 0,
-                DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                DepartmentId = u.DepartmentId,
+                DepartmentName = u.Department?.Name ?? string.Empty,
                 IsActive = u.DeletedAt == null,
             }).ToList();
         }
@@ -90,6 +90,7 @@ namespace ManagementSimulator.Core.Services
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 JobTitleId = dto.JobTitleId,
+                DepartmentId = dto.DepartmentId,
                 Title = jt,
                 DateOfEmployment = dto.DateOfEmployment,
                 MustChangePassword = true,
@@ -319,33 +320,39 @@ namespace ManagementSimulator.Core.Services
             var users = await _userRepository.GetAllAsync();
             var userIds = users.Select(u => u.Id).ToList();
             List<int> jobTitleIds = users.Select(u => u.JobTitleId).Distinct().ToList();
+            List<int> departmentsIds = users.Select(u =>u.DepartmentId).Distinct().ToList();
 
-            var jobTitlesTask = await _jobTitleRepository.GetJobTitlesWithDepartmentsAsync(jobTitleIds);
-            var rolesTask = await _employeeRoleRepository.GetEmployeeRoleUsersByUserIdsAsync(userIds);
-            var subordinatesTask = await _userRepository.GetSubordinatesByUserIdsAsync(userIds);
-            var managersTask = await _userRepository.GetManagersByUserIdsAsync(userIds);
+            var jobTitles = await _jobTitleRepository.GetJobTitlesAsync(jobTitleIds);
+            var departments = await _deparmentRepository.GetAllDepartmentsAsync(departmentsIds);
+            var roles = await _employeeRoleRepository.GetEmployeeRoleUsersByUserIdsAsync(userIds);
+            var subordinates = await _userRepository.GetSubordinatesByUserIdsAsync(userIds);
+            var managers = await _userRepository.GetManagersByUserIdsAsync(userIds);
 
-            var jobTitlesDict = jobTitlesTask.ToDictionary(jt => jt.Id);
+            var jobTitlesDict = jobTitles.ToDictionary(jt => jt.Id);
+            var departmentsDict = departments.ToDictionary(d => d.Id);
 
-            var userRolesDict = rolesTask
+            var userRolesDict = roles
                 .GroupBy(r => r.UsersId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var subordinatesDict = subordinatesTask
+            var subordinatesDict = subordinates
                 .GroupBy(s => s.Id)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var managersDict = managersTask
+            var managersDict = managers
                 .GroupBy(m => m.Id)
                 .ToDictionary(g => g.Key, g => g.ToList());
+
 
             return users.Select(u =>
             {
                 var jobTitle = jobTitlesDict.GetValueOrDefault(u.JobTitleId);
+                var department = departmentsDict.GetValueOrDefault(u.DepartmentId);
 
                 var roles = userRolesDict.GetValueOrDefault(u.Id, new List<EmployeeRoleUser>());
                 var subordinates = subordinatesDict.GetValueOrDefault(u.Id, new List<User>());
                 var managers = managersDict.GetValueOrDefault(u.Id, new List<User>());
+
 
                 return new UserResponseDto
                 {
@@ -358,8 +365,8 @@ namespace ManagementSimulator.Core.Services
 
                     JobTitleId = u.JobTitleId,
                     JobTitleName = jobTitle?.Name ?? string.Empty,
-                    DepartmentId = jobTitle?.DepartmentId ?? 0,
-                    DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
+                    DepartmentId = department?.Id ?? 0,
+                    DepartmentName = department?.Name ?? string.Empty,
 
                     SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
@@ -386,29 +393,36 @@ namespace ManagementSimulator.Core.Services
 
             var userIds = users.Select(u => u.Id).ToList();
             List<int> jobTitleIds = users.Select(u => u.JobTitleId).Distinct().ToList();
+            List<int> departmentIds = users.Select(u => u.DepartmentId).Distinct().ToList();
 
-            var jobTitlesTask = await _jobTitleRepository.GetJobTitlesWithDepartmentsAsync(jobTitleIds);
-            var rolesTask = await _employeeRoleRepository.GetEmployeeRoleUsersByUserIdsAsync(userIds);
-            var subordinatesTask = await _userRepository.GetSubordinatesByUserIdsAsync(userIds);
-            var managersTask = await _userRepository.GetManagersByUserIdsAsync(userIds);
+            var jobTitles = await _jobTitleRepository.GetJobTitlesAsync(jobTitleIds);
+            var departments = await _deparmentRepository.GetAllDepartmentsAsync(departmentIds);
+            var roles = await _employeeRoleRepository.GetEmployeeRoleUsersByUserIdsAsync(userIds);
+            var subordinates = await _userRepository.GetSubordinatesByUserIdsAsync(userIds);
+            var managers = await _userRepository.GetManagersByUserIdsAsync(userIds);
 
-            var jobTitlesDict = jobTitlesTask.ToDictionary(jt => jt.Id);
-            var userRolesDict = rolesTask
+            var jobTitlesDict = jobTitles.ToDictionary(jt => jt.Id);
+            var departmentsDict = departments.ToDictionary(d => d.Id);
+
+            var userRolesDict = roles
                 .GroupBy(r => r.UsersId)
                 .ToDictionary(g => g.Key, g => g.ToList());
-            var subordinatesDict = subordinatesTask
+            var subordinatesDict = subordinates
                 .GroupBy(s => s.Id)
                 .ToDictionary(g => g.Key, g => g.ToList());
-            var managersDict = managersTask
+            var managersDict = managers
                 .GroupBy(m => m.Id)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var mappedUsers = users.Select(u =>
             {
                 var jobTitle = jobTitlesDict.GetValueOrDefault(u.JobTitleId);
+                var department = departmentsDict.GetValueOrDefault(u.DepartmentId);
+
                 var roles = userRolesDict.GetValueOrDefault(u.Id, new List<EmployeeRoleUser>());
                 var subordinates = subordinatesDict.GetValueOrDefault(u.Id, new List<User>());
                 var managers = managersDict.GetValueOrDefault(u.Id, new List<User>());
+
                 return new UserResponseDto
                 {
                     Id = u.Id,
@@ -418,8 +432,8 @@ namespace ManagementSimulator.Core.Services
                     Roles = roles.Select(r => r.Role.Rolename).ToList(),
                     JobTitleId = u.JobTitleId,
                     JobTitleName = jobTitle?.Name ?? string.Empty,
-                    DepartmentId = jobTitle?.DepartmentId ?? 0,
-                    DepartmentName = jobTitle?.Department?.Name ?? string.Empty,
+                    DepartmentId = department.Id,
+                    DepartmentName = department.Name ?? string.Empty,
                     SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
@@ -463,8 +477,8 @@ namespace ManagementSimulator.Core.Services
                     Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
                     JobTitleId = u.JobTitleId,
                     JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.Title?.DepartmentId ?? 0,
-                    DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
                     IsActive = u.DeletedAt == null,
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
@@ -503,8 +517,8 @@ namespace ManagementSimulator.Core.Services
                     Roles = u.Roles.Select(r => r.Role.Rolename).ToList(),
                     JobTitleId = u.JobTitleId,
                     JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.Title?.DepartmentId ?? 0,
-                    DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
                 }),
                 Page = page,
                 PageSize = pageSize,
@@ -537,8 +551,8 @@ namespace ManagementSimulator.Core.Services
                     Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
                     JobTitleId = u.JobTitleId,
                     JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.Title?.DepartmentId ?? 0,
-                    DepartmentName = u.Title?.Department?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
                     SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
                     IsActive = u.DeletedAt == null,
                 }),

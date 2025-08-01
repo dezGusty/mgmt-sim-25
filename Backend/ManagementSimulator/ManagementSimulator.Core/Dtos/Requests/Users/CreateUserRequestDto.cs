@@ -12,7 +12,7 @@ namespace ManagementSimulator.Core.Dtos.Requests.Users
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-
+        public int DepartmentId { get; set; }
         public int JobTitleId { get; set; }
         public List<int> EmployeeRolesId { get; set; } = new List<int>();
         public DateTime DateOfEmployment { get; set; }

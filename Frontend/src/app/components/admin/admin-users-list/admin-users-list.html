@@ -208,7 +208,7 @@
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            <div class="flex space-x-2">
+            <div *ngIf="user.status === 'active'" class="flex space-x-2">
               <!-- Edit Button - Always visible -->
               <button
                 class="text-[#20B486] hover:text-[#1a9c75] transition-colors"

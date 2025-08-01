@@ -10,8 +10,6 @@ namespace ManagementSimulator.Database.Entities
     public class JobTitle : BaseEntity
     {
         //navigation properties 
-        public int DepartmentId { get; set; }
-        public Department Department { get; set; }
 
         public ICollection<User> Users { get; set; } = new List<User>();
 

@@ -22,7 +22,7 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? title, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<LeaveRequestType> Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? title, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<LeaveRequestType> query = GetRecords(includeDeletedEntities: includeDeleted);
 

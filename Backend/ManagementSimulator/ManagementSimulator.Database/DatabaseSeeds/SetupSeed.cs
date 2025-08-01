@@ -15,14 +15,12 @@ namespace ManagementSimulator.Infrastructure
                 dbContext.SaveChanges();
             }
 
-            var itAdminTitle = dbContext.JobTitles.FirstOrDefault(jt => jt.Name == "ITAdmin" && jt.DepartmentId == itDepartment.Id);
+            var itAdminTitle = dbContext.JobTitles.FirstOrDefault(jt => jt.Name == "ITAdmin");
             if (itAdminTitle == null)
             {
                 itAdminTitle = new JobTitle
                 {
                     Name = "ITAdmin",
-                    DepartmentId = itDepartment.Id,
-                    Department = itDepartment
                 };
                 dbContext.JobTitles.Add(itAdminTitle);
                 dbContext.SaveChanges();
@@ -56,6 +54,7 @@ namespace ManagementSimulator.Infrastructure
                     Email = "admin@simulator.com",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                     JobTitleId = itAdminTitle.Id,
+                    DepartmentId = itDepartment.Id,
                     Title = itAdminTitle,
                     DateOfEmployment = DateTime.UtcNow
                 };
@@ -82,7 +81,7 @@ namespace ManagementSimulator.Infrastructure
                     Email = "manager@simulator.com",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("manager123"),
                     JobTitleId = itAdminTitle.Id,
-                    Title = itAdminTitle,
+                    DepartmentId = itDepartment.Id,
                     DateOfEmployment = DateTime.UtcNow
                 };
 
@@ -108,7 +107,7 @@ namespace ManagementSimulator.Infrastructure
                     Email = "employee@simulator.com",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("employee123"),
                     JobTitleId = itAdminTitle.Id,
-                    Title = itAdminTitle,
+                    DepartmentId = itDepartment.Id,
                     DateOfEmployment = DateTime.UtcNow
                 };
 

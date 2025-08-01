@@ -30,56 +30,47 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>?> GetAllJobTitlesWithDepartmentAsync(bool includeDeleted = false)
+        public async Task<List<JobTitle>> GetAllJobTitlesAsync(bool includeDeleted = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
-            query = query.Include(jt => jt.Department)
-                .Include(jt => jt.Users);
+            query = query.Include(jt => jt.Users);
 
             return await query.ToListAsync();
         }
 
-        public async Task<JobTitle?> GetJobTitleWithDepartmentAsync(int id, bool includeDeleted = false)
+        public async Task<JobTitle?> GetJobTitleAsync(int id, bool includeDeleted = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
-            
-            query = query.Include(jt => jt.Department);
 
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>?> GetJobTitlesWithDepartmentsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<JobTitle>> GetJobTitlesAsync(List<int> ids, bool includeDeleted = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
-            query = query.Where(jt => ids.Contains(jt.Id))
-                .Include(jt => jt.Department);
+            query = query.Where(jt => ids.Contains(jt.Id));
 
             return await query.ToListAsync();
         }
 
-        public async Task<(List<JobTitle>? Data, int TotalCount)> GetAllJobTitlesWithDepartmentsFilteredAsync(string? departmentName, string? jobTitleName, QueryParams parameters,
+        public async Task<(List<JobTitle> Data, int TotalCount)> GetAllJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters,
             bool includeDeleted = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
-            query = query.Include(jt => jt.Department)
-                         .Include(jt => jt.Users);
+            query = query.Include(jt => jt.Users);
 
-            // Filtering 
-            if (!string.IsNullOrEmpty(departmentName))
-            {
-                query = query.Where(jt => jt.Department != null && jt.Department.Name.Contains(departmentName));
-            }
+            // Filtering
             if (!string.IsNullOrEmpty(jobTitleName))
             {
                 query = query.Where(jt => jt.Name != null && jt.Name.Contains(jobTitleName));
@@ -93,9 +84,7 @@ namespace ManagementSimulator.Database.Repositories
             // sorting
             if (!string.IsNullOrEmpty(parameters.SortBy))
             {
-                if (string.Equals(parameters.SortBy, "departmentName", StringComparison.OrdinalIgnoreCase))
-                    query = query.OrderBy(jt => jt.Department.Name);
-                else if (string.Equals(parameters.SortBy, "jobTitleName", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(parameters.SortBy, "jobTitleName", StringComparison.OrdinalIgnoreCase))
                     query = query.OrderBy(jt => jt.Name);
             }
             else

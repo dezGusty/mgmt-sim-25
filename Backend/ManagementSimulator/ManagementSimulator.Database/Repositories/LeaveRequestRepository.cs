@@ -21,7 +21,7 @@ namespace ManagementSimulator.Database.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<(List<LeaveRequest>? Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, 
+        public async Task<(List<LeaveRequest> Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, 
             QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;

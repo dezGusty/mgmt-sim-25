@@ -24,13 +24,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<JobTitleResponseDto>> GetAllJobTitlesAsync()
         {
-            var jobTitles = await _jobTitleRepository.GetAllJobTitlesWithDepartmentAsync();
+            var jobTitles = await _jobTitleRepository.GetAllJobTitlesAsync();
             return jobTitles.Select(j => new JobTitleResponseDto
             {
                 Id = j.Id,
                 Name = j.Name ?? string.Empty,
-                DepartmentId = j.DepartmentId,
-                DepartmentName = j.Department?.Name ?? string.Empty,
                 EmployeeCount = j.Users.Count(u => u.DeletedAt == null),
             }).ToList();
         }
@@ -47,8 +45,6 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = jobTitle.Id,
                 Name = jobTitle.Name ?? string.Empty,
-                DepartmentId = jobTitle.DepartmentId,
-                DepartmentName = jobTitle.Department?.Name ?? string.Empty
             };
         }
 
@@ -63,15 +59,9 @@ namespace ManagementSimulator.Core.Services
                 }
             }
 
-            if(await _departmentRepository.GetFirstOrDefaultAsync(request.DepartmentId) == null)
-            {
-                throw new EntryNotFoundException(nameof(Department), request.DepartmentId);
-            }
-
             var newJobTitle = new JobTitle
             {
                 Name = request.Name,
-                DepartmentId = request.DepartmentId
             };
 
             await _jobTitleRepository.AddAsync(newJobTitle);
@@ -80,18 +70,11 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = newJobTitle.Id,
                 Name = newJobTitle.Name ?? string.Empty,
-                DepartmentId = newJobTitle.DepartmentId,
-                DepartmentName = newJobTitle.Department?.Name ?? string.Empty
             };
         }
 
         public async Task<JobTitleResponseDto?> UpdateJobTitleAsync(int id, UpdateJobTitleRequestDto request)
         {
-            if (request.DepartmentId != null && await _departmentRepository.GetFirstOrDefaultAsync((int)request.DepartmentId) == null)
-            {
-                throw new EntryNotFoundException(nameof(Department), request.DepartmentId);
-            }
-
             if (request.Name != null && request.Name != string.Empty)
             {
                 var jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name);
@@ -104,7 +87,7 @@ namespace ManagementSimulator.Core.Services
                     throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
-            var jobTitle = await _jobTitleRepository.GetJobTitleWithDepartmentAsync(id);
+            var jobTitle = await _jobTitleRepository.GetJobTitleAsync(id);
             if (jobTitle == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), id);
@@ -118,8 +101,6 @@ namespace ManagementSimulator.Core.Services
             {
                 Id = jobTitle.Id,
                 Name = jobTitle.Name ?? string.Empty,
-                DepartmentId = jobTitle.DepartmentId,
-                DepartmentName = jobTitle.Department?.Name ?? string.Empty
             };
         }
 
@@ -138,7 +119,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
-            var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesWithDepartmentsFilteredAsync(payload.DepartmentName, payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<JobTitleResponseDto>
@@ -155,8 +136,6 @@ namespace ManagementSimulator.Core.Services
                 {
                     Id = jt.Id,
                     Name = jt.Name,
-                    DepartmentName = jt.Department.Name ?? string.Empty,
-                    DepartmentId = jt.Department.Id,
                     EmployeeCount = jt.Users.Count,
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,

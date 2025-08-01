@@ -37,7 +37,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<Department>? Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<Department> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<Department> query = GetRecords(includeDeletedEntities: includeDeleted);
 
@@ -74,6 +74,15 @@ namespace ManagementSimulator.Database.Repositories
 
                 return (pagedData, totalCount);
             }
+        }
+
+        public async Task<List<Department>> GetAllDepartmentsAsync(List<int> ids, bool includeDeleted = false)
+        {
+            IQueryable<Department> query = _dbContext.Departments;
+            if (!includeDeleted)
+                query = query.Where(d => d.DeletedAt == null);
+
+            return await query.Where(d => ids.Contains(d.Id)).ToListAsync();
         }
     }
 }

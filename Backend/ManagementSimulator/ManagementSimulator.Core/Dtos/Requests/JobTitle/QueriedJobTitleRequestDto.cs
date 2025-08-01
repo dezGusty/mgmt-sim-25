@@ -10,7 +10,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.JobTitle
     public class QueriedJobTitleRequestDto
     {
         public string? JobTitleName { get; set; } = string.Empty;
-        public string? DepartmentName { get; set; } = string.Empty;
 
         public QueryParamsDto PagedQueryParams { get; set; } = new QueryParamsDto();
     }

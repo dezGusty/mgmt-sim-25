@@ -45,7 +45,7 @@ namespace ManagementSimulator.Database.Repositories
             query = query.Include(u => u.Roles)
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
-                    .ThenInclude(jt => jt.Department);
+                .Include(u => u.Department);
 
             return await query.ToListAsync();
         }
@@ -111,7 +111,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<List<User>?> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<User>> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false)
         {
             IQueryable<User> query = _dbContext.Users;
 
@@ -126,7 +126,7 @@ namespace ManagementSimulator.Database.Repositories
 
         }
 
-        public async Task<List<User>?> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<User>> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false)
         {
             IQueryable<User> query = _dbContext.Users;
 
@@ -159,7 +159,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
                                      .Include(u => u.Roles.Where(r => r.DeletedAt == null))
@@ -204,7 +204,8 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch,
+            QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = _dbContext.Users;
             if (!includeDeleted)
@@ -213,7 +214,7 @@ namespace ManagementSimulator.Database.Repositories
             query = query.Include(u => u.Roles.Where(r => r.DeletedAt == null))
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
-                    .ThenInclude(jt => jt.Department);
+                .Include(u => u.Department);
 
             if (!string.IsNullOrEmpty(globalSearch))
             {
@@ -224,7 +225,7 @@ namespace ManagementSimulator.Database.Repositories
                     (u.LastName != null && u.LastName.Contains(globalSearch)) ||
                     (u.Email != null && u.Email.Contains(globalSearch)) ||
                     (u.Title != null && u.Title.Name != null && u.Title.Name.Contains(globalSearch)) ||
-                    (u.Title != null && u.Title.Department != null && u.Title.Department.Name != null && u.Title.Department.Name.Contains(globalSearch))
+                    (u.Title != null && u.Department != null && u.Department.Name != null && u.Department.Name.Contains(globalSearch))
                 );
             }
             else
@@ -241,8 +242,8 @@ namespace ManagementSimulator.Database.Repositories
                 if (!string.IsNullOrEmpty(department))
                 {
                     query = query.Where(u => u.Title != null &&
-                                            u.Title.Department != null &&
-                                            u.Title.Department.Name.Contains(department));
+                                            u.Department != null &&
+                                            u.Department.Name.Contains(department));
                 }
                 if (!string.IsNullOrEmpty(jobTitle))
                 {
@@ -276,7 +277,7 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User> Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = _dbContext.Users;
 

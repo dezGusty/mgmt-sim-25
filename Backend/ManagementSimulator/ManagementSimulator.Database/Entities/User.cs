@@ -14,6 +14,8 @@ namespace ManagementSimulator.Database.Entities
         // navigation properties
         public int JobTitleId { get; set; }
         public JobTitle Title { get; set; }
+        public int DepartmentId { get; set; }
+        public Department Department { get; set; }
 
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
         public ICollection<LeaveRequest> ReviewedRequests { get; set; } = new List<LeaveRequest>();

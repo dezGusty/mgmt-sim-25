@@ -70,22 +70,12 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             var leaveTypes = new List<LeaveRequestType>
             {
-                new() { Title = "Vacation", Description = "Standard annual leave" },
-                new() { Title = "Sick Leave", Description = "Medical certificate required" },
-                new() { Title = "Parental Leave", Description = "Applicable for new parents" },
-                new() { Title = "Unpaid Leave", Description = "Requires manager approval" },
-                new() { Title = "Personal Leave", Description = "Personal time off for individual matters" },
-                new() { Title = "Bereavement Leave", Description = "Leave for death of family member" },
-                new() { Title = "Emergency Leave", Description = "Urgent personal or family emergencies" },
-                new() { Title = "Medical Leave", Description = "Extended medical treatment or recovery" },
-                new() { Title = "Study Leave", Description = "Educational purposes and training" },
-                new() { Title = "Jury Duty", Description = "Legal obligation for court service" },
-                new() { Title = "Military Leave", Description = "Military service obligations" },
-                new() { Title = "Sabbatical", Description = "Extended leave for personal development" },
-                new() { Title = "Compensatory Time", Description = "Time off in lieu of overtime pay" },
-                new() { Title = "Religious Leave", Description = "Religious observances and holidays" },
-                new() { Title = "Volunteer Leave", Description = "Approved volunteer activities" },
-                new() { Title = "Mental Health Leave", Description = "Mental health and wellness support" }
+                new() { Title = "Vacation", Description = "Standard annual leave", IsPaid = true },
+                new() { Title = "Sick Leave", Description = "Medical certificate required", IsPaid = true  },
+                new() { Title = "Parental Leave", Description = "Applicable for new parents", IsPaid = true  },
+                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true  },
+                new() { Title = "Military Leave", Description = "Military service obligations", IsPaid = true  },
+                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true  },
             };
 
             foreach (var leaveType in leaveTypes)
@@ -101,110 +91,110 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             var jobTitles = new List<JobTitle>
             {
-                new() { Name = "Software Engineer", DepartmentId = departmentMap["IT"] },
-                new() { Name = "System Administrator", DepartmentId = departmentMap["IT"] },
-                new() { Name = "IT Manager", DepartmentId = departmentMap["IT"] },
-                new() { Name = "Network Administrator", DepartmentId = departmentMap["IT"] },
-                new() { Name = "Database Administrator", DepartmentId = departmentMap["IT"] },
-                new() { Name = "IT Support Specialist", DepartmentId = departmentMap["IT"] },
-                new() { Name = "Cybersecurity Analyst", DepartmentId = departmentMap["IT"] },
-                new() { Name = "Cloud Architect", DepartmentId = departmentMap["IT"] },
-                new() { Name = "HR Specialist", DepartmentId = departmentMap["HR"] },
-                new() { Name = "Recruiter", DepartmentId = departmentMap["HR"] },
-                new() { Name = "HR Manager", DepartmentId = departmentMap["HR"] },
-                new() { Name = "HR Business Partner", DepartmentId = departmentMap["HR"] },
-                new() { Name = "HR Generalist", DepartmentId = departmentMap["HR"] },
-                new() { Name = "HR Director", DepartmentId = departmentMap["HR"] },
-                new() { Name = "Accountant", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "Financial Analyst", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "Finance Manager", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "Controller", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "CFO", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "Budget Analyst", DepartmentId = departmentMap["Finance"] },
-                new() { Name = "Marketing Manager", DepartmentId = departmentMap["Marketing"] },
-                new() { Name = "Content Creator", DepartmentId = departmentMap["Marketing"] },
-                new() { Name = "Marketing Specialist", DepartmentId = departmentMap["Marketing"] },
-                new() { Name = "Marketing Director", DepartmentId = departmentMap["Marketing"] },
-                new() { Name = "Brand Manager", DepartmentId = departmentMap["Marketing"] },
-                new() { Name = "CEO", DepartmentId = departmentMap["Executive"] },
-                new() { Name = "COO", DepartmentId = departmentMap["Executive"] },
-                new() { Name = "Vice President", DepartmentId = departmentMap["Executive"] },
-                new() { Name = "Executive Assistant", DepartmentId = departmentMap["Executive"] },
-                new() { Name = "Strategy Analyst", DepartmentId = departmentMap["Strategy"] },
-                new() { Name = "Business Analyst", DepartmentId = departmentMap["Strategy"] },
-                new() { Name = "Strategic Planning Manager", DepartmentId = departmentMap["Strategy"] },
-                new() { Name = "Management Consultant", DepartmentId = departmentMap["Strategy"] },
-                new() { Name = "Operations Manager", DepartmentId = departmentMap["Operations"] },
-                new() { Name = "Operations Analyst", DepartmentId = departmentMap["Operations"] },
-                new() { Name = "Process Improvement Specialist", DepartmentId = departmentMap["Operations"] },
-                new() { Name = "Operations Director", DepartmentId = departmentMap["Operations"] },
-                new() { Name = "Sales Representative", DepartmentId = departmentMap["Sales"] },
-                new() { Name = "Sales Manager", DepartmentId = departmentMap["Sales"] },
-                new() { Name = "Senior Sales Executive", DepartmentId = departmentMap["Sales"] },
-                new() { Name = "Sales Director", DepartmentId = departmentMap["Sales"] },
-                new() { Name = "Inside Sales Representative", DepartmentId = departmentMap["Sales"] },
-                new() { Name = "Customer Service Representative", DepartmentId = departmentMap["Customer Service"] },
-                new() { Name = "Customer Success Manager", DepartmentId = departmentMap["Customer Service"] },
-                new() { Name = "Customer Service Manager", DepartmentId = departmentMap["Customer Service"] },
-                new() { Name = "Technical Support Specialist", DepartmentId = departmentMap["Customer Service"] },
-                new() { Name = "Business Development Manager", DepartmentId = departmentMap["Business Development"] },
-                new() { Name = "Business Development Representative", DepartmentId = departmentMap["Business Development"] },
-                new() { Name = "Partnership Manager", DepartmentId = departmentMap["Business Development"] },
-                new() { Name = "Account Manager", DepartmentId = departmentMap["Account Management"] },
-                new() { Name = "Key Account Manager", DepartmentId = departmentMap["Account Management"] },
-                new() { Name = "Client Relationship Manager", DepartmentId = departmentMap["Account Management"] },
-                new() { Name = "Product Manager", DepartmentId = departmentMap["Product Management"] },
-                new() { Name = "Senior Product Manager", DepartmentId = departmentMap["Product Management"] },
-                new() { Name = "Product Owner", DepartmentId = departmentMap["Product Management"] },
-                new() { Name = "Product Director", DepartmentId = departmentMap["Product Management"] },
-                new() { Name = "Frontend Developer", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Backend Developer", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Full Stack Developer", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Engineering Manager", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Lead Engineer", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Principal Engineer", DepartmentId = departmentMap["Engineering"] },
-                new() { Name = "Research Scientist", DepartmentId = departmentMap["Research & Development"] },
-                new() { Name = "R&D Engineer", DepartmentId = departmentMap["Research & Development"] },
-                new() { Name = "Innovation Manager", DepartmentId = departmentMap["Research & Development"] },
-                new() { Name = "R&D Director", DepartmentId = departmentMap["Research & Development"] },
-                new() { Name = "QA Engineer", DepartmentId = departmentMap["Quality Assurance"] },
-                new() { Name = "QA Manager", DepartmentId = departmentMap["Quality Assurance"] },
-                new() { Name = "Test Automation Engineer", DepartmentId = departmentMap["Quality Assurance"] },
-                new() { Name = "Quality Control Specialist", DepartmentId = departmentMap["Quality Assurance"] },
-                new() { Name = "DevOps Engineer", DepartmentId = departmentMap["DevOps"] },
-                new() { Name = "Site Reliability Engineer", DepartmentId = departmentMap["DevOps"] },
-                new() { Name = "Infrastructure Engineer", DepartmentId = departmentMap["DevOps"] },
-                new() { Name = "DevOps Manager", DepartmentId = departmentMap["DevOps"] },
-                new() { Name = "Data Scientist", DepartmentId = departmentMap["Data Science"] },
-                new() { Name = "Data Analyst", DepartmentId = departmentMap["Data Science"] },
-                new() { Name = "Machine Learning Engineer", DepartmentId = departmentMap["Data Science"] },
-                new() { Name = "Data Engineer", DepartmentId = departmentMap["Data Science"] },
-                new() { Name = "Senior Data Scientist", DepartmentId = departmentMap["Data Science"] },
-                new() { Name = "Corporate Lawyer", DepartmentId = departmentMap["Legal"] },
-                new() { Name = "Legal Counsel", DepartmentId = departmentMap["Legal"] },
-                new() { Name = "Compliance Officer", DepartmentId = departmentMap["Legal"] },
-                new() { Name = "Legal Manager", DepartmentId = departmentMap["Legal"] },
-                new() { Name = "Procurement Specialist", DepartmentId = departmentMap["Procurement"] },
-                new() { Name = "Purchasing Manager", DepartmentId = departmentMap["Procurement"] },
-                new() { Name = "Vendor Manager", DepartmentId = departmentMap["Procurement"] },
-                new() { Name = "Contract Manager", DepartmentId = departmentMap["Procurement"] },
-                new() { Name = "Facilities Manager", DepartmentId = departmentMap["Facilities"] },
-                new() { Name = "Maintenance Technician", DepartmentId = departmentMap["Facilities"] },
-                new() { Name = "Office Manager", DepartmentId = departmentMap["Facilities"] },
-                new() { Name = "Building Coordinator", DepartmentId = departmentMap["Facilities"] },
-                new() { Name = "Security Officer", DepartmentId = departmentMap["Security"] },
-                new() { Name = "Security Manager", DepartmentId = departmentMap["Security"] },
-                new() { Name = "Safety Coordinator", DepartmentId = departmentMap["Security"] },
-                new() { Name = "Risk Management Specialist", DepartmentId = departmentMap["Security"] },
-                new() { Name = "Administrative Assistant", DepartmentId = departmentMap["Administration"] },
-                new() { Name = "Office Coordinator", DepartmentId = departmentMap["Administration"] },
-                new() { Name = "Executive Secretary", DepartmentId = departmentMap["Administration"] },
-                new() { Name = "Administrative Manager", DepartmentId = departmentMap["Administration"] }
+                new() { Name = "Software Engineer" },
+                new() { Name = "System Administrator" },
+                new() { Name = "IT Manager" },
+                new() { Name = "Network Administrator" },
+                new() { Name = "Database Administrator" },
+                new() { Name = "IT Support Specialist" },
+                new() { Name = "Cybersecurity Analyst" },
+                new() { Name = "Cloud Architect" },
+                new() { Name = "HR Specialist" },
+                new() { Name = "Recruiter" },
+                new() { Name = "HR Manager" },
+                new() { Name = "HR Business Partner" },
+                new() { Name = "HR Generalist" },
+                new() { Name = "HR Director" },
+                new() { Name = "Accountant" },
+                new() { Name = "Financial Analyst" },
+                new() { Name = "Finance Manager" },
+                new() { Name = "Controller" },
+                new() { Name = "CFO" },
+                new() { Name = "Budget Analyst" },
+                new() { Name = "Marketing Manager" },
+                new() { Name = "Content Creator" },
+                new() { Name = "Marketing Specialist" },
+                new() { Name = "Marketing Director" },
+                new() { Name = "Brand Manager" },
+                new() { Name = "CEO" },
+                new() { Name = "COO" },
+                new() { Name = "Vice President" },
+                new() { Name = "Executive Assistant" },
+                new() { Name = "Strategy Analyst" },
+                new() { Name = "Business Analyst" },
+                new() { Name = "Strategic Planning Manager" },
+                new() { Name = "Management Consultant" },
+                new() { Name = "Operations Manager" },
+                new() { Name = "Operations Analyst" },
+                new() { Name = "Process Improvement Specialist" },
+                new() { Name = "Operations Director" },
+                new() { Name = "Sales Representative" },
+                new() { Name = "Sales Manager" },
+                new() { Name = "Senior Sales Executive" },
+                new() { Name = "Sales Director" },
+                new() { Name = "Inside Sales Representative" },
+                new() { Name = "Customer Service Representative" },
+                new() { Name = "Customer Success Manager" },
+                new() { Name = "Customer Service Manager" },
+                new() { Name = "Technical Support Specialist" },
+                new() { Name = "Business Development Manager" },
+                new() { Name = "Business Development Representative" },
+                new() { Name = "Partnership Manager" },
+                new() { Name = "Account Manager" },
+                new() { Name = "Key Account Manager" },
+                new() { Name = "Client Relationship Manager" },
+                new() { Name = "Product Manager" },
+                new() { Name = "Senior Product Manager" },
+                new() { Name = "Product Owner" },
+                new() { Name = "Product Director" },
+                new() { Name = "Frontend Developer" },
+                new() { Name = "Backend Developer" },
+                new() { Name = "Full Stack Developer" },
+                new() { Name = "Engineering Manager" },
+                new() { Name = "Lead Engineer" },
+                new() { Name = "Principal Engineer" },
+                new() { Name = "Research Scientist" },
+                new() { Name = "R&D Engineer" },
+                new() { Name = "Innovation Manager" },
+                new() { Name = "R&D Director" },
+                new() { Name = "QA Engineer" },
+                new() { Name = "QA Manager" },
+                new() { Name = "Test Automation Engineer" },
+                new() { Name = "Quality Control Specialist" },
+                new() { Name = "DevOps Engineer" },
+                new() { Name = "Site Reliability Engineer" },
+                new() { Name = "Infrastructure Engineer" },
+                new() { Name = "DevOps Manager" },
+                new() { Name = "Data Scientist" },
+                new() { Name = "Data Analyst" },
+                new() { Name = "Machine Learning Engineer" },
+                new() { Name = "Data Engineer" },
+                new() { Name = "Senior Data Scientist" },
+                new() { Name = "Corporate Lawyer" },
+                new() { Name = "Legal Counsel" },
+                new() { Name = "Compliance Officer" },
+                new() { Name = "Legal Manager" },
+                new() { Name = "Procurement Specialist" },
+                new() { Name = "Purchasing Manager" },
+                new() { Name = "Vendor Manager" },
+                new() { Name = "Contract Manager" },
+                new() { Name = "Facilities Manager" },
+                new() { Name = "Maintenance Technician" },
+                new() { Name = "Office Manager" },
+                new() { Name = "Building Coordinator" },
+                new() { Name = "Security Officer" },
+                new() { Name = "Security Manager" },
+                new() { Name = "Safety Coordinator" },
+                new() { Name = "Risk Management Specialist" },
+                new() { Name = "Administrative Assistant" },
+                new() { Name = "Office Coordinator" },
+                new() { Name = "Executive Secretary" },
+                new() { Name = "Administrative Manager" }
             };
 
             foreach (var title in jobTitles)
             {
-                if (!dbContext.JobTitles.Any(jt => jt.Name == title.Name && jt.DepartmentId == title.DepartmentId))
+                if (!dbContext.JobTitles.Any(jt => jt.Name == title.Name))
                 {
                     dbContext.JobTitles.Add(title);
                 }
@@ -219,433 +209,1026 @@ namespace ManagementSimulator.Infrastructure.Seeding
             var managerRoleId = roles.FirstOrDefault(r => r.Rolename == "Manager")?.Id ?? 0;
             var employeeRoleId = roles.FirstOrDefault(r => r.Rolename == "Employee")?.Id ?? 0;
 
+            var departmentsList = dbContext.Departments.ToList();
+
             var userSeeds = new List<(User User, List<int> RoleIds)>
             {
-                (new User { 
-                    FirstName = "Admin", 
-                    LastName = "User", 
-                    Email = "admin@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "System Administrator").Id 
+                (new User {
+                    FirstName = "John",
+                    LastName = "Anderson",
+                    Email = "john.anderson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CEO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2005, 3, 1)
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "John", 
-                    LastName = "Anderson", 
-                    Email = "john.anderson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CEO").Id 
+
+                (new User {
+                    FirstName = "Sarah",
+                    LastName = "Mitchell",
+                    Email = "sarah.mitchell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "COO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2008, 6, 15)
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Sarah", 
-                    LastName = "Mitchell", 
-                    Email = "sarah.mitchell@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "COO").Id 
+
+                (new User {
+                    FirstName = "Michael",
+                    LastName = "Thompson",
+                    Email = "michael.thompson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CFO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2007, 2, 10)
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Michael", 
-                    LastName = "Thompson", 
-                    Email = "michael.thompson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CFO").Id 
+
+                (new User {
+                    FirstName = "Emily",
+                    LastName = "Davis",
+                    Email = "emily.davis@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2020, 8, 22)
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Emily", 
-                    LastName = "Davis", 
-                    Email = "emily.davis@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id 
+
+                (new User {
+                    FirstName = "Robert",
+                    LastName = "Wilson",
+                    Email = "robert.wilson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 4, 7)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "David",
+                    LastName = "Garcia",
+                    Email = "david.garcia@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "IT Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2012, 11, 3)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Jennifer",
+                    LastName = "Martinez",
+                    Email = "jennifer.martinez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 1, 18)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "James",
+                    LastName = "Rodriguez",
+                    Email = "james.rodriguez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 9, 12)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Lisa",
+                    LastName = "Hernandez",
+                    Email = "lisa.hernandez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 3, 25)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Christopher",
+                    LastName = "Lopez",
+                    Email = "christopher.lopez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Network Administrator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 7, 14)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Brandon",
+                    LastName = "Allen",
+                    Email = "brandon.allen@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "System Administrator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 5, 8)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Connor",
+                    LastName = "Mitchell",
+                    Email = "connor.mitchell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Engineering Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2020, 12, 20)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Alexis",
+                    LastName = "Carter",
+                    Email = "alexis.carter@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Lead Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 10, 5)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Blake",
+                    LastName = "Roberts",
+                    Email = "blake.roberts@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Principal Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2009, 4, 30)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Morgan",
+                    LastName = "Gomez",
+                    Email = "morgan.gomez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Frontend Developer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 8, 16)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Cameron",
+                    LastName = "Phillips",
+                    Email = "cameron.phillips@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Backend Developer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 1, 9)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Gregory",
+                    LastName = "James",
+                    Email = "gregory.james@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2006, 11, 12)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Victoria",
+                    LastName = "Watson",
+                    Email = "victoria.watson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 6, 28)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Adam",
+                    LastName = "Brooks",
+                    Email = "adam.brooks@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 11, 14)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Emma",
+                    LastName = "Price",
+                    Email = "emma.price@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 7, 3)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Charlotte",
+                    LastName = "Perry",
+                    Email = "charlotte.perry@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2011, 2, 17)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Henry",
+                    LastName = "Powell",
+                    Email = "henry.powell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 12, 6)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Amelia",
+                    LastName = "Long",
+                    Email = "amelia.long@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Brand Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 4, 21)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Ethan",
+                    LastName = "Flores",
+                    Email = "ethan.flores@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Content Creator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 2, 13)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Lucas",
+                    LastName = "Butler",
+                    Email = "lucas.butler@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2004, 8, 26)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Abigail",
+                    LastName = "Simmons",
+                    Email = "abigail.simmons@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 3, 11)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Gabriel",
+                    LastName = "Foster",
+                    Email = "gabriel.foster@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Business Partner").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 9, 7)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Scarlett",
+                    LastName = "Alexander",
+                    Email = "scarlett.alexander@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Recruiter").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 5, 19)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Owen",
+                    LastName = "Russell",
+                    Email = "owen.russell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Finance Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2013, 10, 24)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Grace",
+                    LastName = "Griffin",
+                    Email = "grace.griffin@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Controller").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 1, 15)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Sebastian",
+                    LastName = "Diaz",
+                    Email = "sebastian.diaz@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Financial Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 7, 29)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Jack",
+                    LastName = "Myers",
+                    Email = "jack.myers@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Accountant").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 4, 12)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Zoey",
+                    LastName = "Graham",
+                    Email = "zoey.graham@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2014, 5, 18)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Luke",
+                    LastName = "Sullivan",
+                    Email = "luke.sullivan@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Success Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 11, 23)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Layla",
+                    LastName = "Wallace",
+                    Email = "layla.wallace@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 12, 10)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Wyatt",
+                    LastName = "West",
+                    Email = "wyatt.west@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2003, 9, 4)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Nora",
+                    LastName = "Tucker",
+                    Email = "nora.tucker@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 2, 27)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Leo",
+                    LastName = "Parker",
+                    Email = "leo.parker@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 6, 1)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Alex",
+                    LastName = "Rogers",
+                    Email = "alex.rogers@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Data Scientist").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2015, 7, 13)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Vanessa",
+                    LastName = "Reed",
+                    Email = "vanessa.reed@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Scientist").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 8, 25)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Carlos",
+                    LastName = "Bailey",
+                    Email = "carlos.bailey@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 6, 8)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Isaiah",
+                    LastName = "Thompson",
+                    Email = "isaiah.thompson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Quality Assurance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2016, 3, 16)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Aurora",
+                    LastName = "White",
+                    Email = "aurora.white@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Quality Assurance").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 10, 31)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Grayson",
+                    LastName = "Martinez",
+                    Email = "grayson.martinez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "DevOps").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 5, 2)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Penelope",
+                    LastName = "Anderson",
+                    Email = "penelope.anderson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "DevOps").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 8, 14)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Adrian",
+                    LastName = "Moore",
+                    Email = "adrian.moore@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Product Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Product Management").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2002, 12, 9)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Addison",
+                    LastName = "Martin",
+                    Email = "addison.martin@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Product Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Product Management").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 2, 22)
+                }, new List<int> { employeeRoleId }),
+
+                (new User {
+                    FirstName = "Lincoln",
+                    LastName = "Garcia",
+                    Email = "lincoln.garcia@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Legal Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Legal").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 2, 22)
+                }, new List<int> { managerRoleId, employeeRoleId }),
+                (new User {
+                    FirstName = "Admin",
+                    LastName = "User",
+                    Email = "admin@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "System Administrator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2010, 1, 15)
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Robert", 
-                    LastName = "Wilson", 
-                    Email = "robert.wilson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id 
+
+                (new User {
+                    FirstName = "John",
+                    LastName = "Anderson",
+                    Email = "john.anderson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CEO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id
+                }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Sarah",
+                    LastName = "Mitchell",
+                    Email = "sarah.mitchell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "COO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id
+                }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Michael",
+                    LastName = "Thompson",
+                    Email = "michael.thompson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "CFO").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id
+                }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Emily",
+                    LastName = "Davis",
+                    Email = "emily.davis@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id
+                }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
+
+                (new User {
+                    FirstName = "Robert",
+                    LastName = "Wilson",
+                    Email = "robert.wilson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Vice President").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Executive").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "David", 
-                    LastName = "Garcia", 
-                    Email = "david.garcia@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "IT Manager").Id 
+
+                (new User {
+                    FirstName = "David",
+                    LastName = "Garcia",
+                    Email = "david.garcia@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "IT Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Jennifer", 
-                    LastName = "Martinez", 
-                    Email = "jennifer.martinez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id 
+
+                (new User {
+                    FirstName = "Jennifer",
+                    LastName = "Martinez",
+                    Email = "jennifer.martinez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "James", 
-                    LastName = "Rodriguez", 
-                    Email = "james.rodriguez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id 
+
+                (new User {
+                    FirstName = "James",
+                    LastName = "Rodriguez",
+                    Email = "james.rodriguez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Lisa", 
-                    LastName = "Hernandez", 
-                    Email = "lisa.hernandez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id 
+
+                (new User {
+                    FirstName = "Lisa",
+                    LastName = "Hernandez",
+                    Email = "lisa.hernandez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Software Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Christopher", 
-                    LastName = "Lopez", 
-                    Email = "christopher.lopez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Network Administrator").Id 
+
+                (new User {
+                    FirstName = "Christopher",
+                    LastName = "Lopez",
+                    Email = "christopher.lopez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Network Administrator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Brandon", 
-                    LastName = "Allen", 
-                    Email = "brandon.allen@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "System Administrator").Id 
+
+                (new User {
+                    FirstName = "Brandon",
+                    LastName = "Allen",
+                    Email = "brandon.allen@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "System Administrator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "IT").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Connor", 
-                    LastName = "Mitchell", 
-                    Email = "connor.mitchell@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Engineering Manager").Id 
+
+                (new User {
+                    FirstName = "Connor",
+                    LastName = "Mitchell",
+                    Email = "connor.mitchell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Engineering Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Alexis", 
-                    LastName = "Carter", 
-                    Email = "alexis.carter@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Lead Engineer").Id 
+
+                (new User {
+                    FirstName = "Alexis",
+                    LastName = "Carter",
+                    Email = "alexis.carter@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Lead Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Blake", 
-                    LastName = "Roberts", 
-                    Email = "blake.roberts@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Principal Engineer").Id 
+
+                (new User {
+                    FirstName = "Blake",
+                    LastName = "Roberts",
+                    Email = "blake.roberts@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Principal Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Morgan", 
-                    LastName = "Gomez", 
-                    Email = "morgan.gomez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Frontend Developer").Id 
+
+                (new User {
+                    FirstName = "Morgan",
+                    LastName = "Gomez",
+                    Email = "morgan.gomez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Frontend Developer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Cameron", 
-                    LastName = "Phillips", 
-                    Email = "cameron.phillips@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Backend Developer").Id 
+
+                (new User {
+                    FirstName = "Cameron",
+                    LastName = "Phillips",
+                    Email = "cameron.phillips@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Backend Developer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Engineering").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Gregory", 
-                    LastName = "James", 
-                    Email = "gregory.james@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Director").Id 
+
+                (new User {
+                    FirstName = "Gregory",
+                    LastName = "James",
+                    Email = "gregory.james@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Victoria", 
-                    LastName = "Watson", 
-                    Email = "victoria.watson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Manager").Id 
+
+                (new User {
+                    FirstName = "Victoria",
+                    LastName = "Watson",
+                    Email = "victoria.watson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Adam", 
-                    LastName = "Brooks", 
-                    Email = "adam.brooks@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id 
+
+                (new User {
+                    FirstName = "Adam",
+                    LastName = "Brooks",
+                    Email = "adam.brooks@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Emma", 
-                    LastName = "Price", 
-                    Email = "emma.price@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id 
+
+                (new User {
+                    FirstName = "Emma",
+                    LastName = "Price",
+                    Email = "emma.price@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Sales Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Sales").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Charlotte", 
-                    LastName = "Perry", 
-                    Email = "charlotte.perry@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Director").Id 
+
+                (new User {
+                    FirstName = "Charlotte",
+                    LastName = "Perry",
+                    Email = "charlotte.perry@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Henry", 
-                    LastName = "Powell", 
-                    Email = "henry.powell@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Manager").Id 
+
+                (new User {
+                    FirstName = "Henry",
+                    LastName = "Powell",
+                    Email = "henry.powell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Marketing Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Amelia", 
-                    LastName = "Long", 
-                    Email = "amelia.long@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Brand Manager").Id 
+
+                (new User {
+                    FirstName = "Amelia",
+                    LastName = "Long",
+                    Email = "amelia.long@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Brand Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Ethan", 
-                    LastName = "Flores", 
-                    Email = "ethan.flores@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Content Creator").Id 
+
+                (new User {
+                    FirstName = "Ethan",
+                    LastName = "Flores",
+                    Email = "ethan.flores@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Content Creator").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Marketing").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Lucas", 
-                    LastName = "Butler", 
-                    Email = "lucas.butler@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Director").Id 
+
+                (new User {
+                    FirstName = "Lucas",
+                    LastName = "Butler",
+                    Email = "lucas.butler@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Abigail", 
-                    LastName = "Simmons", 
-                    Email = "abigail.simmons@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Manager").Id 
+
+                (new User {
+                    FirstName = "Abigail",
+                    LastName = "Simmons",
+                    Email = "abigail.simmons@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Gabriel", 
-                    LastName = "Foster", 
-                    Email = "gabriel.foster@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Business Partner").Id 
+
+                (new User {
+                    FirstName = "Gabriel",
+                    LastName = "Foster",
+                    Email = "gabriel.foster@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "HR Business Partner").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Scarlett", 
-                    LastName = "Alexander", 
-                    Email = "scarlett.alexander@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Recruiter").Id 
+
+                (new User {
+                    FirstName = "Scarlett",
+                    LastName = "Alexander",
+                    Email = "scarlett.alexander@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Recruiter").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "HR").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Owen", 
-                    LastName = "Russell", 
-                    Email = "owen.russell@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Finance Manager").Id 
+
+                (new User {
+                    FirstName = "Owen",
+                    LastName = "Russell",
+                    Email = "owen.russell@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Finance Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Grace", 
-                    LastName = "Griffin", 
-                    Email = "grace.griffin@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Controller").Id 
+
+                (new User {
+                    FirstName = "Grace",
+                    LastName = "Griffin",
+                    Email = "grace.griffin@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Controller").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Sebastian", 
-                    LastName = "Diaz", 
-                    Email = "sebastian.diaz@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Financial Analyst").Id 
+
+                (new User {
+                    FirstName = "Sebastian",
+                    LastName = "Diaz",
+                    Email = "sebastian.diaz@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Financial Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Jack", 
-                    LastName = "Myers", 
-                    Email = "jack.myers@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Accountant").Id 
+
+                (new User {
+                    FirstName = "Jack",
+                    LastName = "Myers",
+                    Email = "jack.myers@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Accountant").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Finance").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Zoey", 
-                    LastName = "Graham", 
-                    Email = "zoey.graham@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Manager").Id 
+
+                (new User {
+                    FirstName = "Zoey",
+                    LastName = "Graham",
+                    Email = "zoey.graham@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Luke", 
-                    LastName = "Sullivan", 
-                    Email = "luke.sullivan@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Success Manager").Id 
+
+                (new User {
+                    FirstName = "Luke",
+                    LastName = "Sullivan",
+                    Email = "luke.sullivan@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Success Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Layla", 
-                    LastName = "Wallace", 
-                    Email = "layla.wallace@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Representative").Id 
+
+                (new User {
+                    FirstName = "Layla",
+                    LastName = "Wallace",
+                    Email = "layla.wallace@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Customer Service Representative").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Customer Service").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Wyatt", 
-                    LastName = "West", 
-                    Email = "wyatt.west@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Director").Id 
+
+                (new User {
+                    FirstName = "Wyatt",
+                    LastName = "West",
+                    Email = "wyatt.west@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Nora", 
-                    LastName = "Tucker", 
-                    Email = "nora.tucker@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Manager").Id 
+
+                (new User {
+                    FirstName = "Nora",
+                    LastName = "Tucker",
+                    Email = "nora.tucker@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Leo", 
-                    LastName = "Parker", 
-                    Email = "leo.parker@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Analyst").Id 
+
+                (new User {
+                    FirstName = "Leo",
+                    LastName = "Parker",
+                    Email = "leo.parker@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Operations Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Operations").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Alex", 
-                    LastName = "Rogers", 
-                    Email = "alex.rogers@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Data Scientist").Id 
+
+                (new User {
+                    FirstName = "Alex",
+                    LastName = "Rogers",
+                    Email = "alex.rogers@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Data Scientist").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Vanessa", 
-                    LastName = "Reed", 
-                    Email = "vanessa.reed@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Scientist").Id 
+
+                (new User {
+                    FirstName = "Vanessa",
+                    LastName = "Reed",
+                    Email = "vanessa.reed@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Scientist").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Carlos", 
-                    LastName = "Bailey", 
-                    Email = "carlos.bailey@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Analyst").Id 
+
+                (new User {
+                    FirstName = "Carlos",
+                    LastName = "Bailey",
+                    Email = "carlos.bailey@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Data Analyst").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Data Science").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Isaiah", 
-                    LastName = "Thompson", 
-                    Email = "isaiah.thompson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Manager").Id 
+
+                (new User {
+                    FirstName = "Isaiah",
+                    LastName = "Thompson",
+                    Email = "isaiah.thompson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Quality Assurance").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Aurora", 
-                    LastName = "White", 
-                    Email = "aurora.white@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Engineer").Id 
+
+                (new User {
+                    FirstName = "Aurora",
+                    LastName = "White",
+                    Email = "aurora.white@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "QA Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Quality Assurance").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Grayson", 
-                    LastName = "Martinez", 
-                    Email = "grayson.martinez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Manager").Id 
+
+                (new User {
+                    FirstName = "Grayson",
+                    LastName = "Martinez",
+                    Email = "grayson.martinez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "DevOps").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Penelope", 
-                    LastName = "Anderson", 
-                    Email = "penelope.anderson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Engineer").Id 
+
+                (new User {
+                    FirstName = "Penelope",
+                    LastName = "Anderson",
+                    Email = "penelope.anderson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "DevOps Engineer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "DevOps").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Adrian", 
-                    LastName = "Moore", 
-                    Email = "adrian.moore@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Product Director").Id 
+
+                (new User {
+                    FirstName = "Adrian",
+                    LastName = "Moore",
+                    Email = "adrian.moore@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Product Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Product Management").Id
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Addison", 
-                    LastName = "Martin", 
-                    Email = "addison.martin@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Product Manager").Id 
+
+                (new User {
+                    FirstName = "Addison",
+                    LastName = "Martin",
+                    Email = "addison.martin@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Senior Product Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Product Management").Id
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Lincoln", 
-                    LastName = "Garcia", 
-                    Email = "lincoln.garcia@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Legal Manager").Id 
+
+                (new User {
+                    FirstName = "Lincoln",
+                    LastName = "Garcia",
+                    Email = "lincoln.garcia@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Legal Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Legal").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2017, 4, 6)
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Elena", 
-                    LastName = "Rodriguez", 
-                    Email = "elena.rodriguez@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Corporate Lawyer").Id 
+
+                (new User {
+                    FirstName = "Elena",
+                    LastName = "Rodriguez",
+                    Email = "elena.rodriguez@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Corporate Lawyer").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Legal").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2021, 4, 19)
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Mateo", 
-                    LastName = "Flores", 
-                    Email = "mateo.flores@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "R&D Director").Id 
+
+                (new User {
+                    FirstName = "Mateo",
+                    LastName = "Flores",
+                    Email = "mateo.flores@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "R&D Director").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Research & Development").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2001, 10, 11)
                 }, new List<int> { managerRoleId, employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Genesis", 
-                    LastName = "Green", 
-                    Email = "genesis.green@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Research Scientist").Id 
+
+                (new User {
+                    FirstName = "Genesis",
+                    LastName = "Green",
+                    Email = "genesis.green@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Research Scientist").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Research & Development").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2022, 3, 28)
                 }, new List<int> { employeeRoleId }),
-                
-                (new User { 
-                    FirstName = "Serenity", 
-                    LastName = "Nelson", 
-                    Email = "serenity.nelson@simulator.com", 
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"), 
-                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Innovation Manager").Id 
+
+                (new User {
+                    FirstName = "Serenity",
+                    LastName = "Nelson",
+                    Email = "serenity.nelson@simulator.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = jobTitlesList.First(jt => jt.Name == "Innovation Manager").Id,
+                    DepartmentId = departmentsList.First(d => d.Name == "Research & Development").Id,
+                    MustChangePassword = false,
+                    DateOfEmployment = new DateTime(2023, 9, 15)
                 }, new List<int> { adminRoleId, employeeRoleId })
             };
-
             foreach (var (user, roleIds) in userSeeds)
             {
                 if (!dbContext.Users.Any(u => u.Email == user.Email))
@@ -677,16 +1260,19 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     continue;
 
                 var job = jobTitlesList[rnd.Next(jobTitlesList.Count)];
+                var department = departmentsList[rnd.Next(departmentsList.Count)];
+
                 var user = new User
                 {
                     FirstName = $"TestF{i}",
                     LastName = $"TestL{i}",
                     Email = email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("pass123"),
-                    JobTitleId = job.Id
+                    JobTitleId = job.Id,
+                    DepartmentId = department.Id
                 };
 
-                dbContext.Users.Add(user);
+                dbContext.Users.Add(user); // departamente deasupra
                 dbContext.SaveChanges();  
 
                 dbContext.EmployeeRolesUsers.Add(new EmployeeRoleUser
