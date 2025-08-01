@@ -30,6 +30,18 @@ export class UsersService {
     if (params?.email) {
       paramsToSend = paramsToSend.set('email', params.email);
     }
+
+    if (params?.department) {
+      paramsToSend = paramsToSend.set('department', params.department);
+    }
+
+    if (params?.jobTitle) {
+      paramsToSend = paramsToSend.set('jobTitle', params.jobTitle);
+    }
+
+    if (params?.globalSearch) {
+      paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
+    }
     
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);

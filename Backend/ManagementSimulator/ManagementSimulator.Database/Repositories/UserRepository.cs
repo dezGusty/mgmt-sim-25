@@ -204,7 +204,7 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<User> query = _dbContext.Users;
             if (!includeDeleted)
@@ -215,14 +215,40 @@ namespace ManagementSimulator.Database.Repositories
                 .Include(u => u.Title)
                     .ThenInclude(jt => jt.Department);
 
-            // filtering 
-            if (!string.IsNullOrEmpty(lastName))
+            if (!string.IsNullOrEmpty(globalSearch))
             {
-                query = query.Where(u => u.LastName.Contains(lastName));
+                Console.WriteLine($"Applying global search for: '{globalSearch}'");
+
+                query = query.Where(u =>
+                    (u.FirstName != null && u.FirstName.Contains(globalSearch)) ||
+                    (u.LastName != null && u.LastName.Contains(globalSearch)) ||
+                    (u.Email != null && u.Email.Contains(globalSearch)) ||
+                    (u.Title != null && u.Title.Name != null && u.Title.Name.Contains(globalSearch)) ||
+                    (u.Title != null && u.Title.Department != null && u.Title.Department.Name != null && u.Title.Department.Name.Contains(globalSearch))
+                );
             }
-            if (!string.IsNullOrEmpty(email))
+            else
             {
-                query = query.Where(u => u.Email.Contains(email));
+                // filtering 
+                if (!string.IsNullOrEmpty(lastName))
+                {
+                    query = query.Where(u => u.LastName.Contains(lastName));
+                }
+                if (!string.IsNullOrEmpty(email))
+                {
+                    query = query.Where(u => u.Email.Contains(email));
+                }
+                if (!string.IsNullOrEmpty(department))
+                {
+                    query = query.Where(u => u.Title != null &&
+                                            u.Title.Department != null &&
+                                            u.Title.Department.Name.Contains(department));
+                }
+                if (!string.IsNullOrEmpty(jobTitle))
+                {
+                    query = query.Where(u => u.Title != null &&
+                                            u.Title.Name.Contains(jobTitle));
+                }
             }
 
             var totalCount = await query.CountAsync();

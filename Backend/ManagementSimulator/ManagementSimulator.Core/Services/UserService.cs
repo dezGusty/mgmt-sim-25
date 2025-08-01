@@ -441,7 +441,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload)
         {
-            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams());
+            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams());
 
             if (users == null || !users.Any())
                 return new PagedResponseDto<UserResponseDto>
