@@ -20,11 +20,10 @@ import { IDepartment } from '../../../models/entities/idepartment';
 export class AdminJobTitlesList implements OnInit {
   jobTitles: IJobTitleViewModel[] = [];
   searchTerm: string = '';
-  searchBy: string = 'jobTitle'; 
   sortDescending: boolean = false;
   
   currentPage: number = 1;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 8;
   totalJobTitles: number = 0;
   totalPages: number = 0;
   
@@ -36,13 +35,10 @@ export class AdminJobTitlesList implements OnInit {
   editForm = {
     id: 0,
     name: '',
-    departmentId: 0
   };
   
   isSubmitting = false;
   errorMessage = '';
-  
-  departments: IDepartment[] = [];
 
   constructor(
     private jobTitleService: JobTitlesService,
@@ -52,31 +48,16 @@ export class AdminJobTitlesList implements OnInit {
 
   ngOnInit(): void {
     this.loadJobTitles();
-    this.loadDepartments();
-  }
-
-  loadDepartments(): void {
-    this.departmentService.getAllDepartments().subscribe({
-      next: (response: IApiResponse<IDepartment[]>) => {
-        if (response.success) {
-          this.departments = response.data;
-        }
-      },
-      error: (err) => {
-        console.error('Failed to fetch departments:', err);
-      }
-    });
   }
 
  loadJobTitles(): void {
   this.isLoading = true;
-  this.errorMessage = ''; // Resetăm mesajul de eroare
-  
+  this.errorMessage = '';
+
   const filterRequest: IFilteredJobTitlesRequest = {
-    jobTitleName: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
-    departmentName: this.searchBy === 'department' ? this.searchTerm : undefined,
+    jobTitleName: this.searchTerm,
     params: {
-      sortBy: this.getSortField(),
+      sortBy: 'name',
       sortDescending: this.sortDescending,
       page: this.currentPage,
       pageSize: this.itemsPerPage
@@ -84,73 +65,47 @@ export class AdminJobTitlesList implements OnInit {
   };
 
   this.jobTitleService.getAllJobTitlesFiltered(filterRequest).subscribe({
-    next: (response: IApiResponse<IFilteredApiResponse<IJobTitle>>) => {
-      console.log('API response:', response);
-      
-      if (response.success) {
-        const rawJobTitles: IJobTitle[] = response.data.data || [];
-        this.jobTitles = rawJobTitles.map(jobTitle => this.mapToJobTitleViewModel(jobTitle));
-        this.totalPages = response.data.totalPages;
-      } else {
+      next: (response: IApiResponse<IFilteredApiResponse<IJobTitle>>) => {
+        console.log('API response:', response);
+        
+        if (response.success) {
+          const rawJobTitles: IJobTitle[] = response.data.data || [];
+          this.jobTitles = rawJobTitles.map(jobTitle => this.mapToJobTitleViewModel(jobTitle));
+          this.totalPages = response.data.totalPages;
+        } else {
 
-        this.errorMessage = response.message || 'Error loading the job titles.';
+          this.errorMessage = response.message || 'Error loading the job titles.';
+          this.jobTitles = [];
+          this.totalPages = 0;
+        }
+        
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to fetch job titles:', err);
+        this.isLoading = false;
+        
+        if (err.status >= 400 && err.status < 500) {
+          this.errorMessage = err.error?.message || 'The request could not be handled properly.';
+        } else if (err.status >= 500) {
+          this.errorMessage = 'Server error, try again later.';
+        } else {
+          this.errorMessage = 'Unexpected error happened';
+        }
+        
         this.jobTitles = [];
         this.totalPages = 0;
+        this.currentPage = 1;
       }
-      
-      this.isLoading = false;
-    },
-    error: (err) => {
-      console.error('Failed to fetch job titles:', err);
-      this.isLoading = false;
-      
-      if (err.status >= 400 && err.status < 500) {
-        this.errorMessage = err.error?.message || 'The request could not be handled properly.';
-      } else if (err.status >= 500) {
-        this.errorMessage = 'Server error, try again later.';
-      } else {
-        this.errorMessage = 'Unexpected error happened';
-      }
-      
-      this.jobTitles = [];
-      this.totalPages = 0;
-      this.currentPage = 1;
-    }
-  });
-}
-
-  private getSortField(): string {
-    switch (this.searchBy) {
-      case 'jobTitle':
-        return 'name';
-      case 'department':
-        return 'departmentName';
-      default:
-        return 'name';
-    }
+    });
   }
 
   private mapToJobTitleViewModel(jobTitle: IJobTitle): IJobTitleViewModel {
     return {
       id: jobTitle.id,
       name: jobTitle.name,
-      department: {
-        id: jobTitle.departmentId,
-        name: jobTitle.departmentName || "Unknown"
-      },
       employeeCount: jobTitle.employeeCount || 0,
     };
-  }
-
-  getSearchPlaceholder(): string {
-    switch (this.searchBy) {
-      case 'jobTitle':
-        return 'Search by job title...';
-      case 'department':
-        return 'Search by department...';
-      default:
-        return 'Search job titles...';
-    }
   }
 
   onSearch(): void {
@@ -228,26 +183,26 @@ export class AdminJobTitlesList implements OnInit {
   const confirmMessage = `Are you sure you want to delete the job title "${jobTitle.name}"?`;
   
   if (confirm(confirmMessage)) {
-    this.isLoading = true;
-    
-    this.jobTitleService.deleteJobTitle(jobTitle.id).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success) {
-          console.log('Job title deleted successfully');
-          this.loadJobTitles(); 
-        } else {
-          alert('Failed to delete job title: ' + (response.message || 'Unknown error'));
+      this.isLoading = true;
+      
+      this.jobTitleService.deleteJobTitle(jobTitle.id).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          if (response.success) {
+            console.log('Job title deleted successfully');
+            this.loadJobTitles(); 
+          } else {
+            alert('Failed to delete job title: ' + (response.message || 'Unknown error'));
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error deleting job title:', error);
+          alert('Error deleting job title: ' + (error.error?.message || error.message));
         }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error deleting job title:', error);
-        alert('Error deleting job title: ' + (error.error?.message || error.message));
-      }
-    });
+      });
+    }
   }
-}
 
   editJobTitle(jobTitle: IJobTitleViewModel): void {
     this.jobTitleToEdit = { ...jobTitle };
@@ -259,7 +214,6 @@ export class AdminJobTitlesList implements OnInit {
     this.editForm = {
       id: jobTitle.id,
       name: jobTitle.name || '',
-      departmentId: jobTitle.department?.id || 0
     };
     this.errorMessage = '';
   }
@@ -276,8 +230,6 @@ export class AdminJobTitlesList implements OnInit {
     const jobTitleToUpdate: IJobTitle = {
       id: this.editForm.id,
       name: this.editForm.name,
-      departmentId: this.editForm.departmentId,
-      departmentName: '',
       employeeCount: 0
     };
 
@@ -307,7 +259,7 @@ export class AdminJobTitlesList implements OnInit {
   }
 
   isFormValid(): boolean {
-    return !!(this.editForm.name.trim() && this.editForm.departmentId > 0);
+    return !!(this.editForm.name.trim());
   }
 
   closeEditModal(): void {

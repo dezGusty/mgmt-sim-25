@@ -48,7 +48,7 @@ export class AdminDepartmentsList implements OnInit {
   loadDepartments(): void {
     this.isLoading = true;
     this.error = '';
-    console.log(`current name:this.${this.currentSearchTerm}`)
+
     const params: IFilteredDepartmentsRequest = {
       name: this.currentSearchTerm,
       params: {
@@ -97,7 +97,8 @@ export class AdminDepartmentsList implements OnInit {
     return {
       id: department.id,
       name: department.name,
-      description: department.description
+      description: department.description,
+      employeeCount: department.employeeCount
     };
   }
 

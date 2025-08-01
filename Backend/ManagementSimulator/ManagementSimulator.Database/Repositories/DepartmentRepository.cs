@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ManagementSimulator.Infrastructure.Exceptions;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Extensions;
+using ManagementSimulator.Database.Dtos.Department;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -37,7 +38,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<Department> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<Department> query = GetRecords(includeDeletedEntities: includeDeleted);
 
@@ -51,7 +52,13 @@ namespace ManagementSimulator.Database.Repositories
             var totalCount = await query.CountAsync();
 
             if (parameters == null)
-                return (await query.ToListAsync(), totalCount);
+                return (await query.Select(d => new DepartmentDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Description = d.Description,
+                    EmployeeCount = d.Users.Count,
+                }).ToListAsync(), totalCount);
 
             // Sorting
             if (string.IsNullOrEmpty(parameters.SortBy))
@@ -62,15 +69,26 @@ namespace ManagementSimulator.Database.Repositories
             // Pagination
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
-                var allData = await query.ToListAsync();
-                return (allData, totalCount);
+                return (await query.Select(d => new DepartmentDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Description = d.Description,
+                    EmployeeCount = d.Users.Count,
+                }).ToListAsync(), totalCount);
             }
             else
             {
                 var pagedData = await query
                     .Skip((int)parameters.PageSize * ((int)parameters.Page - 1))
                     .Take((int)parameters.PageSize)
-                    .ToListAsync();
+                    .Select(d => new DepartmentDto
+                    {
+                        Id = d.Id,
+                        Name = d.Name,
+                        Description = d.Description,
+                        EmployeeCount = d.Users.Count,
+                    }).ToListAsync();
 
                 return (pagedData, totalCount);
             }

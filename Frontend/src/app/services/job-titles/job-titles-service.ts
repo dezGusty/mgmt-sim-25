@@ -43,10 +43,6 @@ export class JobTitlesService {
     if (params?.jobTitleName) {
       paramsToSend = paramsToSend.set('jobTitleName', params.jobTitleName);
     }
-    
-    if (params?.departmentName) {
-      paramsToSend = paramsToSend.set('departmentName', params.departmentName);
-    }
 
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);

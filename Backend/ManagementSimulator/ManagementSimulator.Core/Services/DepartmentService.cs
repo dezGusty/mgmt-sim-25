@@ -121,6 +121,7 @@ namespace ManagementSimulator.Core.Services
                     Id = d.Id,
                     Name = d.Name,
                     Description = d.Description,
+                    EmployeeCount = d.EmployeeCount,
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
