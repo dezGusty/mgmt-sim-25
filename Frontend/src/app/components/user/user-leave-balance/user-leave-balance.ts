@@ -6,8 +6,8 @@ import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leav
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 
 interface LeaveCategory {
-  name: string;
-  total: number;
+  title: string;
+  maxDays: number;
   used: number;
   color: string;
   note?: string;
@@ -22,6 +22,16 @@ interface UpcomingLeave {
   typeColor: string;
 }
 
+interface LeaveTypeCache {
+  typeId: number;
+  typeName: string;
+  staticMaxDays: number;
+  remainingDaysData: any | null;
+  isLoading: boolean;
+  error: string;
+  lastUpdated: number | null;
+}
+
 @Component({
   selector: 'app-user-leave-balance',
   imports: [CommonModule, FormsModule],
@@ -31,183 +41,241 @@ interface UpcomingLeave {
 export class UserLeaveBalance implements OnInit {
   @Output() close = new EventEmitter<void>();
 
+  // Configurare de bază
   selectedYear = new Date().getFullYear();
   availableYears = [2023, 2024, 2025, 2026];
-  
+
+  // Date principale
   leaveRequestTypes: ILeaveRequestType[] = [];
   selectedLeaveRequestTypeId: number = 0;
-  isLoadingTypes = true;
+  leaveTypesCache: LeaveTypeCache[] = [];
 
+  // Stări de încărcare și erori
+  isLoadingTypes = true;
+  errorMessage = '';
+
+  // Date legacy (păstrate pentru compatibilitate)
   leaveCategories: LeaveCategory[] = [];
   upcomingLeaves: UpcomingLeave[] = [];
-  isLoading = true;
-  errorMessage = '';
-  
-  remainingDaysInfo: any | null = null;
-  isLoadingRemainingDays = false;
-  remainingDaysError = '';
-  
+
   constructor(
     private leaveRequestService: LeaveRequestService,
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
-    this.loadLeaveBalance();
   }
 
+  // =====================
+  // ÎNCĂRCARE INIȚIALĂ
+  // =====================
+  
   loadLeaveRequestTypes() {
-    console.log('Loading leave request types for balance view');
     this.isLoadingTypes = true;
-    
+    this.errorMessage = '';
+
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
-        console.log('Leave request types loaded for balance:', types);
         this.leaveRequestTypes = types.data;
+        this.initializeCache(types.data);
         this.isLoadingTypes = false;
-        
-        // Auto-select first type if available
+
         if (types.data.length > 0) {
           this.selectedLeaveRequestTypeId = types.data[0].id;
-          console.log('Auto-selected leave type:', this.selectedLeaveRequestTypeId);
-          this.loadRemainingDaysForSelectedType();
+          this.loadDataForSelectedType();
         }
       },
       error: (err) => {
-        console.log('Error loading leave request types for balance:', err);
         this.isLoadingTypes = false;
         this.errorMessage = 'Failed to load leave request types.';
+        console.error('Error loading leave types:', err);
       }
     });
   }
 
-  loadLeaveBalance() {
-    this.isLoading = true;
-    const userId = 1; 
-    
-    this.leaveRequestService.getLeaveBalance(userId).subscribe({
-      next: (data) => {
-        this.leaveCategories = data.categories;
-        this.upcomingLeaves = data.upcomingLeaves;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.errorMessage = 'Nu s-a putut încărca balanța de concediu.';
-        this.isLoading = false;
-        console.error('Error loading leave balance:', err);
-      }
-    });
+  private initializeCache(types: ILeaveRequestType[]) {
+    this.leaveTypesCache = types.map(type => ({
+      typeId: type.id,
+      typeName: type.title,
+      staticMaxDays: type.maxDays,
+      remainingDaysData: null,
+      isLoading: false,
+      error: '',
+      lastUpdated: null
+    }));
   }
-  
+
+  // =====================
+  // GESTIONARE EVENIMENTE
+  // =====================
+
   onLeaveTypeChange() {
-    console.log('Leave type changed to:', this.selectedLeaveRequestTypeId);
-    this.loadRemainingDaysForSelectedType(); // Va folosi anul curent selectat
+    // Asigură-te că e număr, nu string
+    this.selectedLeaveRequestTypeId = Number(this.selectedLeaveRequestTypeId);
+    
+    // Forțează actualizarea template-ului
+    setTimeout(() => {
+      this.loadDataForSelectedType();
+    }, 0);
   }
 
   onYearChange() {
-    console.log('Year changed to:', this.selectedYear);
-    this.loadRemainingDaysForSelectedType(); // Va folosi noul an selectat
+    this.clearYearCache();
+    this.loadDataForSelectedType();
   }
 
-  loadRemainingDaysForSelectedType() {
-    if (!this.selectedLeaveRequestTypeId || this.selectedLeaveRequestTypeId === 0) {
-      console.log('No leave type selected');
-      this.remainingDaysInfo = null;
+  // =====================
+  // ÎNCĂRCARE DATE API
+  // =====================
+
+  private loadDataForSelectedType() {
+    const cacheEntry = this.getCurrentTypeCache();
+    
+    if (!cacheEntry) {
       return;
     }
 
-    const selectedType = this.leaveRequestTypes.find(type => type.id === this.selectedLeaveRequestTypeId);
-    console.log('Loading remaining days for:');
-    console.log('- Type ID:', this.selectedLeaveRequestTypeId);
-    console.log('- Type Name:', selectedType?.title);
-    console.log('- Type MaxDays (static):', selectedType?.maxDays);
-    console.log('- Year:', this.selectedYear);
+    // Verifică dacă avem deja datele în cache pentru anul curent
+    if (this.hasValidCacheData(cacheEntry)) {
+      return;
+    }
 
-    this.isLoadingRemainingDays = true;
-    this.remainingDaysError = '';
+    this.fetchRemainingDaysData(cacheEntry);
+  }
+
+  private fetchRemainingDaysData(cacheEntry: LeaveTypeCache) {
+    if (!this.selectedLeaveRequestTypeId || this.selectedLeaveRequestTypeId === 0) {
+      cacheEntry.remainingDaysData = null;
+      return;
+    }
+
+    
+    cacheEntry.isLoading = true;
+    cacheEntry.error = '';
 
     this.leaveRequestService.getCurrentUserRemainingLeaveDays(
-      this.selectedLeaveRequestTypeId, 
+      this.selectedLeaveRequestTypeId,
       this.selectedYear
     ).subscribe({
       next: (response) => {
-        console.log('API Response for year', this.selectedYear, ':', response);
-        console.log('API totalDays vs static maxDays:', response.data?.totalDays, 'vs', selectedType?.maxDays);
-        this.remainingDaysInfo = response.data;
-        this.isLoadingRemainingDays = false;
+        cacheEntry.remainingDaysData = response.data;
+        cacheEntry.isLoading = false;
+        cacheEntry.error = '';
+        cacheEntry.lastUpdated = Date.now();
       },
       error: (err) => {
-        console.log('Error loading remaining days for year', this.selectedYear, ':', err);
-        console.log('Will fallback to static maxDays:', selectedType?.maxDays);
-        this.isLoadingRemainingDays = false;
-        this.remainingDaysInfo = null;
-        this.remainingDaysError = 'Failed to load remaining days information.';
+        console.error('API error:', err);
+        cacheEntry.isLoading = false;
+        cacheEntry.remainingDaysData = null;
+        cacheEntry.error = 'Failed to load remaining days information.';
       }
     });
   }
 
-  getTotalDays(): number {
-    return this.leaveCategories.reduce((sum, category) => sum + category.total, 0);
+  // =====================
+  // CACHE MANAGEMENT
+  // =====================
+
+  private getCurrentTypeCache(): LeaveTypeCache | undefined {
+    return this.leaveTypesCache.find(cache => cache.typeId === this.selectedLeaveRequestTypeId);
+  }
+
+  private hasValidCacheData(cacheEntry: LeaveTypeCache): boolean {
+    const isValid = cacheEntry.remainingDaysData !== null && 
+                    cacheEntry.error === '' && 
+                    !cacheEntry.isLoading;
+    
+    return isValid;
+  }
+
+  private clearYearCache() {
+    this.leaveTypesCache.forEach(cache => {
+      cache.remainingDaysData = null;
+      cache.isLoading = false;
+      cache.error = '';
+      cache.lastUpdated = null;
+    });
+  }
+
+  // =====================
+  // GETTERS FOR TEMPLATE
+  // =====================
+
+  get isLoadingRemainingDays(): boolean {
+    const cache = this.getCurrentTypeCache();
+    return cache?.isLoading || false;
+  }
+
+  get remainingDaysError(): string {
+    const cache = this.getCurrentTypeCache();
+    return cache?.error || '';
+  }
+
+  get remainingDaysInfo(): any | null {
+    const cache = this.getCurrentTypeCache();
+    const result = cache?.remainingDaysData || null;
+    return result;
   }
 
   getSelectedLeaveTypeMaxDays(): number {
-    if (this.remainingDaysInfo && this.remainingDaysInfo.totalDays !== undefined) {
-      console.log('Using totalDays from API:', this.remainingDaysInfo.totalDays);
-      return this.remainingDaysInfo.totalDays;
+    const cache = this.getCurrentTypeCache();
+    if (!cache) return 0;
+
+    if (cache.remainingDaysData?.totalDays) {
+      return cache.remainingDaysData.totalDays;
     }
-    
-    const selectedType = this.leaveRequestTypes.find(type => type.id === this.selectedLeaveRequestTypeId);
-    const maxDays = selectedType ? selectedType.maxDays : 0;
-    console.log('Using maxDays from LeaveRequestType:', maxDays, 'for type:', selectedType?.title);
-    return maxDays;
-  }
 
-  getSelectedLeaveTypeStaticMaxDays(): number {
-    const selectedType = this.leaveRequestTypes.find(type => type.id === this.selectedLeaveRequestTypeId);
-    return selectedType ? selectedType.maxDays : 0;
-  }
-
-  isUsingApiData(): boolean {
-    return this.remainingDaysInfo && this.remainingDaysInfo.totalDays !== undefined;
-  }
-
-  getUsedDays(): number {
-    return this.leaveCategories.reduce((sum, category) => sum + category.used, 0);
-  }
-  
-  getRemainingDays(): number {
-    return this.getTotalDays() - this.getUsedDays();
-  }
-  
-  getUsagePercentage(): number {
-    return (this.getUsedDays() / this.getTotalDays()) * 100;
+    return cache.staticMaxDays;
   }
 
   getSelectedLeaveTypeName(): string {
-    const selectedType = this.leaveRequestTypes.find(type => type.id === this.selectedLeaveRequestTypeId);
-    return selectedType ? selectedType.title : 'Select leave type';
+    const cache = this.getCurrentTypeCache();
+    const name = cache?.typeName || 'Select leave type';
+
+    return name;
+  }
+
+  getSelectedTypeRemainingDays(): number {
+    const cache = this.getCurrentTypeCache();
+    if (!cache) return 0;
+
+    if (cache.remainingDaysData?.remainingDays !== undefined) {
+      return cache.remainingDaysData.remainingDays;
+    }
+
+    return cache.staticMaxDays;
   }
 
   getSelectedTypeUsedDays(): number {
     const totalDays = this.getSelectedLeaveTypeMaxDays();
     const remainingDays = this.getSelectedTypeRemainingDays();
     const usedDays = totalDays - remainingDays;
-    
-    console.log('Calculating used days:', totalDays, '-', remainingDays, '=', usedDays);
-    return Math.max(0, usedDays); 
-  }
 
-  getSelectedTypeRemainingDays(): number {
-    return this.remainingDaysInfo ? this.remainingDaysInfo.remainingDays : this.getSelectedLeaveTypeMaxDays();
+    return Math.max(0, usedDays);
   }
 
   getSelectedTypeUsagePercentage(): number {
     const totalDays = this.getSelectedLeaveTypeMaxDays();
-    if (totalDays === 0) {
-      return 0;
-    }
+    if (totalDays === 0) return 0;
+
     const usedDays = this.getSelectedTypeUsedDays();
     return (usedDays / totalDays) * 100;
+  }
+
+  // =====================
+  // LEGACY METHODS (kept for compatibility)
+  // =====================
+
+  getTotalDays(): number {
+    return this.getSelectedLeaveTypeMaxDays();
+  }
+
+  getUsagePercentage(): number {
+    return (this.getUsedDays() / this.getTotalDays()) * 100;
+  }
+
+  getUsedDays(): number {
+    return this.leaveCategories.reduce((sum, category) => sum + category.used, 0);
   }
 }

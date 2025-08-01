@@ -33,8 +33,6 @@ export class UserRequestForm {
   isLoadingRemainingDays = false;
   remainingDaysError = '';
   balanceCalculated = false;
-
-   
   
   // Subject for debouncing API calls
   private updateRemainingDaysSubject = new Subject<void>();

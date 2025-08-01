@@ -107,17 +107,6 @@ export class LeaveRequestService {
     });
   }
 
-  getLeaveBalance(userId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/balance/${userId}`, {
-      withCredentials: true,
-    });
-  }
-
-  getCurrentUserLeaveBalance(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/balance/by-employee`, {
-      withCredentials: true,
-    });
-  }
 
   getRemainingLeaveDaysForPeriod(
     userId: number,
