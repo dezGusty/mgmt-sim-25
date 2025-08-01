@@ -25,10 +25,13 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<(List<LeaveRequestType>? Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? title, QueryParams parameters, bool includeDeleted = false)
         {
             IQueryable<LeaveRequestType> query = GetRecords(includeDeletedEntities: includeDeleted);
-            // Filtering
+
             if (!string.IsNullOrEmpty(title))
             {
-                query = query.Where(lrt => lrt.Title.Contains(title));
+                query = query.Where(lrt =>
+                    lrt.Title.Contains(title) ||
+                    lrt.Description.Contains(title)
+                );
             }
 
             var totalCount = await query.CountAsync();
