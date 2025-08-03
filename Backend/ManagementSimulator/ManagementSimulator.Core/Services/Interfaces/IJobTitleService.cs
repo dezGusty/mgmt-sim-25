@@ -19,5 +19,6 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request);
         Task<JobTitleResponseDto?> UpdateJobTitleAsync(int id,UpdateJobTitleRequestDto request);
         Task<bool> DeleteJobTitleAsync(int id);
+        Task<bool> RestoreJobTitleAsync(int id);    
     }
 }

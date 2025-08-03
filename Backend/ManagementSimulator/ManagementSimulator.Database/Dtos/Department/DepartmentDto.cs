@@ -12,5 +12,6 @@ namespace ManagementSimulator.Database.Dtos.Department
         public string Name { get; set; }
         public string Description { get; set; }
         public int EmployeeCount { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

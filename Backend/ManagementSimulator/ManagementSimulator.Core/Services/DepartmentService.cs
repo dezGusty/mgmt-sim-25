@@ -103,7 +103,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<DepartmentResponseDto>> GetAllDepartmentsFilteredAsync(QueriedDepartmentRequestDto payload)
         {
-            var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams(), 
+                includeDeleted: payload.IncludeDeleted ?? false);
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<DepartmentResponseDto>
@@ -122,12 +123,26 @@ namespace ManagementSimulator.Core.Services
                     Name = d.Name,
                     Description = d.Description,
                     EmployeeCount = d.EmployeeCount,
+                    DeletedAt = d.DeletedAt
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
             };
+        }
+
+        public async Task<bool> RestoreDepartmentAsync(int id)
+        {
+            Department? departmentToRestore = await _repository.GetDepartmentByIdAsync(id, includeDeleted: true);
+            if(departmentToRestore == null)
+            {
+                throw new EntryNotFoundException(nameof(Department), nameof(Department.Id));
+            }
+
+            departmentToRestore.DeletedAt = null;
+            await _repository.SaveChangesAsync();
+            return true;
         }
     }
 }

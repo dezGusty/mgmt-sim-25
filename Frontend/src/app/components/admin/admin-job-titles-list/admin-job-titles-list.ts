@@ -10,6 +10,7 @@ import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-re
 import { IApiResponse } from '../../../models/responses/iapi-response';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { IDepartment } from '../../../models/entities/idepartment';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-job-titles-list',
@@ -56,6 +57,7 @@ export class AdminJobTitlesList implements OnInit {
 
   const filterRequest: IFilteredJobTitlesRequest = {
     jobTitleName: this.searchTerm,
+    includeDeleted: true,
     params: {
       sortBy: 'name',
       sortDescending: this.sortDescending,
@@ -105,6 +107,7 @@ export class AdminJobTitlesList implements OnInit {
       id: jobTitle.id,
       name: jobTitle.name,
       employeeCount: jobTitle.employeeCount || 0,
+      isActive: jobTitle.deletedAt === null,
     };
   }
 
@@ -270,5 +273,19 @@ export class AdminJobTitlesList implements OnInit {
 
   trackByJobTitleId(index: number, item: IJobTitleViewModel): number {
     return item.id;
+  }
+
+  restoreJobTitle(id: number) {
+    this.jobTitleService.restoreJobTitle(id).subscribe({
+      next: (response: IApiResponse<IJobTitle>) => {
+        if(response.success){
+          this.loadJobTitles();
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        console.log(`Restore failed: ${err.error.message}`);
+        alert('Failed to restore job title. Please try again.');
+      }
+    })
   }
 }

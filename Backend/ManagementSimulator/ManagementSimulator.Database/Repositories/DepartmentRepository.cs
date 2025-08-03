@@ -58,6 +58,7 @@ namespace ManagementSimulator.Database.Repositories
                     Name = d.Name,
                     Description = d.Description,
                     EmployeeCount = d.Users.Count,
+                    DeletedAt = d.DeletedAt ?? null,
                 }).ToListAsync(), totalCount);
 
             // Sorting

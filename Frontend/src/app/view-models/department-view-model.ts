@@ -3,4 +3,5 @@ export interface IDepartmentViewModel {
     name?: string;
     description?: string;
     employeeCount?: number;
+    isActive?: boolean;
 }

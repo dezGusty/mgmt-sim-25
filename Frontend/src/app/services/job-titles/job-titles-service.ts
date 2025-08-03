@@ -44,6 +44,10 @@ export class JobTitlesService {
       paramsToSend = paramsToSend.set('jobTitleName', params.jobTitleName);
     }
 
+    if(params?.includeDeleted){
+      paramsToSend = paramsToSend.set('includeDeleted', params.includeDeleted);
+    }
+
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
     }
@@ -61,5 +65,9 @@ export class JobTitlesService {
     }
 
     return this.http.get<IApiResponse<IFilteredApiResponse<IJobTitle>>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+  }
+
+  restoreJobTitle(id: number) : Observable<IApiResponse<IJobTitle>>  {
+    return this.http.patch<IApiResponse<IJobTitle>>(`${this.baseUrl}/restore/${id}`, {});
   }
 }

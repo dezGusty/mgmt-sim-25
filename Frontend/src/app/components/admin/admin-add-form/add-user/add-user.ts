@@ -11,6 +11,8 @@ import { IDepartmentViewModel } from '../../../../view-models/department-view-mo
 import { DepartmentService } from '../../../../services/departments/department-service';
 import { IQueryParams } from '../../../../models/requests/iquery-params';
 import { IFilteredDepartmentsRequest } from '../../../../models/requests/ifiltered-departments-request';
+import { IFilteredJobTitlesRequest } from '../../../../models/requests/ifiltered-job-titles-request';
+import { IDepartment } from '../../../../models/entities/idepartment';
 
 interface NotificationMessage {
   type: 'success' | 'error' | 'info';
@@ -98,6 +100,7 @@ export class AddUser {
         
         const params: IFilteredDepartmentsRequest = {
           name: this.searchTextDepartments.trim() || undefined,
+          includeDeleted: false,
           params: {
             page: this.currentPageDepartment,
             pageSize: this.pageSizeDepartments,
@@ -110,9 +113,9 @@ export class AddUser {
             console.log('API Response:', response);
             
             if (resetPage) {
-              this.filteredDepartments = response.data.data;
+              this.filteredDepartments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
             } else {
-              this.filteredDepartments = [...this.filteredDepartments, ...response.data.data];
+              this.filteredDepartments = [...this.filteredDepartments, ...response.data.data.map(d => this.mapToDepartmentViewModel(d))];
             }
             
             this.canLoadMoreDepartments = response.data.hasNext || 
@@ -130,6 +133,16 @@ export class AddUser {
         });
   }
 
+  private mapToDepartmentViewModel(department: IDepartment) :IDepartmentViewModel {
+    return {
+      id: department.id,
+      name: department.name,
+      description: department.description,
+      employeeCount: department.employeeCount,
+      isActive: department.deletedAt === null,
+    };
+  }
+
   private loadJobTitles(resetPage: boolean = true): void {
     if (resetPage) {
       this.currentPageJobTitles = 1;
@@ -137,8 +150,9 @@ export class AddUser {
     }
     this.isLoadingJobTitles = true;
     
-    const params = {
+    const params: IFilteredJobTitlesRequest = {
       jobTitleName: this.searchTextJobTitles.trim() || undefined,
+      includeDeleted: false,
       params: {
         page: this.currentPageJobTitles,
         pageSize: this.pageSizeJobTitles,

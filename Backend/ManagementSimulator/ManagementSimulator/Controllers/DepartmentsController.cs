@@ -170,5 +170,22 @@ namespace ManagementSimulator.API.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        [HttpPatch("restore/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RestoreDepartmentAsync(int id)
+        {
+            var restoredDepartment = await _departmentService.RestoreDepartmentAsync(id);
+            return Ok(new
+            {
+                Message = "Department restored successfully.",
+                Data = restoredDepartment,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
     }
 }
