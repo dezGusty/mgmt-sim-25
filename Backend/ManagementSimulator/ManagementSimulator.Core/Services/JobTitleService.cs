@@ -119,7 +119,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
-            var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
+            var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams(),
+                includeDeleted: payload.IncludeDeleted ?? false);
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<JobTitleResponseDto>
@@ -137,12 +138,26 @@ namespace ManagementSimulator.Core.Services
                     Id = jt.Id,
                     Name = jt.Name,
                     EmployeeCount = jt.Users.Count,
+                    DeletedAt = jt.DeletedAt,
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
             };
+        }
+
+        public async Task<bool> RestoreJobTitleAsync(int id)
+        {
+            JobTitle? jt = await _jobTitleRepository.GetJobTitleAsync(id, includeDeleted: true);
+            if (jt == null)
+            {
+                throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Id));
+            }
+
+            jt.DeletedAt = null;
+            await _departmentRepository.SaveChangesAsync();
+            return true;
         }
     }
 }

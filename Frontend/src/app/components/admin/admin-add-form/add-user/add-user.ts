@@ -1,14 +1,18 @@
-// add-user.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IJobTitleViewModel } from '../../../../view-models/job-title-view-model';
 import { UsersService } from '../../../../services/users/users-service';
-import { OnInit } from '@angular/core';
 import { JobTitlesService } from '../../../../services/job-titles/job-titles-service';
 import { IAddUser } from '../../../../models/entities/iuser';
 import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IUser } from '../../../../models/entities/iuser';
+import { IDepartmentViewModel } from '../../../../view-models/department-view-model';
+import { DepartmentService } from '../../../../services/departments/department-service';
+import { IQueryParams } from '../../../../models/requests/iquery-params';
+import { IFilteredDepartmentsRequest } from '../../../../models/requests/ifiltered-departments-request';
+import { IFilteredJobTitlesRequest } from '../../../../models/requests/ifiltered-job-titles-request';
+import { IDepartment } from '../../../../models/entities/idepartment';
 
 interface NotificationMessage {
   type: 'success' | 'error' | 'info';
@@ -23,20 +27,32 @@ interface NotificationMessage {
   templateUrl: './add-user.html',
   styleUrl: './add-user.css'
 })
-export class AddUser implements OnInit {
+export class AddUser {
   firstName: string = '';
   lastName: string = '';
   email: string = '';
   
-  searchText: string = '';
+  searchTextJobTitles: string = '';
   filteredJobTitles: IJobTitleViewModel[] = [];
   selectedJobTitleId: number = 0;
   selectedJobTitleName: string = '';
-  isDropdownOpen: boolean = false;
-  currentPage: number = 1;
-  pageSize: number = 5;
-  canLoadMore: boolean = false;
-  isLoading: boolean = false;
+  isJobTitlesDropdownOpen: boolean = false;
+  currentPageJobTitles: number = 1;
+  pageSizeJobTitles: number = 10;
+  canLoadMoreJobTitles: boolean = false;
+  isLoadingJobTitles: boolean = false;
+
+  searchTextDepartments: string = '';
+  filteredDepartments: IDepartmentViewModel[] = [];
+  selectedDepartmentId: number = 0;
+  selectedDepartmentName: string = '';
+  isDepartmentsDropdownOpen: boolean = false;
+  currentPageDepartment: number = 1;
+  pageSizeDepartments: number = 10;
+  canLoadMoreDepartments: boolean = false;
+  isLoadingDepartments: boolean = false;
+
+
   readonly maxDate: string;
   dateOfEmployment: Date = new Date();
   leaveDaysLeftCurrentYear: number = 0;
@@ -51,41 +67,95 @@ export class AddUser implements OnInit {
 
   constructor(
     private userService: UsersService,
-    private jobTitleService: JobTitlesService
+    private jobTitleService: JobTitlesService,
+    private departmentService: DepartmentService
   ) {
     this.maxDate = new Date().toISOString().split('T')[0];
-  }
-
-  ngOnInit(): void {
   }
 
   resetForm(): void {
     this.firstName = '';
     this.lastName = '';
     this.email = '';
-    this.searchText = '';
+    this.searchTextJobTitles = '';
+    this.searchTextDepartments = '';
     this.selectedJobTitleId = 0;
+    this.selectedDepartmentId = 0;
     this.selectedJobTitleName = '';
+    this.selectedDepartmentName = '';
     this.dateOfEmployment = new Date();
     this.leaveDaysLeftCurrentYear = 0;
     this.isAdmin = false;
     this.isManager = false;
-    this.filteredJobTitles = [];
-    this.closeDropdown();
+    this.closeDropdownJobTitles();
+    this.closeDropdownDepartments();
+  }
+
+  private loadDepartments(resetPage: boolean = true) : void {
+    if (resetPage) {
+          this.currentPageJobTitles = 1;
+          this.filteredDepartments = [];
+        }
+        this.isLoadingJobTitles = true;
+        
+        const params: IFilteredDepartmentsRequest = {
+          name: this.searchTextDepartments.trim() || undefined,
+          includeDeleted: false,
+          params: {
+            page: this.currentPageDepartment,
+            pageSize: this.pageSizeDepartments,
+            sortBy: 'name',
+            sortDescending: false
+          }
+        };
+        this.departmentService.getAllDepartmentsFiltered(params).subscribe({
+          next: (response) => {
+            console.log('API Response:', response);
+            
+            if (resetPage) {
+              this.filteredDepartments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
+            } else {
+              this.filteredDepartments = [...this.filteredDepartments, ...response.data.data.map(d => this.mapToDepartmentViewModel(d))];
+            }
+            
+            this.canLoadMoreDepartments = response.data.hasNext || 
+                              (response.data.totalPages && this.currentPageDepartment < response.data.totalPages) || false;
+            
+            this.isLoadingDepartments = false;
+            this.isDepartmentsDropdownOpen = this.filteredDepartments.length > 0;
+          },
+          error: (error) => {
+            console.error('Error loading deparments:', error);
+            this.isLoadingDepartments = false;
+            this.canLoadMoreDepartments = false;
+            this.onSubmitMessage = 'Error retrieving the departments.';
+          }
+        });
+  }
+
+  private mapToDepartmentViewModel(department: IDepartment) :IDepartmentViewModel {
+    return {
+      id: department.id,
+      name: department.name,
+      description: department.description,
+      employeeCount: department.employeeCount,
+      isActive: department.deletedAt === null,
+    };
   }
 
   private loadJobTitles(resetPage: boolean = true): void {
     if (resetPage) {
-      this.currentPage = 1;
+      this.currentPageJobTitles = 1;
       this.filteredJobTitles = [];
     }
-    this.isLoading = true;
+    this.isLoadingJobTitles = true;
     
-    const params = {
-      jobTitleName: this.searchText.trim() || undefined,
+    const params: IFilteredJobTitlesRequest = {
+      jobTitleName: this.searchTextJobTitles.trim() || undefined,
+      includeDeleted: false,
       params: {
-        page: this.currentPage,
-        pageSize: this.pageSize,
+        page: this.currentPageJobTitles,
+        pageSize: this.pageSizeJobTitles,
         sortBy: 'name',
         sortDescending: false
       }
@@ -100,16 +170,16 @@ export class AddUser implements OnInit {
           this.filteredJobTitles = [...this.filteredJobTitles, ...response.data.data];
         }
         
-        this.canLoadMore = response.data.hasNext || 
-                          (response.data.totalPages && this.currentPage < response.data.totalPages) || false;
+        this.canLoadMoreJobTitles = response.data.hasNext || 
+                          (response.data.totalPages && this.currentPageJobTitles < response.data.totalPages) || false;
         
-        this.isLoading = false;
-        this.isDropdownOpen = this.filteredJobTitles.length > 0;
+        this.isLoadingJobTitles = false;
+        this.isJobTitlesDropdownOpen = this.filteredJobTitles.length > 0;
       },
       error: (error) => {
         console.error('Error loading job titles:', error);
-        this.isLoading = false;
-        this.canLoadMore = false;
+        this.isLoadingJobTitles = false;
+        this.canLoadMoreJobTitles = false;
         this.onSubmitMessage = 'Error retrieving the job titles.';
       }
     });
@@ -123,46 +193,90 @@ export class AddUser implements OnInit {
     return this.selectedJobTitleId > 0;
   }
 
-  onSearchTextChange(searchValue: string): void {
-    this.searchText = searchValue;
+  isDepartmentFieldValid(): boolean {
+    return this.selectedDepartmentId > 0;
+  }
+
+  onSearchTextChangeJobTitles(searchValue: string): void {
+    this.searchTextJobTitles = searchValue;
     this.selectedJobTitleId = 0; 
     this.selectedJobTitleName = '';
     
     this.loadJobTitles(true);
   }
 
-  openDropdown(): void {
-    if (!this.isDropdownOpen) {
-      this.isDropdownOpen = true;
+  
+  onSearchTextChangeDepartments(searchValue: string): void {
+    this.searchTextDepartments = searchValue;
+    this.selectedDepartmentId = 0; 
+    this.selectedDepartmentName = '';
+    
+    this.loadDepartments(true);
+  }
+
+  openDropdownJobTitles(): void {
+    if (!this.isJobTitlesDropdownOpen) {
+      this.isJobTitlesDropdownOpen = true;
       if (this.filteredJobTitles.length === 0) {
         this.loadJobTitles();
       }
     }
   }
 
-  closeDropdown(): void {
-    this.isDropdownOpen = false;
+  closeDropdownJobTitles(): void {
+    this.isJobTitlesDropdownOpen = false;
+  }
+
+  openDropdownDepartments(): void {
+    if (!this.isDepartmentsDropdownOpen) {
+      this.isDepartmentsDropdownOpen = true;
+      if (this.filteredDepartments.length === 0) {
+        this.loadDepartments();
+      }
+    }
+  }
+
+  closeDropdownDepartments(): void {
+    this.isDepartmentsDropdownOpen = false;
   }
 
   selectJobTitle(jobTitle: IJobTitleViewModel): void {
     this.selectedJobTitleId = jobTitle.id;
     this.selectedJobTitleName = jobTitle.name || '';
-    this.searchText = jobTitle.name || '';
-    this.closeDropdown();
+    this.searchTextJobTitles = jobTitle.name || '';
+    this.closeDropdownJobTitles();
   }
 
-  loadMore(): void {
-    if (this.canLoadMore && !this.isLoading) {
-      console.log('Loading more - current page:', this.currentPage);
-      this.currentPage++;
+  selectDepartment(deparment: IDepartmentViewModel  ): void {
+    this.selectedDepartmentId = deparment.id;
+    this.selectedDepartmentName = deparment.name || '';
+    this.searchTextDepartments = deparment.name || '';
+    this.closeDropdownDepartments();
+  }
+
+  loadMoreJobTitles(): void {
+    if (this.canLoadMoreJobTitles && !this.isLoadingJobTitles) {
+      console.log('Loading more - current page:', this.currentPageJobTitles);
+      this.currentPageJobTitles++;
       this.loadJobTitles(false);
     } else {
-      console.log('Cannot load more. canLoadMore:', this.canLoadMore, 'isLoading:', this.isLoading);
+      console.log('Cannot load more. canLoadMore:', this.canLoadMoreJobTitles, 'isLoading:', this.isLoadingJobTitles);
+    }
+  }
+
+  loadMoreDepartments() : void {
+    if (this.canLoadMoreDepartments && !this.isLoadingDepartments) {
+      console.log('Loading more - current page:', this.currentPageDepartment);
+      this.currentPageDepartment++;
+      this.loadDepartments(false);
+    } else {
+      console.log('Cannot load more. canLoadMore:', this.canLoadMoreJobTitles, 'isLoading:', this.isLoadingJobTitles);
     }
   }
 
   onClickOutside(event: Event): void {
-    this.closeDropdown();
+    this.closeDropdownJobTitles();
+    this.closeDropdownDepartments();
   }
 
   highlightSearchText(text: string | undefined, searchText: string): string {
@@ -202,6 +316,7 @@ export class AddUser implements OnInit {
       lastName: this.lastName,
       email: this.email,
       jobTitleId: this.selectedJobTitleId,
+      departmentId: this.selectedDepartmentId,
       employeeRolesId: roles,
       dateOfEmployment: this.dateOfEmployment
     };

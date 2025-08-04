@@ -12,22 +12,6 @@
       required
     />
   </div>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1"
-      >Department *</label
-    >
-    <select
-      [(ngModel)]="departmentId"
-      name="departmentId"
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-      required
-    >
-      <option value="0" disabled>Select a department</option>
-      <option *ngFor="let department of departments" [value]="department.id">
-        {{ department.name }}
-      </option>
-    </select>
-  </div>
 </div>
 
   <!-- Loading indicator -->
@@ -65,7 +49,7 @@
     type="button"
     (click)="onSubmit()"
     class="px-4 py-2 text-white bg-[#20B486] border border-transparent rounded-lg hover:bg-[#1a9673] focus:ring-2 focus:ring-[#20B486] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-    [disabled]="isSubmitting || !name.trim() || !departmentId"
+    [disabled]="isSubmitting || !name.trim()"
   >
     <span *ngIf="isSubmitting">Adding...</span>
     <span *ngIf="!isSubmitting">Add Job Title</span>

@@ -164,7 +164,7 @@
             <div>
               <div class="text-lg font-semibold text-gray-900">{{ manager.name }}</div>
               <div class="text-xs text-gray-500">{{ manager.email }}</div>
-              <div class="text-sm text-gray-600">{{ manager.jobTitle?.name }} - {{ manager.jobTitle?.department?.name }}</div>
+              <div class="text-sm text-gray-600">{{ manager.jobTitle?.name }} - {{ manager.department?.name }}</div>
               <div class="flex items-center space-x-2 mt-1">
                 <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
                 <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>

@@ -13,6 +13,8 @@ import { JobTitlesService } from '../../../services/job-titles/job-titles-servic
 import { EmployeeRolesService } from '../../../services/employee-roles/employee-roles';
 import { IEmployeeManager } from '../../../models/entities/iemployee-manager';
 import { IEmployeeRole } from '../../../models/entities/iemployee-role';
+import { IDepartment } from '../../../models/entities/idepartment';
+import { DepartmentService } from '../../../services/departments/department-service';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -45,12 +47,14 @@ export class AdminUsersList implements OnInit {
     lastName: '',
     email: '',
     jobTitleId: 0,
+    departmentId: 0,
     dateOfEmployment: new Date(),
     isAdmin: false,
     isManager: false,
   };
 
   jobTitles: IJobTitle[] = [];
+  departments: IDepartment[] = [];
   isSubmitting: boolean = false;
   editErrorMessage: string = '';
 
@@ -58,7 +62,8 @@ export class AdminUsersList implements OnInit {
 
   constructor(private usersService: UsersService,
               private jobTitlesService: JobTitlesService,
-              private employeeRoleService: EmployeeRolesService) {
+              private employeeRoleService: EmployeeRolesService,
+              private departmentService: DepartmentService) {
 
   }
 
@@ -192,13 +197,13 @@ export class AdminUsersList implements OnInit {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
+      department: {
+          id: user.departmentId || 0,
+          name: user.departmentName || 'Unknown'
+      },
       jobTitle: user.jobTitleId ? {
         id: user.jobTitleId,
         name: user.jobTitleName || 'Unknown',
-        department: {
-          id: user.departmentId || 0,
-          name: user.departmentName || 'Unknown'
-        }
       } : undefined,    
       roles: user.roles,
       status: user.isActive ? 'active' : 'inactive',
@@ -316,6 +321,7 @@ export class AdminUsersList implements OnInit {
     this.userToEdit = { ...user };
     this.populateEditForm(user);
     this.loadJobTitles();
+    this.loadDepartments();
     this.showEditModal = true;
   }
 
@@ -327,6 +333,7 @@ export class AdminUsersList implements OnInit {
       lastName: nameParts.slice(1).join(' ') || '',
       email: user.email,
       jobTitleId: user.jobTitle?.id || 0,
+      departmentId: user.department?.id || 0,
       dateOfEmployment: new Date(),
       isAdmin: user.roles?.includes("Admin") ? true : false,
       isManager: user.roles?.includes("Manager") ? true : false,
@@ -344,6 +351,19 @@ export class AdminUsersList implements OnInit {
       },
       error: (error) => {
         console.error('Error loading job titles:', error);
+      }
+    });
+  }
+
+  loadDepartments() : void {
+    this.departmentService.getAllDepartments().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.departments = response.data || [];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading departments:', error);
       }
     });
   }

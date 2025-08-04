@@ -6,11 +6,12 @@ export interface IUserViewModel {
   jobTitle?: {
     id: number;
     name?: string;
-    department?: {
-      id: number;
-      name?: string;
-    };
   }
+
+  department?: {
+    id: number;
+    name?: string;
+  };
 
   subordinatesIds?: number[];
   subordinatesNames?: string[];

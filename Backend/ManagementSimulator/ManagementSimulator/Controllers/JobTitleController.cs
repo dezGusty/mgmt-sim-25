@@ -175,5 +175,23 @@ namespace ManagementSimulator.API.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        [HttpPatch("restore/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RestoreJobTitleAsync(int id)
+        {
+            bool result = await _jobTitleService.RestoreJobTitleAsync(id);
+
+            return Ok(new
+            {
+                Message = "Job title restored successfully.",
+                Data = result,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
     }
 }

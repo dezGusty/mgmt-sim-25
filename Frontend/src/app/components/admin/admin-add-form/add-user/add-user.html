@@ -115,10 +115,10 @@
             <!-- Input field -->
             <div class="relative w-full max-w-full">
                 <input type="text"
-                       [(ngModel)]="searchText"
-                       (ngModelChange)="onSearchTextChange($event)"
-                       (focus)="openDropdown()"
-                       (click)="openDropdown()"
+                       [(ngModel)]="searchTextJobTitles"
+                       (ngModelChange)="onSearchTextChangeJobTitles($event)"
+                       (focus)="openDropdownJobTitles()"
+                       (click)="openDropdownJobTitles()"
                        name="jobTitleSearch"
                        #jobTitleSearchField="ngModel"
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
@@ -132,7 +132,7 @@
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
                      style="right: 12px; top: 50%; transform: translateY(-50%);">
                     <svg class="h-5 w-5 text-gray-400 transition-transform duration-200" 
-                         [class.rotate-180]="isDropdownOpen"
+                         [class.rotate-180]="isJobTitlesDropdownOpen"
                          style="transition: transform 0.2s ease-in-out;"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -140,19 +140,19 @@
                 </div>
                 
                 <!-- Click outside overlay -->
-                <div *ngIf="isDropdownOpen" 
+                <div *ngIf="isJobTitlesDropdownOpen" 
                      class="fixed inset-0 z-10" 
                      style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
-                     (click)="closeDropdown()"></div>
+                     (click)="closeDropdownJobTitles()"></div>
             </div>
             
             <!-- Dropdown Results -->
-            <div *ngIf="isDropdownOpen" 
+            <div *ngIf="isJobTitlesDropdownOpen" 
                  class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
                  style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
                 
                 <!-- Loading State -->
-                <div *ngIf="isLoading" 
+                <div *ngIf="isLoadingJobTitles" 
                      class="p-3 text-center text-gray-500"
                      style="padding: 12px; text-align: center; color: #6b7280;">
                     <div class="inline-flex items-center">
@@ -165,14 +165,14 @@
                 </div>
                 
                 <!-- No Results -->
-                <div *ngIf="!isLoading && filteredJobTitles.length === 0 && searchText.trim() !== ''" 
+                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length === 0 && searchTextJobTitles.trim() !== ''" 
                      class="p-3 text-center text-gray-500"
                      style="padding: 12px; text-align: center; color: #6b7280;">
-                    <span>No job titles found for "{{searchText}}"</span>
+                    <span>No job titles found for "{{searchTextJobTitles}}"</span>
                 </div>
                 
                 <!-- Results Container -->
-                <div *ngIf="!isLoading && filteredJobTitles.length > 0" 
+                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length > 0" 
                      class="max-h-48 overflow-y-auto"
                      style="max-height: 192px; overflow-y: auto;">
                     <!-- Job Title Options -->
@@ -183,7 +183,7 @@
                          [class.bg-green-50]="selectedJobTitleId === jobTitle.id">
                         
                         <!-- Highlight search text -->
-                        <span [innerHTML]="highlightSearchText(jobTitle.name || '', searchText)"
+                        <span [innerHTML]="highlightSearchText(jobTitle.name || '', searchTextJobTitles)"
                               style="line-height: 1.4;"></span>
                         
                         <!-- Selected indicator -->
@@ -197,12 +197,12 @@
                     </div>
                     
                     <!-- Load More Option -->
-                    <div *ngIf="canLoadMore" 
-                         (click)="loadMore()"
+                    <div *ngIf="canLoadMoreJobTitles" 
+                         (click)="loadMoreJobTitles()"
                          class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
                          style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
-                        <span *ngIf="!isLoading">Load More Job Titles...</span>
-                        <span *ngIf="isLoading">Loading...</span>
+                        <span *ngIf="!isLoadingJobTitles">Load More Job Titles...</span>
+                        <span *ngIf="isLoadingJobTitles">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -225,6 +225,126 @@
             </div>
         </div>
         
+        <div class="space-y-2 relative" style="transition: all 0.2s ease-in-out;">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                Department *
+            </label>
+            
+            <!-- Input field -->
+            <div class="relative w-full max-w-full">
+                <input type="text"
+                       [(ngModel)]="searchTextDepartments"
+                       (ngModelChange)="onSearchTextChangeDepartments($event)"
+                       (focus)="openDropdownDepartments()"
+                       (click)="openDropdownDepartments()"
+                       name="departmentSearch"
+                       #departmentSearchField="ngModel"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
+                       style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); padding-right: 40px;"
+                       placeholder="Search and select job title..."
+                       autocomplete="off"
+                       [class.border-red-500]="!isDepartmentFieldValid() && departmentSearchField.touched"
+                       required>
+                
+                <!-- Dropdown Arrow -->
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
+                     style="right: 12px; top: 50%; transform: translateY(-50%);">
+                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200" 
+                         [class.rotate-180]="isDepartmentsDropdownOpen"
+                         style="transition: transform 0.2s ease-in-out;"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                
+                <!-- Click outside overlay -->
+                <div *ngIf="isDepartmentsDropdownOpen" 
+                     class="fixed inset-0 z-10" 
+                     style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
+                     (click)="closeDropdownDepartments()"></div>
+            </div>
+            
+            <!-- Dropdown Results -->
+            <div *ngIf="isDepartmentsDropdownOpen" 
+                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
+                 style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
+                
+                <!-- Loading State -->
+                <div *ngIf="isLoadingDepartments" 
+                     class="p-3 text-center text-gray-500"
+                     style="padding: 12px; text-align: center; color: #6b7280;">
+                    <div class="inline-flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" style="animation: spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- No Results -->
+                <div *ngIf="!isLoadingDepartments && filteredDepartments.length === 0 && searchTextDepartments.trim() !== ''" 
+                     class="p-3 text-center text-gray-500"
+                     style="padding: 12px; text-align: center; color: #6b7280;">
+                    <span>No departments found for "{{searchTextDepartments}}"</span>
+                </div>
+                
+                <!-- Results Container -->
+                <div *ngIf="!isLoadingDepartments && filteredDepartments.length > 0" 
+                     class="max-h-48 overflow-y-auto"
+                     style="max-height: 192px; overflow-y: auto;">
+                    <!-- Job Title Options -->
+                    <div *ngFor="let department of filteredDepartments"
+                         (click)="selectDepartment(department)"
+                         class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
+                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-bottom: 1px solid #f3f4f6;"
+                         [class.bg-green-50]="selectedDepartmentId === department.id">
+                        
+                        <!-- Highlight search text -->
+                        <span [innerHTML]="highlightSearchText(department.name || '', searchTextDepartments)"
+                              style="line-height: 1.4;"></span>
+                        
+                        <!-- Selected indicator -->
+                        <span *ngIf="selectedDepartmentId === department.id" 
+                              class="float-right text-green-600"
+                              style="float: right; color: #059669;">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                    </div>
+                    
+                    <!-- Load More Option -->
+                    <div *ngIf="canLoadMoreDepartments" 
+                         (click)="loadMoreDepartments()"
+                         class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
+                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
+                        <span *ngIf="!isLoadingDepartments">Load More Departmnets...</span>
+                        <span *ngIf="isLoadingDepartments">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden field pentru validare -->
+            <input type="hidden" 
+                   [(ngModel)]="selectedDepartmentId" 
+                   name="selectedDepartmentId"
+                   #selectedDepartmentIdField="ngModel"
+                   required
+                   min="1">
+                
+            <!-- Error Messages -->
+            <div *ngIf="(!isDepartmentFieldValid() && departmentSearchField.touched) || 
+                        (selectedDepartmentIdField.invalid && selectedDepartmentIdField.touched)" 
+                 class="mt-1 text-sm text-red-600 animate-pulse"
+                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+                <div *ngIf="!isDepartmentFieldValid()" style="margin-bottom: 2px;">Please select a valid department</div>
+                <div *ngIf="selectedDepartmentIdField.errors?.['required']" style="margin-bottom: 2px;">Department is required</div>
+            </div>
+        </div>
+
+
         <!-- User Roles Section -->
         <div class="md:col-span-2 space-y-3" style="grid-column: span 2; margin-top: 1rem;">
             <label class="block text-sm font-medium text-gray-700 mb-3"

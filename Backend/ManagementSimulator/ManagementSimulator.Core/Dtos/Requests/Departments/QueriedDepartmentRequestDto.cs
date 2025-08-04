@@ -10,6 +10,7 @@ namespace ManagementSimulator.Core.Dtos.Requests.Departments
     public class QueriedDepartmentRequestDto
     {
         public string? Name { get; set; }
+        public bool? IncludeDeleted { get; set; }
         public QueryParamsDto PagedQueryParams { get; set; } = new QueryParamsDto();
     }
 }
