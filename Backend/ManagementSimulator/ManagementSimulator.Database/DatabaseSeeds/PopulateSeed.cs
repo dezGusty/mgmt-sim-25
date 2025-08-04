@@ -70,12 +70,12 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             var leaveTypes = new List<LeaveRequestType>
             {
-                new() { Title = "Vacation", Description = "Standard annual leave", IsPaid = true },
-                new() { Title = "Sick Leave", Description = "Medical certificate required", IsPaid = true  },
-                new() { Title = "Parental Leave", Description = "Applicable for new parents", IsPaid = true  },
-                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true  },
-                new() { Title = "Military Leave", Description = "Military service obligations", IsPaid = true  },
-                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true  },
+                new() { Title = "Vacation", Description = "Standard annual leave", IsPaid = true, MaxDays = 21 },
+                new() { Title = "Sick Leave", Description = "Medical certificate required", IsPaid = true, MaxDays = 183  },
+                new() { Title = "Parental Leave", Description = "Applicable for new parents", IsPaid = true, MaxDays = 730 },
+                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = false, MaxDays = 10  },
+                new() { Title = "Military Leave", Description = "Military service obligations", IsPaid = false, MaxDays = 1000 },
+                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true, MaxDays = 10 },
             };
 
             foreach (var leaveType in leaveTypes)
