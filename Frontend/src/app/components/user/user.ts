@@ -40,13 +40,11 @@ export class User {
   showListModal = true;
   errorMessage = '';
 
-  // Adaugă această proprietate pentru a controla afișarea request-urilor anulate
   showCancelledRequests = false;
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
 
-  // Pagination properties
   currentPage = 1;
   itemsPerPage = 5;
   totalPages = 0;
@@ -63,36 +61,6 @@ export class User {
     this.loadRequests();
   }
 
-  goBack() {
-    this.router.navigate(['/']);
-  }
-  
-  toggleRequestForm() {
-    this.showRequestForm = !this.showRequestForm;
-  }
-
-  toggleLeaveBalance() {
-    this.showLeaveBalance = !this.showLeaveBalance;
-  }
-
-  onRequestSubmitted() {
-    this.showSuccessMessage = true;
-    this.successMessage = 'Leave request submitted successfully! 🎉';
-    
-    this.showRequestForm = false;
-    
-    this.loadRequests();
-    
-    setTimeout(() => {
-      this.showSuccessMessage = false;
-    }, 5000);
-  }
-
-  closeSuccessMessage() {
-    this.showSuccessMessage = false;
-  }
-
-  // My Requests List methods
   loadRequests() {
     this.isLoading = true;
     this.errorMessage = '';
@@ -100,7 +68,7 @@ export class User {
     this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
       next: (data) => {       
         this.requests = data.data.sort((a, b) => {
-          const dateA = new Date( a.startDate);
+          const dateA = new Date(a.startDate);
           const dateB = new Date(b.startDate);
           return dateB.getTime() - dateA.getTime();
         });
@@ -131,6 +99,45 @@ export class User {
       }
     })
   }
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredRequests.length / this.itemsPerPage);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    
+    this.paginatedRequests = this.filteredRequests.slice(startIndex, endIndex);
+  }
+
+  goBack() {
+    this.router.navigate(['/']);
+  }
+  
+  toggleRequestForm() {
+    this.showRequestForm = !this.showRequestForm;
+  }
+
+  toggleLeaveBalance() {
+    this.showLeaveBalance = !this.showLeaveBalance;
+  }
+
+  onRequestSubmitted() {
+    this.showSuccessMessage = true;
+    this.successMessage = 'Leave request submitted successfully!';
+    
+    this.showRequestForm = false;
+    
+    this.loadRequests();
+    
+    setTimeout(() => {
+      this.showSuccessMessage = false;
+    }, 5000);
+  }
+
+  closeSuccessMessage() {
+    this.showSuccessMessage = false;
+  }
+
 
   loadLeaveRequestTypes() {
     this.isLoadingTypes = true;
@@ -167,8 +174,6 @@ export class User {
     this.showListModal = false;
   }
 
- 
-
   getLeaveRequestTypeName(typeId: number): string {
     if (this.isLoadingTypes) {
       return 'Loading...';
@@ -177,7 +182,6 @@ export class User {
     const type = this.leaveRequestTypes.find(t => t.id === typeId);
     return type ? type.title || type.title : 'Unknown';
   }
-
 
   cancelRequest(request: LeaveRequest) {
     this.requestToCancel = request;
@@ -219,11 +223,9 @@ export class User {
     this.requestToCancel = null;
   }
   
-
   filterRequests() {
     let results = this.requests;
     
-    // Filtrează request-urile anulate dacă nu sunt activate
     if (!this.showCancelledRequests) {
       results = results.filter(req => req.requestStatus !== this.RequestStatus.CANCELED);
     }
@@ -259,7 +261,6 @@ export class User {
     this.updatePagination();
   }
 
-  // Adaugă această metodă pentru a gestiona schimbarea checkbox-ului
   onShowCancelledToggle() {
     this.filterRequests();
   }
@@ -269,14 +270,6 @@ export class User {
     return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
   }
 
-  updatePagination() {
-    this.totalPages = Math.ceil(this.filteredRequests.length / this.itemsPerPage);
-    
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    
-    this.paginatedRequests = this.filteredRequests.slice(startIndex, endIndex);
-  }
 
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { LeaveRequestService } from '../../../services/leaveRequest/leaveRequest.service';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
+import { LeaveRequest } from '../../../models/entities/iLeave-request';
+import { RequestStatus } from '../../../models/enums/RequestStatus';
 
 interface LeaveCategory {
   title: string;
@@ -13,14 +15,6 @@ interface LeaveCategory {
   note?: string;
 }
 
-interface UpcomingLeave {
-  type: string;
-  startDate: Date;
-  endDate: Date;
-  days: number;
-  status: 'pending' | 'approved';
-  typeColor: string;
-}
 
 interface LeaveTypeCache {
   typeId: number;
@@ -54,9 +48,13 @@ export class UserLeaveBalance implements OnInit {
   isLoadingTypes = true;
   errorMessage = '';
 
+  RequestStatus = RequestStatus;
+  isLoadingUpcomingLeaves = true;
+  upcomingLeaves: LeaveRequest[] = [];
+
+
   // Date legacy (păstrate pentru compatibilitate)
   leaveCategories: LeaveCategory[] = [];
-  upcomingLeaves: UpcomingLeave[] = [];
 
   constructor(
     private leaveRequestService: LeaveRequestService,
@@ -65,12 +63,13 @@ export class UserLeaveBalance implements OnInit {
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
+    this.loadUpcomingLeaves();
   }
 
   // =====================
   // ÎNCĂRCARE INIȚIALĂ
   // =====================
-  
+
   loadLeaveRequestTypes() {
     this.isLoadingTypes = true;
     this.errorMessage = '';
@@ -94,6 +93,40 @@ export class UserLeaveBalance implements OnInit {
     });
   }
 
+  loadUpcomingLeaves() {
+    this.isLoadingUpcomingLeaves = true;
+    this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
+      next: (response) => {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        this.upcomingLeaves = response.data.filter(req => {
+          if (req.requestStatus !== RequestStatus.APPROVED) return false;
+
+          const startDate = new Date(req.startDate);
+          const endDate = new Date(req.endDate);
+
+         const isInCurrentMonth = (
+          (startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear) ||
+          (endDate.getMonth() === currentMonth && endDate.getFullYear() === currentYear) ||
+          (startDate <= new Date(currentYear, currentMonth, 1) && 
+           endDate >= new Date(currentYear, currentMonth + 1, 0))
+        );
+
+          return isInCurrentMonth;
+        });
+
+        this.isLoadingUpcomingLeaves = false;
+      },
+      error: (err) => {
+        this.isLoadingUpcomingLeaves = false;
+        this.errorMessage = 'Failed to load upcoming leaves.';
+        console.error('Error loading upcoming leaves:', err);
+      }
+    });
+  }
+
   private initializeCache(types: ILeaveRequestType[]) {
     this.leaveTypesCache = types.map(type => ({
       typeId: type.id,
@@ -113,7 +146,7 @@ export class UserLeaveBalance implements OnInit {
   onLeaveTypeChange() {
     // Asigură-te că e număr, nu string
     this.selectedLeaveRequestTypeId = Number(this.selectedLeaveRequestTypeId);
-    
+
     // Forțează actualizarea template-ului
     setTimeout(() => {
       this.loadDataForSelectedType();
@@ -131,7 +164,7 @@ export class UserLeaveBalance implements OnInit {
 
   private loadDataForSelectedType() {
     const cacheEntry = this.getCurrentTypeCache();
-    
+
     if (!cacheEntry) {
       return;
     }
@@ -150,7 +183,7 @@ export class UserLeaveBalance implements OnInit {
       return;
     }
 
-    
+
     cacheEntry.isLoading = true;
     cacheEntry.error = '';
 
@@ -182,10 +215,10 @@ export class UserLeaveBalance implements OnInit {
   }
 
   private hasValidCacheData(cacheEntry: LeaveTypeCache): boolean {
-    const isValid = cacheEntry.remainingDaysData !== null && 
-                    cacheEntry.error === '' && 
-                    !cacheEntry.isLoading;
-    
+    const isValid = cacheEntry.remainingDaysData !== null &&
+      cacheEntry.error === '' &&
+      !cacheEntry.isLoading;
+
     return isValid;
   }
 
