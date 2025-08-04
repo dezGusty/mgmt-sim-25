@@ -57,6 +57,18 @@
         </button>
       </div>
 
+      <!-- Search by dropdown-->
+      <div class="w-52">
+        <select
+        [(ngModel)]="searchBy"
+        class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
+        >
+          <option value="activeStatus" [selected]="searchBy === 'activeStatus'">Active status only</option>
+          <option value="inactiveStatus" [selected]="searchBy === 'inactiveStatus'">Inactive status only</option>
+          <option value="global" [selected]="searchBy === 'global'">Activate and inactive status</option>
+        </select>
+      </div>
+
       <!-- Search Button -->
       <button
         (click)="onSearch()"
@@ -79,17 +91,6 @@
         Search
       </button>
 
-      <!-- Search by dropdown-->
-      <div class="w-36">
-        <select
-        [(ngModel)]="searchBy"
-        class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
-        >
-        <option value="status" [selected]="searchBy === 'activeStatus'">Active status</option>
-        <option value="status" [selected]="searchBy === 'inactiveStatus'">Inactive status</option>
-        <option value="global" [selected]="searchBy === 'global'">Global search</option>
-        </select>
-      </div>
       <!-- Clear Button -->
       <button
         *ngIf="searchTerm"

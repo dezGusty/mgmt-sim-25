@@ -42,6 +42,10 @@ export class UsersService {
     if (params?.globalSearch) {
       paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
     }
+
+    if(params?.status != null) {
+      paramsToSend = paramsToSend.set('activityStatus', params.status);
+    }
     
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);

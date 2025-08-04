@@ -386,5 +386,74 @@ namespace ManagementSimulator.Database.Repositories
                 return (pagedData, totalCount);
             }
         }
+
+        public async Task<(List<User>? Data, int TotalCount)> GetAllInactiveUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters)
+        {
+            IQueryable<User> query = _dbContext.Users;
+
+            query = query.Where(u => u.DeletedAt != null)
+                         .Include(u => u.Roles.Where(r => r.DeletedAt == null))
+                             .ThenInclude(u => u.Role)
+                         .Include(u => u.Title)
+                         .Include(u => u.Department);
+
+            if (!string.IsNullOrEmpty(globalSearch))
+            {
+                query = query.Where(u =>
+                    (u.FirstName != null && u.FirstName.Contains(globalSearch)) ||
+                    (u.LastName != null && u.LastName.Contains(globalSearch)) ||
+                    (u.Email != null && u.Email.Contains(globalSearch)) ||
+                    (u.Title != null && u.Title.Name != null && u.Title.Name.Contains(globalSearch)) ||
+                    (u.Title != null && u.Department != null && u.Department.Name != null && u.Department.Name.Contains(globalSearch))
+                );
+            }
+            else
+            {
+                // filtering 
+                if (!string.IsNullOrEmpty(lastName))
+                {
+                    query = query.Where(u => u.LastName.Contains(lastName));
+                }
+                if (!string.IsNullOrEmpty(email))
+                {
+                    query = query.Where(u => u.Email.Contains(email));
+                }
+                if (!string.IsNullOrEmpty(department))
+                {
+                    query = query.Where(u => u.Title != null &&
+                                            u.Department != null &&
+                                            u.Department.Name.Contains(department));
+                }
+                if (!string.IsNullOrEmpty(jobTitle))
+                {
+                    query = query.Where(u => u.Title != null &&
+                                            u.Title.Name.Contains(jobTitle));
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }
     }
 }

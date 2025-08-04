@@ -119,7 +119,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
-            if(payload.ActivityStatus == Enums.JobTitleActivityStatus.INACTIVE)
+            if(payload.ActivityStatus != null && payload.ActivityStatus == Enums.JobTitleActivityStatus.INACTIVE)
             {
                 var (deletedResult, deletedTotalCount) = await _jobTitleRepository.GetAllInactiveJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
                 if (deletedResult == null || !deletedResult.Any())
@@ -147,11 +147,7 @@ namespace ManagementSimulator.Core.Services
                 };
             }
 
-            bool includeDeleted;
-            if (payload.ActivityStatus == Enums.JobTitleActivityStatus.ALL)
-                includeDeleted = true;
-            else 
-                includeDeleted = false;
+            bool includeDeleted = payload.ActivityStatus == null || payload.ActivityStatus == Enums.JobTitleActivityStatus.ALL;
 
             var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams(),
                  includeDeleted: includeDeleted);

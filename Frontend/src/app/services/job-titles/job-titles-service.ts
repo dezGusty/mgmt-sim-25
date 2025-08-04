@@ -44,7 +44,7 @@ export class JobTitlesService {
       paramsToSend = paramsToSend.set('jobTitleName', params.jobTitleName);
     }
 
-    if(params?.activityStatus){
+    if(params?.activityStatus !== undefined){
       paramsToSend = paramsToSend.set('activityStatus', params.activityStatus);
     }
 

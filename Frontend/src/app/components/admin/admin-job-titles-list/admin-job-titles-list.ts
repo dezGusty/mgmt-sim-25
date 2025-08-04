@@ -11,7 +11,7 @@ import { IApiResponse } from '../../../models/responses/iapi-response';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { HttpErrorResponse } from '@angular/common/http';
-import { JobTitleActivityStatus } from '../../../models/enums/JobTitleActivityStatus';
+import { JobTitleActivityStatus } from '../../../models/enums/job-title-activity-status';
 
 @Component({
   selector: 'app-admin-job-titles-list',

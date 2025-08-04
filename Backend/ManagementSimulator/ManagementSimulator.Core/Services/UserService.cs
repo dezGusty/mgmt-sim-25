@@ -463,7 +463,44 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload)
         {
-            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams(), includeDeleted: true);
+            if(payload.ActivityStatus != null && payload.ActivityStatus == Enums.UserActivityStatus.INACTIVE)
+            {
+                var (deletedUsers, deletedTotalCount) = await _userRepository.GetAllInactiveUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams());
+
+                if (deletedUsers == null || !deletedUsers.Any())
+                    return new PagedResponseDto<UserResponseDto>
+                    {
+                        Data = new List<UserResponseDto>(),
+                        Page = payload.PagedQueryParams.Page ?? 1,
+                        PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                        TotalPages = 0
+                    };
+
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = deletedUsers.Select(u => new UserResponseDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FirstName = u.FirstName ?? string.Empty,
+                        LastName = u.LastName ?? string.Empty,
+                        Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                        JobTitleId = u.JobTitleId,
+                        JobTitleName = u.Title?.Name ?? string.Empty,
+                        DepartmentId = u.DepartmentId,
+                        DepartmentName = u.Department?.Name ?? string.Empty,
+                        IsActive = u.DeletedAt == null,
+                    }),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = payload.PagedQueryParams.PageSize != null ?
+                        (int)Math.Ceiling((double)deletedTotalCount / (int)payload.PagedQueryParams.PageSize) : 1
+                };
+            }
+
+            bool includeDeleted = payload.ActivityStatus == null || payload.ActivityStatus == Enums.UserActivityStatus.ALL;
+
+            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams(), includeDeleted: includeDeleted);
 
             if (users == null || !users.Any())
                 return new PagedResponseDto<UserResponseDto>

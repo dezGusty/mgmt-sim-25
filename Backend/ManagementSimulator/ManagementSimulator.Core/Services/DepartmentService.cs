@@ -104,7 +104,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<DepartmentResponseDto>> GetAllDepartmentsFilteredAsync(QueriedDepartmentRequestDto payload)
         {
-            if (payload.ActivityStatus == DepartmentActivityStatus.INACTIVE)
+            if (payload.ActivityStatus != null && payload.ActivityStatus == DepartmentActivityStatus.INACTIVE)
             {
                 var (deletedResult, deletedTotalCount) = await _repository.GetAllDepartmentsFilteredAsync(
                     payload.Name,
@@ -138,7 +138,7 @@ namespace ManagementSimulator.Core.Services
                 };
             }
 
-            bool includeDeleted = payload.ActivityStatus == DepartmentActivityStatus.ALL;
+            bool includeDeleted = payload.ActivityStatus == null || payload.ActivityStatus == DepartmentActivityStatus.ALL;
 
             var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(
                 payload.Name,

@@ -13,7 +13,7 @@ import { IQueryParams } from '../../../../models/requests/iquery-params';
 import { IFilteredDepartmentsRequest } from '../../../../models/requests/ifiltered-departments-request';
 import { IFilteredJobTitlesRequest } from '../../../../models/requests/ifiltered-job-titles-request';
 import { IDepartment } from '../../../../models/entities/idepartment';
-import { JobTitleActivityStatus } from '../../../../models/enums/JobTitleActivityStatus';
+import { JobTitleActivityStatus } from '../../../../models/enums/job-title-activity-status';
 
 interface NotificationMessage {
   type: 'success' | 'error' | 'info';

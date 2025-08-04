@@ -11,7 +11,7 @@ namespace ManagementSimulator.Core.Dtos.Requests.Departments
     public class QueriedDepartmentRequestDto
     {
         public string? Name { get; set; }
-        public DepartmentActivityStatus ActivityStatus { get; set; }
+        public DepartmentActivityStatus? ActivityStatus { get; set; }
         public QueryParamsDto PagedQueryParams { get; set; } = new QueryParamsDto();
     }
 }
