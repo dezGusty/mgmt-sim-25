@@ -29,6 +29,10 @@ export class DepartmentService {
     if (params?.name) {
       paramsToSend = paramsToSend.set('name', params.name);
     }
+
+    if (params?.includeDeleted) {
+      paramsToSend = paramsToSend.set('includeDeleted', params.includeDeleted);
+    }
     
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
@@ -63,5 +67,9 @@ export class DepartmentService {
 
   deleteDepartment(id: number): Observable<IApiResponse<boolean>> {
     return this.http.delete<IApiResponse<boolean>>(`${this.apiUrl}/${id}`);
+  }
+
+  restoreDepartment(id: number): Observable<IApiResponse<IDepartment>> {
+    return this.http.patch<IApiResponse<IDepartment>>(`${this.apiUrl}/restore/${id}`, {})
   }
 }

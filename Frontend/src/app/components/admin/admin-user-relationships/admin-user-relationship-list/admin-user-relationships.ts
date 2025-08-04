@@ -217,12 +217,12 @@ export class AdminUserRelationships implements OnInit {
         ? {
             id: user.jobTitleId,
             name: user.jobTitleName || 'Unknown',
-            department: {
-              id: user.departmentId || 0,
-              name: user.departmentName || 'Unknown',
-            },
           }
         : undefined,
+      department: {
+              id: user.departmentId || 0,
+              name: user.departmentName || 'Unknown',
+      },
       subordinatesIds: user.subordinatesIds || [],
       subordinatesNames: user.subordinatesNames || [],
       roles: user.roles || [],

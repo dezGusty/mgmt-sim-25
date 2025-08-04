@@ -43,9 +43,9 @@ export class JobTitlesService {
     if (params?.jobTitleName) {
       paramsToSend = paramsToSend.set('jobTitleName', params.jobTitleName);
     }
-    
-    if (params?.departmentName) {
-      paramsToSend = paramsToSend.set('departmentName', params.departmentName);
+
+    if(params?.includeDeleted){
+      paramsToSend = paramsToSend.set('includeDeleted', params.includeDeleted);
     }
 
     if (params?.params.sortBy) {
@@ -65,5 +65,9 @@ export class JobTitlesService {
     }
 
     return this.http.get<IApiResponse<IFilteredApiResponse<IJobTitle>>>(`${this.baseUrl}/queried`, {params : paramsToSend});
+  }
+
+  restoreJobTitle(id: number) : Observable<IApiResponse<IJobTitle>>  {
+    return this.http.patch<IApiResponse<IJobTitle>>(`${this.baseUrl}/restore/${id}`, {});
   }
 }

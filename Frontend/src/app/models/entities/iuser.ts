@@ -24,6 +24,7 @@ export interface IAddUser {
   firstName: string;
   lastName: string;
   jobTitleId: number;
+  departmentId: number;
   employeeRolesId: number[];
   dateOfEmployment: Date;
 }

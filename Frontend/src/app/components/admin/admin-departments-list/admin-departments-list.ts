@@ -6,6 +6,8 @@ import { DepartmentService } from '../../../services/departments/department-serv
 import { IDepartment } from '../../../models/entities/idepartment';
 import { IFilteredDepartmentsRequest } from '../../../models/requests/ifiltered-departments-request';
 import { IDepartmentViewModel } from '../../../view-models/department-view-model';
+import { IApiResponse } from '../../../models/responses/iapi-response';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-departments-list',
@@ -48,9 +50,10 @@ export class AdminDepartmentsList implements OnInit {
   loadDepartments(): void {
     this.isLoading = true;
     this.error = '';
-    console.log(`current name:this.${this.currentSearchTerm}`)
+
     const params: IFilteredDepartmentsRequest = {
       name: this.currentSearchTerm,
+      includeDeleted: true,
       params: {
         sortBy: "name", 
         sortDescending: this.sortDescending,
@@ -97,7 +100,9 @@ export class AdminDepartmentsList implements OnInit {
     return {
       id: department.id,
       name: department.name,
-      description: department.description
+      description: department.description,
+      employeeCount: department.employeeCount,
+      isActive: department.deletedAt === null
     };
   }
 
@@ -270,5 +275,19 @@ export class AdminDepartmentsList implements OnInit {
     if (event.type === 'department') {
       this.loadDepartments();
     }
+  }
+
+  restoreDepartment(id: number) {
+    this.departmentService.restoreDepartment(id).subscribe({
+      next: (response: IApiResponse<IDepartment>) => {
+        if(response.success){
+          this.loadDepartments();
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        console.log(`Restore failed: ${err.error.message}`);
+        alert('Failed to restore department. Please try again.');
+      }
+    })
   }
 }
