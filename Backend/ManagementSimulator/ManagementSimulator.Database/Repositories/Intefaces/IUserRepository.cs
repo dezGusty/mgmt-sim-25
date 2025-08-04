@@ -10,7 +10,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
 {
     public interface IUserRepository : IBaseRepostory<User>
     {
-        Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, bool includeDeleted = false);
+        Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, string? globalSearch = null, string? unassignedName = null, string? jobTitle = null, bool includeDeleted = false);
         Task<List<User>> GetAllAdminsAsync(string? lastName, string? email, bool includeDeleted = false);
         Task<List<User>> GetAllUsersIncludeRelationshipsAsync(bool includeDeleted = false);
         Task<User?> GetUserByEmail(string email, bool includeDeleted = false);
@@ -21,6 +21,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<User?> GetUserByIdAsync(int id, bool includeDeleted = false);
         Task<List<User>> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false);
         Task<List<User>> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false);
-        Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false);
+        Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false);
     }
 }

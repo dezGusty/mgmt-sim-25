@@ -79,9 +79,9 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllUnassignedUsersFilteredAsync([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetAllUnassignedUsersFilteredAsync([FromQuery] QueriedUserRequestDto payload)
         {
-            var unassignedUsers = await _userService.GetAllUnassignedUsersFilteredAsync(page, pageSize);
+            var unassignedUsers = await _userService.GetAllUnassignedUsersFilteredAsync(payload);
             if (unassignedUsers == null || unassignedUsers.Data == null || !unassignedUsers.Data.Any())
             {
                 return NotFound(new

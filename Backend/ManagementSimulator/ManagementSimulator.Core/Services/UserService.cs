@@ -60,8 +60,8 @@ namespace ManagementSimulator.Core.Services
         public async Task<UserResponseDto?> GetUserByIdAsync(int id)
         {
             var user = await _userRepository.GetUserWithReferencesByIdAsync(id);
-            
-            if(user == null)
+
+            if (user == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
             }
@@ -146,7 +146,7 @@ namespace ManagementSimulator.Core.Services
             }
             catch (Exception ex)
             {
-                throw new MailNotSentException(user.Email);        
+                throw new MailNotSentException(user.Email);
             }
 
             return user.ToUserResponseDto();
@@ -190,7 +190,7 @@ namespace ManagementSimulator.Core.Services
                 if (user != null)
                 {
                     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-                    user.MustChangePassword = false; 
+                    user.MustChangePassword = false;
                     user.ModifiedAt = DateTime.UtcNow;
 
                     await _userRepository.SaveChangesAsync();
@@ -248,7 +248,7 @@ namespace ManagementSimulator.Core.Services
                 int employeeRole = await _employeeRoleRepository.GetEmployeeRoleUserByNameAsync("Employee");
                 foreach (var relation in existingRelations)
                 {
-                    if(relation.RolesId != employeeRole)
+                    if (relation.RolesId != employeeRole)
                         await _employeeRoleRepository.DeleteEmployeeUserRoleAsync(relation);
                 }
 
@@ -261,7 +261,7 @@ namespace ManagementSimulator.Core.Services
                     }
 
                     var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true);
-                    if(employeeRoleUser != null)
+                    if (employeeRoleUser != null)
                     {
                         if (employeeRoleUser.DeletedAt != null)
                         {
@@ -320,7 +320,7 @@ namespace ManagementSimulator.Core.Services
             var users = await _userRepository.GetAllAsync();
             var userIds = users.Select(u => u.Id).ToList();
             List<int> jobTitleIds = users.Select(u => u.JobTitleId).Distinct().ToList();
-            List<int> departmentsIds = users.Select(u =>u.DepartmentId).Distinct().ToList();
+            List<int> departmentsIds = users.Select(u => u.DepartmentId).Distinct().ToList();
 
             var jobTitles = await _jobTitleRepository.GetJobTitlesAsync(jobTitleIds);
             var departments = await _deparmentRepository.GetAllDepartmentsAsync(departmentsIds);
@@ -380,7 +380,15 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsFilteredAsync(QueriedUserRequestDto payload)
         {
-            var (users, totalCount) = await _userRepository.GetAllManagersFilteredAsync(payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams());
+            var (users, totalCount) = await _userRepository.GetAllManagersFilteredAsync(
+                payload.GlobalSearch,
+                payload.ManagerName,
+                payload.EmployeeName,
+                payload.ManagerEmail,
+                payload.EmployeeEmail,
+                payload.JobTitle,
+                payload.Department,
+                payload.PagedQueryParams.ToQueryParams());
 
             if (users == null || !users.Any())
                 return new PagedResponseDto<UserResponseDto>
@@ -449,7 +457,7 @@ namespace ManagementSimulator.Core.Services
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
 
@@ -493,19 +501,31 @@ namespace ManagementSimulator.Core.Services
             return await _userRepository.GetAllAdminsAsync(lastName, email);
         }
 
-        public async Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(int page, int pageSize)
+        public async Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload)
         {
-            var (unassignedUsers, totalCount) = await _userRepository.GetAllUnassignedUsersFilteredAsync(new QueryParams { Page = page, PageSize = pageSize });
+            var queryParams = new QueryParams
+            {
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 10,
+                SortBy = payload.PagedQueryParams.SortBy
+            };
+
+            var (unassignedUsers, totalCount) = await _userRepository.GetAllUnassignedUsersFilteredAsync(
+                queryParams,
+                payload.GlobalSearch,
+                payload.UnassignedName,
+                payload.JobTitle);
 
             if (unassignedUsers == null || !unassignedUsers.Any())
                 return new PagedResponseDto<UserResponseDto>
                 {
                     Data = new List<UserResponseDto>(),
-                    Page = page,
-                    PageSize = pageSize,
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 10,
                     TotalPages = 0
                 };
 
+            var pageSize = payload.PagedQueryParams.PageSize ?? 10;
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = unassignedUsers.Select(u => new UserResponseDto
@@ -520,16 +540,25 @@ namespace ManagementSimulator.Core.Services
                     DepartmentId = u.DepartmentId,
                     DepartmentName = u.Department?.Name ?? string.Empty,
                 }),
-                Page = page,
+                Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = pageSize,
                 TotalPages = pageSize > 0 ?
-                    (int)Math.Ceiling((double)totalCount / pageSize) : 1 
+                    (int)Math.Ceiling((double)totalCount / pageSize) : 1
             };
         }
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllManagersFilteredAsync(QueriedUserRequestDto payload)
         {
-            (List<User>? managers, int totalCount) = await _userRepository.GetAllManagersFilteredAsync(payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams(), includeDeleted: false);
+            (List<User>? managers, int totalCount) = await _userRepository.GetAllManagersFilteredAsync(
+                payload.GlobalSearch,
+                payload.ManagerName,
+                payload.EmployeeName,
+                payload.ManagerEmail,
+                payload.EmployeeEmail,
+                payload.JobTitle,
+                payload.Department,
+                payload.PagedQueryParams.ToQueryParams(),
+                includeDeleted: false);
 
             if (managers == null || !managers.Any())
                 return new PagedResponseDto<UserResponseDto>

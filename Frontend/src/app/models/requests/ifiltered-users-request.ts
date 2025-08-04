@@ -6,5 +6,10 @@ export interface IFilteredUsersRequest {
     department?: string;
     jobTitle?: string;
     globalSearch?: string;
+    employeeName?: string;
+    employeeEmail?: string;
+    managerName?: string;
+    managerEmail?: string;
+    unassignedName?: string;
     params: IQueryParams;
 }
