@@ -73,8 +73,8 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 new() { Title = "Vacation", Description = "Standard annual leave", IsPaid = true, MaxDays = 21 },
                 new() { Title = "Sick Leave", Description = "Medical certificate required", IsPaid = true, MaxDays = 183  },
                 new() { Title = "Parental Leave", Description = "Applicable for new parents", IsPaid = true, MaxDays = 730 },
-                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true, MaxDays = 10  },
-                new() { Title = "Military Leave", Description = "Military service obligations", IsPaid = true, MaxDays = 1000 },
+                new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = false, MaxDays = 10  },
+                new() { Title = "Military Leave", Description = "Military service obligations", IsPaid = false, MaxDays = 1000 },
                 new() { Title = "Study Leave", Description = "Educational purposes and training", IsPaid = true, MaxDays = 10 },
             };
 
