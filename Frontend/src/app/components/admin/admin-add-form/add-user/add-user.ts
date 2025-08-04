@@ -101,7 +101,7 @@ export class AddUser {
         
         const params: IFilteredDepartmentsRequest = {
           name: this.searchTextDepartments.trim() || undefined,
-          includeDeleted: false,
+          activityStatus: 0,
           params: {
             page: this.currentPageDepartment,
             pageSize: this.pageSizeDepartments,

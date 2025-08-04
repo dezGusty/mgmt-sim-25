@@ -1,4 +1,5 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.PagedQueryParams;
+using ManagementSimulator.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace ManagementSimulator.Core.Dtos.Requests.Departments
     public class QueriedDepartmentRequestDto
     {
         public string? Name { get; set; }
-        public bool? IncludeDeleted { get; set; }
+        public DepartmentActivityStatus ActivityStatus { get; set; }
         public QueryParamsDto PagedQueryParams { get; set; } = new QueryParamsDto();
     }
 }
