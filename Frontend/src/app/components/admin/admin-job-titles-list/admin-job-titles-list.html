@@ -9,7 +9,7 @@
           type="text"
           [(ngModel)]="searchTerm"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
-          placeholder="Search by job title name"
+          placeholder="Search by job title name..."
           (keypress)="onSearchKeypress($event)"
         />
       </div>
@@ -79,6 +79,17 @@
         Search
       </button>
 
+      <!-- Search by dropdown-->
+      <div class="w-36">
+        <select
+        [(ngModel)]="searchBy"
+        class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
+        >
+        <option value="status" [selected]="searchBy === 'activeStatus'">Active status</option>
+        <option value="status" [selected]="searchBy === 'inactiveStatus'">Inactive status</option>
+        <option value="global" [selected]="searchBy === 'global'">Global search</option>
+        </select>
+      </div>
       <!-- Clear Button -->
       <button
         *ngIf="searchTerm"
@@ -118,6 +129,11 @@
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
           >
             Employees
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Status
           </th>
           <th
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -169,6 +185,19 @@
               {{ jobTitle.employeeCount }} employees
             </span>
           </td>
+           <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+              [class]="
+                jobTitle.isActive
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              "
+            >
+              {{ (jobTitle.isActive ? 'Active' : 'Inactive') | titlecase }}
+            </span>
+          </td>
+
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <!-- Edit button -->
             <div class="flex space-x-2">

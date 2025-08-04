@@ -119,8 +119,42 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
+            if(payload.ActivityStatus == Enums.JobTitleActivityStatus.INACTIVE)
+            {
+                var (deletedResult, deletedTotalCount) = await _jobTitleRepository.GetAllInactiveJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
+                if (deletedResult == null || !deletedResult.Any())
+                    return new PagedResponseDto<JobTitleResponseDto>
+                    {
+                        Data = new List<JobTitleResponseDto>(),
+                        Page = payload.PagedQueryParams.Page ?? 1,
+                        PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                        TotalPages = 0
+                    };
+
+                return new PagedResponseDto<JobTitleResponseDto>
+                {
+                    Data = deletedResult.Select(jt => new JobTitleResponseDto
+                    {
+                        Id = jt.Id,
+                        Name = jt.Name,
+                        EmployeeCount = jt.Users.Count,
+                        DeletedAt = jt.DeletedAt,
+                    }),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = payload.PagedQueryParams.PageSize != null ?
+                        (int)Math.Ceiling((double)deletedTotalCount / (int)payload.PagedQueryParams.PageSize) : 1
+                };
+            }
+
+            bool includeDeleted;
+            if (payload.ActivityStatus == Enums.JobTitleActivityStatus.ALL)
+                includeDeleted = true;
+            else 
+                includeDeleted = false;
+
             var (result, totalCount) = await _jobTitleRepository.GetAllJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams(),
-                includeDeleted: payload.IncludeDeleted ?? false);
+                 includeDeleted: includeDeleted);
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<JobTitleResponseDto>

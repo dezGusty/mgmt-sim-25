@@ -1,8 +1,8 @@
 import { IQueryParams } from "./iquery-params";
+import { JobTitleActivityStatus } from "../enums/JobTitleActivityStatus";
 
 export interface IFilteredJobTitlesRequest {
     jobTitleName? : string;
-    isPaid?: boolean;
-    includeDeleted: boolean;
+    activityStatus : JobTitleActivityStatus;
     params: IQueryParams;
 }

@@ -105,5 +105,47 @@ namespace ManagementSimulator.Database.Repositories
                 return (pagedData, totalCount);
             }
         }
+
+        public async Task<(List<JobTitle> Data, int TotalCount)> GetAllInactiveJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters)
+        {
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            query = query.Where(jt => jt.DeletedAt != null).Include(jt => jt.Users);
+
+            // Filtering
+            if (!string.IsNullOrEmpty(jobTitleName))
+            {
+                query = query.Where(jt => jt.Name != null && jt.Name.Contains(jobTitleName));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+            {
+                if (string.Equals(parameters.SortBy, "jobTitleName", StringComparison.OrdinalIgnoreCase))
+                    query = query.OrderBy(jt => jt.Name);
+            }
+            else
+            {
+                query = query.OrderBy(jt => jt.Id);
+            }
+
+            // Pagination
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)(parameters.Page) - 1) * (int)(parameters.PageSize))
+                             .Take((int)parameters.PageSize)
+                             .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }
     }
 }
