@@ -51,6 +51,8 @@ export class UserLeaveBalance implements OnInit {
   RequestStatus = RequestStatus;
   isLoadingUpcomingLeaves = true;
   upcomingLeaves: LeaveRequest[] = [];
+  startDate = new Date();
+  endDate = new Date();
 
 
   // Date legacy (păstrate pentru compatibilitate)
@@ -104,14 +106,14 @@ export class UserLeaveBalance implements OnInit {
         this.upcomingLeaves = response.data.filter(req => {
           if (req.requestStatus !== RequestStatus.APPROVED) return false;
 
-          const startDate = new Date(req.startDate);
-          const endDate = new Date(req.endDate);
+          this.startDate = new Date(req.startDate);
+          this.endDate = new Date(req.endDate);
 
          const isInCurrentMonth = (
-          (startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear) ||
-          (endDate.getMonth() === currentMonth && endDate.getFullYear() === currentYear) ||
-          (startDate <= new Date(currentYear, currentMonth, 1) && 
-           endDate >= new Date(currentYear, currentMonth + 1, 0))
+          (this.startDate.getMonth() === currentMonth && this.startDate.getFullYear() === currentYear) ||
+          (this.endDate.getMonth() === currentMonth && this.endDate.getFullYear() === currentYear) ||
+          (this.startDate <= new Date(currentYear, currentMonth, 1) && 
+           this.endDate >= new Date(currentYear, currentMonth + 1, 0))
         );
 
           return isInCurrentMonth;
@@ -127,6 +129,45 @@ export class UserLeaveBalance implements OnInit {
     });
   }
 
+  getLeaveRequestTypeName(typeId: number): string {
+    if (this.isLoadingTypes) {
+      return 'Loading...';
+    }
+    
+    const type = this.leaveRequestTypes.find(t => t.id === typeId);
+    return type ? type.title || type.title : 'Unknown';
+  }
+
+  getStatusDisplayName(status: RequestStatus): string {
+      switch (status) {
+        case RequestStatus.PENDING:
+          return 'Pending';
+        case RequestStatus.APPROVED:
+          return 'Approved';
+        case RequestStatus.REJECTED:
+          return 'Rejected';
+        case RequestStatus.CANCELED:
+          return 'Canceled';
+        default:
+          return 'Unknown';
+      }
+  }  
+
+ calculateLeaveDuration(startDate: Date, endDate: Date): number {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  
+  const diffInMs = end.getTime() - start.getTime();
+  
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1;
+  
+  return Math.max(1, diffInDays); 
+}
+
+
   private initializeCache(types: ILeaveRequestType[]) {
     this.leaveTypesCache = types.map(type => ({
       typeId: type.id,
@@ -140,14 +181,12 @@ export class UserLeaveBalance implements OnInit {
   }
 
   // =====================
-  // GESTIONARE EVENIMENTE
+  // EVENT HANDLING
   // =====================
 
   onLeaveTypeChange() {
-    // Asigură-te că e număr, nu string
     this.selectedLeaveRequestTypeId = Number(this.selectedLeaveRequestTypeId);
 
-    // Forțează actualizarea template-ului
     setTimeout(() => {
       this.loadDataForSelectedType();
     }, 0);
@@ -159,7 +198,7 @@ export class UserLeaveBalance implements OnInit {
   }
 
   // =====================
-  // ÎNCĂRCARE DATE API
+  // API DATA LOADING
   // =====================
 
   private loadDataForSelectedType() {
@@ -169,7 +208,6 @@ export class UserLeaveBalance implements OnInit {
       return;
     }
 
-    // Verifică dacă avem deja datele în cache pentru anul curent
     if (this.hasValidCacheData(cacheEntry)) {
       return;
     }
