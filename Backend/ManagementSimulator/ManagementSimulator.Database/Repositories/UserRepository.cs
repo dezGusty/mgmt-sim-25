@@ -22,9 +22,12 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<User?> GetUserByEmail(string email, bool includeDeleted = false)
+        public async Task<User?> GetUserByEmail(string email, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if(!tracking) 
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -35,9 +38,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<List<User>> GetAllUsersWithReferencesAsync(bool includeDeleted = false)
+        public async Task<List<User>> GetAllUsersWithReferencesAsync(bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -50,9 +56,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<User?> GetUserWithReferencesByIdAsync(int id, bool includeDeleted = false)
+        public async Task<User?> GetUserWithReferencesByIdAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -64,9 +73,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false)
+        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<EmployeeManager> query = _dbContext.EmployeeManagers;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -84,9 +96,12 @@ namespace ManagementSimulator.Database.Repositories
                 .ExecuteUpdateAsync(u => u.SetProperty(x => x.DeletedAt, _ => null)) > 0;
         }
 
-        public async Task<User?> GetUserByIdAsync(int id, bool includeDeleted = false)
+        public async Task<User?> GetUserByIdAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -94,9 +109,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<List<User>> GetAllUsersIncludeRelationshipsAsync(bool includeDeleted = false)
+        public async Task<List<User>> GetAllUsersIncludeRelationshipsAsync(bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -111,9 +129,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<List<User>> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<User>> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -126,9 +147,12 @@ namespace ManagementSimulator.Database.Repositories
 
         }
 
-        public async Task<List<User>> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<User>> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
@@ -140,10 +164,13 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<List<User>> GetAllAdminsAsync(string? lastName, string? email, bool includeDeleted = false)
+        public async Task<List<User>> GetAllAdminsAsync(string? lastName, string? email, bool includeDeleted = false, bool tracking = false)
         {
             var query = GetRecords(includeDeletedEntities: includeDeleted)
                 .Where(u => u.Roles.Where(r => r.DeletedAt == null).Any(r => r.Role.Rolename == "Admin"));
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             // filtering 
             if (!string.IsNullOrEmpty(lastName))
@@ -159,7 +186,8 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? lastName, string? email, QueryParams parameters, bool includeDeleted = false,
+            bool tracking = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
                                      .Include(u => u.Roles.Where(r => r.DeletedAt == null))
@@ -168,7 +196,10 @@ namespace ManagementSimulator.Database.Repositories
                                         .ThenInclude(subordinates => subordinates.Employee)
                                             .ThenInclude(e => e.Title)
                                      .Where(u => u.Subordinates.Count > 0);
-            
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             // filtering 
             if (!string.IsNullOrEmpty(lastName))
             {
@@ -205,9 +236,13 @@ namespace ManagementSimulator.Database.Repositories
         }
 
         public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch,
-            QueryParams parameters, bool includeDeleted = false)
+            QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
 
@@ -277,9 +312,12 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User> Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User> Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if(!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);

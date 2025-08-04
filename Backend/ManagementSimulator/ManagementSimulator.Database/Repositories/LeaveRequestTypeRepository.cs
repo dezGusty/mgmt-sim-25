@@ -22,9 +22,13 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<(List<LeaveRequestType> Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? title, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<LeaveRequestType> Data, int TotalCount)> GetAllLeaveRequestTypesFilteredAsync(string? title, QueryParams parameters, bool includeDeleted = false,
+            bool tracking = false)
         {
             IQueryable<LeaveRequestType> query = GetRecords(includeDeletedEntities: includeDeleted);
+
+            if(!tracking)
+                query = query.AsNoTracking();
 
             if (!string.IsNullOrEmpty(title))
             {
@@ -63,9 +67,13 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<LeaveRequestType?> GetLeaveRequestTypesByTitleAsync(string title, bool includeDeleted = false)
+        public async Task<LeaveRequestType?> GetLeaveRequestTypesByTitleAsync(string title, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<LeaveRequestType?> query = _dbContext.LeaveRequestTypes;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(lrt => lrt.DeletedAt == null);
 

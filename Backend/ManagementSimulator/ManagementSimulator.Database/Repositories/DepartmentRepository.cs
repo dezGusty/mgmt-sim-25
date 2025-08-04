@@ -22,25 +22,38 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = databaseContext;
         }
 
-        public async Task<Department?> GetDepartmentByNameAsync(string name, bool includeDeleted = false)
+        public async Task<Department?> GetDepartmentByNameAsync(string name, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Department> query = _dbContext.Departments;
+
+            if(!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(d => d.DeletedAt == null);
+
             return await query.FirstOrDefaultAsync(d => d.Name == name);
         }
 
-        public async Task<Department?> GetDepartmentByIdAsync(int id, bool includeDeleted = false)
+        public async Task<Department?> GetDepartmentByIdAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Department> query = _dbContext.Departments;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(d => d.DeletedAt == null);
+
             return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Department> query = GetRecords(includeDeletedEntities: includeDeleted);
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             // Filtering
             if (!string.IsNullOrEmpty(name))
@@ -95,9 +108,13 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<List<Department>> GetAllDepartmentsAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<Department>> GetAllDepartmentsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Department> query = _dbContext.Departments;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(d => d.DeletedAt == null);
 

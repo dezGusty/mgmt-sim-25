@@ -60,7 +60,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<UserResponseDto>> GetEmployeesByManagerIdAsync(int managerId)
         {
-            var employees = await _employeeManagerRepository.GetEmployeesForManagerByIdAsync(managerId);
+            var employees = await _employeeManagerRepository.GetEmployeesForManagerByIdAsync(managerId, tracking: false);
 
             if (employees == null || !employees.Any())
             {
@@ -85,7 +85,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<UserResponseDto>> GetManagersByEmployeeIdAsync(int employeeId)
         {
-            var managers = await _employeeManagerRepository.GetManagersForEmployeesByIdAsync(employeeId);
+            var managers = await _employeeManagerRepository.GetManagersForEmployeesByIdAsync(employeeId, tracking: false);
 
             if (managers == null || !managers.Any())
             {
@@ -110,12 +110,12 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<EmployeeManagerResponseDto> UpdateManagerForEmployeeAsync(int employeeId, int managerId, int newManagerId)
         {
-            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId, includeDeleted: true);
+            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId, includeDeleted: true, tracking: true);
             if (userManager == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.EmployeeManager), $"{employeeId}-{managerId}");
             }
-            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, newManagerId, includeDeleted: true);
+            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, newManagerId, includeDeleted: true, tracking: true);
             if (newEmployeeManager != null)
             {
                 if (newEmployeeManager.DeletedAt == null)
@@ -142,12 +142,12 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId)
         {
-            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId, includeDeleted: true);
+            var userManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId, includeDeleted: true, tracking: true);
             if (userManager == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.EmployeeManager), $"{employeeId}-{managerId}");
             }
-            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(newEmployeeId, managerId, includeDeleted: true);
+            var newEmployeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(newEmployeeId, managerId, includeDeleted: true, tracking: true);
             if (newEmployeeManager != null)
             {
                 if (newEmployeeManager.DeletedAt != null)
@@ -205,7 +205,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task PatchManagersForEmployeeAsync(int employeeId, List<int>? managersIds)
         {
-            List<EmployeeManager>? existingRelations = await _employeeManagerRepository.GetEMRelationshipForEmployeesByIdAsync(employeeId, includeDeleted: true);
+            List<EmployeeManager>? existingRelations = await _employeeManagerRepository.GetEMRelationshipForEmployeesByIdAsync(employeeId, includeDeleted: true, tracking: true);
 
             List<int> currentManagerIds = existingRelations
                 .Where(em => em.DeletedAt == null)

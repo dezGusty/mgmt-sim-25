@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using Microsoft.IdentityModel.Tokens;
 using ManagementSimulator.Database.Extensions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -22,12 +23,16 @@ namespace ManagementSimulator.Database.Repositories
         }
 
         public async Task<(List<LeaveRequest> Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, 
-            QueryParams parameters, bool includeDeleted = false)
+            QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
 
+            if(!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(lr => lr.DeletedAt == null);
+
             query = query.Include(lr => lr.User)
                          .Where(lr => employeeIds.Contains(lr.UserId));
 
@@ -66,17 +71,25 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<List<LeaveRequest>> GetOverlappingRequestsAsync(int userId, DateTime startDate, DateTime endDate)
+        public async Task<List<LeaveRequest>> GetOverlappingRequestsAsync(int userId, DateTime startDate, DateTime endDate, bool tracking = false)
         {
-            return await _dbcontext.LeaveRequests
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            return await query
                 .Where(lr => lr.UserId == userId &&
                              ((lr.StartDate <= endDate && lr.EndDate >= startDate)))
                 .ToListAsync();
         }
 
-        public async Task<List<LeaveRequest>> GetLeaveRequestsByUserAndTypeAsync(int userId, int leaveRequestTypeId, int year, bool includeDeleted = false)
+        public async Task<List<LeaveRequest>> GetLeaveRequestsByUserAndTypeAsync(int userId, int leaveRequestTypeId, int year, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(lr => lr.DeletedAt == null);

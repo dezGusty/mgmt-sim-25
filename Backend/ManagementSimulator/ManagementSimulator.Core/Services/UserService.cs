@@ -116,7 +116,7 @@ namespace ManagementSimulator.Core.Services
                 }
 
                 var existingRelation = await _employeeRoleRepository
-                    .GetEmployeeRoleUserAsync(user.Id, roleId, includeDeleted: true);
+                    .GetEmployeeRoleUserAsync(user.Id, roleId, includeDeleted: true, tracking: true);
 
                 if (existingRelation == null)
                 {
@@ -186,7 +186,7 @@ namespace ManagementSimulator.Core.Services
 
             if (_cache.TryGetValue(cacheKey, out string email))
             {
-                var user = await _userRepository.GetUserByEmail(email);
+                var user = await _userRepository.GetUserByEmail(email, tracking: true);
                 if (user != null)
                 {
                     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -211,7 +211,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
         {
-            User? existing = await _userRepository.GetUserWithReferencesByIdAsync(id);
+            User? existing = await _userRepository.GetUserWithReferencesByIdAsync(id, tracking: true); 
             if (existing == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
@@ -260,7 +260,7 @@ namespace ManagementSimulator.Core.Services
                         throw new EntryNotFoundException(nameof(EmployeeRole), roleId);
                     }
 
-                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true);
+                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true, tracking: true);
                     if(employeeRoleUser != null)
                     {
                         if (employeeRoleUser.DeletedAt != null)
@@ -305,7 +305,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task RestoreUserByIdAsync(int id)
         {
-            var userToRestore = await _userRepository.GetUserByIdAsync(id, includeDeleted: true);
+            var userToRestore = await _userRepository.GetUserByIdAsync(id, includeDeleted: true, tracking: true);
             if (userToRestore == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
