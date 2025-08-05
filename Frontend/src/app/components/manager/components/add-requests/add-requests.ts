@@ -24,7 +24,6 @@ export class AddRequests implements OnInit {
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
 
-  // Sorting properties
   sortColumn: string = 'submitted';
   sortDirection: 'asc' | 'desc' = 'desc';
 
@@ -145,10 +144,6 @@ export class AddRequests implements OnInit {
         case 'dates':
           aValue = new Date(a.from);
           bValue = new Date(b.from);
-          break;
-        case 'status':
-          aValue = a.status.toLowerCase();
-          bValue = b.status.toLowerCase();
           break;
         case 'submitted':
         default:

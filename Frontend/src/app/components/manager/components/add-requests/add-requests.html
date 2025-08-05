@@ -240,27 +240,7 @@
           </button>
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('status')"
-          >
-            Status
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'status'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'status' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'status' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
-            </svg>
-          </button>
+          Status
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
           <button
