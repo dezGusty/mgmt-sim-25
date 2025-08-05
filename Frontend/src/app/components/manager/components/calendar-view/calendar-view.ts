@@ -200,7 +200,12 @@ export class CalendarView implements OnInit, OnChanges {
   onWheel(event: WheelEvent) {
     const container = event.currentTarget as HTMLElement;
     event.preventDefault();
-    container.scrollLeft += event.deltaY;
+
+    if (event.shiftKey) {
+      container.scrollLeft += event.deltaY;
+    } else {
+      container.scrollTop += event.deltaY;
+    }
   }
 
   isDateInRange(date: Date, fromDate: Date, toDate: Date): boolean {

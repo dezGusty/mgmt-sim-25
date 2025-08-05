@@ -1,4 +1,4 @@
-<div class="bg-white rounded-lg shadow-sm border">
+<div class="bg-white rounded-lg shadow-sm border h-full flex flex-col">
   <div
     class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
   >
@@ -103,10 +103,7 @@
     </div>
   </div>
 
-  <div class="p-4 border-b bg-gray-50" *ngIf="legendItems.length > 0">
-    <h3 class="text-sm font-medium text-gray-700 mb-2">
-      Legenda tipuri concedii:
-    </h3>
+  <div class="p-2 border-b bg-gray-50" *ngIf="legendItems.length > 0">
     <div class="flex flex-wrap gap-3">
       <div *ngFor="let item of legendItems" class="flex items-center gap-2">
         <div
@@ -121,11 +118,7 @@
   <div
     class="overflow-x-auto max-h-[600px] overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
     (wheel)="onWheel($event)"
-    style="
-      scroll-behavior: smooth;
-      scrollbar-width: thin;
-      scrollbar-color: #d1d5db #f9fafb;
-    "
+    style="scrollbar-color: #d1d5db #f9fafb"
   >
     <table class="w-full border-collapse text-sm">
       <thead class="sticky top-0 bg-white z-10">
