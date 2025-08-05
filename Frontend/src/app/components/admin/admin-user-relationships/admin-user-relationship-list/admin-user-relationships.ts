@@ -9,10 +9,12 @@ import { IFilteredUsersRequest } from '../../../../models/requests/ifiltered-use
 import { AdminAssignRelationship } from '../admin-assign-relationship/admin-assign-relationship';
 import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../../../models/responses/ifiltered-api-response';
+import { UserSearchType } from '../../../../models/enums/user-search-type';
+import { HighlightPipe } from '../../../../pipes/highlight.pipe';
 
 @Component({
   selector: 'app-admin-user-relationships',
-  imports: [CommonModule, FormsModule, AdminAssignRelationship],
+  imports: [CommonModule, FormsModule, AdminAssignRelationship, HighlightPipe],
   templateUrl: './admin-user-relationships.html',
   styleUrl: './admin-user-relationships.css',
 })
@@ -24,8 +26,14 @@ export class AdminUserRelationships implements OnInit {
   unassignedUsers: IUserViewModel[] = [];
 
   searchTerm: string = '';
-  searchBy: 'lastName' | 'email' = 'lastName';
+  searchBy: UserSearchType = UserSearchType.Global;
   sortDescending: boolean = false;
+
+  currentSearchTerm: string = '';
+  currentSearchBy: UserSearchType = UserSearchType.Global;
+  currentHighlightTerm: string = '';
+
+  UserSearchType = UserSearchType;
 
   readonly pageSizeManagers: number = 3;
   currentPageManagers: number = 1;
@@ -107,10 +115,38 @@ export class AdminUserRelationships implements OnInit {
     this.isLoadingManagers = true;
     this.managersErrorMessage = '';
 
+    let searchParams: any = {};
+
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Global:
+          searchParams.globalSearch = this.currentSearchTerm;
+          break;
+        case UserSearchType.ManagerName:
+          searchParams.managerName = this.currentSearchTerm;
+          break;
+        case UserSearchType.EmployeeName:
+          searchParams.employeeName = this.currentSearchTerm; 
+          break;
+        case UserSearchType.ManagerEmail:
+          searchParams.managerEmail = this.currentSearchTerm;
+          break;
+        case UserSearchType.EmployeeEmail:
+          searchParams.employeeEmail = this.currentSearchTerm;
+          break;
+        case UserSearchType.JobTitle:
+          searchParams.jobTitle = this.currentSearchTerm;
+          break;
+        default:
+          searchParams.globalSearch = this.currentSearchTerm;
+          break;
+      }
+    }
+
     const params: IFilteredUsersRequest = {
-      [this.searchBy === 'email' ? 'email' : 'lastName']: this.searchTerm,
+      ...searchParams,
       params: {
-        sortBy: this.searchBy === 'lastName' ? 'lastName' : 'email',
+        sortBy: 'lastName',
         sortDescending: this.sortDescending,
         page: this.currentPageManagers,
         pageSize: this.pageSizeManagers,
@@ -124,11 +160,7 @@ export class AdminUserRelationships implements OnInit {
         const rawUsers: IUser[] = response.data.data;
         
         if (!rawUsers || rawUsers.length === 0) {
-          if (this.searchTerm) {
-            this.managersErrorMessage = `No admins found for your specified criteria.`;
-          } else {
-            this.managersErrorMessage = 'No admins found.';
-          }
+          this.managersErrorMessage = this.getManagersEmptyMessage();
           this.managers = [];
           this.totalPagesManagers = 0;
         } else {
@@ -154,7 +186,27 @@ export class AdminUserRelationships implements OnInit {
     this.isLoadingUnassignedUsers = true;
     this.unassignedUsersErrorMessage = '';
 
+    let searchParams: any = {};
+
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Global:
+          searchParams.globalSearch = this.currentSearchTerm;
+          break;
+        case UserSearchType.UnassignedName:
+          searchParams.unassignedName = this.currentSearchTerm;
+          break;
+        case UserSearchType.JobTitle:
+          searchParams.jobTitle = this.currentSearchTerm;
+          break;
+        default:
+          searchParams.globalSearch = this.currentSearchTerm;
+          break;
+      }
+    }
+
     const params: IFilteredUsersRequest = {
+      ...searchParams,
       params: {
         sortBy: 'lastName',
         sortDescending: false,
@@ -170,7 +222,7 @@ export class AdminUserRelationships implements OnInit {
         const rawUnassignedUsers: IUser[] = response.data.data;
         
         if (!rawUnassignedUsers || rawUnassignedUsers.length === 0) {
-          this.unassignedUsersErrorMessage = 'No unassigned users.';
+          this.unassignedUsersErrorMessage = this.getUnassignedUsersEmptyMessage();
           this.unassignedUsers = [];
           this.totalPagesUnassignedUsers = 0;
         } else {
@@ -185,13 +237,42 @@ export class AdminUserRelationships implements OnInit {
       },
       error: (err) => {
         this.isLoadingUnassignedUsers = false;
-        this.unassignedUsersErrorMessage = 'Eroare loading the unassigned users.';
+        this.unassignedUsersErrorMessage = 'Error loading the unassigned users.';
         this.unassignedUsers = [];
         this.totalPagesUnassignedUsers = 0;
         console.error('Failed to fetch unassigned users:', err);
         this.checkIfInitialDataLoaded();
       },
     });
+  }
+
+  getManagersEmptyMessage(): string {
+    if (this.currentSearchTerm.trim()) {
+      switch(this.currentSearchBy){
+        case UserSearchType.Global:
+          return 'No managers found for the global search term.';
+        case UserSearchType.ManagerName:
+          return `No managers found with the name "${this.currentSearchTerm}".`;
+        case UserSearchType.EmployeeName:
+          return `No employees found with the name "${this.currentSearchTerm}".`;
+        case UserSearchType.ManagerEmail:
+          return `No managers found with the email "${this.currentSearchTerm}".`;
+        case UserSearchType.EmployeeEmail:
+          return `No employees found with the email "${this.currentSearchTerm}".`;
+        case UserSearchType.JobTitle:
+          return `No managers found with the job title "${this.currentSearchTerm}".`;
+        default:
+          return `No managers found for "${this.currentSearchTerm}".`;
+      }
+    }
+    return 'No managers found.';
+  }
+
+  getUnassignedUsersEmptyMessage(): string {
+    if (this.currentSearchTerm.trim()) {
+      return `No unassigned users found with the name "${this.currentSearchTerm}".`;
+    }
+    return 'No unassigned users found.';
   }
 
   private checkIfInitialDataLoaded(): void {
@@ -405,14 +486,38 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getSearchPlaceholder(): string {
-    return this.searchBy === 'lastName'
-      ? 'Search managers by last name...'
-      : 'Search managers by email...';
+    switch (this.searchBy) {
+      case UserSearchType.Global:
+        return 'Search by name, email, job title, department...';
+      case UserSearchType.ManagerName:
+        return 'Search managers by name...';
+      case UserSearchType.EmployeeName:
+        return 'Search by employee name...';
+      case UserSearchType.ManagerEmail:
+        return 'Search managers by email...';
+      case UserSearchType.EmployeeEmail:
+        return 'Search employees by email...';
+      case UserSearchType.JobTitle:
+        return 'Search by job title...';
+      case UserSearchType.UnassignedName:
+        return 'Search unassigned users by name...';
+      default:
+        return 'Search...';
+    }
   }
 
   onSearch(): void {
+    this.currentSearchTerm = this.searchTerm;
+    this.currentSearchBy = this.searchBy;
+    this.currentHighlightTerm = this.searchTerm;
     this.currentPageManagers = 1;
-    this.loadManagersWithRelationships();
+    this.currentPageUnassignedUsers = 1;
+    
+    if (this.currentSearchBy === UserSearchType.UnassignedName) {
+      this.loadUnassignedUsers();
+    } else {
+      this.loadManagersWithRelationships();
+    }
   }
 
   toggleSortOrder(): void {
@@ -423,8 +528,14 @@ export class AdminUserRelationships implements OnInit {
 
   clearSearch(): void {
     this.searchTerm = '';
+    this.searchBy = UserSearchType.Global;
+    this.currentSearchTerm = '';
+    this.currentSearchBy = UserSearchType.Global;
+    this.currentHighlightTerm = '';
     this.currentPageManagers = 1;
+    this.currentPageUnassignedUsers = 1;
     this.loadManagersWithRelationships();
+    this.loadUnassignedUsers();
   }
 
   isManager(userId: number | undefined): boolean {
@@ -524,6 +635,34 @@ export class AdminUserRelationships implements OnInit {
     if (event.key === 'Enter') {
       this.onSearch();
     }
+  }
+
+  getHighlightTerm(fieldType: 'name' | 'email' | 'jobTitle'): string {
+    if (!this.currentHighlightTerm) return '';
+
+    switch (this.currentSearchBy) {
+      case UserSearchType.Global:
+        return this.currentHighlightTerm; // Highlight în toate câmpurile
+      case UserSearchType.ManagerName:
+      case UserSearchType.EmployeeName:
+      case UserSearchType.UnassignedName:
+        return fieldType === 'name' ? this.currentHighlightTerm : '';
+      case UserSearchType.ManagerEmail:
+      case UserSearchType.EmployeeEmail:
+        return fieldType === 'email' ? this.currentHighlightTerm : '';
+      case UserSearchType.JobTitle:
+        return fieldType === 'jobTitle' ? this.currentHighlightTerm : '';
+      default:
+        return '';
+    }
+  }
+
+  getInitials(fullName: string): string {
+    if (!fullName) return '';
+    const names = fullName.split(' ');
+    const firstInitial = names[0]?.charAt(0).toUpperCase() || '';
+    const lastInitial = names[names.length - 1]?.charAt(0).toUpperCase() || '';
+    return firstInitial + lastInitial;
   }
 
   closeAssignModal() {

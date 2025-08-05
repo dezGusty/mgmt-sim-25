@@ -42,6 +42,10 @@ export class UsersService {
     if (params?.globalSearch) {
       paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
     }
+
+    if(params?.status != null) {
+      paramsToSend = paramsToSend.set('activityStatus', params.status);
+    }
     
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
@@ -69,12 +73,34 @@ export class UsersService {
   getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
 
+    // Search parameters
+    if (params?.globalSearch) {
+      paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
+    }
+    
+    if (params?.unassignedName) {
+      paramsToSend = paramsToSend.set('unassignedName', params.unassignedName);
+    }
+    
+    if (params?.jobTitle) {
+      paramsToSend = paramsToSend.set('jobTitle', params.jobTitle);
+    }
+
+    // Pagination parameters
+    if (params?.params.sortBy) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+    }
+    
+    if (params?.params.sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+    }
+    
     if (params?.params.page) {
-      paramsToSend = paramsToSend.set('page', params.params.page.toString());
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
     }
     
     if (params?.params.pageSize) {
-      paramsToSend = paramsToSend.set('pageSize', params.params.pageSize.toString());
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
     }
 
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/unassignedUsers/queried`, { params: paramsToSend });
@@ -82,6 +108,11 @@ export class UsersService {
 
   getUsersIncludeRelationshipsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
+    
+    // Search parameters
+    if (params?.globalSearch) {
+      paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
+    }
     
     if (params?.lastName) {
       paramsToSend = paramsToSend.set('lastName', params.lastName);
@@ -91,6 +122,31 @@ export class UsersService {
       paramsToSend = paramsToSend.set('email', params.email);
     }
     
+    if (params?.employeeName) {
+      paramsToSend = paramsToSend.set('employeeName', params.employeeName);
+    }
+    
+    if (params?.employeeEmail) {
+      paramsToSend = paramsToSend.set('employeeEmail', params.employeeEmail);
+    }
+    
+    if (params?.managerName) {
+      paramsToSend = paramsToSend.set('managerName', params.managerName);
+    }
+    
+    if (params?.managerEmail) {
+      paramsToSend = paramsToSend.set('managerEmail', params.managerEmail);
+    }
+    
+    if (params?.jobTitle) {
+      paramsToSend = paramsToSend.set('jobTitle', params.jobTitle);
+    }
+    
+    if (params?.department) {
+      paramsToSend = paramsToSend.set('department', params.department);
+    }
+    
+    // Pagination parameters
     if (params?.params.sortBy) {
       paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
     }

@@ -11,6 +11,7 @@ import { IApiResponse } from '../../../models/responses/iapi-response';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { HttpErrorResponse } from '@angular/common/http';
+import { JobTitleActivityStatus } from '../../../models/enums/job-title-activity-status';
 
 @Component({
   selector: 'app-admin-job-titles-list',
@@ -21,6 +22,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class AdminJobTitlesList implements OnInit {
   jobTitles: IJobTitleViewModel[] = [];
   searchTerm: string = '';
+  searchBy: 'global' | 'inactiveStatus' | 'activeStatus' = 'global';
   sortDescending: boolean = false;
   
   currentPage: number = 1;
@@ -56,8 +58,9 @@ export class AdminJobTitlesList implements OnInit {
   this.errorMessage = '';
 
   const filterRequest: IFilteredJobTitlesRequest = {
-    jobTitleName: this.searchTerm,
-    includeDeleted: true,
+    jobTitleName: this.searchTerm ? this.searchTerm : undefined,
+    activityStatus: this.searchBy === 'activeStatus' ? JobTitleActivityStatus.ACTIVE 
+      : this.searchBy === 'inactiveStatus' ? JobTitleActivityStatus.INACTIVE : JobTitleActivityStatus.ALL,
     params: {
       sortBy: 'name',
       sortDescending: this.sortDescending,

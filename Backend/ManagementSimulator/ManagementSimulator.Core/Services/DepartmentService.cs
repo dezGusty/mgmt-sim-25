@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Departments;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
+using ManagementSimulator.Core.Enums;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
@@ -103,8 +104,47 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<DepartmentResponseDto>> GetAllDepartmentsFilteredAsync(QueriedDepartmentRequestDto payload)
         {
-            var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams(), 
-                includeDeleted: payload.IncludeDeleted ?? false, tracking: false);
+            if (payload.ActivityStatus != null && payload.ActivityStatus == DepartmentActivityStatus.INACTIVE)
+            {
+                var (deletedResult, deletedTotalCount) = await _repository.GetAllDepartmentsFilteredAsync(
+                    payload.Name,
+                    payload.PagedQueryParams.ToQueryParams(),
+                    includeDeleted: true
+                );
+
+                if (deletedResult == null || !deletedResult.Any())
+                    return new PagedResponseDto<DepartmentResponseDto>
+                    {
+                        Data = new List<DepartmentResponseDto>(),
+                        Page = payload.PagedQueryParams.Page ?? 1,
+                        PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                        TotalPages = 0
+                    };
+
+                return new PagedResponseDto<DepartmentResponseDto>
+                {
+                    Data = deletedResult.Select(d => new DepartmentResponseDto
+                    {
+                        Id = d.Id,
+                        Name = d.Name,
+                        Description = d.Description,
+                        EmployeeCount = d.EmployeeCount,
+                        DeletedAt = d.DeletedAt,
+                    }).ToList(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = payload.PagedQueryParams.PageSize != null ?
+                        (int)Math.Ceiling((double)deletedTotalCount / (int)payload.PagedQueryParams.PageSize) : 1
+                };
+            }
+
+            bool includeDeleted = payload.ActivityStatus == null || payload.ActivityStatus == DepartmentActivityStatus.ALL;
+
+            var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(
+                payload.Name,
+                payload.PagedQueryParams.ToQueryParams(),
+                includeDeleted: includeDeleted
+            );
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<DepartmentResponseDto>
@@ -123,12 +163,12 @@ namespace ManagementSimulator.Core.Services
                     Name = d.Name,
                     Description = d.Description,
                     EmployeeCount = d.EmployeeCount,
-                    DeletedAt = d.DeletedAt
-                }),
+                    DeletedAt = d.DeletedAt,
+                }).ToList(),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
 

@@ -13,6 +13,7 @@ import { IQueryParams } from '../../../../models/requests/iquery-params';
 import { IFilteredDepartmentsRequest } from '../../../../models/requests/ifiltered-departments-request';
 import { IFilteredJobTitlesRequest } from '../../../../models/requests/ifiltered-job-titles-request';
 import { IDepartment } from '../../../../models/entities/idepartment';
+import { JobTitleActivityStatus } from '../../../../models/enums/job-title-activity-status';
 
 interface NotificationMessage {
   type: 'success' | 'error' | 'info';
@@ -100,7 +101,7 @@ export class AddUser {
         
         const params: IFilteredDepartmentsRequest = {
           name: this.searchTextDepartments.trim() || undefined,
-          includeDeleted: false,
+          activityStatus: 0,
           params: {
             page: this.currentPageDepartment,
             pageSize: this.pageSizeDepartments,
@@ -152,7 +153,7 @@ export class AddUser {
     
     const params: IFilteredJobTitlesRequest = {
       jobTitleName: this.searchTextJobTitles.trim() || undefined,
-      includeDeleted: false,
+      activityStatus: JobTitleActivityStatus.ACTIVE,
       params: {
         page: this.currentPageJobTitles,
         pageSize: this.pageSizeJobTitles,

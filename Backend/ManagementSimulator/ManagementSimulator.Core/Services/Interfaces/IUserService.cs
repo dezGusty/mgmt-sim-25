@@ -15,7 +15,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(int page, int pageSize);
+        Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload);
         Task<List<User>> GetAllAdminsAsync(string? lastName, string? email);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsFilteredAsync(QueriedUserRequestDto payload);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload);

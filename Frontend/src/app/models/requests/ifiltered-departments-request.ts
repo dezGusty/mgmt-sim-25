@@ -1,7 +1,8 @@
 import { IQueryParams } from "./iquery-params";
+import { SearchType } from "../enums/search-type";
 
 export interface IFilteredDepartmentsRequest {
     name?: string;
-    includeDeleted?: boolean;
+    activityStatus?: SearchType;
     params : IQueryParams; 
 }
