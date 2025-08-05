@@ -10,6 +10,7 @@ export interface ILeaveRequest {
   createdAtDate: Date;
   comment?: string;
   leaveTypeDescription: string;
+  departmentName: string;
   leaveType?: {
     id: number;
     title: string;

@@ -10,6 +10,12 @@
             <h3 class="text-lg font-semibold text-slate-900">
               {{ req.employeeName }}
             </h3>
+            <span
+              *ngIf="req.departmentName"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700"
+            >
+              {{ req.departmentName }}
+            </span>
           </div>
           <span
             class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium shadow-sm"
@@ -170,6 +176,9 @@
           Employee
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+          Department
+        </th>
+        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
           Dates
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
@@ -201,6 +210,9 @@
         }"
       >
         <td class="px-6 py-4 text-sm text-gray-900">{{ req.employeeName }}</td>
+        <td class="px-6 py-4 text-sm text-gray-700">
+          {{ req.departmentName || "-" }}
+        </td>
         <td class="px-6 py-4 text-sm text-gray-700">
           {{ req.from }}–{{ req.to }}
         </td>

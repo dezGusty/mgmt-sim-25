@@ -71,6 +71,7 @@ export class AddRequests implements OnInit {
                 comment: item.reviewerComment,
                 createdAtDate: new Date(item.createdAt),
                 leaveTypeDescription: leaveTypeDescription,
+                departmentName: item.departmentName,
                 leaveType: leaveTypeData
                   ? {
                       id: leaveTypeData.id,

@@ -233,7 +233,7 @@ namespace ManagementSimulator.Core.Services
             var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
-            var allRequests = await _leaveRequestRepository.GetAllAsync();
+            var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsAsync();
             var filtered = allRequests
                 .Where(r => employeeIds.Contains(r.UserId))
                 .Select(r => r.ToLeaveRequestResponseDto())

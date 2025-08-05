@@ -20,5 +20,6 @@ namespace ManagementSimulator.Core.Dtos.Responses.LeaveRequest
         public string Reason { get; set; } = string.Empty;
         public RequestStatus RequestStatus { get; set; }
         public string ReviewerComment { get; set; } = string.Empty;
+        public string DepartmentName { get; set; } = string.Empty;
     }
 }

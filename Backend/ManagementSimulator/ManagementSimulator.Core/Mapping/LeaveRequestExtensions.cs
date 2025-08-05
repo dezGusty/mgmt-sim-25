@@ -25,6 +25,7 @@ namespace ManagementSimulator.Core.Mapping
                 RequestStatus = entity.RequestStatus,
                 ReviewerComment = entity.ReviewerComment ?? string.Empty,
                 CreatedAt = entity.CreatedAt,
+                DepartmentName = entity.User?.Department?.Name ?? string.Empty,
             };
         }
 
