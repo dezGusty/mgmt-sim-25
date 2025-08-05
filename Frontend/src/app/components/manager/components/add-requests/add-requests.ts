@@ -85,9 +85,18 @@ export class AddRequests implements OnInit {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.loadRequests();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex] = {
+              ...this.requests[requestIndex],
+              status: 'Approved',
+              comment: data.comment || '',
+            };
+          }
           this.dataRefreshed.emit();
         }
       });
@@ -101,16 +110,24 @@ export class AddRequests implements OnInit {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.loadRequests();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex] = {
+              ...this.requests[requestIndex],
+              status: 'Rejected',
+              comment: data.comment || '',
+            };
+          }
           this.dataRefreshed.emit();
         }
       });
   }
 
   onActionCompleted() {
-    this.loadRequests();
     this.dataRefreshed.emit();
   }
 

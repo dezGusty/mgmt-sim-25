@@ -70,12 +70,6 @@ export class CalendarView implements OnInit, OnChanges {
   updateLegend() {
     const leaveTypes = new Set<string>();
     this.filteredRequestsForCalendar.forEach((req) => {
-      console.log('Processing request for legend:', {
-        employee: req.employeeName,
-        leaveTypeTitle: req.leaveType?.title,
-        leaveType: req.leaveType,
-      });
-
       if (req.leaveType?.title) {
         leaveTypes.add(req.leaveType.title);
       }
@@ -308,14 +302,14 @@ export class CalendarView implements OnInit, OnChanges {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
           const requestIndex = this.requests.findIndex(
             (req) => req.id === data.id
           );
           if (requestIndex !== -1) {
             this.requests[requestIndex].status = 'Approved';
-            this.requests[requestIndex].comment = data.comment;
+            this.requests[requestIndex].comment = data.comment || '';
             this.requests = [...this.requests];
           }
           this.generateTableData();
