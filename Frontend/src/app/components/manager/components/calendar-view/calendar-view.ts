@@ -32,7 +32,7 @@ export class CalendarView implements OnInit, OnChanges {
   dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   calendarFilters = {
-    pending: false,
+    pending: true,
     approved: true,
     rejected: false,
   };
