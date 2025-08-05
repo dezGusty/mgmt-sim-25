@@ -9,70 +9,42 @@
         (click)="toggleFilter('pending')"
         class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
         [ngClass]="{
-          'bg-yellow-200 border-2 border-yellow-400 shadow-md':
+          'bg-gray-200 border-2 border-gray-400 shadow-md':
             calendarFilters.pending,
           'bg-gray-100 border border-gray-300 opacity-50':
             !calendarFilters.pending
         }"
       >
-        <div
-          class="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"
-        ></div>
+        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
         <span
           [ngClass]="{
-            'font-semibold text-yellow-800': calendarFilters.pending,
+            'font-semibold text-gray-800': calendarFilters.pending,
             'text-gray-500': !calendarFilters.pending
           }"
           >Pending</span
         >
-        <svg
-          *ngIf="calendarFilters.pending"
-          class="w-4 h-4 text-yellow-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
+        <span class="text-lg font-bold text-gray-600">?</span>
       </button>
 
       <button
         (click)="toggleFilter('approved')"
         class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
         [ngClass]="{
-          'bg-green-200 border-2 border-green-400 shadow-md':
+          'bg-gray-200 border-2 border-gray-400 shadow-md':
             calendarFilters.approved,
           'bg-gray-100 border border-gray-300 opacity-50':
             !calendarFilters.approved
         }"
       >
-        <div class="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
+        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
         <span
           [ngClass]="{
-            'font-semibold text-green-800': calendarFilters.approved,
+            'font-semibold text-gray-800': calendarFilters.approved,
             'text-gray-500': !calendarFilters.approved
           }"
           >Approved</span
         >
-        <svg
-          *ngIf="calendarFilters.approved"
-          class="w-4 h-4 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
+        <span class="text-lg font-bold text-gray-600">✓</span>
       </button>
     </div>
 
@@ -131,6 +103,21 @@
     </div>
   </div>
 
+  <div class="p-4 border-b bg-gray-50" *ngIf="legendItems.length > 0">
+    <h3 class="text-sm font-medium text-gray-700 mb-2">
+      Legenda tipuri concedii:
+    </h3>
+    <div class="flex flex-wrap gap-3">
+      <div *ngFor="let item of legendItems" class="flex items-center gap-2">
+        <div
+          class="w-4 h-4 rounded border border-gray-300"
+          [style.background-color]="item.color"
+        ></div>
+        <span class="text-sm text-gray-600">{{ item.title }}</span>
+      </div>
+    </div>
+  </div>
+
   <div
     class="overflow-x-auto max-h-[600px] overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
     (wheel)="onWheel($event)"
@@ -165,9 +152,10 @@
           </th>
           <th
             *ngFor="let date of calendarDates"
-            class="border border-gray-300 p-1 text-xs text-gray-600 min-w-[40px] bg-gray-50"
+            class="border border-gray-300 p-1 text-xs min-w-[40px]"
             [ngClass]="{
-              'bg-blue-200 font-bold': isToday(date)
+              'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
+              'bg-gray-50 text-gray-600': !isToday(date)
             }"
           >
             {{ date.getDate() }}
@@ -192,37 +180,25 @@
             *ngFor="let dateData of employeeData.dates"
             class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
             [ngClass]="{
-              'bg-green-200 hover:bg-green-300 text-green-800 font-bold':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                getStatusColor(dateData.requests[0].status).includes('green') &&
-                !isDateInHoveredRequest(dateData.date),
-              'bg-green-300 text-green-800 font-bold':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                getStatusColor(dateData.requests[0].status).includes('green') &&
-                isDateInHoveredRequest(dateData.date),
-              'bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                getStatusColor(dateData.requests[0].status).includes(
-                  'yellow'
-                ) &&
-                !isDateInHoveredRequest(dateData.date),
-              'bg-yellow-300 text-yellow-800 font-bold':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                getStatusColor(dateData.requests[0].status).includes(
-                  'yellow'
-                ) &&
-                isDateInHoveredRequest(dateData.date),
               'hover:bg-gray-100': !dateData.hasLeave,
-              'bg-blue-200 font-bold': isToday(dateData.date),
               'cursor-pointer':
                 dateData.hasLeave && dateData.requests.length > 0,
               'cursor-default':
-                !dateData.hasLeave || dateData.requests.length === 0
+                !dateData.hasLeave || dateData.requests.length === 0,
+              'opacity-75':
+                dateData.hasLeave &&
+                dateData.requests.length > 0 &&
+                !isDateInHoveredRequest(dateData.date, employeeData.employee),
+              'opacity-100 ring-2 ring-gray-400':
+                dateData.hasLeave &&
+                dateData.requests.length > 0 &&
+                isDateInHoveredRequest(dateData.date, employeeData.employee)
             }"
+            [style.background-color]="
+              dateData.hasLeave && dateData.requests.length > 0
+                ? getLeaveTypeColor(dateData.requests[0])
+                : ''
+            "
             (click)="onCellClick(employeeData.employee, dateData.date)"
             (mouseenter)="
               dateData.hasLeave && dateData.requests.length > 0
@@ -236,7 +212,12 @@
                 : ''
             "
           >
-            <span *ngIf="dateData.hasLeave" class="text-xs font-bold"> ✓ </span>
+            <span
+              *ngIf="dateData.hasLeave && dateData.requests.length > 0"
+              class="text-lg font-bold text-white text-shadow"
+            >
+              {{ getStatusIcon(dateData.requests[0].status) }}
+            </span>
           </td>
         </tr>
       </tbody>

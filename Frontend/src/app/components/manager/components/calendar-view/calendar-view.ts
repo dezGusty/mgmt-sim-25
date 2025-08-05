@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { CalendarUtils, CalendarDay } from '../../../../utils/calendar.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
+import { ColorUtils } from '../../../../utils/color.utils';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { RequestDetail } from '../request-detail/request-detail';
 
@@ -52,6 +53,8 @@ export class CalendarView implements OnInit, OnChanges {
   startMonth = this.currentMonth;
   startYear = this.currentYear;
 
+  legendItems: { title: string; color: string }[] = [];
+
   constructor(private leaveRequests: LeaveRequests) {}
 
   ngOnInit() {
@@ -62,6 +65,37 @@ export class CalendarView implements OnInit, OnChanges {
     if (changes['requests']) {
       this.generateTableData();
     }
+  }
+
+  updateLegend() {
+    const leaveTypes = new Set<string>();
+    this.filteredRequestsForCalendar.forEach((req) => {
+      console.log('Processing request for legend:', {
+        employee: req.employeeName,
+        leaveTypeDescription: req.leaveTypeDescription,
+        leaveTypeTitle: req.leaveType?.title,
+        leaveType: req.leaveType,
+      });
+
+      if (req.leaveType?.title) {
+        leaveTypes.add(req.leaveType.title);
+      }
+    });
+
+    console.log('Unique leave types found:', Array.from(leaveTypes));
+
+    this.legendItems = Array.from(leaveTypes).map((type) => ({
+      title: type,
+      color: ColorUtils.generateColorForLeaveType(type),
+    }));
+
+    console.log('Legend items created:', this.legendItems);
+  }
+
+  getLeaveTypeColor(request: ILeaveRequest): string {
+    return ColorUtils.generateColorForLeaveType(
+      request.leaveType?.title || 'Unknown'
+    );
   }
 
   get filteredRequestsForCalendar(): ILeaveRequest[] {
@@ -79,12 +113,24 @@ export class CalendarView implements OnInit, OnChanges {
   generateTableData() {
     const filteredRequests = this.filteredRequestsForCalendar;
 
+    console.log('All filtered requests:', filteredRequests);
+    console.log(
+      'Leave type descriptions:',
+      filteredRequests.map((req) => ({
+        employee: req.employeeName,
+        leaveTypeDescription: req.leaveTypeDescription,
+        leaveType: req.leaveType,
+        status: req.status,
+      }))
+    );
+
     this.employees = [
       ...new Set(filteredRequests.map((req) => req.employeeName)),
     ].sort();
 
     this.generateCalendarDates();
     this.generateMonthHeaders();
+    this.updateLegend();
 
     this.tableData = this.employees.map((employee) => ({
       employee,
@@ -232,8 +278,12 @@ export class CalendarView implements OnInit, OnChanges {
     this.hoveredRequest = null;
   }
 
-  isDateInHoveredRequest(date: Date): boolean {
+  isDateInHoveredRequest(date: Date, employee: string): boolean {
     if (!this.hoveredRequest) {
+      return false;
+    }
+
+    if (this.hoveredRequest.employeeName !== employee) {
       return false;
     }
 
@@ -262,6 +312,16 @@ export class CalendarView implements OnInit, OnChanges {
       .subscribe((res) => {
         if (res) {
           this.closeDetails();
+          // Update the local request status immediately
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].status = 'Approved';
+            this.requests[requestIndex].comment = data.comment;
+            // Create new array reference to trigger change detection
+            this.requests = [...this.requests];
+          }
           this.generateTableData();
         }
       });
@@ -277,8 +337,41 @@ export class CalendarView implements OnInit, OnChanges {
       .subscribe((res) => {
         if (res) {
           this.closeDetails();
+          // Update the local request status immediately
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].status = 'Rejected';
+            this.requests[requestIndex].comment = data.comment;
+            // Create new array reference to trigger change detection
+            this.requests = [...this.requests];
+          }
           this.generateTableData();
         }
       });
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return '✓';
+      case 'pending':
+        return '?';
+      default:
+        return '•';
+    }
+  }
+
+  onRequestAdded(newRequest: any) {
+    // Add the new request to the existing requests array
+    this.requests = [...this.requests, newRequest];
+    // Regenerate the calendar data to include the new request
+    this.generateTableData();
+  }
+
+  refreshCalendarData() {
+    // Method to manually refresh calendar data if needed
+    this.generateTableData();
   }
 }
