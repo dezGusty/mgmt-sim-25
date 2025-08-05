@@ -244,6 +244,7 @@
       [request]="selectedRequest"
       (approve)="onApprove($event)"
       (reject)="onReject($event)"
+      (actionCompleted)="onActionCompleted()"
     ></app-request-detail>
     <button
       class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"

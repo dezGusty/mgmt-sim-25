@@ -20,6 +20,7 @@ export class AddRequests implements OnInit {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
   @Input() searchTerm: string = '';
+  @Output() dataRefreshed = new EventEmitter<void>();
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
@@ -37,7 +38,17 @@ export class AddRequests implements OnInit {
     this.leaveRequests.fetchByManager().subscribe((apiData) => {
       if (apiData.success && Array.isArray(apiData.data)) {
         const requestsRaw = apiData.data;
-        this.requests = [];
+        const tempRequests: ILeaveRequest[] = [];
+        let completedRequests = 0;
+        const totalRequests = requestsRaw.filter(
+          (item: any) => item.requestStatus !== 32
+        ).length;
+
+        if (totalRequests === 0) {
+          this.requests = [];
+          return;
+        }
+
         requestsRaw.forEach((item: any) => {
           if (item.requestStatus === 32) {
             return;
@@ -48,7 +59,7 @@ export class AddRequests implements OnInit {
             .subscribe((typeRes) => {
               const leaveTypeData = typeRes?.data;
               const leaveTypeDescription = leaveTypeData?.description || '';
-              this.requests.push({
+              tempRequests.push({
                 id: String(item.id),
                 employeeName: item.fullName,
                 status: StatusUtils.mapStatus(item.requestStatus),
@@ -71,9 +82,17 @@ export class AddRequests implements OnInit {
                   : undefined,
               });
 
-              this.requests.sort(
-                (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-              );
+              completedRequests++;
+
+              // Only update the requests array when all async operations are complete
+              if (completedRequests === totalRequests) {
+                tempRequests.sort(
+                  (a, b) =>
+                    b.createdAtDate.getTime() - a.createdAtDate.getTime()
+                );
+                // Create a new array reference to trigger ngOnChanges in child components
+                this.requests = [...tempRequests];
+              }
             });
         });
       }
@@ -99,6 +118,7 @@ export class AddRequests implements OnInit {
         if (res) {
           this.closeDetails();
           this.loadRequests();
+          this.dataRefreshed.emit();
         }
       });
   }
@@ -114,8 +134,14 @@ export class AddRequests implements OnInit {
         if (res) {
           this.closeDetails();
           this.loadRequests();
+          this.dataRefreshed.emit();
         }
       });
+  }
+
+  onActionCompleted() {
+    this.loadRequests();
+    this.dataRefreshed.emit();
   }
 
   get filteredRequests(): ILeaveRequest[] {

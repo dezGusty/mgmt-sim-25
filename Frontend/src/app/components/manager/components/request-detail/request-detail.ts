@@ -13,5 +13,6 @@ export class RequestDetail {
   @Input() request: ILeaveRequest | null = null;
   @Output() approve = new EventEmitter<{ id: string; comment?: string }>();
   @Output() reject = new EventEmitter<{ id: string; comment?: string }>();
+  @Output() actionCompleted = new EventEmitter<void>();
   pendingComment: string = '';
 }

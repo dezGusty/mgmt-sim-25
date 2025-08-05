@@ -213,7 +213,20 @@ export class AddRequestForm implements OnInit {
             'Request created and auto-approved successfully:',
             createdRequest
           );
-          this.requestAdded.emit(createdRequest);
+
+          // Emit the properly formatted request
+          const formattedRequest = {
+            ...createdRequest,
+            // Ensure the request has the proper structure for the calendar
+            leaveType: this.leaveTypes.find(
+              (type) => type.id === this.leaveRequestTypeId
+            ),
+            employeeName:
+              this.employees.find((emp) => emp.id === this.userId)?.name ||
+              'Unknown',
+          };
+
+          this.requestAdded.emit(formattedRequest);
           this.handleClose();
         },
         error: (err) => {
