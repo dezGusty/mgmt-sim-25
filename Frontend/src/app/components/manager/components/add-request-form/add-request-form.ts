@@ -6,6 +6,10 @@ import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { LeaveRequestService } from '../../../../services/leaveRequest/leaveRequest.service';
 import { FormUtils } from '../../../../utils/form.utils';
+import { ILeaveRequest } from '../../../../models/leave-request';
+import { CreateLeaveRequestResponse } from '../../../../models/create-leave-request-response';
+import { StatusUtils } from '../../../../utils/status.utils';
+import { DateUtils } from '../../../../utils/date.utils';
 
 @Component({
   selector: 'app-add-request-form',
@@ -207,24 +211,36 @@ export class AddRequestForm implements OnInit {
         reason: this.reason || '',
       })
       .subscribe({
-        next: (createdRequest) => {
+        next: (response) => {
           this.isSubmitting = false;
           console.log(
             'Request created and auto-approved successfully:',
-            createdRequest
+            response
           );
 
-          const formattedRequest = {
-            ...createdRequest,
-            leaveType: this.leaveTypes.find(
-              (type) => type.id === this.leaveRequestTypeId
-            ),
-            employeeName:
-              this.employees.find((emp) => emp.id === this.userId)?.name ||
-              'Unknown',
-          };
+          // Backend now returns all the data we need - create ILeaveRequest directly
+          if (response.success && response.data) {
+            const backendData = response.data;
+            const formattedRequest: ILeaveRequest = {
+              id: backendData.id.toString(),
+              employeeName: backendData.fullName,
+              status: StatusUtils.mapStatus(backendData.requestStatus),
+              from: DateUtils.formatDate(backendData.startDate),
+              to: DateUtils.formatDate(backendData.endDate),
+              reason: backendData.reason,
+              createdAt: DateUtils.formatDate(backendData.createdAt),
+              comment: backendData.reviewerComment,
+              createdAtDate: new Date(backendData.createdAt),
+              departmentName: backendData.departmentName,
+              leaveType: {
+                title: backendData.leaveRequestTypeName,
+                isPaid: backendData.leaveRequestTypeIsPaid,
+              },
+            };
 
-          this.requestAdded.emit(formattedRequest);
+            this.requestAdded.emit(formattedRequest);
+          }
+
           this.handleClose();
         },
         error: (err) => {

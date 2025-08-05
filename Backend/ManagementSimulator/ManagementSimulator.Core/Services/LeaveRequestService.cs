@@ -82,7 +82,9 @@ namespace ManagementSimulator.Core.Services
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
-            return leaveRequest.ToCreateLeaveRequestResponseDto();
+            
+            var savedLeaveRequest = await _leaveRequestRepository.GetLeaveRequestWithDetailsAsync(leaveRequest.Id);
+            return savedLeaveRequest.ToCreateLeaveRequestResponseDto();
         }
 
         public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestByEmployeeAsync(CreateLeaveRequestByEmployeeDto dto, int userId)
@@ -139,7 +141,9 @@ namespace ManagementSimulator.Core.Services
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
-            return leaveRequest.ToCreateLeaveRequestResponseDto();
+
+            var savedLeaveRequest = await _leaveRequestRepository.GetLeaveRequestWithDetailsAsync(leaveRequest.Id);
+            return savedLeaveRequest.ToCreateLeaveRequestResponseDto();
         }
 
 

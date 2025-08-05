@@ -15,6 +15,7 @@ namespace ManagementSimulator.Core.Dtos.Responses.LeaveRequest
         public string FullName { get; set; }
         public int? ReviewerId { get; set; }
         public int LeaveRequestTypeId { get; set; }
+        public string LeaveRequestTypeName { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Reason { get; set; } = string.Empty;

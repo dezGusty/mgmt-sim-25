@@ -171,7 +171,7 @@
     <div class="mb-6" *ngIf="showAddRequestForm">
       <app-add-request-form
         (close)="showAddRequestForm = false"
-        (requestAdded)="onRequestAdded()"
+        (requestAdded)="onRequestAdded($event)"
       />
     </div>
 

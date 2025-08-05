@@ -72,7 +72,6 @@ export class CalendarView implements OnInit, OnChanges {
     this.filteredRequestsForCalendar.forEach((req) => {
       console.log('Processing request for legend:', {
         employee: req.employeeName,
-        leaveTypeDescription: req.leaveTypeDescription,
         leaveTypeTitle: req.leaveType?.title,
         leaveType: req.leaveType,
       });
@@ -118,7 +117,6 @@ export class CalendarView implements OnInit, OnChanges {
       'Leave type descriptions:',
       filteredRequests.map((req) => ({
         employee: req.employeeName,
-        leaveTypeDescription: req.leaveTypeDescription,
         leaveType: req.leaveType,
         status: req.status,
       }))

@@ -5,6 +5,7 @@ import { AddRequests } from './components/add-requests/add-requests';
 import { AddRequestForm } from './components/add-request-form/add-request-form';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ILeaveRequest } from '../../models/leave-request';
 
 @Component({
   selector: 'app-manager-main-page',
@@ -28,8 +29,8 @@ export class ManagerMainPage {
 
   viewMode: 'card' | 'table' | 'calendar' = 'table';
 
-  onRequestAdded() {
-    this.addRequestsComponent.loadRequests();
+  onRequestAdded(newRequest: ILeaveRequest) {
+    this.addRequestsComponent.addRequest(newRequest);
   }
 
   goBack() {

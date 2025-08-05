@@ -4,18 +4,13 @@ export interface ILeaveRequest {
   status: 'Pending' | 'Approved' | 'Rejected';
   from: string;
   to: string;
-  days: number;
   reason: string;
   createdAt: string;
   createdAtDate: Date;
   comment?: string;
-  leaveTypeDescription: string;
   departmentName: string;
   leaveType?: {
-    id: number;
     title: string;
-    description: string;
-    maxDays: number;
     isPaid: boolean;
   };
 }

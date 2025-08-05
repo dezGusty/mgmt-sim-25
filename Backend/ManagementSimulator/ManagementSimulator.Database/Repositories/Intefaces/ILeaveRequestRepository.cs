@@ -14,5 +14,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<LeaveRequest>> GetOverlappingRequestsAsync(int userId, DateTime startDate, DateTime endDate, bool tracking = false);
         Task<List<LeaveRequest>> GetLeaveRequestsByUserAndTypeAsync(int userId, int leaveRequestTypeId, int year, bool includeDeleted = false, bool tracking = false);
         Task<List<LeaveRequest>> GetAllWithRelationshipsAsync(bool includeDeleted = false, bool tracking = false);
+        Task<LeaveRequest> GetLeaveRequestWithDetailsAsync(int id, bool includeDeleted = false, bool tracking = false);
     }
 }
