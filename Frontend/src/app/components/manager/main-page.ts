@@ -24,10 +24,24 @@ export class ManagerMainPage {
   showAddRequestForm = false;
   currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'Pending';
   searchTerm: string = '';
+  searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
 
   constructor(private router: Router) {}
 
   viewMode: 'card' | 'table' | 'calendar' = 'table';
+
+  getSearchPlaceholder(): string {
+    switch (this.searchCriteria) {
+      case 'employee':
+        return 'Search by employee name...';
+      case 'department':
+        return 'Search by department...';
+      case 'type':
+        return 'Search by leave type...';
+      default:
+        return 'Search by all fields...';
+    }
+  }
 
   onRequestAdded(newRequest: ILeaveRequest) {
     this.addRequestsComponent.addRequest(newRequest);

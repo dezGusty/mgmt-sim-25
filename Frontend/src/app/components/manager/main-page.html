@@ -54,6 +54,17 @@
         class="flex items-center gap-2 flex-1 max-w-md mx-4"
         *ngIf="viewMode !== 'calendar'"
       >
+        <div class="relative">
+          <select
+            [(ngModel)]="searchCriteria"
+            class="px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white min-w-[120px]"
+          >
+            <option value="all">All</option>
+            <option value="employee">Employee</option>
+            <option value="department">Department</option>
+            <option value="type">Type Name</option>
+          </select>
+        </div>
         <div class="relative flex-1">
           <svg
             class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -70,9 +81,9 @@
           </svg>
           <input
             type="text"
-            placeholder="Search by employee name..."
+            [placeholder]="getSearchPlaceholder()"
             [(ngModel)]="searchTerm"
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
           />
         </div>
       </div>
@@ -180,6 +191,7 @@
       [filter]="currentFilter"
       [viewMode]="viewMode"
       [searchTerm]="searchTerm"
+      [searchCriteria]="searchCriteria"
     />
   </div>
 </main>

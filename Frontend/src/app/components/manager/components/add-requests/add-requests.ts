@@ -19,6 +19,7 @@ export class AddRequests implements OnInit {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'table';
   @Input() searchTerm: string = '';
+  @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
   @Output() dataRefreshed = new EventEmitter<void>();
 
   requests: ILeaveRequest[] = [];
@@ -183,11 +184,25 @@ export class AddRequests implements OnInit {
     let filtered = RequestUtils.filterRequests(this.requests, this.filter);
 
     if (this.searchTerm) {
-      filtered = filtered.filter((request) =>
-        request.employeeName
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((request) => {
+        const searchTermLower = this.searchTerm.toLowerCase();
+        
+        switch (this.searchCriteria) {
+          case 'employee':
+            return request.employeeName.toLowerCase().includes(searchTermLower);
+          case 'department':
+            return (request.departmentName || '').toLowerCase().includes(searchTermLower);
+          case 'type':
+            return (request.leaveType?.title || '').toLowerCase().includes(searchTermLower);
+          case 'all':
+          default:
+            return (
+              request.employeeName.toLowerCase().includes(searchTermLower) ||
+              (request.departmentName || '').toLowerCase().includes(searchTermLower) ||
+              (request.leaveType?.title || '').toLowerCase().includes(searchTermLower)
+            );
+        }
+      });
     }
 
     return this.sortRequests(filtered);
