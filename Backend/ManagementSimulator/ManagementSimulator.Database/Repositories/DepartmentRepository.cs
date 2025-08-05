@@ -49,14 +49,14 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllInactiveDepartmentsFilteredAsync(string? name, QueryParams parameters)
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllInactiveDepartmentsFilteredAsync(string? name, QueryParams parameters, bool tracking = false)
         {
             IQueryable<Department> query = _dbContext.Departments;
 
-            query = query.Where(d => d.DeletedAt != null).Include(d => d.Users);
-
             if (!tracking)
                 query = query.AsNoTracking();
+
+            query = query.Where(d => d.DeletedAt != null).Include(d => d.Users);
 
             // Filtering
             if (!string.IsNullOrEmpty(name))
@@ -112,11 +112,14 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Department> query = _dbContext.Departments;
             if (!includeDeleted)
                 query = query.Where(d => d.DeletedAt == null);
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             query = query.Include(d => d.Users);
 
@@ -137,7 +140,7 @@ namespace ManagementSimulator.Database.Repositories
                     EmployeeCount = d.Users.Count,
                     DeletedAt = d.DeletedAt
                 }).ToListAsync(), totalCount);
-
+            
             // Sorting
             if (string.IsNullOrEmpty(parameters.SortBy))
                 query = query.OrderBy(d => d.Id);

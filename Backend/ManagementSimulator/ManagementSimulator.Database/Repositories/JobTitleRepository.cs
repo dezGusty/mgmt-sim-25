@@ -127,9 +127,12 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<JobTitle> Data, int TotalCount)> GetAllInactiveJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters)
+        public async Task<(List<JobTitle> Data, int TotalCount)> GetAllInactiveJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters, bool tracking = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             query = query.Where(jt => jt.DeletedAt != null).Include(jt => jt.Users);
 

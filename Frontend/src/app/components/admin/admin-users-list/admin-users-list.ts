@@ -80,7 +80,7 @@ export class AdminUsersList implements OnInit {
     this.errorMessage = '';
     console.log(this.searchByActivityStatus);
     const filterRequest: IFilteredUsersRequest = {
-      lastName: this.searchBy === 'name' ? this.searchTerm : undefined,
+      name: this.searchBy === 'name' ? this.searchTerm : undefined,
       email: this.searchBy === 'email' ? this.searchTerm : undefined,
       department: this.searchBy === 'department' ? this.searchTerm : undefined,
       jobTitle: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,

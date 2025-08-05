@@ -442,12 +442,12 @@ namespace ManagementSimulator.Core.Services
                     JobTitleName = jobTitle?.Name ?? string.Empty,
                     DepartmentId = department.Id,
                     DepartmentName = department.Name ?? string.Empty,
-                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.EmployeeId)).ToList(),
-                    SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
-                    SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Email ?? string.Empty)).ToList(),
-                    SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
-                    SubordinatesJobTitleIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.JobTitleId)).ToList(),
-                    ManagersIds = managers.SelectMany(u => u.Managers.Select(m => m.ManagerId)).ToList(),
+                    SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.EmployeeId)).ToList(),
+                    SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
+                    SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.Employee.Email ?? string.Empty)).ToList(),
+                    SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
+                    SubordinatesJobTitleIds = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.Employee.JobTitleId)).ToList(),
+                    ManagersIds = managers.SelectMany(u => u.Managers.Where(s => s.DeletedAt == null).Select(m => m.ManagerId)).ToList(),
                 };
             }).ToList();
 
@@ -465,7 +465,7 @@ namespace ManagementSimulator.Core.Services
         {
             if(payload.ActivityStatus != null && payload.ActivityStatus == Enums.UserActivityStatus.INACTIVE)
             {
-                var (deletedUsers, deletedTotalCount) = await _userRepository.GetAllInactiveUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams());
+                var (deletedUsers, deletedTotalCount) = await _userRepository.GetAllInactiveUsersWithReferencesFilteredAsync(payload.Name, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams());
 
                 if (deletedUsers == null || !deletedUsers.Any())
                     return new PagedResponseDto<UserResponseDto>
@@ -500,7 +500,7 @@ namespace ManagementSimulator.Core.Services
 
             bool includeDeleted = payload.ActivityStatus == null || payload.ActivityStatus == Enums.UserActivityStatus.ALL;
 
-            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.LastName, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams(), includeDeleted: includeDeleted);
+            var (users, totalCount) = await _userRepository.GetAllUsersWithReferencesFilteredAsync(payload.Name, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams(), includeDeleted: includeDeleted);
 
             if (users == null || !users.Any())
                 return new PagedResponseDto<UserResponseDto>

@@ -141,10 +141,10 @@ namespace ManagementSimulator.Database.Repositories
 
             query = query.Where(u => ids.Contains(u.Id))
                 .Include(u => u.Subordinates)
-                    .ThenInclude(em => em.Employee);
+                    .ThenInclude(em => em.Employee)
+                        .ThenInclude(u => u.Title);
 
             return await query.ToListAsync();
-
         }
 
         public async Task<List<User>> GetManagersByUserIdsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false)
@@ -164,7 +164,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<List<User>> GetAllAdminsAsync(string? lastName, string? email, bool includeDeleted = false, bool tracking = false)
+        public async Task<List<User>> GetAllAdminsAsync(string? name, string? email, bool includeDeleted = false, bool tracking = false)
         {
             var query = GetRecords(includeDeletedEntities: includeDeleted)
                 .Where(u => u.Roles.Where(r => r.DeletedAt == null).Any(r => r.Role.Rolename == "Admin"));
@@ -173,9 +173,9 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.AsNoTracking();
 
             // filtering 
-            if (!string.IsNullOrEmpty(lastName))
+            if (!string.IsNullOrEmpty(name))
             {
-                query = query.Where(u => u.LastName.Contains(lastName));
+                query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(name));
             }
 
             if (!string.IsNullOrEmpty(email))
@@ -186,7 +186,7 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false)
+        public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
                                      .Include(u => u.Roles.Where(r => r.DeletedAt == null))
@@ -201,8 +201,8 @@ namespace ManagementSimulator.Database.Repositories
             if (!tracking)
                 query = query.AsNoTracking();
 
-            // filtering 
-            if (!string.IsNullOrEmpty(lastName))
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(globalSearch))
             {
                 query = query.Where(u =>
                     u.FirstName.Contains(globalSearch) ||
@@ -286,7 +286,7 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch,
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? name, string? email, string? department, string? jobTitle, string? globalSearch,
             QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
@@ -317,9 +317,9 @@ namespace ManagementSimulator.Database.Repositories
             else
             {
                 // filtering 
-                if (!string.IsNullOrEmpty(lastName))
+                if (!string.IsNullOrEmpty(name))
                 {
-                    query = query.Where(u => u.LastName.Contains(lastName));
+                    query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(name));
                 }
                 if (!string.IsNullOrEmpty(email))
                 {
@@ -363,7 +363,7 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, string? globalSearch = null, string? unassignedName = null, string? jobTitle = null, bool includeDeleted = false)
+        public async Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, string? globalSearch = null, string? unassignedName = null, string? jobTitle = null, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
 
@@ -374,7 +374,7 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(u => u.DeletedAt == null);
 
             query = query.Include(u => u.Managers)
-                     .Where(u => u.Managers.Count == 0)
+                     .Where(u => u.Managers.Where(m => m.DeletedAt == null).Count() == 0)
                 .Include(u => u.Roles)
                     .ThenInclude(u => u.Role)
                 .Include(u => u.Title)
@@ -384,8 +384,7 @@ namespace ManagementSimulator.Database.Repositories
             if (!string.IsNullOrWhiteSpace(globalSearch))
             {
                 query = query.Where(u =>
-                    u.FirstName.Contains(globalSearch) ||
-                    u.LastName.Contains(globalSearch) ||
+                    (u.FirstName + " " + u.LastName).Contains(unassignedName) || 
                     u.Email.Contains(globalSearch) ||
                     (u.Title != null && u.Title.Name.Contains(globalSearch)) ||
                     (u.Department != null && u.Department.Name.Contains(globalSearch))
@@ -394,10 +393,7 @@ namespace ManagementSimulator.Database.Repositories
 
             if (!string.IsNullOrWhiteSpace(unassignedName))
             {
-                query = query.Where(u =>
-                    u.FirstName.Contains(unassignedName) ||
-                    u.LastName.Contains(unassignedName)
-                );
+                query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(unassignedName));
             }
 
             if (!string.IsNullOrWhiteSpace(jobTitle))
@@ -424,9 +420,12 @@ namespace ManagementSimulator.Database.Repositories
             }
         }
 
-        public async Task<(List<User>? Data, int TotalCount)> GetAllInactiveUsersWithReferencesFilteredAsync(string? lastName, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters)
+        public async Task<(List<User>? Data, int TotalCount)> GetAllInactiveUsersWithReferencesFilteredAsync(string? name, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool tracking = false)
         {
             IQueryable<User> query = _dbContext.Users;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             query = query.Where(u => u.DeletedAt != null)
                          .Include(u => u.Roles.Where(r => r.DeletedAt == null))
@@ -447,9 +446,9 @@ namespace ManagementSimulator.Database.Repositories
             else
             {
                 // filtering 
-                if (!string.IsNullOrEmpty(lastName))
+                if (!string.IsNullOrEmpty(name))
                 {
-                    query = query.Where(u => u.LastName.Contains(lastName));
+                    query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(name));
                 }
                 if (!string.IsNullOrEmpty(email))
                 {
@@ -479,7 +478,7 @@ namespace ManagementSimulator.Database.Repositories
             else
                 query = query.OrderBy(u => u.Id);
 
-            // paging 
+            // paging
             if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
             {
                 return (await query.ToListAsync(), totalCount);

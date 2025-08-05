@@ -16,34 +16,34 @@
     <!-- Search/Filter Section -->
     <div class="mb-5 p-4 bg-gray-50 border border-gray-200 rounded">
       <h4 class="mb-3 text-gray-700 text-base font-medium">Filter Managers:</h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Last Name:</label
-          >
+      <div class="flex gap-4 items-end" (click)="$event.stopPropagation()">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Search criteria:
+          </label>
           <input
             type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Search by last name..."
-            [(ngModel)]="filterParams.lastName"
-            (input)="onFilterChange()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [placeholder]="getSearchPlaceholder()"
+            [(ngModel)]="searchTerm"
+            (keypress)="onSearchKeypress($event)"
             [disabled]="isLoading"
           />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Email:</label
-          >
-          <input
-            type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Search by email..."
-            [(ngModel)]="filterParams.email"
-            (input)="onFilterChange()"
-            [disabled]="isLoading"
-          />
+        
+        <div class="w-40">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Search by:
+          </label>
+          <select 
+            [(ngModel)]="searchBy"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]">
+            <option value="name" [selected]="searchBy === 'name'">By name</option>
+            <option value="email" [selected]="searchBy === 'email'">By email</option>
+          </select>
         </div>
       </div>
+
       <div class="mt-3 flex gap-2">
         <button
           class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200"
@@ -59,14 +59,14 @@
       <h4 class="mb-4 text-gray-700 text-lg">
         Select Managers ({{ getSelectedManagersCount() }} selected)
         <span class="text-sm font-normal text-gray-500" *ngIf="totalCount > 0">
-          - Showing {{ displayedManagers.length }} of {{ totalCount }} total
+          - Showing {{ allManagers.length }} of {{ totalCount }} total
         </span>
       </h4>
 
       <!-- Loading indicator -->
       <div
         class="text-center py-4"
-        *ngIf="isLoading && displayedManagers.length === 0"
+        *ngIf="isLoading && allManagers.length === 0"
       >
         <div
           class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
@@ -77,23 +77,23 @@
       <!-- Managers list -->
       <div
         class="max-h-96 overflow-y-auto"
-        *ngIf="!isLoading || displayedManagers.length > 0"
+        *ngIf="!isLoading || allManagers.length > 0"
       >
         <div
           class="mb-3 p-2 border border-gray-200 rounded hover:bg-gray-50 transition-colors duration-200"
-          *ngFor="let manager of displayedManagers; trackBy: trackByManagerId"
+          *ngFor="let manager of allManagers; trackBy: trackByManagerId"
         >
           <label class="flex items-center cursor-pointer w-full">
             <input
               type="checkbox"
               class="mr-3 transform scale-125"
               [checked]="isManagerSelected(manager.id)"
-              (change)="onCheckboxChange($event, manager.id)"
+              (change)="onCheckboxChange($event, manager.id, manager.name, manager.jobTitleName)"
             />
 
             <span class="flex flex-col gap-1">
               <strong class="text-gray-800"
-                >{{ manager.firstName }} {{ manager.lastName }}</strong
+                >{{ manager.name }}</strong
               >
               <span class="text-gray-600 text-sm">({{ manager.email }})</span>
               <span class="text-gray-500 text-sm italic"
@@ -102,36 +102,14 @@
             </span>
           </label>
         </div>
-      </div>
-
-      <!-- Load More Button -->
-      <div class="text-center mt-4" *ngIf="hasMoreData && !isLoading">
-        <button
-          class="px-6 py-2 bg-blue-100 text-blue-700 rounded border border-blue-300 hover:bg-blue-200 transition-colors duration-200"
-          (click)="loadMoreManagers()"
-        >
-          Load More Managers
-        </button>
-      </div>
-
-      <!-- Loading more indicator -->
-      <div
-        class="text-center py-2"
-        *ngIf="isLoading && displayedManagers.length > 0"
-      >
-        <div
-          class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"
-        ></div>
-        <span class="ml-2 text-gray-600 text-sm">Loading more...</span>
-      </div>
 
       <!-- No results message -->
       <div
         class="py-5 text-center text-gray-500 italic"
         *ngIf="
           !isLoading &&
-          displayedManagers.length === 0 &&
-          (filterParams.lastName || filterParams.email)
+          allManagers.length === 0 &&
+          searchTerm
         "
       >
         No managers found matching your search criteria
@@ -142,9 +120,8 @@
         class="py-5 text-center text-gray-500 italic"
         *ngIf="
           !isLoading &&
-          displayedManagers.length === 0 &&
-          !filterParams.lastName &&
-          !filterParams.email
+          allManagers.length === 0 &&
+          searchTerm
         "
       >
         No managers available
@@ -158,8 +135,8 @@
         (click)="onAssignClick()"
         [disabled]="isLoading"
       >
-        <div *ngIf="selectedManagerIds.length === 0">Unassign user</div>
-        <div *ngIf="selectedManagerIds.length !== 0">
+        <div *ngIf="selectedManagersForCurrentUser.length === 0">Unassign user</div>
+        <div *ngIf="selectedManagersForCurrentUser.length !== 0">
           Assign Selected ({{ getSelectedManagersCount() }})
         </div>
       </button>
@@ -175,7 +152,7 @@
     <!-- Selected Managers Summary -->
     <div
       class="mt-5 p-4 bg-gray-50 rounded border border-gray-200"
-      *ngIf="selectedManagerIds.length > 0"
+      *ngIf="selectedManagersForCurrentUser.length > 0"
     >
       <h4 class="mt-0 mb-3 text-gray-700 text-base">Selected Managers:</h4>
       <ul class="m-0 pl-5">
@@ -183,7 +160,7 @@
           class="mb-1 text-gray-700"
           *ngFor="let manager of getSelectedManagers()"
         >
-          {{ manager.firstName }} {{ manager.lastName }} -
+          {{ manager.name }} -
           {{ manager.jobTitleName }}
         </li>
       </ul>

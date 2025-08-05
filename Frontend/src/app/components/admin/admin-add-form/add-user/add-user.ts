@@ -119,7 +119,7 @@ export class AddUser {
               this.filteredDepartments = [...this.filteredDepartments, ...response.data.data.map(d => this.mapToDepartmentViewModel(d))];
             }
             
-            this.canLoadMoreDepartments = response.data.hasNext || 
+            this.canLoadMoreDepartments = response.data.hasNextPage || 
                               (response.data.totalPages && this.currentPageDepartment < response.data.totalPages) || false;
             
             this.isLoadingDepartments = false;
@@ -171,7 +171,7 @@ export class AddUser {
           this.filteredJobTitles = [...this.filteredJobTitles, ...response.data.data];
         }
         
-        this.canLoadMoreJobTitles = response.data.hasNext || 
+        this.canLoadMoreJobTitles = response.data.hasNextPage || 
                           (response.data.totalPages && this.currentPageJobTitles < response.data.totalPages) || false;
         
         this.isLoadingJobTitles = false;

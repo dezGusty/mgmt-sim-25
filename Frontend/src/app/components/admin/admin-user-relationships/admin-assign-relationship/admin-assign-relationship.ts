@@ -9,6 +9,7 @@ import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IFilteredUsersRequest } from '../../../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../../../models/responses/ifiltered-api-response'; 
 import { IUser } from '../../../../models/entities/iuser'; 
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-assign-relationship',
@@ -22,63 +23,42 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
     name: string,
     email: string,
   }
-  @Input() managers!: {
-    id: number,
-    firstName: string,  
-    lastName: string,
-    email: string,
-    jobTitleName: string,
-  }[];
-  @Input() currentManagerIds: number[] = [];
   @Input() isUsedForPost: boolean = true;
 
   @Output() onAssign = new EventEmitter<number[]>();
   @Output() onClose = new EventEmitter<void>();
 
-  selectedManagerIds: number[] = [];
-  displayedManagers: any[] = [];
-  allLoadedManagers: any[] = [];
+  allManagers: {
+    id: number,
+    name: string,
+    email: string,
+    jobTitleName: string,
+    subordinatesIds: number[]
+  }[] = [];
+
+  selectedManagersForCurrentUser: {
+    id: number,
+    name: string,
+    jobTitleName: string
+  }[] = [];
   
-  currentPage: number = 1;
-  pageSize: number = 5;
   totalCount: number = 0;
-  hasMoreData: boolean = true;
   isLoading: boolean = false;
 
-  filterParams = {
-    lastName: '',
-    email: ''
-  };
+  searchTerm: string = '';
+  searchBy: 'name'| 'email' = 'name';
 
   private searchSubject = new Subject<void>();
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private employeeManagerService: EmployeeManagerService,
-    private usersService: UsersService
-  ) {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.resetAndLoadManagers();
-    });
+  constructor(private employeeManagerService: EmployeeManagerService,
+              private usersService: UsersService) {
+    
   }
 
   ngOnInit() {
-    this.selectedManagerIds = [...this.currentManagerIds];
-    
-
-    if (this.managers && this.managers.length > 0) {
-      this.displayedManagers = [...this.managers];
-      this.allLoadedManagers = [...this.managers];
-      this.totalCount = this.managers.length;
-      this.hasMoreData = false;
-    } else {
-      // Load managers from API
-      this.loadManagers();
-    }
+    this.selectedManagersForCurrentUser = [];
+    this.loadManagers();
   }
 
   ngOnDestroy() {
@@ -89,59 +69,54 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
   loadManagers(reset: boolean = false) {
     if (this.isLoading) return;
 
-    if (reset) {
-      this.currentPage = 1;
-      this.displayedManagers = [];
-      this.allLoadedManagers = [];
-      this.hasMoreData = true;
-    }
-
     this.isLoading = true;
 
     const request: IFilteredUsersRequest = {
-      lastName: this.filterParams.lastName || undefined,
-      email: this.filterParams.email || undefined,
+      name: this.searchBy === 'name' ? this.searchTerm : undefined,
+      email: this.searchBy === 'email' ? this.searchTerm : undefined,
       params: {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        sortBy: 'lastName',
+        sortBy: "lastName",
         sortDescending: false
       }
     };
 
     this.usersService.getAllManagersFiltered(request).subscribe({
       next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
-        this.isLoading = false;
-        
-        if (response.success && response.data) {
-          const newManagers = response.data.data || [];
-          
-          if (reset) {
-            this.displayedManagers = newManagers;
-            this.allLoadedManagers = newManagers;
-          } else {
-            const existingIds = new Set(this.allLoadedManagers.map(m => m.id));
-            const uniqueNewManagers = newManagers.filter(m => !existingIds.has(m.id));
-            
-            this.displayedManagers = [...this.displayedManagers, ...uniqueNewManagers];
-            this.allLoadedManagers = [...this.allLoadedManagers, ...uniqueNewManagers];
-          }
-          
-          this.currentPage++;
+        console.log("All available maangers: ",response.data.data);
+        this.allManagers = response.data.data.map(user => ({
+          id: user.id,
+          name: user.firstName + ' ' + user.lastName,
+          email: user.email,
+          jobTitleName: user.jobTitleName || 'Unknown job title',
+          subordinatesIds: user.subordinatesIds || []
+        }));
 
-          this.hasMoreData = response.data.hasNext;
-        }
-      },
-      error: (error: any) => {
+
+        this.allManagers.forEach(element => {
+          if(element.subordinatesIds.includes(this.employee.id) && !this.selectedManagersForCurrentUser.map(manager => manager.id).includes(element.id)) {
+            this.selectedManagersForCurrentUser.push({
+              id: element.id,
+              name: element.name,
+              jobTitleName: element.jobTitleName
+            });  
+          }
+        });
+
+        this.allManagers.sort((a, b) => {
+          const aIsSelected = this.selectedManagersForCurrentUser.some(sm => sm.id === a.id);
+          const bIsSelected = this.selectedManagersForCurrentUser.some(sm => sm.id === b.id);
+          
+          if (aIsSelected && !bIsSelected) return -1;
+          if (!aIsSelected && bIsSelected) return 1;
+          return 0;
+        });
+
         this.isLoading = false;
-        console.error('Error loading managers:', error);
+      }, 
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
       }
     });
-  }
-
-  loadMoreManagers() {
-    if (!this.hasMoreData || this.isLoading) return;
-    this.loadManagers();
   }
 
   resetAndLoadManagers() {
@@ -153,36 +128,43 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.filterParams.lastName = '';
-    this.filterParams.email = '';
+    this.searchTerm = '';
     this.resetAndLoadManagers();
   }
 
-  onCheckboxChange(event: Event, managerId: number): void {
-  const target = event.target as HTMLInputElement;
-  if (target) {
-    this.onManagerToggle(managerId, target.checked);
+  onCheckboxChange(event: Event, managerId: number,managerName: string, managerJobTitleName:string): void {
+    const target = event.target as HTMLInputElement;
+    if (target) {
+      this.onManagerToggle(managerId, managerName, managerJobTitleName, target.checked);
+    }
   }
-}
 
-  onManagerToggle(managerId: number, isChecked: boolean) {
+  onManagerToggle(managerId: number, managerName: string, managerJobTitleName:string, isChecked: boolean) {
     if (isChecked) {
-      if (!this.selectedManagerIds.includes(managerId)) {
-        this.selectedManagerIds.push(managerId);
+      if (!this.selectedManagersForCurrentUser.map(manager => manager.id).includes(managerId)) {
+        this.selectedManagersForCurrentUser.push({
+          id: managerId, 
+          name: managerName,
+          jobTitleName: managerJobTitleName
+        });
       }
     } else {
-      this.selectedManagerIds = this.selectedManagerIds.filter(id => id !== managerId);
+      this.selectedManagersForCurrentUser = this.selectedManagersForCurrentUser.filter(manager => manager.id !== managerId);
     }
   }
 
   isManagerSelected(managerId: number): boolean {
-    return this.selectedManagerIds.includes(managerId);
+    return this.selectedManagersForCurrentUser.map(manager => manager.id).includes(managerId);
+  }
+
+  onSearchKeypress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.loadManagers();
+    }
   }
 
   getSelectedManagers() {
-    return this.allLoadedManagers.filter(manager => 
-      this.selectedManagerIds.includes(manager.id)
-    );
+    return this.selectedManagersForCurrentUser;
   }
 
   trackByManagerId(index: number, manager: any): number {
@@ -193,30 +175,30 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
     if (this.isLoading) return;
     console.log('pressing button');
     if(this.isUsedForPost){
-        this.employeeManagerService.addManagersForEmployee(this.employee.id, this.selectedManagerIds).subscribe({
-        next: (response: IApiResponse<IEmployeeManager>) => {
-          if (response.success) {
-            console.log("Relation successfully created");
-            this.onAssign.emit(this.selectedManagerIds);
-          }
-        },
-        error: (error) => {
-          console.error('Error assigning managers:', error);
+      this.employeeManagerService.addManagersForEmployee(this.employee.id, this.selectedManagersForCurrentUser.map(manager => manager.id)).subscribe({
+      next: (response: IApiResponse<IEmployeeManager>) => {
+        if (response.success) {
+          console.log("Relation successfully created");
+          this.onAssign.emit(this.selectedManagersForCurrentUser.map(manager => manager.id));
         }
-      });
+      },
+      error: (error) => {
+        console.error('Error assigning managers:', error);
+      }
+    });
     }
     else {
-        this.employeeManagerService.patchManagersForEmployee(this.employee.id, this.selectedManagerIds).subscribe({
-        next: (response: IApiResponse<IEmployeeManager>) => {
-          if (response.success) {
-            console.log("Relation successfully created");
-            this.onAssign.emit(this.selectedManagerIds);
-          }
-        },
-        error: (error) => {
-          console.error('Error assigning managers:', error);
+      this.employeeManagerService.patchManagersForEmployee(this.employee.id, this.selectedManagersForCurrentUser.map(manager => manager.id)).subscribe({
+      next: (response: IApiResponse<IEmployeeManager>) => {
+        if (response.success) {
+          console.log("Relation successfully created");
+          this.onAssign.emit(this.selectedManagersForCurrentUser.map(manager => manager.id));
         }
-      });
+      },
+      error: (error) => {
+        console.error('Error reassigning managers:', error);
+      }
+    });
     }
   }
 
@@ -225,10 +207,17 @@ export class AdminAssignRelationship implements OnInit, OnDestroy {
   }
 
   getSelectedManagersCount(): number {
-    return this.selectedManagerIds.length;
+    return this.selectedManagersForCurrentUser.length;
   }
 
   onOverlayClick(event: Event) {
     this.onClose.emit();
+  }
+
+  getSearchPlaceholder() : string {
+    if(this.searchBy === 'email')
+      return 'Search for managers by email...';
+    else
+      return 'Search for managers by name...';
   }
 }

@@ -23,8 +23,8 @@ export class UsersService {
   getAllUsersFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
     
-    if (params?.lastName) {
-      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    if (params?.name) {
+      paramsToSend = paramsToSend.set('lastName', params.name);
     }
     
     if (params?.email) {
@@ -114,8 +114,8 @@ export class UsersService {
       paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
     }
     
-    if (params?.lastName) {
-      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    if (params?.name) {
+      paramsToSend = paramsToSend.set('name', params.name);
     }
     
     if (params?.email) {
@@ -187,8 +187,8 @@ export class UsersService {
   getAllManagersFiltered(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
         
-    if (params?.lastName) {
-      paramsToSend = paramsToSend.set('lastName', params.lastName);
+    if (params?.name) {
+      paramsToSend = paramsToSend.set('managerName', params.name);
     }
     
     if (params?.email) {
@@ -204,11 +204,11 @@ export class UsersService {
     }
     
     if (params?.params.page) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page);
     }
     
     if (params?.params.pageSize) {
-      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize);
     }
     
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/managers`, { params: paramsToSend });

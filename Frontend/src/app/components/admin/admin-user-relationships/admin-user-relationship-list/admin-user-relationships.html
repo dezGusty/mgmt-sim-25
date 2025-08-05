@@ -934,8 +934,6 @@
   <app-admin-assign-relationship
     *ngIf="showAssignRelationShipComponent"
     [employee]="selectedEmployee"
-    [managers]="managersToAssigned"
-    [currentManagerIds]="currentManagerIds"
     [isUsedForPost]="postRelationship"
     (onAssign)="onAssignManagers($event)"
     (onClose)="closeAssignModal()"

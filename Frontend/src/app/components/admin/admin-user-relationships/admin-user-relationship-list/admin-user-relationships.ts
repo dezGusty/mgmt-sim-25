@@ -569,41 +569,12 @@ export class AdminUserRelationships implements OnInit {
 
   assignManager(user: IUserViewModel, isPost: boolean = false): void {
     this.postRelationship = isPost;
-    
     this.selectedEmployee = {
       id: user.id,
       name: user.name,
       email: user.email
     };
-
-    const params: IFilteredUsersRequest = {
-      params: {
-        page: 1,
-        pageSize: 10
-      }
-    };
-
-    this.userService.getAllManagersFiltered(params).subscribe({
-      next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
-        this.managersToAssigned = response.data.data.map(user => ({
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          jobTitleName: user.jobTitleName || 'Unknown job title',
-          subordinatesIds: user.subordinatesIds || []
-        }));
-
-        this.currentManagerIds = [];
-        this.managersToAssigned.forEach(element => {
-          if(element.subordinatesIds.includes(user.id)) {
-            this.currentManagerIds.push(element.id);  
-          }
-        });
-
-        this.showAssignRelationShipComponent = true;
-      }
-    });
+    this.showAssignRelationShipComponent = true;
   }
 
   editRelationship(relationship: any): void {
@@ -626,8 +597,8 @@ export class AdminUserRelationships implements OnInit {
   }
 
   onAssignManagers(selectedManagerIds: number[]) {
-    this.closeAssignModal();
     this.loadAdmins();
+    this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
   }
 
@@ -642,7 +613,7 @@ export class AdminUserRelationships implements OnInit {
 
     switch (this.currentSearchBy) {
       case UserSearchType.Global:
-        return this.currentHighlightTerm; // Highlight în toate câmpurile
+        return this.currentHighlightTerm;
       case UserSearchType.ManagerName:
       case UserSearchType.EmployeeName:
       case UserSearchType.UnassignedName:

@@ -106,10 +106,9 @@ namespace ManagementSimulator.Core.Services
         {
             if (payload.ActivityStatus != null && payload.ActivityStatus == DepartmentActivityStatus.INACTIVE)
             {
-                var (deletedResult, deletedTotalCount) = await _repository.GetAllDepartmentsFilteredAsync(
+                var (deletedResult, deletedTotalCount) = await _repository.GetAllInactiveDepartmentsFilteredAsync(
                     payload.Name,
-                    payload.PagedQueryParams.ToQueryParams(),
-                    includeDeleted: true
+                    payload.PagedQueryParams.ToQueryParams()
                 );
 
                 if (deletedResult == null || !deletedResult.Any())
