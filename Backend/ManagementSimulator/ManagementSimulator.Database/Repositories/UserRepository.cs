@@ -73,18 +73,15 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false, bool tracking = false)
+        public async Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false)
         {
             IQueryable<EmployeeManager> query = _dbContext.EmployeeManagers;
-
-            if (!tracking)
-                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
 
             query = query.Where(em => em.ManagerId == managerId);
-
+                                 
 
             return await query.Select(em => em.Employee).ToListAsync();
         }

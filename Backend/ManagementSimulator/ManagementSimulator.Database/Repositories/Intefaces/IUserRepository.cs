@@ -18,7 +18,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<User>> GetAllUsersWithReferencesAsync(bool includeDeleted = false, bool tracking = false);
         Task<(List<User>? Data, int TotalCount)> GetAllInactiveUsersWithReferencesFilteredAsync(string? name, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool tracking = false); 
         Task<User?> GetUserWithReferencesByIdAsync(int id, bool includeDeleted = false, bool tracking = false);
-        Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false, bool tracking = false);
+        Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false);
         Task<bool> RestoreUserByIdAsync(int id);
         Task<User?> GetUserByIdAsync(int id, bool includeDeleted = false, bool tracking = false);
         Task<List<User>> GetSubordinatesByUserIdsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false);
