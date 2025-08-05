@@ -325,7 +325,7 @@ export class CalendarView implements OnInit, OnChanges {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
           const requestIndex = this.requests.findIndex(
             (req) => req.id === data.id
