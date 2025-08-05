@@ -26,7 +26,7 @@ export class ManagerMainPage {
 
   constructor(private router: Router) {}
 
-  viewMode: 'card' | 'table' | 'calendar' = 'card';
+  viewMode: 'card' | 'table' | 'calendar' = 'table';
 
   onRequestAdded() {
     this.addRequestsComponent.loadRequests();

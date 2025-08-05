@@ -312,14 +312,12 @@ export class CalendarView implements OnInit, OnChanges {
       .subscribe((res) => {
         if (res) {
           this.closeDetails();
-          // Update the local request status immediately
           const requestIndex = this.requests.findIndex(
             (req) => req.id === data.id
           );
           if (requestIndex !== -1) {
             this.requests[requestIndex].status = 'Approved';
             this.requests[requestIndex].comment = data.comment;
-            // Create new array reference to trigger change detection
             this.requests = [...this.requests];
           }
           this.generateTableData();
@@ -337,14 +335,12 @@ export class CalendarView implements OnInit, OnChanges {
       .subscribe((res) => {
         if (res) {
           this.closeDetails();
-          // Update the local request status immediately
           const requestIndex = this.requests.findIndex(
             (req) => req.id === data.id
           );
           if (requestIndex !== -1) {
             this.requests[requestIndex].status = 'Rejected';
             this.requests[requestIndex].comment = data.comment;
-            // Create new array reference to trigger change detection
             this.requests = [...this.requests];
           }
           this.generateTableData();
@@ -364,14 +360,11 @@ export class CalendarView implements OnInit, OnChanges {
   }
 
   onRequestAdded(newRequest: any) {
-    // Add the new request to the existing requests array
     this.requests = [...this.requests, newRequest];
-    // Regenerate the calendar data to include the new request
     this.generateTableData();
   }
 
   refreshCalendarData() {
-    // Method to manually refresh calendar data if needed
     this.generateTableData();
   }
 }

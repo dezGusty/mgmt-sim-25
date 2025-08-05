@@ -214,10 +214,8 @@ export class AddRequestForm implements OnInit {
             createdRequest
           );
 
-          // Emit the properly formatted request
           const formattedRequest = {
             ...createdRequest,
-            // Ensure the request has the proper structure for the calendar
             leaveType: this.leaveTypes.find(
               (type) => type.id === this.leaveRequestTypeId
             ),

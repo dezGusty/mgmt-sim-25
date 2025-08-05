@@ -18,7 +18,7 @@ import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/l
 })
 export class AddRequests implements OnInit {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
-  @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
+  @Input() viewMode: 'card' | 'table' | 'calendar' = 'table';
   @Input() searchTerm: string = '';
   @Output() dataRefreshed = new EventEmitter<void>();
 
@@ -85,13 +85,11 @@ export class AddRequests implements OnInit {
 
               completedRequests++;
 
-              // Only update the requests array when all async operations are complete
               if (completedRequests === totalRequests) {
                 tempRequests.sort(
                   (a, b) =>
                     b.createdAtDate.getTime() - a.createdAtDate.getTime()
                 );
-                // Create a new array reference to trigger ngOnChanges in child components
                 this.requests = [...tempRequests];
               }
             });
