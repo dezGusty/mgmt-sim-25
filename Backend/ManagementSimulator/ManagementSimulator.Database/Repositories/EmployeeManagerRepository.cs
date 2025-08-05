@@ -1,13 +1,7 @@
 ﻿using ManagementSimulator.Database.Context;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
-using ManagementSimulator.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -45,23 +39,34 @@ namespace ManagementSimulator.Database.Repositories
             await SaveChangesAsync();
         }
 
-        public async Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId)
+        public async Task<List<User>> GetManagersForEmployeesByIdAsync(int subordinateId, bool tracking = false)
         {
-            return await _context.EmployeeManagers
-                                 .Where(em => em.DeletedAt == null)
-                                 .Where(em => em.EmployeeId == subordinateId)
-                                 .Include(em => em.Manager)
-                                 .Include(em => em.Manager.Title)
-                                 .Include(em => em.Manager.Roles)
-                                     .ThenInclude(eru => eru.Role)
-                                 .Where(em => em.Manager != null && em.Manager.DeletedAt == null)
-                                 .Select(em => em.Manager)
-                                 .ToListAsync();
+            var query = _context.EmployeeManagers.AsQueryable();
+
+            if (!tracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            return await query
+                         .Where(em => em.DeletedAt == null)
+                         .Where(em => em.EmployeeId == subordinateId)
+                         .Include(em => em.Manager)
+                         .Include(em => em.Manager.Title)
+                         .Include(em => em.Manager.Roles)
+                             .ThenInclude(eru => eru.Role)
+                         .Where(em => em.Manager != null && em.Manager.DeletedAt == null)
+                         .Select(em => em.Manager)
+                         .ToListAsync();
         }
 
-        public async Task<List<EmployeeManager>> GetEMRelationshipForEmployeesByIdAsync(int subordinateId, bool includeDeleted = false)
+        public async Task<List<EmployeeManager>> GetEMRelationshipForEmployeesByIdAsync(int subordinateId, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<EmployeeManager> query = _context.EmployeeManagers;
+
+            if(!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(em => em.DeletedAt == null);
 
@@ -70,10 +75,14 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId)
+        public async Task<List<User>> GetEmployeesForManagerByIdAsync(int managerId, bool tracking = false)
         {
-            return await _context.EmployeeManagers
-                                 .Where(em => em.DeletedAt == null)
+            IQueryable<EmployeeManager> query = _context.EmployeeManagers;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            return await query.Where(em => em.DeletedAt == null)
                                  .Where(um => um.ManagerId == managerId)
                                  .Include(um => um.Employee)
                                  .Include(um => um.Employee.Title)
@@ -84,9 +93,13 @@ namespace ManagementSimulator.Database.Repositories
                                  .ToListAsync();
         }
 
-        public async Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId, bool includeDeleted = false)
+        public async Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<EmployeeManager?> query = _context.EmployeeManagers;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(em => em.DeletedAt == null);
 
@@ -95,9 +108,12 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<EmployeeManager>> GetAllEmployeeManagersAsync(bool includeDeleted = false)
+        public async Task<List<EmployeeManager>> GetAllEmployeeManagersAsync(bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<EmployeeManager> query = _context.EmployeeManagers;
+
+            if (!tracking)
+                query = query.AsNoTracking();
 
             if (!includeDeleted)
                 query = query.Where(em => em.DeletedAt == null);

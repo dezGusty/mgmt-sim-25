@@ -87,7 +87,7 @@ namespace ManagementSimulator.Core.Services
                     throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
-            var jobTitle = await _jobTitleRepository.GetJobTitleAsync(id);
+            var jobTitle = await _jobTitleRepository.GetJobTitleAsync(id, tracking:true);
             if (jobTitle == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), id);
@@ -149,7 +149,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<bool> RestoreJobTitleAsync(int id)
         {
-            JobTitle? jt = await _jobTitleRepository.GetJobTitleAsync(id, includeDeleted: true);
+            JobTitle? jt = await _jobTitleRepository.GetJobTitleAsync(id, includeDeleted: true, tracking: true);
             if (jt == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Id));

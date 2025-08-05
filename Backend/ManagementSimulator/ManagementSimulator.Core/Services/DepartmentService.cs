@@ -48,7 +48,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<DepartmentResponseDto> AddDepartmentAsync(CreateDepartmentRequestDto request)
         {
-            if (await _repository.GetDepartmentByNameAsync(request.Name, includeDeleted: true) != null)
+            if (await _repository.GetDepartmentByNameAsync(request.Name, includeDeleted: true, tracking: false) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(Department), nameof(Department.Name));
             }
@@ -104,7 +104,7 @@ namespace ManagementSimulator.Core.Services
         public async Task<PagedResponseDto<DepartmentResponseDto>> GetAllDepartmentsFilteredAsync(QueriedDepartmentRequestDto payload)
         {
             var (result, totalCount) = await _repository.GetAllDepartmentsFilteredAsync(payload.Name, payload.PagedQueryParams.ToQueryParams(), 
-                includeDeleted: payload.IncludeDeleted ?? false);
+                includeDeleted: payload.IncludeDeleted ?? false, tracking: false);
 
             if (result == null || !result.Any())
                 return new PagedResponseDto<DepartmentResponseDto>
@@ -134,7 +134,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<bool> RestoreDepartmentAsync(int id)
         {
-            Department? departmentToRestore = await _repository.GetDepartmentByIdAsync(id, includeDeleted: true);
+            Department? departmentToRestore = await _repository.GetDepartmentByIdAsync(id, includeDeleted: true, tracking: true);
             if(departmentToRestore == null)
             {
                 throw new EntryNotFoundException(nameof(Department), nameof(Department.Id));

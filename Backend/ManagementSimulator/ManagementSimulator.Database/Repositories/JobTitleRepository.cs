@@ -22,17 +22,26 @@ namespace ManagementSimulator.Database.Repositories
             _dbContext = databaseContext;
         }
 
-        public async Task<JobTitle?> GetJobTitleByNameAsync(string name, bool includeDeleted = false)
+        public async Task<JobTitle?> GetJobTitleByNameAsync(string name, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<JobTitle?> query = _dbContext.JobTitles;
+
+            if(!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
+
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>> GetAllJobTitlesAsync(bool includeDeleted = false)
+        public async Task<List<JobTitle>> GetAllJobTitlesAsync(bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
@@ -41,18 +50,26 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<JobTitle?> GetJobTitleAsync(int id, bool includeDeleted = false)
+        public async Task<JobTitle?> GetJobTitleAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<JobTitle>> GetJobTitlesAsync(List<int> ids, bool includeDeleted = false)
+        public async Task<List<JobTitle>> GetJobTitlesAsync(List<int> ids, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
@@ -62,9 +79,13 @@ namespace ManagementSimulator.Database.Repositories
         }
 
         public async Task<(List<JobTitle> Data, int TotalCount)> GetAllJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters,
-            bool includeDeleted = false)
+            bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<JobTitle> query = _dbContext.JobTitles;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
