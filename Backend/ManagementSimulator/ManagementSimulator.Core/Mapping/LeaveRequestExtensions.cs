@@ -16,22 +16,17 @@ namespace ManagementSimulator.Core.Mapping
             {
                 Id = entity.Id,
                 UserId = entity.UserId,
-
                 FullName = entity.User?.FullName ?? string.Empty,
-
-
                 ReviewerId = entity.ReviewerId,
-
                 LeaveRequestTypeId = entity.LeaveRequestTypeId,
-
+                LeaveRequestTypeName = entity.LeaveRequestType?.Title ?? string.Empty,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
-
                 Reason = entity.Reason ?? string.Empty,
                 RequestStatus = entity.RequestStatus,
                 ReviewerComment = entity.ReviewerComment ?? string.Empty,
-
                 CreatedAt = entity.CreatedAt,
+                DepartmentName = entity.User?.Department?.Name ?? string.Empty,
             };
         }
 
@@ -40,11 +35,19 @@ namespace ManagementSimulator.Core.Mapping
             return new CreateLeaveRequestResponseDto
             {
                 Id = entity.Id,
-                UserId = entity.UserId,
+                CreatedAt = entity.CreatedAt,
+                FullName = entity.User?.FullName ?? string.Empty,
+                LeaveRequestTypeId = entity.LeaveRequestTypeId,
+                LeaveRequestTypeName = entity.LeaveRequestType?.Title ?? string.Empty,
+                LeaveRequestTypeIsPaid = entity.LeaveRequestType?.IsPaid ?? false,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
                 Reason = entity.Reason ?? string.Empty,
+                RequestStatus = entity.RequestStatus,
+                ReviewerComment = entity.ReviewerComment ?? string.Empty,
+                DepartmentName = entity.User?.Department?.Name ?? string.Empty,
             };
         }
     }
 }
+                

@@ -4,6 +4,7 @@ import { Observable, catchError, of, tap, switchMap } from 'rxjs';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IUser } from '../../models/entities/iuser';
 import { ILeaveRequest } from '../../models/leave-request';
+import { CreateLeaveRequestResponse } from '../../models/create-leave-request-response';
 
 @Injectable({
   providedIn: 'root',
@@ -25,9 +26,9 @@ export class LeaveRequests {
     startDate: string;
     endDate: string;
     reason: string;
-  }): Observable<IApiResponse<ILeaveRequest>> {
+  }): Observable<IApiResponse<CreateLeaveRequestResponse>> {
     return this.http
-      .post<IApiResponse<ILeaveRequest>>(
+      .post<IApiResponse<CreateLeaveRequestResponse>>(
         'https://localhost:7275/api/LeaveRequests',
         data,
         {
@@ -43,8 +44,20 @@ export class LeaveRequests {
               requestStatus: 4,
               reviewerComment: 'Auto-approved by manager',
             }).pipe(
-              tap(() => console.log('Request auto-approved')),
-              switchMap(() => of(response))
+              tap((patchResponse) =>
+                console.log('Request auto-approved:', patchResponse)
+              ),
+              switchMap(() => {
+                const updatedResponse = {
+                  ...response,
+                  data: {
+                    ...response.data,
+                    requestStatus: 4,
+                    reviewerComment: 'Auto-approved by manager',
+                  },
+                };
+                return of(updatedResponse);
+              })
             );
           }
           return of(response);

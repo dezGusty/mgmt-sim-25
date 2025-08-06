@@ -15,5 +15,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<JobTitle?> GetJobTitleAsync(int id, bool includeDeleted = false, bool tracking = false);
         Task<List<JobTitle>> GetJobTitlesAsync(List<int> ids, bool includeDeleted = false, bool tracking = false);
         Task<(List<JobTitle> Data, int TotalCount)> GetAllJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters, bool includeDeleted = false, bool tracking = false);
+        Task<(List<JobTitle> Data, int TotalCount)> GetAllInactiveJobTitlesFilteredAsync(string? jobTitleName, QueryParams parameters, bool tracking = false);
     }
 }

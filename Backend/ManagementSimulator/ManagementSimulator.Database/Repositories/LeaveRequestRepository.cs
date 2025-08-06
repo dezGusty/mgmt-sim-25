@@ -34,6 +34,8 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(lr => lr.DeletedAt == null);
 
             query = query.Include(lr => lr.User)
+                         .ThenInclude(u => u.Department)
+                         .Include(lr => lr.LeaveRequestType)
                          .Where(lr => employeeIds.Contains(lr.UserId));
 
             // filtering
@@ -105,6 +107,46 @@ namespace ManagementSimulator.Database.Repositories
                              lr.RequestStatus == Database.Enums.RequestStatus.Approved) &&
                             lr.StartDate <= endOfYear && lr.EndDate >= startOfYear)
                 .ToListAsync();
+        }
+
+        public async Task<List<LeaveRequest>> GetAllWithRelationshipsAsync(bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            if (!includeDeleted)
+                query = query.Where(lr => lr.DeletedAt == null);
+
+            return await query
+                .Include(lr => lr.User)
+                .ThenInclude(u => u.Department)
+                .Include(lr => lr.LeaveRequestType)
+                .ToListAsync();
+        }
+
+        public async Task<LeaveRequest> GetLeaveRequestWithDetailsAsync(int id, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            if (!includeDeleted)
+                query = query.Where(lr => lr.DeletedAt == null);
+
+            var leaveRequest = await query
+                .Include(lr => lr.User)
+                .ThenInclude(u => u.Department)
+                .Include(lr => lr.LeaveRequestType)
+                .Include(lr => lr.Reviewer)
+                .FirstOrDefaultAsync(lr => lr.Id == id);
+
+            if (leaveRequest == null)
+                throw new InvalidOperationException($"Leave request with ID {id} not found");
+
+            return leaveRequest;
         }
     }
 }

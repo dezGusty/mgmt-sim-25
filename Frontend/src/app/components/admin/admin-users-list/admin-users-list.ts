@@ -15,6 +15,7 @@ import { IEmployeeManager } from '../../../models/entities/iemployee-manager';
 import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
+import { UserActivityStatus } from '../../../models/enums/user-activity-status';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -26,6 +27,7 @@ export class AdminUsersList implements OnInit {
   users: IUserViewModel[] = [];
   searchTerm: string = '';
   searchBy: string = 'globalSearch';
+  searchByActivityStatus: 'activeStatus' | 'inactiveStatus' | 'global' = 'global';
   sortDescending: boolean = false;
   userRoles: Map<string,number> = new Map();
 
@@ -76,13 +78,15 @@ export class AdminUsersList implements OnInit {
     this.isLoading = true;
     this.hasError = false;
     this.errorMessage = '';
-    
+    console.log(this.searchByActivityStatus);
     const filterRequest: IFilteredUsersRequest = {
-      lastName: this.searchBy === 'name' ? this.searchTerm : undefined,
+      name: this.searchBy === 'name' ? this.searchTerm : undefined,
       email: this.searchBy === 'email' ? this.searchTerm : undefined,
       department: this.searchBy === 'department' ? this.searchTerm : undefined,
       jobTitle: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
       globalSearch: this.searchBy === 'globalSearch' ? this.searchTerm : undefined,
+      status: this.searchByActivityStatus === 'activeStatus' ? UserActivityStatus.ACTIVE : this.searchByActivityStatus === 'inactiveStatus'
+         ? UserActivityStatus.INACTIVE : UserActivityStatus.ALL,
       params: {
         sortBy: this.getSortField(),
         sortDescending: this.sortDescending,

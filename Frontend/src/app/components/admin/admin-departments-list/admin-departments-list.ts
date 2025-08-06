@@ -8,6 +8,7 @@ import { IFilteredDepartmentsRequest } from '../../../models/requests/ifiltered-
 import { IDepartmentViewModel } from '../../../view-models/department-view-model';
 import { IApiResponse } from '../../../models/responses/iapi-response';
 import { HttpErrorResponse } from '@angular/common/http';
+import { SearchType } from '../../../models/enums/search-type';
 
 @Component({
   selector: 'app-admin-departments-list',
@@ -18,7 +19,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class AdminDepartmentsList implements OnInit {
   departments: IDepartmentViewModel[] = [];
   searchTerm: string = '';
-  currentSearchTerm: string = ''; // Termenul folosit pentru ultima căutare
+  searchBy: SearchType = SearchType.Global;
+
+  currentSearchTerm: string = '';
+  currentSearchBy: SearchType = SearchType.Global;
+
+  SearchType = SearchType;
+
   isLoading: boolean = true;
   error: string = '';
   
@@ -27,7 +34,6 @@ export class AdminDepartmentsList implements OnInit {
   totalPages: number = 0;
   sortDescending: boolean = false;
 
-  // Edit modal properties
   showEditModal = false;
   departmentToEdit: IDepartmentViewModel | null = null;
   
@@ -48,49 +54,111 @@ export class AdminDepartmentsList implements OnInit {
   }
 
   loadDepartments(): void {
-    this.isLoading = true;
-    this.error = '';
+  this.isLoading = true;
+  this.error = '';
 
-    const params: IFilteredDepartmentsRequest = {
-      name: this.currentSearchTerm,
-      includeDeleted: true,
-      params: {
-        sortBy: "name", 
-        sortDescending: this.sortDescending,
-        page: this.currentPage,
-        pageSize: this.pageSize
-      }
-    };
+  let nameFilter: string | undefined;
 
-    this.departmentService.getAllDepartmentsFiltered(params).subscribe({
-      next: (response) => {
-        console.log(response);
+  if(this.currentSearchTerm.trim()) {
+    nameFilter = this.currentSearchTerm;
+  }else{
+    nameFilter = undefined;
+  }
+
+  const params: IFilteredDepartmentsRequest = {
+    name: nameFilter,              
+    activityStatus: this.currentSearchBy,
+    params: {
+      sortBy: "name", 
+      sortDescending: this.sortDescending,
+      page: this.currentPage,
+      pageSize: this.pageSize
+    }
+  };
+
+  console.log('Request params:', params);
+
+  this.departmentService.getAllDepartmentsFiltered(params).subscribe({
+    next: (response) => {
+      console.log('API response:', response);
+      
+      let allDepartments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
+      
+      if (response && response.data && response.data.data) {
         this.departments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
-        this.totalPages = response.data.totalPages;
-        this.hasInitiallyLoaded = true;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.hasInitiallyLoaded = true;
-        this.error = 'Failed to load departments. Please try again later.';
-        console.error('Error loading departments:', err);
+        this.totalPages = response.data.totalPages || 0;
+      } else {
         this.departments = [];
+        this.totalPages = 0;
       }
-    });
+
+      this.hasInitiallyLoaded = true;
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.hasInitiallyLoaded = true;
+      this.error = 'Failed to load departments. Please try again later.';
+      console.error('Error loading departments:', err);
+      this.departments = [];
+    }
+  });
+}
+
+  getSearchPlaceholder(): string {
+    switch (this.searchBy) {
+      case SearchType.Active:
+        return 'Search active departments by name...';
+      case SearchType.Inactive:
+        return 'Search inactive departments by name...';
+      case SearchType.Global:
+      default:
+        return 'Search all departments by name...';
+    }
   }
 
   getEmptyStateMessage(): string {
-    if (!this.hasInitiallyLoaded) {
-      return '';
-    }
-    
-    if (this.currentSearchTerm.trim()) {
-      return `No departments match your search for "${this.currentSearchTerm}".`;
-    }
-    
-    return 'No departments found. Get started by creating a new department.';
+  if (!this.hasInitiallyLoaded) {
+    return '';
   }
+  
+  const hasActiveSearch = this.currentSearchTerm.trim() || this.currentSearchBy !== SearchType.Global;
+  
+  if (hasActiveSearch) {
+    let searchTypeMessage = '';
+    switch (this.currentSearchBy) {
+      case SearchType.Active:
+        searchTypeMessage = this.currentSearchTerm ? 
+          `No active departments found matching "${this.currentSearchTerm}".` : 
+          'No active departments found.';
+        break;
+      case SearchType.Inactive:
+        searchTypeMessage = this.currentSearchTerm ? 
+          `No inactive departments found matching "${this.currentSearchTerm}".` : 
+          'No inactive departments found.';
+        break;
+      case SearchType.Global:
+      default:
+        searchTypeMessage = this.currentSearchTerm ? 
+          `No departments found matching "${this.currentSearchTerm}".` : 
+          'No departments found with current filters.';
+        break;
+    }
+    return searchTypeMessage;
+  }
+  
+  return 'No departments found. Get started by creating a new department.';
+}
+
+getEmptyStateSubMessage(): string {
+  const hasActiveSearch = this.currentSearchTerm.trim() || this.currentSearchBy !== SearchType.Global;
+  
+  if (hasActiveSearch) {
+    return 'Try adjusting your search criteria or clearing the filters.';
+  }
+  
+  return 'Create your first department to get started.';
+}
 
   shouldShowEmptyState(): boolean {
     return !this.isLoading && !this.error && this.departments.length === 0 && this.hasInitiallyLoaded;
@@ -115,6 +183,7 @@ export class AdminDepartmentsList implements OnInit {
 
   onSearch(): void {
     this.currentSearchTerm = this.searchTerm;
+    this.currentSearchBy = this.searchBy;
     this.currentPage = 1; 
     this.loadDepartments();
   }
@@ -124,6 +193,7 @@ export class AdminDepartmentsList implements OnInit {
       this.onSearch();
     }
   }
+  
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
@@ -184,7 +254,9 @@ export class AdminDepartmentsList implements OnInit {
 
   clearSearch(): void {
     this.searchTerm = '';
+    this.searchBy = this.SearchType.Global;
     this.currentSearchTerm = '';
+    this.currentSearchBy = this.SearchType.Global;
     this.currentPage = 1; 
     this.loadDepartments();
   }

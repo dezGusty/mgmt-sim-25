@@ -11,6 +11,7 @@ using ManagementSimulator.Infrastructure.Exceptions;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Extensions;
 using ManagementSimulator.Database.Dtos.Department;
+using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -48,18 +49,19 @@ namespace ManagementSimulator.Database.Repositories
             return await query.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllInactiveDepartmentsFilteredAsync(string? name, QueryParams parameters, bool tracking = false)
         {
-            IQueryable<Department> query = GetRecords(includeDeletedEntities: includeDeleted);
+            IQueryable<Department> query = _dbContext.Departments;
 
             if (!tracking)
                 query = query.AsNoTracking();
 
+            query = query.Where(d => d.DeletedAt != null).Include(d => d.Users);
+
             // Filtering
             if (!string.IsNullOrEmpty(name))
             {
-                var lowerName = name.ToLower();
-                query = query.Where(d => d.Name.ToLower().Contains(lowerName));
+                query = query.Where(d => d.Name.Contains(name));
             }
 
             var totalCount = await query.CountAsync();
@@ -71,7 +73,7 @@ namespace ManagementSimulator.Database.Repositories
                     Name = d.Name,
                     Description = d.Description,
                     EmployeeCount = d.Users.Count,
-                    DeletedAt = d.DeletedAt ?? null,
+                    DeletedAt = d.DeletedAt
                 }).ToListAsync(), totalCount);
 
             // Sorting
@@ -89,6 +91,7 @@ namespace ManagementSimulator.Database.Repositories
                     Name = d.Name,
                     Description = d.Description,
                     EmployeeCount = d.Users.Count,
+                    DeletedAt = d.DeletedAt
                 }).ToListAsync(), totalCount);
             }
             else
@@ -102,6 +105,72 @@ namespace ManagementSimulator.Database.Repositories
                         Name = d.Name,
                         Description = d.Description,
                         EmployeeCount = d.Users.Count,
+                        DeletedAt = d.DeletedAt
+                    }).ToListAsync();
+
+                return (pagedData, totalCount);
+            }
+        }
+
+        public async Task<(List<DepartmentDto> Data, int TotalCount)> GetAllDepartmentsFilteredAsync(string? name, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<Department> query = _dbContext.Departments;
+            if (!includeDeleted)
+                query = query.Where(d => d.DeletedAt == null);
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            query = query.Include(d => d.Users);
+
+            // Filtering
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(d => d.Name.Contains(name));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.Select(d => new DepartmentDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Description = d.Description,
+                    EmployeeCount = d.Users.Count,
+                    DeletedAt = d.DeletedAt
+                }).ToListAsync(), totalCount);
+            
+            // Sorting
+            if (string.IsNullOrEmpty(parameters.SortBy))
+                query = query.OrderBy(d => d.Id);
+            else
+                query = query.ApplySorting<Department>(parameters.SortBy, parameters.SortDescending ?? false);
+
+            // Pagination
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.Select(d => new DepartmentDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Description = d.Description,
+                    EmployeeCount = d.Users.Count,
+                    DeletedAt = d.DeletedAt
+                }).ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query
+                    .Skip((int)parameters.PageSize * ((int)parameters.Page - 1))
+                    .Take((int)parameters.PageSize)
+                    .Select(d => new DepartmentDto
+                    {
+                        Id = d.Id,
+                        Name = d.Name,
+                        Description = d.Description,
+                        EmployeeCount = d.Users.Count,
+                        DeletedAt = d.DeletedAt
                     }).ToListAsync();
 
                 return (pagedData, totalCount);

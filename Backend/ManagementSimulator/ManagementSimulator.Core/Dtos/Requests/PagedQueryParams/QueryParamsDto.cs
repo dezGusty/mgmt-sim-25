@@ -12,8 +12,8 @@ namespace ManagementSimulator.Core.Dtos.Requests.PagedQueryParams
         public string? SortBy { get; set; } = "Id";
         public bool? SortDescending { get; set; } = false;
 
-        public int? Page { get; set; } = 1;
-        public int? PageSize { get; set; } = 1;
+        public int? Page { get; set; }
+        public int? PageSize { get; set; }
 
         public QueryParams ToQueryParams()
         {
@@ -21,8 +21,8 @@ namespace ManagementSimulator.Core.Dtos.Requests.PagedQueryParams
             {
                 SortBy = SortBy ?? "Id",
                 SortDescending = SortDescending ?? false,
-                Page = Page ?? 1,
-                PageSize = PageSize ?? 1
+                Page = Page,
+                PageSize = PageSize
             };
         }
     }

@@ -3,6 +3,6 @@ export interface IFilteredApiResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }

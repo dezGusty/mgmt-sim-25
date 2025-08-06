@@ -3,5 +3,5 @@ export interface IDepartment {
   name: string;
   description?: string;
   employeeCount? : number;
-  deletedAt? : Date;
+  deletedAt? : Date | null;
 }

@@ -7,7 +7,6 @@ import { ILeaveRequest } from '../../../../models/leave-request';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
-import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 
 @Component({
   selector: 'app-add-requests',
@@ -18,64 +17,55 @@ import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/l
 })
 export class AddRequests implements OnInit {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
-  @Input() viewMode: 'card' | 'table' | 'calendar' = 'card';
+  @Input() viewMode: 'card' | 'table' | 'calendar' = 'table';
   @Input() searchTerm: string = '';
+  @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
+  @Output() dataRefreshed = new EventEmitter<void>();
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
 
-  constructor(
-    private leaveRequests: LeaveRequests,
-    private leaveRequestTypeService: LeaveRequestTypeService
-  ) {}
+  sortColumn: string = 'submitted';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
+  constructor(private leaveRequests: LeaveRequests) {}
 
   ngOnInit() {
     this.loadRequests();
+  }
+  addRequest(newRequest: ILeaveRequest) {
+    this.requests = [newRequest, ...this.requests];
   }
 
   public loadRequests() {
     this.leaveRequests.fetchByManager().subscribe((apiData) => {
       if (apiData.success && Array.isArray(apiData.data)) {
         const requestsRaw = apiData.data;
-        this.requests = [];
-        requestsRaw.forEach((item: any) => {
-          if (item.requestStatus === 32) {
-            return;
-          }
 
-          this.leaveRequestTypeService
-            .getLeaveRequestTypeById(item.leaveRequestTypeId)
-            .subscribe((typeRes) => {
-              const leaveTypeData = typeRes?.data;
-              const leaveTypeDescription = leaveTypeData?.description || '';
-              this.requests.push({
-                id: String(item.id),
-                employeeName: item.fullName,
-                status: StatusUtils.mapStatus(item.requestStatus),
-                from: DateUtils.formatDate(item.startDate),
-                to: DateUtils.formatDate(item.endDate),
-                days: DateUtils.calcDays(item.startDate, item.endDate),
-                reason: item.reason,
-                createdAt: DateUtils.formatDate(item.createdAt),
-                comment: item.reviewerComment,
-                createdAtDate: new Date(item.createdAt),
-                leaveTypeDescription: leaveTypeDescription,
-                leaveType: leaveTypeData
-                  ? {
-                      id: leaveTypeData.id,
-                      title: leaveTypeData.title,
-                      description: leaveTypeData.description,
-                      maxDays: leaveTypeData.maxDays,
-                      isPaid: leaveTypeData.isPaid,
-                    }
-                  : undefined,
-              });
-
-              this.requests.sort(
-                (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-              );
-            });
-        });
+        this.requests = requestsRaw
+          .filter((item: any) => item.requestStatus !== 32)
+          .map((item: any) => ({
+            id: String(item.id),
+            employeeName: item.fullName,
+            status: StatusUtils.mapStatus(item.requestStatus),
+            from: DateUtils.formatDate(item.startDate),
+            to: DateUtils.formatDate(item.endDate),
+            reason: item.reason,
+            createdAt: DateUtils.formatDate(item.createdAt),
+            comment: item.reviewerComment,
+            createdAtDate: new Date(item.createdAt),
+            departmentName: item.departmentName,
+            leaveType: {
+              id: item.leaveRequestTypeId,
+              title: item.leaveRequestTypeName || 'Unknown',
+              description: '',
+              maxDays: 0,
+              isPaid: false,
+            },
+          }))
+          .sort(
+            (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
+          );
       }
     });
   }
@@ -96,9 +86,19 @@ export class AddRequests implements OnInit {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.loadRequests();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex] = {
+              ...this.requests[requestIndex],
+              status: 'Approved',
+              comment: data.comment || '',
+            };
+          }
+          this.dataRefreshed.emit();
         }
       });
   }
@@ -111,24 +111,100 @@ export class AddRequests implements OnInit {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.loadRequests();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex] = {
+              ...this.requests[requestIndex],
+              status: 'Rejected',
+              comment: data.comment || '',
+            };
+          }
+          this.dataRefreshed.emit();
         }
       });
+  }
+
+  onActionCompleted() {
+    this.dataRefreshed.emit();
+  }
+
+  sortBy(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+  }
+
+  private sortRequests(requests: ILeaveRequest[]): ILeaveRequest[] {
+    return [...requests].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (this.sortColumn) {
+        case 'employee':
+          aValue = a.employeeName.toLowerCase();
+          bValue = b.employeeName.toLowerCase();
+          break;
+        case 'department':
+          aValue = (a.departmentName || '').toLowerCase();
+          bValue = (b.departmentName || '').toLowerCase();
+          break;
+        case 'type':
+          aValue = (a.leaveType?.title || '').toLowerCase();
+          bValue = (b.leaveType?.title || '').toLowerCase();
+          break;
+        case 'dates':
+          aValue = new Date(a.from);
+          bValue = new Date(b.from);
+          break;
+        case 'submitted':
+        default:
+          aValue = a.createdAtDate;
+          bValue = b.createdAtDate;
+          break;
+      }
+
+      if (aValue < bValue) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
   }
 
   get filteredRequests(): ILeaveRequest[] {
     let filtered = RequestUtils.filterRequests(this.requests, this.filter);
 
     if (this.searchTerm) {
-      filtered = filtered.filter((request) =>
-        request.employeeName
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((request) => {
+        const searchTermLower = this.searchTerm.toLowerCase();
+        
+        switch (this.searchCriteria) {
+          case 'employee':
+            return request.employeeName.toLowerCase().includes(searchTermLower);
+          case 'department':
+            return (request.departmentName || '').toLowerCase().includes(searchTermLower);
+          case 'type':
+            return (request.leaveType?.title || '').toLowerCase().includes(searchTermLower);
+          case 'all':
+          default:
+            return (
+              request.employeeName.toLowerCase().includes(searchTermLower) ||
+              (request.departmentName || '').toLowerCase().includes(searchTermLower) ||
+              (request.leaveType?.title || '').toLowerCase().includes(searchTermLower)
+            );
+        }
+      });
     }
 
-    return filtered;
+    return this.sortRequests(filtered);
   }
 }

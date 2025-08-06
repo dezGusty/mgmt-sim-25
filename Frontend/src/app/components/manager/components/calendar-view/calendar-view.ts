@@ -6,16 +6,18 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { CalendarUtils, CalendarDay } from '../../../../utils/calendar.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
+import { ColorUtils } from '../../../../utils/color.utils';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { RequestDetail } from '../request-detail/request-detail';
 
 @Component({
   selector: 'app-calendar-view',
   standalone: true,
-  imports: [CommonModule, RequestDetail],
+  imports: [CommonModule, FormsModule, RequestDetail],
   templateUrl: './calendar-view.html',
   styleUrls: ['./calendar-view.css'],
 })
@@ -30,7 +32,7 @@ export class CalendarView implements OnInit, OnChanges {
   dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   calendarFilters = {
-    pending: false,
+    pending: true,
     approved: true,
     rejected: false,
   };
@@ -38,16 +40,55 @@ export class CalendarView implements OnInit, OnChanges {
   hoveredRequest: ILeaveRequest | null = null;
   selectedRequest: ILeaveRequest | null = null;
 
+  employees: string[] = [];
+  calendarDates: Date[] = [];
+  monthHeaders: { month: string; year: number; daysInMonth: number }[] = [];
+  tableData: {
+    employee: string;
+    dates: { date: Date; hasLeave: boolean; requests: ILeaveRequest[] }[];
+  }[] = [];
+
+  displayMonths = 3;
+  monthsOptions = [1, 3, 6, 9, 12, 24];
+  startMonth = this.currentMonth;
+  startYear = this.currentYear;
+
+  legendItems: { title: string; color: string }[] = [];
+
   constructor(private leaveRequests: LeaveRequests) {}
 
   ngOnInit() {
-    this.generateCalendar();
+    this.generateTableData();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['requests']) {
-      this.generateCalendar();
+      this.generateTableData();
     }
+  }
+
+  updateLegend() {
+    const leaveTypes = new Set<string>();
+    this.filteredRequestsForCalendar.forEach((req) => {
+      if (req.leaveType?.title) {
+        leaveTypes.add(req.leaveType.title);
+      }
+    });
+
+    console.log('Unique leave types found:', Array.from(leaveTypes));
+
+    this.legendItems = Array.from(leaveTypes).map((type) => ({
+      title: type,
+      color: ColorUtils.generateColorForLeaveType(type),
+    }));
+
+    console.log('Legend items created:', this.legendItems);
+  }
+
+  getLeaveTypeColor(request: ILeaveRequest): string {
+    return ColorUtils.generateColorForLeaveType(
+      request.leaveType?.title || 'Unknown'
+    );
   }
 
   get filteredRequestsForCalendar(): ILeaveRequest[] {
@@ -59,49 +100,163 @@ export class CalendarView implements OnInit, OnChanges {
 
   toggleFilter(status: 'pending' | 'approved') {
     this.calendarFilters[status] = !this.calendarFilters[status];
-    this.generateCalendar();
+    this.generateTableData();
   }
 
-  generateCalendar() {
-    this.calendarDays = CalendarUtils.generateCalendarDaysWithMondayFirst(
-      this.currentMonth,
-      this.currentYear,
-      this.filteredRequestsForCalendar
+  generateTableData() {
+    const filteredRequests = this.filteredRequestsForCalendar;
+
+    console.log('All filtered requests:', filteredRequests);
+    console.log(
+      'Leave type descriptions:',
+      filteredRequests.map((req) => ({
+        employee: req.employeeName,
+        leaveType: req.leaveType,
+        status: req.status,
+      }))
+    );
+
+    this.employees = [
+      ...new Set(filteredRequests.map((req) => req.employeeName)),
+    ].sort();
+
+    this.generateCalendarDates();
+    this.generateMonthHeaders();
+    this.updateLegend();
+
+    this.tableData = this.employees.map((employee) => ({
+      employee,
+      dates: this.calendarDates.map((date) => ({
+        date,
+        hasLeave: this.hasLeaveOnDate(employee, date, filteredRequests),
+        requests: this.getRequestsForEmployeeAndDate(
+          employee,
+          date,
+          filteredRequests
+        ),
+      })),
+    }));
+  }
+
+  generateCalendarDates() {
+    this.calendarDates = [];
+
+    for (let i = 0; i < this.displayMonths; i++) {
+      const month = (this.startMonth + i) % 12;
+      const year = this.startYear + Math.floor((this.startMonth + i) / 12);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        this.calendarDates.push(new Date(year, month, day));
+      }
+    }
+  }
+
+  generateMonthHeaders() {
+    this.monthHeaders = [];
+
+    for (let i = 0; i < this.displayMonths; i++) {
+      const month = (this.startMonth + i) % 12;
+      const year = this.startYear + Math.floor((this.startMonth + i) / 12);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      this.monthHeaders.push({
+        month: this.monthNames[month],
+        year,
+        daysInMonth,
+      });
+    }
+  }
+
+  hasLeaveOnDate(
+    employee: string,
+    date: Date,
+    requests: ILeaveRequest[]
+  ): boolean {
+    return requests.some(
+      (req) =>
+        req.employeeName === employee &&
+        this.isDateInRange(date, new Date(req.from), new Date(req.to))
     );
   }
 
-  getLeaveRequestsForDate(date: Date): ILeaveRequest[] {
-    return CalendarUtils.getLeaveRequestsForDate(
+  getRequestsForEmployeeAndDate(
+    employee: string,
+    date: Date,
+    requests: ILeaveRequest[]
+  ): ILeaveRequest[] {
+    return requests.filter(
+      (req) =>
+        req.employeeName === employee &&
+        this.isDateInRange(date, new Date(req.from), new Date(req.to))
+    );
+  }
+
+  onMonthsChange(months: number) {
+    this.displayMonths = months;
+    this.generateTableData();
+  }
+
+  onWheel(event: WheelEvent) {
+    const container = event.currentTarget as HTMLElement;
+    event.preventDefault();
+
+    if (event.shiftKey) {
+      container.scrollLeft += event.deltaY;
+    } else {
+      container.scrollTop += event.deltaY;
+    }
+  }
+
+  isDateInRange(date: Date, fromDate: Date, toDate: Date): boolean {
+    const checkDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    const from = new Date(
+      fromDate.getFullYear(),
+      fromDate.getMonth(),
+      fromDate.getDate()
+    );
+    const to = new Date(
+      toDate.getFullYear(),
+      toDate.getMonth(),
+      toDate.getDate()
+    );
+
+    return checkDate >= from && checkDate <= to;
+  }
+
+  onCellClick(employee: string, date: Date) {
+    const requests = this.getRequestsForEmployeeAndDate(
+      employee,
       date,
       this.filteredRequestsForCalendar
     );
+    if (requests.length > 0) {
+      this.selectedRequest = requests[0];
+    }
   }
 
   previousMonth() {
-    if (this.currentMonth === 0) {
-      this.currentMonth = 11;
-      this.currentYear--;
+    if (this.startMonth === 0) {
+      this.startMonth = 11;
+      this.startYear--;
     } else {
-      this.currentMonth--;
+      this.startMonth--;
     }
-    this.generateCalendar();
+    this.generateTableData();
   }
 
   nextMonth() {
-    if (this.currentMonth === 11) {
-      this.currentMonth = 0;
-      this.currentYear++;
+    if (this.startMonth === 11) {
+      this.startMonth = 0;
+      this.startYear++;
     } else {
-      this.currentMonth++;
+      this.startMonth++;
     }
-    this.generateCalendar();
-  }
-
-  goToToday() {
-    const today = new Date();
-    this.currentMonth = today.getMonth();
-    this.currentYear = today.getFullYear();
-    this.generateCalendar();
+    this.generateTableData();
   }
 
   getStatusColor(status: string): string {
@@ -120,8 +275,12 @@ export class CalendarView implements OnInit, OnChanges {
     this.hoveredRequest = null;
   }
 
-  isDateInHoveredRequest(date: Date): boolean {
+  isDateInHoveredRequest(date: Date, employee: string): boolean {
     if (!this.hoveredRequest) {
+      return false;
+    }
+
+    if (this.hoveredRequest.employeeName !== employee) {
       return false;
     }
 
@@ -148,9 +307,17 @@ export class CalendarView implements OnInit, OnChanges {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.generateCalendar();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].status = 'Approved';
+            this.requests[requestIndex].comment = data.comment || '';
+            this.requests = [...this.requests];
+          }
+          this.generateTableData();
         }
       });
   }
@@ -163,10 +330,38 @@ export class CalendarView implements OnInit, OnChanges {
         reviewerComment: data.comment,
       })
       .subscribe((res) => {
-        if (res) {
+        if (res.success) {
           this.closeDetails();
-          this.generateCalendar();
+          const requestIndex = this.requests.findIndex(
+            (req) => req.id === data.id
+          );
+          if (requestIndex !== -1) {
+            this.requests[requestIndex].status = 'Rejected';
+            this.requests[requestIndex].comment = data.comment;
+            this.requests = [...this.requests];
+          }
+          this.generateTableData();
         }
       });
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return '✓';
+      case 'pending':
+        return '?';
+      default:
+        return '•';
+    }
+  }
+
+  onRequestAdded(newRequest: any) {
+    this.requests = [...this.requests, newRequest];
+    this.generateTableData();
+  }
+
+  refreshCalendarData() {
+    this.generateTableData();
   }
 }

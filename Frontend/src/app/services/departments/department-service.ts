@@ -30,8 +30,8 @@ export class DepartmentService {
       paramsToSend = paramsToSend.set('name', params.name);
     }
 
-    if (params?.includeDeleted) {
-      paramsToSend = paramsToSend.set('includeDeleted', params.includeDeleted);
+    if(params.activityStatus !== undefined) {
+      paramsToSend = paramsToSend.set('activityStatus', params.activityStatus.toString());
     }
     
     if (params?.params.sortBy) {

@@ -1,90 +1,67 @@
-<div class="bg-white rounded-lg shadow-sm border">
+<div class="bg-white rounded-lg shadow-sm border h-full flex flex-col">
   <div
     class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
   >
-    <h2 class="text-2xl font-bold text-slate-900">
-      {{ monthNames[currentMonth] }} {{ currentYear }}
-    </h2>
+    <h2 class="text-2xl font-bold text-slate-900">Calendar Angajați</h2>
 
     <div class="flex items-center gap-3">
       <button
         (click)="toggleFilter('pending')"
         class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
         [ngClass]="{
-          'bg-yellow-200 border-2 border-yellow-400 shadow-md':
+          'bg-gray-200 border-2 border-gray-400 shadow-md':
             calendarFilters.pending,
           'bg-gray-100 border border-gray-300 opacity-50':
             !calendarFilters.pending
         }"
       >
-        <div
-          class="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"
-        ></div>
+        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
         <span
           [ngClass]="{
-            'font-semibold text-yellow-800': calendarFilters.pending,
+            'font-semibold text-gray-800': calendarFilters.pending,
             'text-gray-500': !calendarFilters.pending
           }"
           >Pending</span
         >
-        <svg
-          *ngIf="calendarFilters.pending"
-          class="w-4 h-4 text-yellow-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
+        <span class="text-lg font-bold text-gray-600">?</span>
       </button>
 
       <button
         (click)="toggleFilter('approved')"
         class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
         [ngClass]="{
-          'bg-green-200 border-2 border-green-400 shadow-md':
+          'bg-gray-200 border-2 border-gray-400 shadow-md':
             calendarFilters.approved,
           'bg-gray-100 border border-gray-300 opacity-50':
             !calendarFilters.approved
         }"
       >
-        <div class="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
+        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
         <span
           [ngClass]="{
-            'font-semibold text-green-800': calendarFilters.approved,
+            'font-semibold text-gray-800': calendarFilters.approved,
             'text-gray-500': !calendarFilters.approved
           }"
           >Approved</span
         >
-        <svg
-          *ngIf="calendarFilters.approved"
-          class="w-4 h-4 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
+        <span class="text-lg font-bold text-gray-600">✓</span>
       </button>
     </div>
 
     <div class="flex items-center gap-3">
-      <button
-        (click)="goToToday()"
-        class="px-4 py-2 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] text-slate-900 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
-      >
-        Today
-      </button>
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">Luni:</label>
+        <select
+          [(ngModel)]="displayMonths"
+          (ngModelChange)="onMonthsChange($event)"
+          class="px-3 py-1 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-blue-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200"
+        >
+          <option *ngFor="let months of monthsOptions" [value]="months">
+            {{ months }} {{ months === 1 ? "lună" : "luni" }}
+          </option>
+        </select>
+      </div>
+
       <div class="flex items-center gap-1">
         <button
           (click)="previousMonth()"
@@ -126,62 +103,118 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-7 border-b bg-gray-50">
-    <div
-      *ngFor="let day of dayNames"
-      class="p-4 text-center font-medium text-gray-700 border-r last:border-r-0"
-    >
-      {{ day }}
+  <div class="p-2 border-b bg-gray-50" *ngIf="legendItems.length > 0">
+    <div class="flex flex-wrap gap-3">
+      <div *ngFor="let item of legendItems" class="flex items-center gap-2">
+        <div
+          class="w-4 h-4 rounded border border-gray-300"
+          [style.background-color]="item.color"
+        ></div>
+        <span class="text-sm text-gray-600">{{ item.title }}</span>
+      </div>
     </div>
   </div>
 
-  <div class="grid grid-cols-7 auto-rows-fr grid-rows-6">
-    <div
-      *ngFor="let day of calendarDays"
-      class="min-h-[120px] h-[140px] flex flex-col transition-colors duration-300 border-r border-b last:border-r-0 p-2"
-      [ngClass]="{
-        'bg-gray-50 text-gray-400':
-          !day.isCurrentMonth && !isDateInHoveredRequest(day.date),
-        'bg-white hover:bg-slate-50':
-          day.isCurrentMonth && !isDateInHoveredRequest(day.date),
-        'bg-blue-100': isDateInHoveredRequest(day.date)
-      }"
-    >
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex justify-between items-start mb-2">
-          <span
-            class="text-sm font-medium"
+  <div
+    class="overflow-x-auto max-h-[600px] overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
+    (wheel)="onWheel($event)"
+    style="scrollbar-color: #d1d5db #f9fafb"
+  >
+    <table class="w-full border-collapse text-sm">
+      <thead class="sticky top-0 bg-white z-10">
+        <tr>
+          <th
+            class="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 font-semibold text-gray-700 min-w-[150px] z-20 text-left cursor-default"
+          >
+            Angajat
+          </th>
+          <ng-container *ngFor="let monthHeader of monthHeaders">
+            <th
+              class="border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-center bg-blue-50"
+              [attr.colspan]="monthHeader.daysInMonth"
+            >
+              {{ monthHeader.month }} {{ monthHeader.year }}
+            </th>
+          </ng-container>
+        </tr>
+        <tr>
+          <th
+            class="sticky left-0 bg-gray-100 border border-gray-300 p-1 text-xs text-gray-600 z-20"
+          >
+            Nume
+          </th>
+          <th
+            *ngFor="let date of calendarDates"
+            class="border border-gray-300 p-1 text-xs min-w-[40px]"
             [ngClass]="{
-              'text-blue-600 font-bold': isToday(day.date),
-              'text-gray-900': day.isCurrentMonth && !isToday(day.date),
-              'text-gray-400': !day.isCurrentMonth
+              'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
+              'bg-gray-50 text-gray-600': !isToday(date)
             }"
           >
-            {{ day.dayNumber }}
-          </span>
-          <span
-            *ngIf="day.leaveRequests.length > 0"
-            class="text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-          >
-            {{ day.leaveRequests.length }}
-          </span>
-        </div>
-        <div
-          class="leave-requests-container flex-1 space-y-1 overflow-y-auto overflow-x-hidden"
+            {{ date.getDate() }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let employeeData of tableData; let i = index"
+          class="hover:bg-gray-50 text-sm"
+          [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
         >
-          <div
-            *ngFor="let request of day.leaveRequests"
-            class="text-xs p-1 rounded border truncate whitespace-nowrap overflow-hidden text-ellipsis flex-shrink-0 cursor-pointer transition-all duration-300 hover:shadow-lg"
-            [ngClass]="getStatusColor(request.status)"
-            (mouseenter)="onRequestHover(request)"
-            (mouseleave)="onRequestLeave()"
-            (click)="openDetails(request)"
+          <td
+            class="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium text-gray-800 z-10 text-left cursor-default min-w-[150px]"
+            [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
           >
-            <div class="font-medium truncate">{{ request.employeeName }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+            {{ employeeData.employee }}
+          </td>
+
+          <td
+            *ngFor="let dateData of employeeData.dates"
+            class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
+            [ngClass]="{
+              'hover:bg-gray-100': !dateData.hasLeave,
+              'cursor-pointer':
+                dateData.hasLeave && dateData.requests.length > 0,
+              'cursor-default':
+                !dateData.hasLeave || dateData.requests.length === 0,
+              'opacity-75':
+                dateData.hasLeave &&
+                dateData.requests.length > 0 &&
+                !isDateInHoveredRequest(dateData.date, employeeData.employee),
+              'opacity-100 ring-2 ring-gray-400':
+                dateData.hasLeave &&
+                dateData.requests.length > 0 &&
+                isDateInHoveredRequest(dateData.date, employeeData.employee)
+            }"
+            [style.background-color]="
+              dateData.hasLeave && dateData.requests.length > 0
+                ? getLeaveTypeColor(dateData.requests[0])
+                : ''
+            "
+            (click)="onCellClick(employeeData.employee, dateData.date)"
+            (mouseenter)="
+              dateData.hasLeave && dateData.requests.length > 0
+                ? onRequestHover(dateData.requests[0])
+                : null
+            "
+            (mouseleave)="onRequestLeave()"
+            [title]="
+              dateData.hasLeave && dateData.requests.length > 0
+                ? dateData.requests[0].reason || 'Concediu'
+                : ''
+            "
+          >
+            <span
+              *ngIf="dateData.hasLeave && dateData.requests.length > 0"
+              class="text-lg font-bold text-white text-shadow"
+            >
+              {{ getStatusIcon(dateData.requests[0].status) }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div
@@ -198,15 +231,8 @@
         class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"
         (click)="closeDetails()"
       >
-        Close
+        ✕
       </button>
     </div>
   </div>
-  <button
-    *ngIf="selectedRequest"
-    class="fixed top-4 right-4 bg-gray-200 px-3 py-1 rounded transition-all duration-200 transform hover:scale-105"
-    (click)="closeDetails()"
-  >
-    Close
-  </button>
 </div>

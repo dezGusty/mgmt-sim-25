@@ -44,8 +44,8 @@ export class JobTitlesService {
       paramsToSend = paramsToSend.set('jobTitleName', params.jobTitleName);
     }
 
-    if(params?.includeDeleted){
-      paramsToSend = paramsToSend.set('includeDeleted', params.includeDeleted);
+    if(params?.activityStatus !== undefined){
+      paramsToSend = paramsToSend.set('activityStatus', params.activityStatus);
     }
 
     if (params?.params.sortBy) {

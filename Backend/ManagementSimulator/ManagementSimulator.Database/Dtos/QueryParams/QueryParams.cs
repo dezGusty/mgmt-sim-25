@@ -11,7 +11,7 @@ namespace ManagementSimulator.Database.Dtos.QueryParams
         public string? SortBy { get; set; } = "Id";
         public bool? SortDescending { get; set; } = false;
 
-        public int? Page { get; set; } = 1;
-        public int? PageSize { get; set; } = 1;
+        public int? Page { get; set; }
+        public int? PageSize { get; set; }
     }
 }
