@@ -6,7 +6,6 @@ import { LeaveRequest } from '../../../models/entities/iLeave-request';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../../models/enums/RequestStatus';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-user-request-form',
@@ -27,15 +26,12 @@ export class UserRequestForm {
 
   leaveRequestTypes: ILeaveRequestType[] = [];
   isLoadingTypes = true;
-  
-  // New properties for remaining days
+
   remainingDaysInfo: any | null = null;
   isLoadingRemainingDays = false;
   remainingDaysError = '';
   balanceCalculated = false;
-  
-  // Subject for debouncing API calls
-  private updateRemainingDaysSubject = new Subject<void>();
+
 
   Math = Math;
 
@@ -48,17 +44,10 @@ export class UserRequestForm {
   }
 
   constructor(
-    private leaveRequestService: LeaveRequestService, 
+    private leaveRequestService: LeaveRequestService,
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {
-    // Setup debounced remaining days update
-    this.updateRemainingDaysSubject.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.updateRemainingDays();
-    });
-  }
+  ) {}
+  
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
@@ -81,7 +70,7 @@ export class UserRequestForm {
 
   private triggerRemainingDaysUpdate() {
     if (this.leaveRequestTypeId && this.leaveRequestTypeId > 0 && this.startDate && this.endDate) {
-      this.updateRemainingDaysSubject.next();
+      this.updateRemainingDays();
     } else {
       this.remainingDaysInfo = null;
       this.remainingDaysError = '';
@@ -99,8 +88,8 @@ export class UserRequestForm {
     this.balanceCalculated = false;
 
     this.leaveRequestService.getCurrentUserRemainingLeaveDaysForPeriod(
-      this.leaveRequestTypeId, 
-      this.startDate, 
+      this.leaveRequestTypeId,
+      this.startDate,
       this.endDate
     ).subscribe({
       next: (response) => {
@@ -120,33 +109,33 @@ export class UserRequestForm {
 
   validateDates(): boolean {
     const today = new Date().toISOString().split('T')[0];
-    
+
     if (this.startDate < today) {
       this.errorMessage = 'Start date cannot be in the past.';
       return false;
     }
-    
+
     if (this.endDate < this.startDate) {
       this.errorMessage = 'End date cannot be before start date.';
       return false;
     }
-    
+
     if (!this.startDate || !this.endDate) {
       this.errorMessage = 'Please select both start and end dates.';
       return false;
     }
-    
+
     return true;
   }
 
   loadLeaveRequestTypes() {
     this.isLoadingTypes = true;
-    
+
     this.leaveRequestTypeService.getAllLeaveRequestTypes().subscribe({
       next: (types) => {
         this.leaveRequestTypes = types.data;
         this.isLoadingTypes = false;
-        
+
         if (types.data.length > 0) {
           this.leaveRequestTypeId = types.data[0].id;
           this.triggerRemainingDaysUpdate();
@@ -169,7 +158,7 @@ export class UserRequestForm {
     if (formElement) {
       formElement.classList.add('fade-out');
     }
-    
+
     setTimeout(() => {
       this.startDate = '';
       this.endDate = '';
@@ -179,16 +168,16 @@ export class UserRequestForm {
       this.remainingDaysInfo = null;
       this.remainingDaysError = '';
       this.balanceCalculated = false;
-      
+
       if (formElement) {
         formElement.classList.remove('fade-out');
         formElement.classList.add('fade-in');
-        
+
         setTimeout(() => {
           formElement.classList.remove('fade-in');
         }, 300);
       }
-    }, 150); 
+    }, 150);
   }
 
   resetForm() {
@@ -205,7 +194,7 @@ export class UserRequestForm {
   closeForm() {
     this.close.emit();
   }
-  
+
   submitForm() {
     if (!this.validateDates()) {
       return;
@@ -227,12 +216,12 @@ export class UserRequestForm {
 
     const requestDto: CreateLeaveRequestByEmployeeDto = {
       leaveRequestTypeId: this.leaveRequestTypeId,
-      startDate: this.startDate, 
-      endDate: this.endDate,    
+      startDate: this.startDate,
+      endDate: this.endDate,
       reason: this.reason || undefined,
-      requestStatus: RequestStatus.PENDING, 
+      requestStatus: RequestStatus.PENDING,
     };
-    
+
     this.leaveRequestService.addLeaveRequestByEmployee(requestDto).subscribe({
       next: (response) => {
         this.isSubmitting = false;
@@ -240,11 +229,11 @@ export class UserRequestForm {
 
         setTimeout(() => {
           this.resetFormSmooth();
-        }, 300); 
-        
+        }, 300);
+
         setTimeout(() => {
           this.closeForm();
-        }, 800); 
+        }, 800);
       },
       error: (err) => {
         console.error('Error details:', {

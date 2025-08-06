@@ -3,16 +3,13 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-xl font-bold text-gray-900">Submit Leave Request</h3>
-      <button
-        (click)="closeForm()"
-        class="text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="Close">
+      <button (click)="closeForm()" class="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </div>
-    
+
     <!-- Form -->
     <form (submit)="submitForm(); $event.preventDefault()">
       <!-- Leave Type -->
@@ -20,17 +17,11 @@
         <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
           Leave Type
         </label>
-        <select
-          id="type"
-          [(ngModel)]="leaveRequestTypeId"
-          name="type"
-          (change)="onLeaveTypeChange()"
+        <select id="type" [(ngModel)]="leaveRequestTypeId" name="type" (change)="onLeaveTypeChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required>
           <option value="" disabled>Select leave type</option>
-          <option 
-            *ngFor="let type of leaveRequestTypes" 
-            [value]="type.id">
+          <option *ngFor="let type of leaveRequestTypes" [value]="type.id">
             {{ type.title }}
           </option>
         </select>
@@ -41,12 +32,7 @@
         <label for="fromDate" class="block text-sm font-medium text-gray-700 mb-1">
           From Date
         </label>
-        <input
-          type="date"
-          id="fromDate"
-          [(ngModel)]="startDate"
-          name="fromDate"
-          [min]="todayDate"
+        <input type="date" id="fromDate" [(ngModel)]="startDate" name="fromDate" [min]="todayDate"
           (change)="onStartDateChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required />
@@ -58,13 +44,7 @@
         <label for="toDate" class="block text-sm font-medium text-gray-700 mb-1">
           To Date
         </label>
-        <input
-          type="date"
-          id="toDate"
-          [(ngModel)]="endDate"
-          name="toDate"
-          [min]="minEndDate"
-          (change)="onEndDateChange()"
+        <input type="date" id="toDate" [(ngModel)]="endDate" name="toDate" [min]="minEndDate"
           (change)="onEndDateChange()"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required />
@@ -80,21 +60,14 @@
       </div>
 
       <!-- Remaining Days Info -->
-      <div 
-        class="leave-balance-container mb-4"
-        [class.show]="isLoadingRemainingDays || balanceCalculated">
+      <div class="leave-balance-container mb-4" [class.show]="isLoadingRemainingDays || balanceCalculated">
         <div class="leave-balance-content p-4 border rounded-lg bg-gray-50">
-          <div
-            *ngIf="isLoadingRemainingDays"
-            class="flex items-center gap-2 text-blue-600 calculating-indicator">
-            <div
-              class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          <div *ngIf="isLoadingRemainingDays" class="flex items-center gap-2 text-blue-600 calculating-indicator">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             <span class="text-sm">Calculating remaining days...</span>
           </div>
 
-          <div
-            *ngIf="!isLoadingRemainingDays && remainingDaysInfo"
-            class="space-y-2">
+          <div *ngIf="!isLoadingRemainingDays && remainingDaysInfo" class="space-y-2">
             <h4 class="font-semibold text-gray-700">
               Leave Balance Information
             </h4>
@@ -103,15 +76,15 @@
                 <span class="text-gray-600">Leave Type:</span>
                 <span class="font-medium ml-2">{{
                   remainingDaysInfo.leaveRequestTypeName || getSelectedLeaveTypeName()
-                }}</span>
+                  }}</span>
               </div>
               <div>
                 <span class="text-gray-600">Max Days Allowed:</span>
                 <span class="font-medium ml-2">
                   {{
-                    remainingDaysInfo.hasUnlimitedDays
-                      ? "Unlimited"
-                      : remainingDaysInfo.maxDaysAllowed || remainingDaysInfo.totalDays
+                  remainingDaysInfo.hasUnlimitedDays
+                  ? "Unlimited"
+                  : remainingDaysInfo.maxDaysAllowed || remainingDaysInfo.totalDays
                   }}
                 </span>
               </div>
@@ -119,10 +92,9 @@
                 <span class="text-gray-600">Days Used (including this request):</span>
                 <span class="font-medium ml-2">{{
                   remainingDaysInfo.daysUsed || remainingDaysInfo.usedDays
-                }}</span>
+                  }}</span>
               </div>
-              <div
-                [class]="
+              <div [class]="
                   remainingDaysInfo.remainingDays < 0
                     ? 'text-red-600'
                     : 'text-green-600'
@@ -130,28 +102,24 @@
                 <span class="text-gray-600">Remaining Days:</span>
                 <span class="font-bold ml-2">
                   {{
-                    remainingDaysInfo.hasUnlimitedDays
-                      ? "Unlimited"
-                      : remainingDaysInfo.remainingDays
+                  remainingDaysInfo.hasUnlimitedDays
+                  ? "Unlimited"
+                  : remainingDaysInfo.remainingDays
                   }}
                 </span>
               </div>
             </div>
 
-            <div
-              *ngIf="
+            <div *ngIf="
                 !remainingDaysInfo.hasUnlimitedDays &&
                 remainingDaysInfo.remainingDays < 0
-              "
-              class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mt-2">
+              " class="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mt-2">
               <strong>Warning:</strong> This request exceeds the available leave
               days by {{ Math.abs(remainingDaysInfo.remainingDays) }} day(s).
             </div>
           </div>
 
-          <div
-            *ngIf="!isLoadingRemainingDays && !remainingDaysInfo && remainingDaysError"
-            class="text-red-600 text-sm">
+          <div *ngIf="!isLoadingRemainingDays && !remainingDaysInfo && remainingDaysError" class="text-red-600 text-sm">
             Unable to calculate leave balance. Please check the selected values.
           </div>
         </div>
@@ -162,11 +130,7 @@
         <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
           Reason
         </label>
-        <textarea
-          id="reason"
-          [(ngModel)]="reason"
-          name="reason"
-          rows="3"
+        <textarea id="reason" [(ngModel)]="reason" name="reason" rows="3"
           class="form-field w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required></textarea>
       </div>
@@ -175,7 +139,8 @@
       <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded transition-all">
         <div class="flex items-center gap-2">
           <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           {{ errorMessage }}
         </div>
@@ -183,17 +148,14 @@
 
       <!-- Submit Buttons -->
       <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          (click)="closeForm()"
+        <button type="button" (click)="closeForm()"
           class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors">
           Cancel
         </button>
-        <button
-          type="submit"
+        <button type="submit"
           class="submit-button bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold px-4 py-2 rounded flex items-center gap-2"
           [disabled]="isSubmitting || isLoadingTypes || (remainingDaysInfo && remainingDaysInfo.remainingDays < 0)">
-          
+
           <span *ngIf="isSubmitting" class="loading-spinner"></span>
           {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
         </button>
