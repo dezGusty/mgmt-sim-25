@@ -345,7 +345,9 @@ export class CalendarView implements OnInit, OnChanges {
       });
   }
 
-  getStatusIcon(status: string): string {
+  getStatusIcon(status: string | undefined): string {
+    if (!status) return '•';
+
     switch (status.toLowerCase()) {
       case 'approved':
         return '✓';

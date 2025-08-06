@@ -209,7 +209,7 @@
               *ngIf="dateData.hasLeave && dateData.requests.length > 0"
               class="text-lg font-bold text-white text-shadow"
             >
-              {{ getStatusIcon(dateData.requests[0].status) }}
+              {{ getStatusIcon(dateData.requests[0].status || "pending") }}
             </span>
           </td>
         </tr>

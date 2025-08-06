@@ -147,6 +147,7 @@
   <table class="min-w-full bg-white shadow-sm rounded overflow-hidden">
     <thead class="bg-gray-100 border-b-2 border-gray-200">
       <tr>
+        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">#</th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
           <button
             class="flex items-center gap-1 hover:text-gray-700 transition-colors"
@@ -272,7 +273,7 @@
     </thead>
     <tbody class="divide-y divide-gray-200">
       <tr
-        *ngFor="let req of filteredRequests"
+        *ngFor="let req of filteredRequests; let i = index"
         class="hover:bg-gray-50 border-l-4"
         [ngClass]="{
           'border-yellow-400': req.status === 'Pending',
@@ -284,6 +285,7 @@
             req.status !== 'Rejected'
         }"
       >
+        <td class="px-6 py-4 text-sm text-gray-900 font-mono">{{ i + 1 }}</td>
         <td class="px-6 py-4 text-sm text-gray-900">{{ req.employeeName }}</td>
         <td class="px-6 py-4 text-sm text-gray-700">
           {{ req.departmentName || "-" }}

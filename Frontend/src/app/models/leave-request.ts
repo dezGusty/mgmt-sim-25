@@ -1,7 +1,7 @@
 export interface ILeaveRequest {
   id: string;
   employeeName: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected' | undefined;
   from: string;
   to: string;
   reason: string;

@@ -44,25 +44,29 @@ export class AddRequests implements OnInit {
 
         this.requests = requestsRaw
           .filter((item: any) => item.requestStatus !== 32)
-          .map((item: any) => ({
-            id: String(item.id),
-            employeeName: item.fullName,
-            status: StatusUtils.mapStatus(item.requestStatus),
-            from: DateUtils.formatDate(item.startDate),
-            to: DateUtils.formatDate(item.endDate),
-            reason: item.reason,
-            createdAt: DateUtils.formatDate(item.createdAt),
-            comment: item.reviewerComment,
-            createdAtDate: new Date(item.createdAt),
-            departmentName: item.departmentName,
-            leaveType: {
-              id: item.leaveRequestTypeId,
-              title: item.leaveRequestTypeName || 'Unknown',
-              description: '',
-              maxDays: 0,
-              isPaid: false,
-            },
-          }))
+          .map((item: any) => {
+            const status = StatusUtils.mapStatus(item.requestStatus);
+            return {
+              id: String(item.id),
+              employeeName: item.fullName,
+              status: status,
+              from: DateUtils.formatDate(item.startDate),
+              to: DateUtils.formatDate(item.endDate),
+              reason: item.reason,
+              createdAt: DateUtils.formatDate(item.createdAt),
+              comment: item.reviewerComment,
+              createdAtDate: new Date(item.createdAt),
+              departmentName: item.departmentName,
+              leaveType: {
+                id: item.leaveRequestTypeId,
+                title: item.leaveRequestTypeName || 'Unknown',
+                description: '',
+                maxDays: 0,
+                isPaid: false,
+              },
+            };
+          })
+          .filter((request) => request.status !== undefined)
           .sort(
             (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
           );
@@ -186,20 +190,28 @@ export class AddRequests implements OnInit {
     if (this.searchTerm) {
       filtered = filtered.filter((request) => {
         const searchTermLower = this.searchTerm.toLowerCase();
-        
+
         switch (this.searchCriteria) {
           case 'employee':
             return request.employeeName.toLowerCase().includes(searchTermLower);
           case 'department':
-            return (request.departmentName || '').toLowerCase().includes(searchTermLower);
+            return (request.departmentName || '')
+              .toLowerCase()
+              .includes(searchTermLower);
           case 'type':
-            return (request.leaveType?.title || '').toLowerCase().includes(searchTermLower);
+            return (request.leaveType?.title || '')
+              .toLowerCase()
+              .includes(searchTermLower);
           case 'all':
           default:
             return (
               request.employeeName.toLowerCase().includes(searchTermLower) ||
-              (request.departmentName || '').toLowerCase().includes(searchTermLower) ||
-              (request.leaveType?.title || '').toLowerCase().includes(searchTermLower)
+              (request.departmentName || '')
+                .toLowerCase()
+                .includes(searchTermLower) ||
+              (request.leaveType?.title || '')
+                .toLowerCase()
+                .includes(searchTermLower)
             );
         }
       });

@@ -1,5 +1,7 @@
 export class StatusUtils {
-  static mapStatus(status: number): 'Pending' | 'Approved' | 'Rejected' {
+  static mapStatus(
+    status: number
+  ): 'Pending' | 'Approved' | 'Rejected' | undefined {
     switch (status) {
       case 2:
         return 'Pending';
@@ -8,7 +10,7 @@ export class StatusUtils {
       case 8:
         return 'Rejected';
       default:
-        return 'Pending';
+        return undefined;
     }
   }
 }

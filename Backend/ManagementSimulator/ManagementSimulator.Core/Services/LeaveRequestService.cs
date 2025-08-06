@@ -245,6 +245,22 @@ namespace ManagementSimulator.Core.Services
 
             return filtered;
         }
+        //         public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId)
+        // {
+        //     var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+        //     var employeeIds = employees.Select(e => e.Id).ToList();
+
+        //     var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsAsync();
+        //     var today = DateTime.UtcNow.Date;
+            
+        //     var filtered = allRequests
+        //         .Where(r => employeeIds.Contains(r.UserId))
+        //         .Where(r => !(r.RequestStatus == RequestStatus.Pending && r.StartDate < today))
+        //         .Select(r => r.ToLeaveRequestResponseDto())
+        //         .ToList();
+
+        //     return filtered;
+        // }
 
         public async Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId, QueriedLeaveRequestRequestDto payload)
         {

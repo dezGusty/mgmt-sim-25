@@ -218,27 +218,30 @@ export class AddRequestForm implements OnInit {
             response
           );
 
-          // Backend now returns all the data we need - create ILeaveRequest directly
           if (response.success && response.data) {
             const backendData = response.data;
-            const formattedRequest: ILeaveRequest = {
-              id: backendData.id.toString(),
-              employeeName: backendData.fullName,
-              status: StatusUtils.mapStatus(backendData.requestStatus),
-              from: DateUtils.formatDate(backendData.startDate),
-              to: DateUtils.formatDate(backendData.endDate),
-              reason: backendData.reason,
-              createdAt: DateUtils.formatDate(backendData.createdAt),
-              comment: backendData.reviewerComment,
-              createdAtDate: new Date(backendData.createdAt),
-              departmentName: backendData.departmentName,
-              leaveType: {
-                title: backendData.leaveRequestTypeName,
-                isPaid: backendData.leaveRequestTypeIsPaid,
-              },
-            };
+            const status = StatusUtils.mapStatus(backendData.requestStatus);
 
-            this.requestAdded.emit(formattedRequest);
+            if (status !== undefined) {
+              const formattedRequest: ILeaveRequest = {
+                id: backendData.id.toString(),
+                employeeName: backendData.fullName,
+                status: status,
+                from: DateUtils.formatDate(backendData.startDate),
+                to: DateUtils.formatDate(backendData.endDate),
+                reason: backendData.reason,
+                createdAt: DateUtils.formatDate(backendData.createdAt),
+                comment: backendData.reviewerComment,
+                createdAtDate: new Date(backendData.createdAt),
+                departmentName: backendData.departmentName,
+                leaveType: {
+                  title: backendData.leaveRequestTypeName,
+                  isPaid: backendData.leaveRequestTypeIsPaid,
+                },
+              };
+
+              this.requestAdded.emit(formattedRequest);
+            }
           }
 
           this.handleClose();
