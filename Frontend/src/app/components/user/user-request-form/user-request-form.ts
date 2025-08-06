@@ -46,14 +46,16 @@ export class UserRequestForm {
   constructor(
     private leaveRequestService: LeaveRequestService,
     private leaveRequestTypeService: LeaveRequestTypeService
-  ) {}
-  
+  ) { }
+
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
   }
 
   onStartDateChange() {
+    this.resetErrorState();
+
     if (this.endDate && this.endDate < this.startDate) {
       this.endDate = '';
     }
@@ -61,11 +63,20 @@ export class UserRequestForm {
   }
 
   onEndDateChange() {
+    this.resetErrorState();
     this.triggerRemainingDaysUpdate();
   }
 
   onLeaveTypeChange() {
+    this.resetErrorState();
     this.triggerRemainingDaysUpdate();
+  }
+
+  private resetErrorState() {
+    this.errorMessage = '';
+    this.remainingDaysInfo = null;
+    this.balanceCalculated = false;
+    this.remainingDaysError = '';
   }
 
   private triggerRemainingDaysUpdate() {
