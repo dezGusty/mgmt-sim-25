@@ -60,14 +60,34 @@
       </div>
 
       <!-- Remaining Days Info -->
-      <div class="leave-balance-container mb-4" [class.show]="isLoadingRemainingDays || balanceCalculated">
-        <div class="leave-balance-content p-4 border rounded-lg bg-gray-50">
+      <div class="leave-balance-container mb-4" [class.show]="isLoadingRemainingDays || balanceCalculated || errorMessage">
+        <div class="leave-balance-content p-4 border rounded-lg" [ngClass]="{
+          'bg-gray-50': !errorMessage,
+          'bg-red-50 border-red-200': errorMessage
+        }">
+          
+          <!-- Loading state -->
           <div *ngIf="isLoadingRemainingDays" class="flex items-center gap-2 text-blue-600 calculating-indicator">
             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             <span class="text-sm">Calculating remaining days...</span>
           </div>
 
-          <div *ngIf="!isLoadingRemainingDays && remainingDaysInfo" class="space-y-2">
+          <!-- Error state - Display error messages here -->
+          <div *ngIf="!isLoadingRemainingDays && errorMessage" class="space-y-2">
+            <h4 class="font-semibold text-red-700 flex items-center gap-2">
+              <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Validation Error
+            </h4>
+            <div class="text-red-800 text-sm">
+              {{ errorMessage }}
+            </div>
+          </div>
+
+          <!-- Success state - Display balance information -->
+          <div *ngIf="!isLoadingRemainingDays && !errorMessage && remainingDaysInfo" class="space-y-2">
             <h4 class="font-semibold text-gray-700">
               Leave Balance Information
             </h4>
@@ -110,6 +130,7 @@
               </div>
             </div>
 
+            <!-- Warning for negative remaining days -->
             <div *ngIf="
                 !remainingDaysInfo.hasUnlimitedDays &&
                 remainingDaysInfo.remainingDays < 0
@@ -119,7 +140,9 @@
             </div>
           </div>
 
-          <div *ngIf="!isLoadingRemainingDays && !remainingDaysInfo && remainingDaysError" class="text-red-600 text-sm">
+          <!-- Fallback error state -->
+          <div *ngIf="!isLoadingRemainingDays && !errorMessage && !remainingDaysInfo && remainingDaysError" 
+               class="text-red-600 text-sm">
             Unable to calculate leave balance. Please check the selected values.
           </div>
         </div>
@@ -135,16 +158,7 @@
           required></textarea>
       </div>
 
-      <!-- Error Message -->
-      <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded transition-all">
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          {{ errorMessage }}
-        </div>
-      </div>
+
 
       <!-- Submit Buttons -->
       <div class="flex justify-end gap-3">
