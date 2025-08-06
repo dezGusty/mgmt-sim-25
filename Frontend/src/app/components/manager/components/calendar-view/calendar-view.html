@@ -1,4 +1,7 @@
-<div class="bg-white rounded-lg shadow-sm border h-full flex flex-col">
+<div
+  class="bg-white rounded-lg shadow-sm border h-full flex flex-col"
+  [ngClass]="{ 'fixed inset-0 z-50 rounded-none': isFullscreen }"
+>
   <div
     class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
   >
@@ -45,6 +48,34 @@
           >Approved</span
         >
         <span class="text-lg font-bold text-gray-600">✓</span>
+      </button>
+
+      <button
+        (click)="toggleFullscreen()"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-800"
+        [title]="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            *ngIf="!isFullscreen"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+          ></path>
+          <path
+            *ngIf="isFullscreen"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 4H4m0 0v4m0-4l5 5m7-1V4m0 0h4m-4 0l5 5M8 20H4m0 0v-4m0 4l5-5m7 5l5-5m-5 5v4m0-4h4"
+          ></path>
+        </svg>
       </button>
     </div>
 
@@ -116,7 +147,8 @@
   </div>
 
   <div
-    class="overflow-x-auto max-h-[600px] overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
+    class="overflow-x-auto overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
+    [ngClass]="{ 'max-h-[600px]': !isFullscreen, 'flex-1': isFullscreen }"
     (wheel)="onWheel($event)"
     style="scrollbar-color: #d1d5db #f9fafb"
   >

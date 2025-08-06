@@ -54,6 +54,7 @@ export class CalendarView implements OnInit, OnChanges {
   startYear = this.currentYear;
 
   legendItems: { title: string; color: string }[] = [];
+  isFullscreen = false;
 
   constructor(private leaveRequests: LeaveRequests) {}
 
@@ -365,5 +366,9 @@ export class CalendarView implements OnInit, OnChanges {
 
   refreshCalendarData() {
     this.generateTableData();
+  }
+
+  toggleFullscreen() {
+    this.isFullscreen = !this.isFullscreen;
   }
 }
