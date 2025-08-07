@@ -165,7 +165,7 @@ export class User {
         case RequestStatus.CANCELED:
           return 'Canceled';
         default:
-          return 'Unknown';
+          return 'Canceled';
       }
     }
 

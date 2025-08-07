@@ -53,10 +53,7 @@ namespace ManagementSimulator.Core.Services
             JobTitle? jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!, includeDeleted: true);
             if (jt != null)
             {
-                if (jt.DeletedAt == null)
-                { 
-                    throw new UniqueConstraintViolationException(nameof(JobTitle),nameof(JobTitle.Name));
-                }
+                throw new UniqueConstraintViolationException(nameof(JobTitle),nameof(JobTitle.Name));
             }
 
             var newJobTitle = new JobTitle

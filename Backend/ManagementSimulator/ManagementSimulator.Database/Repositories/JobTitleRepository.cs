@@ -32,7 +32,7 @@ namespace ManagementSimulator.Database.Repositories
             if (!includeDeleted)
                 query = query.Where(jt => jt.DeletedAt == null);
 
-            return await query.FirstOrDefaultAsync();
+            return await query.FirstOrDefaultAsync(jt => jt.Name == name);
         }
 
         public async Task<List<JobTitle>> GetAllJobTitlesAsync(bool includeDeleted = false, bool tracking = false)

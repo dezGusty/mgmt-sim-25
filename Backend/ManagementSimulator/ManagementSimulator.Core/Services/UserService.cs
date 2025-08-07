@@ -71,7 +71,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<UserResponseDto> AddUserAsync(CreateUserRequestDto dto)
         {
-            if (await _userRepository.GetUserByEmail(dto.Email) != null)
+            if (await _userRepository.GetUserByEmail(dto.Email, includeDeleted: true) != null)
             {
                 throw new UniqueConstraintViolationException(nameof(User), nameof(User.Email));
             }
