@@ -6,12 +6,13 @@ import { IFilteredDepartmentsRequest } from '../../models/requests/ifiltered-dep
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
 import { IApiResponse } from '../../models/responses/iapi-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DepartmentService {
-  private readonly apiUrl = 'https://localhost:7275/api/departments';
+  private readonly apiUrl = `${environment.apiUrl}/departments`;
 
   constructor(private http: HttpClient) { }
 

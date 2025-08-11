@@ -415,10 +415,7 @@ FodyWeavers.xsd
 *.msp
 .vs/*
 
-Backend/ManagementSimulator/ManagementSimulator.Database/Migrations/
-Backend/ManagementSimulator/ManagementSimulator/appsettings.json
-
 Backend/ManagementSimulator/.vs/
 Backend/ManagementSimulator/appsettings.Development.json
 Backend/ManagementSimulator/ManagementSimulator/appsettings.Development.json
-.fake
+Backend/ManagementSimulator/ManagementSimulator/appsettings.json

@@ -23,6 +23,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
     {
         var success = await _authService.LoginAsync(HttpContext, dto.Email, dto.Password);
@@ -56,6 +57,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("send-reset-code")]
+    [AllowAnonymous]
     public async Task<IActionResult> SendResetCode([FromBody] SendResetCodeRequestDto request)
     {
         try
@@ -82,6 +84,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("reset-password")]
+    [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
     {
         try

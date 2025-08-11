@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using ManagementSimulator.Infrastructure.Config;
+using System.IO;
 
 namespace ManagementSimulator.Database.Context
 {
@@ -14,8 +15,20 @@ namespace ManagementSimulator.Database.Context
     {
         public MGMTSimulatorDbContext CreateDbContext(string[] args)
         {
+            var current = Directory.GetCurrentDirectory();
+            var candidateBases = new[]
+            {
+                current,
+                Path.GetFullPath(Path.Combine(current, "..", "ManagementSimulator"))
+            };
+
+            string basePath = candidateBases.FirstOrDefault(path =>
+                File.Exists(Path.Combine(path, "appsettings.Development.json")) ||
+                File.Exists(Path.Combine(path, "appsettings.json")))
+                ?? current;
+
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(basePath)
                 .AddJsonFile("appsettings.Development.json", optional: true)
                 .AddJsonFile("appsettings.json", optional: true); // fallback option
 

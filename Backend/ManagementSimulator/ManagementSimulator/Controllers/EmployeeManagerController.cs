@@ -11,6 +11,7 @@ namespace ManagementSimulator.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EmployeeManagerController : ControllerBase
     {
         private readonly ILogger<EmployeeManagerController> _logger;

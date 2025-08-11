@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class LoginGuard implements CanActivate {
   constructor(private router: Router) {}
 
   async canActivate(): Promise<boolean | UrlTree> {
-  const hasAuthCookies = this.hasAuthenticationCookies();
-      
-      if (!hasAuthCookies) {
-        return true;
-      }
+    const hasAuthCookies = this.hasAuthenticationCookies();
+
+    if (!hasAuthCookies) {
+      return true;
+    }
 
     try {
-      const response = await fetch('https://localhost:7275/api/Auth/me', {
+      const response = await fetch(`${environment.apiUrl}/Auth/me`, {
         credentials: 'include',
       });
 
@@ -35,15 +36,16 @@ export class LoginGuard implements CanActivate {
 
   private hasAuthenticationCookies(): boolean {
     const cookies = document.cookie;
-    
+
     const authCookieNames = [
       '.AspNetCore.Identity.Application',
       'auth-token',
       'session-id',
-      'access-token'
+      'access-token',
+      'ManagementSimulator.Auth'
     ];
 
-    return authCookieNames.some(cookieName => 
+    return authCookieNames.some(cookieName =>
       cookies.includes(`${cookieName}=`)
     );
   }
