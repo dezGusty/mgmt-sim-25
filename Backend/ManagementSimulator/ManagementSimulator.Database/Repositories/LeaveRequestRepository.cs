@@ -11,6 +11,7 @@ using ManagementSimulator.Database.Dtos.QueryParams;
 using Microsoft.IdentityModel.Tokens;
 using ManagementSimulator.Database.Extensions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Database.Repositories
 {
@@ -147,6 +148,27 @@ namespace ManagementSimulator.Database.Repositories
                 throw new InvalidOperationException($"Leave request with ID {id} not found");
 
             return leaveRequest;
+        }
+
+        public async Task<List<LeaveRequest>> GetFilteredLeaveRequestsAsync(string status, int limit)
+        {
+            var query = _dbcontext.LeaveRequests
+                .Include(lr => lr.User)
+                .Include(lr => lr.LeaveRequestType)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status) && status.ToUpper() != "ALL")
+            {
+                if (Enum.TryParse<RequestStatus>(status, true, out var requestStatus))
+                {
+                    query = query.Where(r => r.RequestStatus == requestStatus);
+                }
+            }
+
+            return await query
+                .OrderByDescending(lr => lr.CreatedAt)
+                .Take(limit)
+                .ToListAsync();
         }
     }
 }

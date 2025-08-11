@@ -667,5 +667,19 @@ namespace ManagementSimulator.API.Controllers
 
             return await GetRemainingLeaveDaysForPeriodAsync(userId, leaveRequestTypeId, startDate, endDate);
         }
+
+        [HttpGet("filtered")]
+        public async Task<ActionResult<List<LeaveRequestResponseDto>>> GetFilteredLeaveRequests([FromQuery] string status = "All", [FromQuery] int limit = 10)
+        {
+            try
+            {
+                var result = await _leaveRequestService.GetFilteredLeaveRequestsAsync(status, limit);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

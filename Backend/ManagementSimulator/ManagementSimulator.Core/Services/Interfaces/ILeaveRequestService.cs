@@ -29,6 +29,6 @@ namespace ManagementSimulator.Core.Services.Interfaces
 
         Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysAsync(int userId, int leaveRequestTypeId, int year);
         Task<RemainingLeaveDaysResponseDto> GetRemainingLeaveDaysForPeriodAsync(int userId, int leaveRequestTypeId, DateTime startDate, DateTime endDate);
+        Task<List<LeaveRequestResponseDto>> GetFilteredLeaveRequestsAsync(string status, int limit);
     }
-
 }

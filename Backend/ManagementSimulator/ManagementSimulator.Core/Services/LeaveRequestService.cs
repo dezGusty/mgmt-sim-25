@@ -449,5 +449,11 @@ namespace ManagementSimulator.Core.Services
 
             return workingDays;
         }
+
+        public async Task<List<LeaveRequestResponseDto>> GetFilteredLeaveRequestsAsync(string status, int limit)
+        {
+            var requests = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, limit);
+            return requests.Select(r => r.ToLeaveRequestResponseDto()).ToList();
+        }
     }
 }
