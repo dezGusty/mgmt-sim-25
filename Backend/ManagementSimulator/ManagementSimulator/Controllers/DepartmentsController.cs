@@ -3,11 +3,13 @@ using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ManagementSimulator.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DepartmentsController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;

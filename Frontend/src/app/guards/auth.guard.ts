@@ -6,6 +6,7 @@ import {
   ActivatedRouteSnapshot,
 } from '@angular/router';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
@@ -13,7 +14,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
     try {
-      const response = await fetch('https://localhost:7275/api/Auth/me', {
+      const response = await fetch(`${environment.apiUrl}/Auth/me`, {
         credentials: 'include',
       });
 

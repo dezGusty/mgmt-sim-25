@@ -3,11 +3,13 @@ using ManagementSimulator.Core.Dtos.Requests.LeaveRequestTypes;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ManagementSimulator.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LeaveRequestTypeController : ControllerBase
     {
         private readonly ILeaveRequestTypeService _leaveRequestTypeService;

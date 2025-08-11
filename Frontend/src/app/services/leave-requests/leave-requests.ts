@@ -5,12 +5,13 @@ import { IApiResponse } from '../../models/responses/iapi-response';
 import { IUser } from '../../models/entities/iuser';
 import { ILeaveRequest } from '../../models/leave-request';
 import { CreateLeaveRequestResponse } from '../../models/create-leave-request-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LeaveRequests {
-  private apiUrl = 'https://localhost:7275/api/LeaveRequests';
+  private apiUrl = `${environment.apiUrl}/LeaveRequests`;
 
   constructor(private http: HttpClient) {}
 
@@ -28,13 +29,9 @@ export class LeaveRequests {
     reason: string;
   }): Observable<IApiResponse<CreateLeaveRequestResponse>> {
     return this.http
-      .post<IApiResponse<CreateLeaveRequestResponse>>(
-        'https://localhost:7275/api/LeaveRequests',
-        data,
-        {
-          withCredentials: true,
-        }
-      )
+      .post<IApiResponse<CreateLeaveRequestResponse>>(this.apiUrl, data, {
+        withCredentials: true,
+      })
       .pipe(
         tap((response) => console.log('addLeaveRequest response:', response)),
         switchMap((response) => {

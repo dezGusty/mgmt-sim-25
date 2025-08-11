@@ -14,6 +14,7 @@ namespace ManagementSimulator.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LeaveRequestsController : ControllerBase
     {
         private readonly ILeaveRequestService _leaveRequestService;
