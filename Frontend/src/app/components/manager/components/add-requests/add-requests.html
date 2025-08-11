@@ -143,6 +143,10 @@
   </div>
 </div>
 
+<div *ngIf="errorMessage" class="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700">
+  {{ errorMessage }}
+</div>
+
 <div *ngIf="viewMode === 'table'">
   <table class="min-w-full bg-white shadow-sm rounded overflow-hidden">
     <thead class="bg-gray-100 border-b-2 border-gray-200">

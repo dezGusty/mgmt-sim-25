@@ -24,6 +24,7 @@ export class AddRequests implements OnInit {
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
+  errorMessage: string | null = null;
 
   sortColumn: string = 'submitted';
   sortDirection: 'asc' | 'desc' = 'desc';
@@ -38,39 +39,52 @@ export class AddRequests implements OnInit {
   }
 
   public loadRequests() {
-    this.leaveRequests.fetchByManager().subscribe((apiData) => {
-      if (apiData.success && Array.isArray(apiData.data)) {
-        const requestsRaw = apiData.data;
+    this.errorMessage = null;
+    this.leaveRequests.fetchByManager().subscribe({
+      next: (apiData) => {
+        if (apiData.success && Array.isArray(apiData.data)) {
+          const requestsRaw = apiData.data;
 
-        this.requests = requestsRaw
-          .filter((item: any) => item.requestStatus !== 32)
-          .map((item: any) => {
-            const status = StatusUtils.mapStatus(item.requestStatus);
-            return {
-              id: String(item.id),
-              employeeName: item.fullName,
-              status: status,
-              from: DateUtils.formatDate(item.startDate),
-              to: DateUtils.formatDate(item.endDate),
-              reason: item.reason,
-              createdAt: DateUtils.formatDate(item.createdAt),
-              comment: item.reviewerComment,
-              createdAtDate: new Date(item.createdAt),
-              departmentName: item.departmentName,
-              leaveType: {
-                id: item.leaveRequestTypeId,
-                title: item.leaveRequestTypeName || 'Unknown',
-                description: '',
-                maxDays: 0,
-                isPaid: false,
-              },
-            };
-          })
-          .filter((request) => request.status !== undefined)
-          .sort(
-            (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-          );
-      }
+          this.requests = requestsRaw
+            .filter((item: any) => item.requestStatus !== 32)
+            .map((item: any) => {
+              const status = StatusUtils.mapStatus(item.requestStatus);
+              return {
+                id: String(item.id),
+                employeeName: item.fullName,
+                status: status,
+                from: DateUtils.formatDate(item.startDate),
+                to: DateUtils.formatDate(item.endDate),
+                reason: item.reason,
+                createdAt: DateUtils.formatDate(item.createdAt),
+                comment: item.reviewerComment,
+                createdAtDate: new Date(item.createdAt),
+                departmentName: item.departmentName,
+                leaveType: {
+                  id: item.leaveRequestTypeId,
+                  title: item.leaveRequestTypeName || 'Unknown',
+                  description: '',
+                  maxDays: 0,
+                  isPaid: false,
+                },
+              };
+            })
+            .filter((request) => request.status !== undefined)
+            .sort(
+              (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
+            );
+
+          this.errorMessage = null;
+        } else {
+          this.requests = [];
+          this.errorMessage = apiData.message || 'Failed to load leave requests.';
+        }
+      },
+      error: () => {
+        // In practice this won't run because service maps errors to a successful emission
+        this.requests = [];
+        this.errorMessage = 'Failed to load leave requests. Please try again later.';
+      },
     });
   }
 

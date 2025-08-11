@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, of, tap, switchMap } from 'rxjs';
 import { IApiResponse } from '../../models/responses/iapi-response';
-import { IUser } from '../../models/entities/iuser';
 import { ILeaveRequest } from '../../models/leave-request';
 import { CreateLeaveRequestResponse } from '../../models/create-leave-request-response';
 
@@ -14,10 +13,26 @@ export class LeaveRequests {
 
   constructor(private http: HttpClient) {}
 
-  fetchByManager(): Observable<IApiResponse<IUser[]>> {
-    return this.http.get<IApiResponse<IUser[]>>(`${this.apiUrl}/by-manager`, {
-      withCredentials: true,
-    });
+  fetchByManager(): Observable<IApiResponse<any[]>> {
+    return this.http
+      .get<IApiResponse<any[]>>(`${this.apiUrl}/by-manager`, {
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          const base = { data: [] as any[], success: false, timestamp: new Date() };
+
+          if (err.status === 404) {
+            return of({ ...base, message: 'No leave requests found for your team.' } satisfies IApiResponse<any[]>);
+          }
+
+          if (err.status === 401 || err.status === 403) {
+            return of({ ...base, message: 'You are not authorized to view these requests.' } satisfies IApiResponse<any[]>);
+          }
+
+          return of({ ...base, message: 'Failed to load leave requests. Please try again later.' } satisfies IApiResponse<any[]>);
+        })
+      );
   }
 
   addLeaveRequest(data: {
