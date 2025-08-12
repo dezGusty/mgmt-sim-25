@@ -668,18 +668,41 @@ namespace ManagementSimulator.API.Controllers
             return await GetRemainingLeaveDaysForPeriodAsync(userId, leaveRequestTypeId, startDate, endDate);
         }
 
+       
         [HttpGet("filtered")]
-        public async Task<ActionResult<List<LeaveRequestResponseDto>>> GetFilteredLeaveRequests([FromQuery] string status = "All", [FromQuery] int limit = 10)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFilteredLeaveRequestsAsync(
+            [FromQuery] string? status = "ALL",
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int pageNumber = 1)
         {
-            try
+            if (pageSize <= 0)
+                return BadRequest(new { Message = "Page size must be greater than 0" });
+            if (pageNumber <= 0)
+                return BadRequest(new { Message = "Page number must be greater than 0" });
+
+            var (items, totalCount) = await _leaveRequestService.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber);
+            
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(new
             {
-                var result = await _leaveRequestService.GetFilteredLeaveRequestsAsync(status, limit);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                Message = "Leave requests retrieved successfully.",
+                Data = new
+                {
+                    Items = items,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    HasNextPage = pageNumber < totalPages,
+                    HasPreviousPage = pageNumber > 1
+                },
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }

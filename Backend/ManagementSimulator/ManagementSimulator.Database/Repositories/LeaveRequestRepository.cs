@@ -150,8 +150,19 @@ namespace ManagementSimulator.Database.Repositories
             return leaveRequest;
         }
 
-        public async Task<List<LeaveRequest>> GetFilteredLeaveRequestsAsync(string status, int limit)
+        public async Task<(List<LeaveRequest> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber = 1)
         {
+            if (pageNumber < 1) throw new ArgumentException("Page number must be greater than 0");
+            if (pageSize < 1) throw new ArgumentException("Page size must be greater than 0");
+
+            if (!string.IsNullOrEmpty(status) && status.ToUpper() != "ALL")
+            {
+                if (!Enum.TryParse<RequestStatus>(status, true, out var _))
+                {
+                    throw new ArgumentException($"Invalid status value: {status}. Status must be one of: {string.Join(", ", Enum.GetNames<RequestStatus>())}");
+                }
+            }
+
             var query = _dbcontext.LeaveRequests
                 .AsNoTracking()
                 .Select(lr => new
@@ -167,13 +178,18 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(r => r.RequestStatus == requestStatus);
             }
 
+            var totalCount = await query.CountAsync();
+
+            var skip = (pageNumber - 1) * pageSize;
+
             var filteredIds = await query
                 .OrderByDescending(lr => lr.CreatedAt)
-                .Take(limit)
+                .Skip(skip)
+                .Take(pageSize)
                 .Select(lr => lr.LeaveRequest.Id)
                 .ToListAsync();
 
-            var result = await _dbcontext.LeaveRequests
+            var items = await _dbcontext.LeaveRequests
                 .AsNoTracking()
                 .Where(lr => filteredIds.Contains(lr.Id))
                 .Include(lr => lr.User)
@@ -181,7 +197,7 @@ namespace ManagementSimulator.Database.Repositories
                 .OrderByDescending(lr => lr.CreatedAt)
                 .ToListAsync();
 
-            return result;
+            return (items, totalCount);
         }
 
     }
