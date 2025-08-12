@@ -48,7 +48,7 @@ namespace ManagementSimulator.Core.Services
 
             var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(dto.UserId, dto.StartDate, dto.EndDate);
             var hasConflictingRequest = overlappingRequests.Any(r => r.RequestStatus == RequestStatus.Pending || r.RequestStatus == RequestStatus.Approved);
-            
+
             if (hasConflictingRequest)
             {
                 throw new LeaveRequestOverlapException("Employee already has a pending or approved leave request for this period.");
@@ -59,13 +59,13 @@ namespace ManagementSimulator.Core.Services
                 var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
                 var currentYear = DateTime.Now.Year;
                 var remainingDaysInfo = await GetRemainingLeaveDaysAsync(dto.UserId, dto.LeaveRequestTypeId, currentYear);
-                
+
                 if (remainingDaysInfo.RemainingDays.HasValue && requestedDays > remainingDaysInfo.RemainingDays.Value)
                 {
                     throw new InsufficientLeaveDaysException(
-                        dto.UserId, 
-                        dto.LeaveRequestTypeId, 
-                        requestedDays, 
+                        dto.UserId,
+                        dto.LeaveRequestTypeId,
+                        requestedDays,
                         remainingDaysInfo.RemainingDays.Value,
                         $"Insufficient leave days. Requested: {requestedDays}, Available: {remainingDaysInfo.RemainingDays.Value}");
                 }
@@ -82,7 +82,7 @@ namespace ManagementSimulator.Core.Services
             };
 
             await _leaveRequestRepository.AddAsync(leaveRequest);
-            
+
             var savedLeaveRequest = await _leaveRequestRepository.GetLeaveRequestWithDetailsAsync(leaveRequest.Id);
             return savedLeaveRequest.ToCreateLeaveRequestResponseDto();
         }
@@ -107,7 +107,7 @@ namespace ManagementSimulator.Core.Services
 
             var overlappingRequests = await _leaveRequestRepository.GetOverlappingRequestsAsync(userId, dto.StartDate, dto.EndDate);
             var hasConflictingRequest = overlappingRequests.Any(r => r.RequestStatus == RequestStatus.Pending || r.RequestStatus == RequestStatus.Approved);
-            
+
             if (hasConflictingRequest)
             {
                 throw new LeaveRequestOverlapException("You already have a pending or approved leave request for this period.");
@@ -118,13 +118,13 @@ namespace ManagementSimulator.Core.Services
                 var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
                 var currentYear = DateTime.Now.Year;
                 var remainingDaysInfo = await GetRemainingLeaveDaysAsync(userId, dto.LeaveRequestTypeId, currentYear);
-                
+
                 if (remainingDaysInfo.RemainingDays.HasValue && requestedDays > remainingDaysInfo.RemainingDays.Value)
                 {
                     throw new InsufficientLeaveDaysException(
-                        userId, 
-                        dto.LeaveRequestTypeId, 
-                        requestedDays, 
+                        userId,
+                        dto.LeaveRequestTypeId,
+                        requestedDays,
                         remainingDaysInfo.RemainingDays.Value,
                         $"Insufficient leave days. Requested: {requestedDays}, Available: {remainingDaysInfo.RemainingDays.Value}");
                 }
@@ -191,7 +191,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<bool> DeleteLeaveRequestAsync(int id)
         {
-            if(await _leaveRequestRepository.GetFirstOrDefaultAsync(id) == null)
+            if (await _leaveRequestRepository.GetFirstOrDefaultAsync(id) == null)
             {
                 throw new EntryNotFoundException(nameof(LeaveRequest), id);
             }
@@ -204,22 +204,22 @@ namespace ManagementSimulator.Core.Services
         {
             LeaveRequest? existing = await _leaveRequestRepository.GetFirstOrDefaultAsync(id);
 
-            if(existing == null)
+            if (existing == null)
             {
                 throw new EntryNotFoundException(nameof(LeaveRequest), id);
             }
 
-            if(dto.UserId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.UserId) == null)
+            if (dto.UserId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.UserId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.User), dto.UserId);
             }
 
-            if(dto.ReviewerId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.ReviewerId) == null)
+            if (dto.ReviewerId != null && await _userRepository.GetFirstOrDefaultAsync((int)dto.ReviewerId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.User), dto.ReviewerId);
             }
 
-            if(dto.LeaveRequestTypeId != null && await _leaveRequestTypeRepository.GetFirstOrDefaultAsync((int)dto.LeaveRequestTypeId) == null)
+            if (dto.LeaveRequestTypeId != null && await _leaveRequestTypeRepository.GetFirstOrDefaultAsync((int)dto.LeaveRequestTypeId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), dto.LeaveRequestTypeId);
             }
@@ -231,7 +231,7 @@ namespace ManagementSimulator.Core.Services
             return existing.ToLeaveRequestResponseDto();
         }
 
-        
+
         public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId)
         {
             var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
@@ -252,7 +252,7 @@ namespace ManagementSimulator.Core.Services
 
         //     var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsAsync();
         //     var today = DateTime.UtcNow.Date;
-            
+
         //     var filtered = allRequests
         //         .Where(r => employeeIds.Contains(r.UserId))
         //         .Where(r => !(r.RequestStatus == RequestStatus.Pending && r.StartDate < today))
@@ -426,7 +426,7 @@ namespace ManagementSimulator.Core.Services
                 LeaveRequestTypeId = leaveRequestTypeId,
                 LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
                 MaxDaysAllowed = leaveRequestType.MaxDays,
-                DaysUsed = daysUsed + requestedDays, 
+                DaysUsed = daysUsed + requestedDays,
                 RemainingDays = remainingDays,
                 HasUnlimitedDays = hasUnlimitedDays,
                 UsedLeaveRequests = usedLeaveRequests
@@ -448,6 +448,12 @@ namespace ManagementSimulator.Core.Services
             }
 
             return workingDays;
+        }
+
+        public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber)
+        {
+            var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber);
+            return (items.Select(r => r.ToLeaveRequestResponseDto()).ToList(), totalCount);
         }
     }
 }
