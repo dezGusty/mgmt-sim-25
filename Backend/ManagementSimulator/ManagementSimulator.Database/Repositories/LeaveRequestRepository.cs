@@ -23,12 +23,12 @@ namespace ManagementSimulator.Database.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<(List<LeaveRequest> Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email, 
+        public async Task<(List<LeaveRequest> Data, int TotalCount)> GetAllLeaveRequestsWithRelationshipsFilteredAsync(List<int> employeeIds, string? lastName, string? email,
             QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
@@ -102,9 +102,9 @@ namespace ManagementSimulator.Database.Repositories
 
             return await query
                 .Include(lr => lr.LeaveRequestType)
-                .Where(lr => lr.UserId == userId && 
+                .Where(lr => lr.UserId == userId &&
                             lr.LeaveRequestTypeId == leaveRequestTypeId &&
-                            (lr.RequestStatus == Database.Enums.RequestStatus.Pending || 
+                            (lr.RequestStatus == Database.Enums.RequestStatus.Pending ||
                              lr.RequestStatus == Database.Enums.RequestStatus.Approved) &&
                             lr.StartDate <= endOfYear && lr.EndDate >= startOfYear)
                 .ToListAsync();
@@ -153,22 +153,36 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<List<LeaveRequest>> GetFilteredLeaveRequestsAsync(string status, int limit)
         {
             var query = _dbcontext.LeaveRequests
-                .Include(lr => lr.User)
-                .Include(lr => lr.LeaveRequestType)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(status) && status.ToUpper() != "ALL")
-            {
-                if (Enum.TryParse<RequestStatus>(status, true, out var requestStatus))
+                .AsNoTracking()
+                .Select(lr => new
                 {
-                    query = query.Where(r => r.RequestStatus == requestStatus);
-                }
+                    LeaveRequest = lr,
+                    lr.RequestStatus,
+                    lr.CreatedAt
+                });
+
+            if (!string.IsNullOrEmpty(status) && status.ToUpper() != "ALL" &&
+                Enum.TryParse<RequestStatus>(status, true, out var requestStatus))
+            {
+                query = query.Where(r => r.RequestStatus == requestStatus);
             }
 
-            return await query
+            var filteredIds = await query
                 .OrderByDescending(lr => lr.CreatedAt)
                 .Take(limit)
+                .Select(lr => lr.LeaveRequest.Id)
                 .ToListAsync();
+
+            var result = await _dbcontext.LeaveRequests
+                .AsNoTracking()
+                .Where(lr => filteredIds.Contains(lr.Id))
+                .Include(lr => lr.User)
+                .Include(lr => lr.LeaveRequestType)
+                .OrderByDescending(lr => lr.CreatedAt)
+                .ToListAsync();
+
+            return result;
         }
+
     }
 }
