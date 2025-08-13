@@ -15,6 +15,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<LeaveRequest>> GetLeaveRequestsByUserAndTypeAsync(int userId, int leaveRequestTypeId, int year, bool includeDeleted = false, bool tracking = false);
         Task<List<LeaveRequest>> GetAllWithRelationshipsAsync(bool includeDeleted = false, bool tracking = false);
         Task<LeaveRequest> GetLeaveRequestWithDetailsAsync(int id, bool includeDeleted = false, bool tracking = false);
-        Task<(List<LeaveRequest> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber = 1);
+        Task<(List<LeaveRequest> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber = 1, List<int>? employeeIds = null);
     }
 }
