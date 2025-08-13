@@ -49,7 +49,7 @@ export class CalendarView implements OnInit, OnChanges {
   }[] = [];
 
   displayMonths = 3;
-  monthsOptions = [1, 3, 6, 9, 12, 24];
+  monthsOptions = [1, 3, 6];
   startMonth = this.currentMonth;
   startYear = this.currentYear;
 
