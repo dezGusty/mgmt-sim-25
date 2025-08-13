@@ -147,180 +147,92 @@
   {{ errorMessage }}
 </div>
 
-<div *ngIf="viewMode === 'table'">
+<div *ngIf="viewMode === 'table'" class="table-scroll-outer">
   <table class="min-w-full bg-white shadow-sm rounded overflow-hidden">
     <thead class="bg-gray-100 border-b-2 border-gray-200">
       <tr>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">#</th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('employee')"
-          >
+          <button class="flex items-center gap-1 hover:text-gray-700 transition-colors" (click)="sortBy('employee')">
             Employee
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'employee'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'employee' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'employee' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
+              <path *ngIf="sortColumn !== 'employee'" d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z" opacity="0.3" />
+              <path *ngIf="sortColumn === 'employee' && sortDirection === 'asc'" d="M5 8l5-5 5 5H5z" />
+              <path *ngIf="sortColumn === 'employee' && sortDirection === 'desc'" d="M5 12l5 5 5-5H5z" />
             </svg>
           </button>
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('department')"
-          >
+          <button class="flex items-center gap-1 hover:text-gray-700 transition-colors" (click)="sortBy('department')">
             Department
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'department'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'department' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'department' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
+              <path *ngIf="sortColumn !== 'department'" d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z" opacity="0.3" />
+              <path *ngIf="sortColumn === 'department' && sortDirection === 'asc'" d="M5 8l5-5 5 5H5z" />
+              <path *ngIf="sortColumn === 'department' && sortDirection === 'desc'" d="M5 12l5 5 5-5H5z" />
             </svg>
           </button>
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('type')"
-          >
+          <button class="flex items-center gap-1 hover:text-gray-700 transition-colors" (click)="sortBy('type')">
             Type Name
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'type'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'type' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'type' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
+              <path *ngIf="sortColumn !== 'type'" d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z" opacity="0.3" />
+              <path *ngIf="sortColumn === 'type' && sortDirection === 'asc'" d="M5 8l5-5 5 5H5z" />
+              <path *ngIf="sortColumn === 'type' && sortDirection === 'desc'" d="M5 12l5 5 5-5H5z" />
             </svg>
           </button>
         </th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('dates')"
-          >
+          <button class="flex items-center gap-1 hover:text-gray-700 transition-colors" (click)="sortBy('dates')">
             Dates
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'dates'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'dates' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'dates' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
+              <path *ngIf="sortColumn !== 'dates'" d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z" opacity="0.3" />
+              <path *ngIf="sortColumn === 'dates' && sortDirection === 'asc'" d="M5 8l5-5 5 5H5z" />
+              <path *ngIf="sortColumn === 'dates' && sortDirection === 'desc'" d="M5 12l5 5 5-5H5z" />
             </svg>
           </button>
         </th>
+        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Status</th>
         <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          Status
-        </th>
-        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          <button
-            class="flex items-center gap-1 hover:text-gray-700 transition-colors"
-            (click)="sortBy('submitted')"
-          >
+          <button class="flex items-center gap-1 hover:text-gray-700 transition-colors" (click)="sortBy('submitted')">
             Submitted
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                *ngIf="sortColumn !== 'submitted'"
-                d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z"
-                opacity="0.3"
-              />
-              <path
-                *ngIf="sortColumn === 'submitted' && sortDirection === 'asc'"
-                d="M5 8l5-5 5 5H5z"
-              />
-              <path
-                *ngIf="sortColumn === 'submitted' && sortDirection === 'desc'"
-                d="M5 12l5 5 5-5H5z"
-              />
+              <path *ngIf="sortColumn !== 'submitted'" d="M5 8l5-5 5 5H5zm0 4l5 5 5-5H5z" opacity="0.3" />
+              <path *ngIf="sortColumn === 'submitted' && sortDirection === 'asc'" d="M5 8l5-5 5 5H5z" />
+              <path *ngIf="sortColumn === 'submitted' && sortDirection === 'desc'" d="M5 12l5 5 5-5H5z" />
             </svg>
           </button>
         </th>
-        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-          Actions
-        </th>
+        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-200">
-      <tr
-        *ngFor="let req of filteredRequests; let i = index"
-        class="hover:bg-gray-50 border-l-4"
+    <tbody class="divide-y divide-gray-200 table-scroll-inner">
+      <tr *ngFor="let req of filteredRequests; let i = index" class="hover:bg-gray-50 border-l-4"
         [ngClass]="{
           'border-yellow-400': req.status === 'Pending',
           'border-green-400': req.status === 'Approved',
           'border-red-400': req.status === 'Rejected',
-          'border-transparent':
-            req.status !== 'Pending' &&
-            req.status !== 'Approved' &&
-            req.status !== 'Rejected'
-        }"
-      >
+          'border-transparent': req.status !== 'Pending' && req.status !== 'Approved' && req.status !== 'Rejected'
+        }">
         <td class="px-6 py-4 text-sm text-gray-900 font-mono">{{ i + 1 }}</td>
         <td class="px-6 py-4 text-sm text-gray-900">{{ req.employeeName }}</td>
-        <td class="px-6 py-4 text-sm text-gray-700">
-          {{ req.departmentName || "-" }}
-        </td>
-        <td class="px-6 py-4 text-sm text-gray-700">
-          {{ req.leaveType?.title || "-" }}
-        </td>
-        <td class="px-6 py-4 text-sm text-gray-700">
-          {{ req.from }}–{{ req.to }}
-        </td>
-
+        <td class="px-6 py-4 text-sm text-gray-700">{{ req.departmentName || "-" }}</td>
+        <td class="px-6 py-4 text-sm text-gray-700">{{ req.leaveType?.title || "-" }}</td>
+        <td class="px-6 py-4 text-sm text-gray-700">{{ req.from }}–{{ req.to }}</td>
         <td class="px-6 py-4">
-          <span
-            class="px-2 inline-flex text-xs font-semibold rounded-full"
+          <span class="px-2 inline-flex text-xs font-semibold rounded-full"
             [ngClass]="{
               'bg-yellow-100 text-yellow-800': req.status === 'Pending',
               'bg-green-100 text-green-800': req.status === 'Approved',
               'bg-red-100 text-red-800': req.status === 'Rejected'
-            }"
-          >
+            }">
             {{ req.status }}
           </span>
         </td>
         <td class="px-6 py-4 text-sm text-gray-500">{{ req.createdAt }}</td>
         <td class="px-6 py-4">
-          <button
-            class="rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 px-3 py-1 text-sm font-medium hover:cursor-pointer transition-all duration-200 transform"
-            (click)="openDetails(req)"
-          >
-            Details
-          </button>
+          <button class="rounded bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 px-3 py-1 text-sm font-medium hover:cursor-pointer transition-all duration-200 transform"
+            (click)="openDetails(req)">Details</button>
         </td>
       </tr>
     </tbody>
