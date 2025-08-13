@@ -669,9 +669,11 @@ namespace ManagementSimulator.API.Controllers
         }
 
        
+        [Authorize(Roles = "Manager")]
         [HttpGet("filtered")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetFilteredLeaveRequestsAsync(
             [FromQuery] string? status = "ALL",
@@ -683,7 +685,31 @@ namespace ManagementSimulator.API.Controllers
             if (pageNumber <= 0)
                 return BadRequest(new { Message = "Page number must be greater than 0" });
 
-            var (items, totalCount) = await _leaveRequestService.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber);
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "Manager ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var managerId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid Manager ID.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            var (items, totalCount) = await _leaveRequestService.GetFilteredLeaveRequestsAsync(managerId, status, pageSize, pageNumber);
             
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
