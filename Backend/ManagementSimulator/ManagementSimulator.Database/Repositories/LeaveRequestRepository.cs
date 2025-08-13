@@ -179,7 +179,7 @@ namespace ManagementSimulator.Database.Repositories
             return leaveRequest;
         }
 
-        public async Task<(List<LeaveRequest> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber = 1)
+        public async Task<(List<LeaveRequest> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(string status, int pageSize, int pageNumber = 1, List<int>? employeeIds = null)
         {
             if (pageNumber < 1) throw new ArgumentException("Page number must be greater than 0");
             if (pageSize < 1) throw new ArgumentException("Page size must be greater than 0");
@@ -194,12 +194,21 @@ namespace ManagementSimulator.Database.Repositories
 
             var query = _dbcontext.LeaveRequests
                 .AsNoTracking()
+                .Include(lr => lr.User)
+                .Include(lr => lr.LeaveRequestType)
                 .Select(lr => new
                 {
                     LeaveRequest = lr,
                     lr.RequestStatus,
-                    lr.CreatedAt
+                    lr.CreatedAt,
+                    lr.UserId
                 });
+
+            // Aplicăm filtrarea după employeeIds dacă există
+            if (employeeIds != null && employeeIds.Any())
+            {
+                query = query.Where(r => employeeIds.Contains(r.UserId));
+            }
 
             if (!string.IsNullOrEmpty(status) && status.ToUpper() != "ALL" &&
                 Enum.TryParse<RequestStatus>(status, true, out var requestStatus))
@@ -231,3 +240,4 @@ namespace ManagementSimulator.Database.Repositories
 
     }
 }
+
