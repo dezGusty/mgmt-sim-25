@@ -1,0 +1,52 @@
+
+.table-scroll-outer {
+	width: 100%;
+	overflow: hidden;
+}
+
+.table-scroll-inner {
+	display: block;
+	height: 100%;
+	max-height: calc(100vh - 220px);
+	overflow-y: auto;
+	padding: 1rem 0.5rem;
+	box-sizing: border-box;
+}
+
+.table-scroll-outer {
+	width: 100%;
+	overflow: hidden;
+	padding: 1rem;
+	box-sizing: border-box;
+}
+.table-scroll-outer table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+.table-scroll-outer thead, .table-scroll-outer thead tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+.table-scroll-outer thead th {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: #f3f4f6;
+}
+.table-scroll-inner tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+.table-scroll-inner td, .table-scroll-inner th {
+	box-sizing: border-box;
+}
+.table-scroll-inner::-webkit-scrollbar {
+	width: 8px;
+}
+.table-scroll-inner::-webkit-scrollbar-thumb {
+	background: #e5e7eb;
+	border-radius: 4px;
+}
