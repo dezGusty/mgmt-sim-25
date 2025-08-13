@@ -377,7 +377,7 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetRequestsByManager()
+        public async Task<IActionResult> GetRequestsByManager([FromQuery] string? name = null)
         {
             var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -403,7 +403,7 @@ namespace ManagementSimulator.API.Controllers
                 });
             }
 
-            var requests = await _leaveRequestService.GetLeaveRequestsForManagerAsync(managerId);
+            var requests = await _leaveRequestService.GetLeaveRequestsForManagerAsync(managerId, name);
             if (requests == null || !requests.Any())
             {
                 return NotFound(new

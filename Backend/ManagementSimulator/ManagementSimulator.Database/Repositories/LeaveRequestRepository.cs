@@ -127,6 +127,35 @@ namespace ManagementSimulator.Database.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<LeaveRequest>> GetAllWithRelationshipsByUserIdsAsync(List<int> userIds, string? name = null, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            if (!includeDeleted)
+                query = query.Where(lr => lr.DeletedAt == null);
+
+            query = query
+                .Include(lr => lr.User)
+                .ThenInclude(u => u.Department)
+                .Include(lr => lr.LeaveRequestType)
+                .Where(lr => userIds.Contains(lr.UserId));
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                var lowered = name.ToLower();
+                query = query.Where(lr =>
+                    (lr.User.FirstName + " " + lr.User.LastName).ToLower().Contains(lowered)
+                    || lr.User.FirstName.ToLower().Contains(lowered)
+                    || lr.User.LastName.ToLower().Contains(lowered)
+                );
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<LeaveRequest> GetLeaveRequestWithDetailsAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<LeaveRequest> query = _dbcontext.LeaveRequests;

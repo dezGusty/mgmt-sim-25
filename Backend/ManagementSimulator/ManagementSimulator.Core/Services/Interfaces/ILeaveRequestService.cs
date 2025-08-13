@@ -23,7 +23,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task ReviewLeaveRequestAsync(int id,ReviewLeaveRequestDto dto, int managerId);
         Task<LeaveRequestResponseDto> UpdateLeaveRequestAsync(int id, UpdateLeaveRequestDto dto);
         Task<bool> DeleteLeaveRequestAsync(int id);
-        Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId);
+        Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId, string? name = null);
 
         Task CancelLeaveRequestAsync(int requestId, int userId);
 
