@@ -232,14 +232,13 @@ namespace ManagementSimulator.Core.Services
         }
 
 
-        public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId)
+        public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId, string? name = null)
         {
             var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
-            var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsAsync();
+            var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsByUserIdsAsync(employeeIds, name);
             var filtered = allRequests
-                .Where(r => employeeIds.Contains(r.UserId))
                 .Select(r => r.ToLeaveRequestResponseDto())
                 .ToList();
 
