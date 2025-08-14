@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RequestDetail } from '../request-detail/request-detail';
@@ -8,6 +8,7 @@ import { ILeaveRequest } from '../../../../models/leave-request';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-add-requests',
@@ -16,12 +17,15 @@ import { RequestUtils } from '../../../../utils/request.utils';
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
-export class AddRequests implements OnInit, OnChanges {
+export class AddRequests implements OnInit, OnDestroy, OnChanges {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'table';
-  @Input() searchTerm: string = '';
+  @Input() debouncedSearchTerm$!: Observable<string>;
   @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
   @Output() dataRefreshed = new EventEmitter<void>();
+
+  private searchSubscription?: Subscription;
+  searchTerm: string = '';
 
   requests: ILeaveRequest[] = [];
   selectedRequest: ILeaveRequest | null = null;
@@ -42,10 +46,26 @@ export class AddRequests implements OnInit, OnChanges {
 
   ngOnInit() {
     this.loadRequests();
+    
+    if (this.debouncedSearchTerm$) {
+      this.searchSubscription = this.debouncedSearchTerm$.subscribe(searchTerm => {
+        this.searchTerm = searchTerm;
+        this.currentPage = 1;
+        this.totalPages = 0;
+        this.totalCount = 0;
+        this.loadRequests();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filter'] || changes['searchTerm'] || changes['searchCriteria']) {
+    if (changes['filter'] || changes['searchCriteria']) {
       this.currentPage = 1;
       this.totalPages = 0;
       this.totalCount = 0;
