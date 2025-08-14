@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RequestDetail } from '../request-detail/request-detail';
 import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
@@ -11,7 +12,7 @@ import { RequestUtils } from '../../../../utils/request.utils';
 @Component({
   selector: 'app-add-requests',
   standalone: true,
-  imports: [CommonModule, NgClass, RequestDetail, CalendarView],
+  imports: [CommonModule, NgClass, FormsModule, RequestDetail, CalendarView],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
@@ -361,6 +362,15 @@ export class AddRequests implements OnInit, OnChanges {
   }
 
   onFilterChange(): void {
+    if (!this.isLoading) {
+      this.currentPage = 1;
+      this.totalPages = 0;
+      this.totalCount = 0;
+      this.loadRequests();
+    }
+  }
+
+  onItemsPerPageChange(): void {
     if (!this.isLoading) {
       this.currentPage = 1;
       this.totalPages = 0;
