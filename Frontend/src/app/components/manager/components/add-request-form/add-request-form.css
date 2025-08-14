@@ -66,3 +66,36 @@ button[disabled]:hover {
   background: #e5e7eb !important;
   transform: none !important;
 }
+
+/* Employee Search Dropdown Styling */
+.employee-search-container {
+  position: relative;
+}
+
+.employee-search-container .dropdown-results {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.employee-search-container .dropdown-results div {
+  transition: background-color 0.15s ease-in-out;
+}
+
+.employee-search-container .dropdown-results div:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.employee-search-container .dropdown-results div.bg-blue-50 {
+  background-color: #eff6ff !important;
+  border-left: 3px solid #3b82f6;
+}

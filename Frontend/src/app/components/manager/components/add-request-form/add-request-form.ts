@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LeaveRequestTypeService } from '../../../../services/leaveRequestType/leave-request-type-service';
 import { EmployeeService } from '../../../../services/employee';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
@@ -23,7 +25,7 @@ import { DateUtils } from '../../../../utils/date.utils';
     LeaveRequestService,
   ],
 })
-export class AddRequestForm implements OnInit {
+export class AddRequestForm implements OnInit, OnDestroy {
   showForm = true;
   userId: number | null = null;
   leaveRequestTypeId: number | null = null;
@@ -42,6 +44,15 @@ export class AddRequestForm implements OnInit {
 
   leaveTypes: { id: number; title: string; isPaid: boolean }[] = [];
   employees: { id: number; name: string }[] = [];
+  
+  // Employee search properties
+  employeeSearchTerm: string = '';
+  filteredEmployees: { id: number; name: string }[] = [];
+  showEmployeeDropdown: boolean = false;
+  selectedEmployee: { id: number; name: string } | null = null;
+  
+  private employeeSearchSubject = new BehaviorSubject<string>('');
+  private destroy$ = new Subject<void>();
 
   Math = Math;
 
@@ -113,8 +124,19 @@ export class AddRequestForm implements OnInit {
         isPaid: type.isPaid,
       }));
     });
+    
     this.employeeService.getEmployees().subscribe((users) => {
       this.employees = users;
+      this.filteredEmployees = users; // Initialize filtered employees
+    });
+
+    // Set up debounced employee search
+    this.employeeSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(searchTerm => {
+      this.filterEmployees(searchTerm);
     });
   }
 
@@ -133,6 +155,52 @@ export class AddRequestForm implements OnInit {
 
   onUserChange() {
     this.calculateRemainingDays();
+  }
+
+  // Employee search methods
+  onEmployeeSearchInput(event: any) {
+    const searchTerm = event.target.value;
+    this.employeeSearchTerm = searchTerm;
+    this.employeeSearchSubject.next(searchTerm);
+    this.showEmployeeDropdown = searchTerm.length > 0;
+    
+    // Clear selection if search term doesn't match selected employee
+    if (this.selectedEmployee && !this.selectedEmployee.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      this.selectedEmployee = null;
+      this.userId = null;
+      this.calculateRemainingDays();
+    }
+  }
+
+  filterEmployees(searchTerm: string) {
+    if (!searchTerm) {
+      this.filteredEmployees = this.employees;
+    } else {
+      this.filteredEmployees = this.employees.filter(employee =>
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  }
+
+  selectEmployee(employee: { id: number; name: string }) {
+    this.selectedEmployee = employee;
+    this.userId = employee.id;
+    this.employeeSearchTerm = employee.name;
+    this.showEmployeeDropdown = false;
+    this.calculateRemainingDays();
+  }
+
+  closeEmployeeDropdown() {
+    this.showEmployeeDropdown = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    // Close dropdown if clicking outside
+    const target = event.target as HTMLElement;
+    if (!target.closest('.employee-search-container')) {
+      this.closeEmployeeDropdown();
+    }
   }
 
   onLeaveTypeChange() {
@@ -260,6 +328,16 @@ export class AddRequestForm implements OnInit {
       });
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.employeeSearchSubject.complete();
+    
+    if (this.calculationTimeout) {
+      clearTimeout(this.calculationTimeout);
+    }
+  }
+
   handleClose() {
     if (this.calculationTimeout) {
       clearTimeout(this.calculationTimeout);
@@ -275,6 +353,12 @@ export class AddRequestForm implements OnInit {
     this.remainingDaysInfo = null;
     this.isCalculatingBalance = false;
     this.balanceCalculated = false;
+    
+    // Reset employee search
+    this.employeeSearchTerm = '';
+    this.selectedEmployee = null;
+    this.showEmployeeDropdown = false;
+    
     this.close.emit();
   }
 }
