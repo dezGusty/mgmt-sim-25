@@ -247,5 +247,15 @@ namespace ManagementSimulator.Core.Services
             }
             await _employeeManagerRepository.SaveChangesAsync();
         }
+
+        public async Task SetSubordinatesToUnassignedAsync(int managerId)
+        {
+            if (await _userRepository.GetFirstOrDefaultAsync(managerId) == null)
+            {
+                throw new EntryNotFoundException(nameof(Database.Entities.User), managerId);
+            }
+
+            await _employeeManagerRepository.SetSubordinatesToUnassignedByManagerIdAsync(managerId);
+        }
     }
 }

@@ -19,5 +19,6 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task DeleteEmployeeManagerAsync(int employeeId, int managerId);
         Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId);
         Task<EmployeeManagerResponseDto> UpdateManagerForEmployeeAsync(int employeeId, int managerId, int newManagerId);
+        Task SetSubordinatesToUnassignedAsync(int managerId);
     }
 }
