@@ -15,22 +15,49 @@
         {{ errorMessage }}
       </div>
 
-      <div>
+      <div class="employee-search-container">
         <label class="block text-sm font-medium text-gray-700 mb-1"
           >Employee *</label
         >
-        <select
-          [(ngModel)]="userId"
-          name="userId"
-          class="w-full px-3 py-2 border rounded bg-gray-50"
-          [class.border-red-500]="!userId && showValidationErrors"
-          (change)="onUserChange()"
-        >
-          <option [value]="null" disabled selected>Select employee</option>
-          <option *ngFor="let employee of employees" [value]="employee.id">
-            {{ employee.name }}
-          </option>
-        </select>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="employeeSearchTerm"
+            name="employeeSearchTerm"
+            class="w-full px-3 py-2 border rounded bg-gray-50"
+            [class.border-red-500]="!userId && showValidationErrors"
+            placeholder="Search for employee..."
+            (input)="onEmployeeSearchInput($event)"
+            (focus)="showEmployeeDropdown = employeeSearchTerm.length > 0"
+            autocomplete="off"
+          />
+          
+          <!-- Employee Dropdown -->
+          <div 
+            *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+            class="dropdown-results absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1"
+          >
+            <div 
+              *ngFor="let employee of filteredEmployees"
+              class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+              [class.bg-blue-50]="selectedEmployee?.id === employee.id"
+              (click)="selectEmployee(employee)"
+            >
+              {{ employee.name }}
+            </div>
+          </div>
+          
+          <!-- No results message -->
+          <div 
+            *ngIf="showEmployeeDropdown && filteredEmployees.length === 0 && employeeSearchTerm"
+            class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1"
+          >
+            <div class="px-3 py-2 text-gray-500">
+              No employees found
+            </div>
+          </div>
+        </div>
+        
         <div
           *ngIf="!userId && showValidationErrors"
           class="text-red-500 text-sm mt-1"
