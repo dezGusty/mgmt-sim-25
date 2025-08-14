@@ -21,6 +21,7 @@ namespace ManagementSimulator.Core.Services
         private readonly IEmployeeRoleRepository _employeeRoleRepository;
         private readonly IDeparmentRepository _deparmentRepository;
         private readonly IEmailService _emailService;
+        private readonly IEmployeeManagerService _employeeManagerService;
         private readonly IMemoryCache _cache;
 
         public UserService(
@@ -29,6 +30,7 @@ namespace ManagementSimulator.Core.Services
             IEmployeeRoleRepository employeeRoleRepository,
             IDeparmentRepository deparmentRepository,
             IEmailService emailService,
+            IEmployeeManagerService employeeManagerService,
             IMemoryCache cache)
         {
             _userRepository = userRepository;
@@ -36,6 +38,7 @@ namespace ManagementSimulator.Core.Services
             _jobTitleRepository = jobTitleRepository;
             _deparmentRepository = deparmentRepository;
             _emailService = emailService;
+            _employeeManagerService = employeeManagerService;
             _cache = cache;
         }
 
@@ -298,6 +301,14 @@ namespace ManagementSimulator.Core.Services
             if (await _userRepository.GetFirstOrDefaultAsync(id) == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
+            }
+
+            try
+            {
+                await _employeeManagerService.SetSubordinatesToUnassignedAsync(id);
+            }
+            catch (EntryNotFoundException)
+            {
             }
 
             return await _userRepository.DeleteAsync(id);

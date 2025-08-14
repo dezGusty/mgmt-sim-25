@@ -120,5 +120,13 @@ namespace ManagementSimulator.Database.Repositories
 
             return await query.ToListAsync();
         }
+
+        public async Task SetSubordinatesToUnassignedByManagerIdAsync(int managerId)
+        {
+            await _context.EmployeeManagers
+                .Where(em => em.ManagerId == managerId && em.DeletedAt == null)
+                .ExecuteUpdateAsync(em => em.SetProperty(e => e.DeletedAt, DateTime.UtcNow)
+                                           .SetProperty(e => e.ModifiedAt, DateTime.UtcNow));
+        }
     }
 }
