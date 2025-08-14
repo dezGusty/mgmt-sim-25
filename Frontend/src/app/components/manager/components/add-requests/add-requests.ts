@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Output, OnInit, Input } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RequestDetail } from '../request-detail/request-detail';
 import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
@@ -11,11 +12,11 @@ import { RequestUtils } from '../../../../utils/request.utils';
 @Component({
   selector: 'app-add-requests',
   standalone: true,
-  imports: [CommonModule, NgClass, RequestDetail, CalendarView],
+  imports: [CommonModule, NgClass, FormsModule, RequestDetail, CalendarView],
   templateUrl: './add-requests.html',
   styleUrls: ['./add-requests.css'],
 })
-export class AddRequests implements OnInit {
+export class AddRequests implements OnInit, OnChanges {
   @Input() filter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'All';
   @Input() viewMode: 'card' | 'table' | 'calendar' = 'table';
   @Input() searchTerm: string = '';
@@ -29,63 +30,167 @@ export class AddRequests implements OnInit {
   sortColumn: string = 'submitted';
   sortDirection: 'asc' | 'desc' = 'desc';
 
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 0;
+  totalCount: number = 0;
+  isLoading: boolean = false;
+
   constructor(private leaveRequests: LeaveRequests) {}
+
+  Math = Math;
 
   ngOnInit() {
     this.loadRequests();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['filter'] || changes['searchTerm'] || changes['searchCriteria']) {
+      this.currentPage = 1;
+      this.totalPages = 0;
+      this.totalCount = 0;
+      this.loadRequests();
+    }
   }
   addRequest(newRequest: ILeaveRequest) {
     this.requests = [newRequest, ...this.requests];
   }
 
   public loadRequests() {
+    if (this.isLoading) return;
+    
+    this.isLoading = true;
     this.errorMessage = null;
+    
+    if (this.searchTerm && this.searchTerm.trim()) {
+      this.loadRequestsWithSearch();
+    } else {
+      this.loadRequestsPaginated();
+    }
+  }
+
+  private loadRequestsPaginated() {
+    const statusFilter = this.filter === 'All' ? 'ALL' : this.filter;
+    
+    this.leaveRequests.fetchByManagerPaginated(statusFilter, this.itemsPerPage, this.currentPage).subscribe({
+      next: (apiData) => {
+        if (apiData.success && apiData.data) {
+          const requestsRaw = apiData.data.items || [];
+          this.totalCount = apiData.data.totalCount;
+          this.totalPages = apiData.data.totalPages;
+
+          this.requests = this.mapRequests(requestsRaw);
+          this.errorMessage = null;
+        } else {
+          this.requests = [];
+          this.totalCount = 0;
+          this.totalPages = 0;
+          this.errorMessage = apiData.message || 'Failed to load leave requests.';
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.requests = [];
+        this.totalCount = 0;
+        this.totalPages = 0;
+        this.errorMessage = 'Failed to load leave requests. Please try again later.';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  private loadRequestsWithSearch() {
     this.leaveRequests.fetchByManager().subscribe({
       next: (apiData) => {
         if (apiData.success && Array.isArray(apiData.data)) {
           const requestsRaw = apiData.data;
+          let filteredRequests = this.mapRequests(requestsRaw);
+          
+          filteredRequests = RequestUtils.filterRequests(filteredRequests, this.filter);
+          
+          if (this.searchTerm && this.searchTerm.trim()) {
+            filteredRequests = filteredRequests.filter((request) => {
+              const searchTermLower = this.searchTerm.toLowerCase();
 
-          this.requests = requestsRaw
-            .filter((item: any) => item.requestStatus !== 32)
-            .map((item: any) => {
-              const status = StatusUtils.mapStatus(item.requestStatus);
-              return {
-                id: String(item.id),
-                employeeName: item.fullName,
-                status: status,
-                from: DateUtils.formatDate(item.startDate),
-                to: DateUtils.formatDate(item.endDate),
-                reason: item.reason,
-                createdAt: DateUtils.formatDate(item.createdAt),
-                comment: item.reviewerComment,
-                createdAtDate: new Date(item.createdAt),
-                departmentName: item.departmentName,
-                leaveType: {
-                  id: item.leaveRequestTypeId,
-                  title: item.leaveRequestTypeName || 'Unknown',
-                  description: '',
-                  maxDays: 0,
-                  isPaid: false,
-                },
-              };
-            })
-            .filter((request) => request.status !== undefined)
-            .sort(
-              (a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime()
-            );
+              switch (this.searchCriteria) {
+                case 'employee':
+                  return request.employeeName.toLowerCase().includes(searchTermLower);
+                case 'department':
+                  return (request.departmentName || '')
+                    .toLowerCase()
+                    .includes(searchTermLower);
+                case 'type':
+                  return (request.leaveType?.title || '')
+                    .toLowerCase()
+                    .includes(searchTermLower);
+                case 'all':
+                default:
+                  return (
+                    request.employeeName.toLowerCase().includes(searchTermLower) ||
+                    (request.departmentName || '')
+                      .toLowerCase()
+                      .includes(searchTermLower) ||
+                    (request.leaveType?.title || '')
+                      .toLowerCase()
+                      .includes(searchTermLower)
+                  );
+              }
+            });
+          }
+
+          this.totalCount = filteredRequests.length;
+          this.totalPages = Math.ceil(this.totalCount / this.itemsPerPage);
+          
+          const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+          const endIndex = startIndex + this.itemsPerPage;
+          this.requests = filteredRequests
+            .sort((a, b) => b.createdAtDate.getTime() - a.createdAtDate.getTime())
+            .slice(startIndex, endIndex);
 
           this.errorMessage = null;
         } else {
           this.requests = [];
+          this.totalCount = 0;
+          this.totalPages = 0;
           this.errorMessage = apiData.message || 'Failed to load leave requests.';
         }
+        this.isLoading = false;
       },
       error: () => {
-        // In practice this won't run because service maps errors to a successful emission
         this.requests = [];
+        this.totalCount = 0;
+        this.totalPages = 0;
         this.errorMessage = 'Failed to load leave requests. Please try again later.';
+        this.isLoading = false;
       },
     });
+  }
+
+  private mapRequests(requestsRaw: any[]): ILeaveRequest[] {
+    return requestsRaw
+      .map((item: any) => {
+        const status = StatusUtils.mapStatus(item.requestStatus);
+        return {
+          id: String(item.id),
+          employeeName: item.fullName,
+          status: status,
+          from: DateUtils.formatDate(item.startDate),
+          to: DateUtils.formatDate(item.endDate),
+          reason: item.reason,
+          createdAt: DateUtils.formatDate(item.createdAt),
+          comment: item.reviewerComment,
+          createdAtDate: new Date(item.createdAt),
+          departmentName: item.departmentName,
+          leaveType: {
+            id: item.leaveRequestTypeId,
+            title: item.leaveRequestTypeName || 'Unknown',
+            description: '',
+            maxDays: 0,
+            isPaid: false,
+          },
+        };
+      })
+      .filter((request) => request.status !== undefined);
   }
 
   openDetails(req: ILeaveRequest) {
@@ -199,38 +304,78 @@ export class AddRequests implements OnInit {
   }
 
   get filteredRequests(): ILeaveRequest[] {
-    let filtered = RequestUtils.filterRequests(this.requests, this.filter);
+    return this.sortRequests(this.requests);
+  }
 
-    if (this.searchTerm) {
-      filtered = filtered.filter((request) => {
-        const searchTermLower = this.searchTerm.toLowerCase();
-
-        switch (this.searchCriteria) {
-          case 'employee':
-            return request.employeeName.toLowerCase().includes(searchTermLower);
-          case 'department':
-            return (request.departmentName || '')
-              .toLowerCase()
-              .includes(searchTermLower);
-          case 'type':
-            return (request.leaveType?.title || '')
-              .toLowerCase()
-              .includes(searchTermLower);
-          case 'all':
-          default:
-            return (
-              request.employeeName.toLowerCase().includes(searchTermLower) ||
-              (request.departmentName || '')
-                .toLowerCase()
-                .includes(searchTermLower) ||
-              (request.leaveType?.title || '')
-                .toLowerCase()
-                .includes(searchTermLower)
-            );
-        }
-      });
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage && !this.isLoading) {
+      this.currentPage = page;
+      this.loadRequests();
     }
+  }
 
-    return this.sortRequests(filtered);
+  goToFirstPage(): void {
+    this.goToPage(1);
+  }
+
+  goToLastPage(): void {
+    this.goToPage(this.totalPages);
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = Math.max(1, this.currentPage - 2);
+      let endPage = Math.min(this.totalPages, this.currentPage + 2);
+      
+      if (this.currentPage <= 3) {
+        endPage = Math.min(this.totalPages, 5);
+      }
+      if (this.currentPage >= this.totalPages - 2) {
+        startPage = Math.max(1, this.totalPages - 4);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
+  }
+
+  onFilterChange(): void {
+    if (!this.isLoading) {
+      this.currentPage = 1;
+      this.totalPages = 0;
+      this.totalCount = 0;
+      this.loadRequests();
+    }
+  }
+
+  onItemsPerPageChange(): void {
+    if (!this.isLoading) {
+      this.currentPage = 1;
+      this.totalPages = 0;
+      this.totalCount = 0;
+      this.loadRequests();
+    }
   }
 }
