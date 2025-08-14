@@ -1,0 +1,55 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Backend (.NET)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": ["run", "--project", "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator/ManagementSimulator.API.csproj"],
+            "cwd": "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Launch Frontend (Angular)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/Frontend/node_modules/@angular/cli/bin/ng",
+            "args": ["serve"],
+            "cwd": "${workspaceFolder}/Frontend",
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "Local:\\s+(http://\\S+)",
+                "uriFormat": "%s"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch Frontend & Backend",
+            "configurations": [
+                "Launch Backend (.NET)",
+                "Launch Frontend (Angular)"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "",
+                "order": 1
+            }
+        }
+    ]
+}
