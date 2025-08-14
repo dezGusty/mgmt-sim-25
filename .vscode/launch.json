@@ -6,8 +6,8 @@
             "type": "coreclr",
             "request": "launch",
             "program": "dotnet",
-            "args": ["run", "--project", "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator/ManagementSimulator.API.csproj"],
-            "cwd": "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator",
+            "args": ["run", "--project", "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator.API/ManagementSimulator.API.csproj"],
+            "cwd": "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator.API",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
