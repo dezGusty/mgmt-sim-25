@@ -36,6 +36,33 @@ export class LeaveRequests {
       );
   }
 
+  fetchByManagerPaginated(status: string = 'ALL', pageSize: number = 10, pageNumber: number = 1): Observable<IApiResponse<{items: any[], totalCount: number, totalPages: number}>> {
+    return this.http
+      .get<IApiResponse<{items: any[], totalCount: number, totalPages: number}>>(`${this.apiUrl}/filtered`, {
+        params: {
+          status,
+          pageSize: pageSize.toString(),
+          pageNumber: pageNumber.toString()
+        },
+        withCredentials: true,
+      })
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
+          const base = { data: {items: [] as any[], totalCount: 0, totalPages: 0}, success: false, timestamp: new Date() };
+
+          if (err.status === 404) {
+            return of({ ...base, message: 'No leave requests found for your team.' });
+          }
+
+          if (err.status === 401 || err.status === 403) {
+            return of({ ...base, message: 'You are not authorized to view these requests.' });
+          }
+
+          return of({ ...base, message: 'Failed to load leave requests. Please try again later.' });
+        })
+      );
+  }
+
   addLeaveRequest(data: {
     userId: number;
     leaveRequestTypeId: number;
