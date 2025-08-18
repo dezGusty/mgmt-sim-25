@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementSimulator.API", "ManagementSimulator\ManagementSimulator.API.csproj", "{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementSimulator.API", "ManagementSimulator.API\ManagementSimulator.API.csproj", "{B933B3B6-244C-43CB-8F3D-FF872A5BC59F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementSimulator.Core", "ManagementSimulator.Core\ManagementSimulator.Core.csproj", "{E2007A8F-E90C-48D5-AF98-2208F42D0664}"
 EndProject
