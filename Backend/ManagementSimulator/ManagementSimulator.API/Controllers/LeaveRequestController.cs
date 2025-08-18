@@ -18,11 +18,13 @@ namespace ManagementSimulator.API.Controllers
     public class LeaveRequestsController : ControllerBase
     {
         private readonly ILeaveRequestService _leaveRequestService;
+        private readonly IResourceAuthorizationService _resourceAuthorizationService;
         private readonly ILogger<LeaveRequestsController> _logger;
 
-        public LeaveRequestsController(ILeaveRequestService leaveRequestService, ILogger<LeaveRequestsController> logger)
+        public LeaveRequestsController(ILeaveRequestService leaveRequestService, IResourceAuthorizationService resourceAuthorizationService, ILogger<LeaveRequestsController> logger)
         {
             _leaveRequestService = leaveRequestService;
+            _resourceAuthorizationService = resourceAuthorizationService;
             _logger = logger;
         }
         
@@ -166,12 +168,36 @@ namespace ManagementSimulator.API.Controllers
         }
 
 
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetLeaveRequestByIdAsync(int id)
         {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(nameIdentifierClaim) || !int.TryParse(nameIdentifierClaim, out var currentUserId))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new LeaveRequestResponseDto(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            // Check authorization unless user is admin
+            if (!User.IsInRole("Admin"))
+            {
+                var canAccess = await _resourceAuthorizationService.CanManagerAccessLeaveRequestAsync(currentUserId, id);
+                if (!canAccess)
+                {
+                    return Forbid();
+                }
+            }
+
             var request = await _leaveRequestService.GetRequestByIdAsync(id);
             if (request == null)
             {
@@ -193,12 +219,36 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet("user/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetRequestsByUserAsync(int userId)
         {
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(nameIdentifierClaim) || !int.TryParse(nameIdentifierClaim, out var currentUserId))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            // Check authorization unless user is admin
+            if (!User.IsInRole("Admin"))
+            {
+                var canAccess = await _resourceAuthorizationService.CanManagerAccessUserDataAsync(currentUserId, userId);
+                if (!canAccess)
+                {
+                    return Forbid();
+                }
+            }
+
             var requests = await _leaveRequestService.GetRequestsByUserAsync(userId);
             if (requests == null || !requests.Any())
             {
@@ -220,6 +270,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -246,6 +297,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("queried/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -315,6 +367,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
