@@ -23,6 +23,7 @@ namespace ManagementSimulator.API.Controllers
             _logger = logger;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -41,6 +42,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("addManagersForEmployee")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +61,7 @@ namespace ManagementSimulator.API.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("patchManagersForEmployee")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -76,6 +79,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -218,6 +222,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -235,6 +240,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("employee/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -253,6 +259,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("manager/{employeeId}/{managerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -22,6 +22,7 @@ namespace ManagementSimulator.API.Controllers
             _logger = logger;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -49,6 +50,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("managers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -77,6 +79,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("unassignedUsers/queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -104,6 +107,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("admins")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -131,6 +135,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -158,6 +163,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("includeRelationships")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -185,6 +191,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("includeRelationships/queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -212,6 +219,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -239,6 +247,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -255,6 +264,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -283,6 +293,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -310,6 +321,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/restore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
