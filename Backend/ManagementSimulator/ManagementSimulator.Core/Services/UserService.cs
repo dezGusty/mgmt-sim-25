@@ -11,6 +11,8 @@ using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
 using Microsoft.Extensions.Caching.Memory;
 using System.Data;
+using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
+using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -23,6 +25,8 @@ namespace ManagementSimulator.Core.Services
         private readonly IEmailService _emailService;
         private readonly IEmployeeManagerService _employeeManagerService;
         private readonly IMemoryCache _cache;
+        private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
+        private readonly ILeaveRequestRepository _leaveRequestRepository;
 
         public UserService(
             IUserRepository userRepository,
@@ -31,7 +35,9 @@ namespace ManagementSimulator.Core.Services
             IDeparmentRepository deparmentRepository,
             IEmailService emailService,
             IEmployeeManagerService employeeManagerService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            ILeaveRequestTypeRepository leaveRequestTypeRepository,
+            ILeaveRequestRepository leaveRequestRepository)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -40,6 +46,8 @@ namespace ManagementSimulator.Core.Services
             _emailService = emailService;
             _employeeManagerService = employeeManagerService;
             _cache = cache;
+            _leaveRequestTypeRepository = leaveRequestTypeRepository;
+            _leaveRequestRepository = leaveRequestRepository;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -102,7 +110,6 @@ namespace ManagementSimulator.Core.Services
 
             await _userRepository.AddAsync(user);
 
-            // User shall always be at least employee
             EmployeeRoleUser eru = new EmployeeRoleUser
             {
                 UsersId = user.Id,
@@ -212,9 +219,130 @@ namespace ManagementSimulator.Core.Services
             return await _userRepository.GetUserByEmail(email);
         }
 
+        public async Task<PagedResponseDto<HrUserResponseDto>> GetAllUsersForHrAsync(HrUsersRequestDto request)
+        {
+            var year = request.Year ?? DateTime.Now.Year;
+
+            var users = await _userRepository.GetAllUsersWithReferencesAsync(includeDeleted: false);
+
+            var filteredUsers = users.Where(u => u.DeletedAt == null).AsQueryable();
+
+            var totalCount = filteredUsers.Count();
+
+            var pageSize = request.PageSize ?? 10;
+            var page = request.Page ?? 1;
+
+            var pagedUsers = filteredUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var leaveRequestTypes = await _leaveRequestTypeRepository.GetAllAsync();
+
+            var hrUserDtos = new List<HrUserResponseDto>();
+
+            foreach (var user in pagedUsers)
+            {
+                var hrUserDto = await MapToHrUserResponseDto(user, year, leaveRequestTypes);
+                hrUserDtos.Add(hrUserDto);
+            }
+
+            return new PagedResponseDto<HrUserResponseDto>
+            {
+                Data = hrUserDtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+        }
+
+        private async Task<HrUserResponseDto> MapToHrUserResponseDto(User user, int year, List<LeaveRequestType> leaveRequestTypes)
+        {
+            var hrUserDto = new HrUserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Roles = user.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                JobTitleId = user.JobTitleId,
+                JobTitleName = user.Title?.Name ?? string.Empty,
+                DepartmentId = user.DepartmentId,
+                DepartmentName = user.Department?.Name ?? string.Empty,
+                IsActive = user.DeletedAt == null,
+                DateOfEmployment = user.DateOfEmployment
+            };
+
+            var startOfYear = new DateTime(year, 1, 1);
+            var endOfYear = new DateTime(year, 12, 31);
+
+            var userLeaveRequests = await _leaveRequestRepository.GetAllWithRelationshipsAsync();
+            var yearLeaveRequests = userLeaveRequests
+                .Where(lr => lr.UserId == user.Id &&
+                           lr.StartDate <= endOfYear &&
+                           lr.EndDate >= startOfYear)
+                .ToList();
+
+            hrUserDto.TotalLeaveDays = 21;
+
+            var approvedRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved).ToList();
+            var pendingRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending).ToList();
+            
+            hrUserDto.UsedLeaveDays = CalculateTotalDays(pendingRequests);
+            hrUserDto.RemainingLeaveDays = hrUserDto.TotalLeaveDays - hrUserDto.UsedLeaveDays;
+            
+            hrUserDto.LeaveTypeStatistics = new List<LeaveTypeStatDto>();
+            
+            foreach (var leaveType in leaveRequestTypes)
+            {
+                var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id).ToList();
+                var approvedTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved).ToList();
+                var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending).ToList();
+                
+                var usedDaysForType = CalculateTotalDays(pendingTypeRequests);
+                var maxAllowedDays = leaveType.MaxDays ?? hrUserDto.TotalLeaveDays;
+                
+                var leaveTypeStat = new LeaveTypeStatDto
+                {
+                    LeaveTypeId = leaveType.Id,
+                    LeaveTypeName = leaveType.Title,
+                    UsedDays = usedDaysForType,
+                    RemainingDays = maxAllowedDays - usedDaysForType,
+                    MaxAllowedDays = maxAllowedDays
+                };
+                
+                hrUserDto.LeaveTypeStatistics.Add(leaveTypeStat);
+            }
+
+            return hrUserDto;
+        }
+
+        private int CalculateTotalDays(List<LeaveRequest> leaveRequests)
+        {
+            int totalDays = 0;
+
+            foreach (var request in leaveRequests)
+            {
+                var current = request.StartDate.Date;
+                var end = request.EndDate.Date;
+
+                while (current <= end)
+                {
+                    if (current.DayOfWeek != DayOfWeek.Saturday && current.DayOfWeek != DayOfWeek.Sunday)
+                    {
+                        totalDays++;
+                    }
+                    current = current.AddDays(1);
+                }
+            }
+
+            return totalDays;
+        }
+
         public async Task<UserResponseDto?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
         {
-            User? existing = await _userRepository.GetUserWithReferencesByIdAsync(id, tracking: true); 
+            User? existing = await _userRepository.GetUserWithReferencesByIdAsync(id, tracking: true);
             if (existing == null)
             {
                 throw new EntryNotFoundException(nameof(User), id);
@@ -264,7 +392,7 @@ namespace ManagementSimulator.Core.Services
                     }
 
                     var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true, tracking: true);
-                    if(employeeRoleUser != null)
+                    if (employeeRoleUser != null)
                     {
                         if (employeeRoleUser.DeletedAt != null)
                         {
@@ -474,7 +602,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload)
         {
-            if(payload.ActivityStatus != null && payload.ActivityStatus == Enums.UserActivityStatus.INACTIVE)
+            if (payload.ActivityStatus != null && payload.ActivityStatus == Enums.UserActivityStatus.INACTIVE)
             {
                 var (deletedUsers, deletedTotalCount) = await _userRepository.GetAllInactiveUsersWithReferencesFilteredAsync(payload.Name, payload.Email, payload.Department, payload.JobTitle, payload.GlobalSearch, payload.PagedQueryParams.ToQueryParams());
 
