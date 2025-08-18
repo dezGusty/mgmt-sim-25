@@ -35,11 +35,11 @@ export class AdminUserRelationships implements OnInit {
 
   UserSearchType = UserSearchType;
 
-  readonly pageSizeManagers: number = 3;
+  pageSizeManagers: number = 10;
   currentPageManagers: number = 1;
   totalPagesManagers: number = 0;
 
-  readonly pageSizeUnassignedUsers: number = 3;
+  pageSizeUnassignedUsers: number = 10;
   currentPageUnassignedUsers: number = 1;
   totalPagesUnassignedUsers: number = 0;
 
@@ -196,6 +196,14 @@ export class AdminUserRelationships implements OnInit {
         case UserSearchType.UnassignedName:
           searchParams.unassignedName = this.currentSearchTerm;
           break;
+        case UserSearchType.ManagerName:
+        case UserSearchType.EmployeeName:
+          searchParams.unassignedName = this.currentSearchTerm;
+          break;
+        case UserSearchType.ManagerEmail:
+        case UserSearchType.EmployeeEmail:
+          searchParams.globalSearch = this.currentSearchTerm;
+          break;
         case UserSearchType.JobTitle:
           searchParams.jobTitle = this.currentSearchTerm;
           break;
@@ -342,15 +350,25 @@ export class AdminUserRelationships implements OnInit {
     this.loadUnassignedUsers();
   }
 
-  getMaxDisplayedResultManagers(): number {
-    return Math.min(
-      this.currentPageManagers * this.pageSizeManagers,
-      this.managers.length
-    );
-  }
-
   getStartResultIndexManagers(): number {
     return (this.currentPageManagers - 1) * this.pageSizeManagers + 1;
+  }
+
+  getMaxDisplayedResultManagers(): number {
+    return this.getStartResultIndexManagers() + this.managers.length - 1;
+  }
+
+  getTotalManagersCount(): number {
+    // Calculate approximate total count based on pagination info
+    if (this.totalPagesManagers > 1) {
+      // If we're on the last page, calculate based on current page items
+      if (this.currentPageManagers === this.totalPagesManagers) {
+        return ((this.totalPagesManagers - 1) * this.pageSizeManagers) + this.managers.length;
+      }
+      // If not on last page, estimate total as full pages
+      return this.totalPagesManagers * this.pageSizeManagers;
+    }
+    return this.managers.length;
   }
 
   goToPageManagers(page: number): void {
@@ -473,10 +491,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getMaxDisplayedResultUnassignedUsers(): number {
-    return Math.min(
-      this.currentPageUnassignedUsers * this.pageSizeUnassignedUsers,
-      this.unassignedUsers.length
-    );
+    return this.getStartResultIndexUnassignedUsers() + this.unassignedUsers.length - 1;
   }
 
   getStartResultIndexUnassignedUsers(): number {
@@ -513,10 +528,20 @@ export class AdminUserRelationships implements OnInit {
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
     
-    if (this.currentSearchBy === UserSearchType.UnassignedName) {
-      this.loadUnassignedUsers();
-    } else {
+    // Always load managers unless only searching unassigned users by name
+    if (this.currentSearchBy !== UserSearchType.UnassignedName) {
       this.loadManagersWithRelationships();
+    }
+    
+    // Load unassigned users for relevant search types
+    if (this.currentSearchBy === UserSearchType.Global || 
+        this.currentSearchBy === UserSearchType.UnassignedName ||
+        this.currentSearchBy === UserSearchType.ManagerEmail || 
+        this.currentSearchBy === UserSearchType.EmployeeEmail || 
+        this.currentSearchBy === UserSearchType.ManagerName ||
+        this.currentSearchBy === UserSearchType.EmployeeName ||
+        this.currentSearchBy === UserSearchType.JobTitle) {
+      this.loadUnassignedUsers();
     }
   }
 
@@ -551,6 +576,15 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getUnassignedUsersCount(): number {
+    // Calculate approximate total count based on pagination info
+    if (this.totalPagesUnassignedUsers > 1) {
+      // If we're on the last page, calculate based on current page items
+      if (this.currentPageUnassignedUsers === this.totalPagesUnassignedUsers) {
+        return ((this.totalPagesUnassignedUsers - 1) * this.pageSizeUnassignedUsers) + this.unassignedUsers.length;
+      }
+      // If not on last page, estimate total as full pages
+      return this.totalPagesUnassignedUsers * this.pageSizeUnassignedUsers;
+    }
     return this.unassignedUsers.length;
   }
 
@@ -639,4 +673,16 @@ export class AdminUserRelationships implements OnInit {
   closeAssignModal() {
     this.showAssignRelationShipComponent = false;
   }
+
+  onItemsPerPageChangeManagers(): void {
+    this.currentPageManagers = 1;
+    this.loadManagersWithRelationships();
+  }
+
+  onItemsPerPageChangeUnassignedUsers(): void {
+    this.currentPageUnassignedUsers = 1;
+    this.loadUnassignedUsers();
+  }
+
+  Math = Math;
 }
