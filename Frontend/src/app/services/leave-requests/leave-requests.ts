@@ -14,9 +14,14 @@ export class LeaveRequests {
 
   constructor(private http: HttpClient) {}
 
-  fetchByManager(): Observable<IApiResponse<any[]>> {
+  fetchByManager(name?: string): Observable<IApiResponse<any[]>> {
+    const params: any = {};
+    if (name && name.trim().length > 0) {
+      params.name = name;
+    }
     return this.http
       .get<IApiResponse<any[]>>(`${this.apiUrl}/by-manager`, {
+        params,
         withCredentials: true,
       })
       .pipe(
