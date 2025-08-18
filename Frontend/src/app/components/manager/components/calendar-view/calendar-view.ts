@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { CalendarUtils, CalendarDay } from '../../../../utils/calendar.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
@@ -22,6 +24,10 @@ import { RequestDetail } from '../request-detail/request-detail';
   styleUrls: ['./calendar-view.css'],
 })
 export class CalendarView implements OnInit, OnChanges {
+  filteredEmployees: string[] = [];
+  employeeSearchTerm: string = '';
+  private employeeSearchSubject = new BehaviorSubject<string>('');
+  private destroy$ = new Subject<void>();
   @Input() requests: ILeaveRequest[] = [];
 
   currentDate = new Date();
@@ -59,7 +65,18 @@ export class CalendarView implements OnInit, OnChanges {
   constructor(private leaveRequests: LeaveRequests) {}
 
   ngOnInit() {
-    this.generateTableData();
+    this.employeeSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((searchTerm) => {
+      if (searchTerm && searchTerm.trim().length > 0) {
+        this.fetchRequestsByManager(searchTerm);
+      } else {
+        this.fetchRequestsByManager('');
+      }
+    });
+    this.fetchRequestsByManager('');
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -106,26 +123,14 @@ export class CalendarView implements OnInit, OnChanges {
 
   generateTableData() {
     const filteredRequests = this.filteredRequestsForCalendar;
-
-    console.log('All filtered requests:', filteredRequests);
-    console.log(
-      'Leave type descriptions:',
-      filteredRequests.map((req) => ({
-        employee: req.employeeName,
-        leaveType: req.leaveType,
-        status: req.status,
-      }))
-    );
-
     this.employees = [
       ...new Set(filteredRequests.map((req) => req.employeeName)),
     ].sort();
-
+    this.filteredEmployees = [...this.employees];
     this.generateCalendarDates();
     this.generateMonthHeaders();
     this.updateLegend();
-
-    this.tableData = this.employees.map((employee) => ({
+    this.tableData = this.filteredEmployees.map((employee: string) => ({
       employee,
       dates: this.calendarDates.map((date) => ({
         date,
@@ -137,6 +142,56 @@ export class CalendarView implements OnInit, OnChanges {
         ),
       })),
     }));
+  }
+
+  onEmployeeSearchInput(event: any) {
+    this.employeeSearchTerm = event.target.value;
+    this.employeeSearchSubject.next(this.employeeSearchTerm);
+  }
+
+  fetchRequestsByManager(name: string) {
+    this.leaveRequests.fetchByManager(name).subscribe((res) => {
+      console.log('API response:', res);
+      let rawData: any[] = [];
+      if (res && Array.isArray(res.data)) {
+        rawData = res.data;
+      } else if (res && res.data && typeof res.data === 'object' && Array.isArray((res.data as any).items)) {
+        rawData = (res.data as any).items;
+      }
+      this.requests = rawData.map((item: any) => ({
+        id: item.id?.toString() ?? '',
+        employeeName: item.fullName ?? item.employeeName ?? '',
+        status: this.mapStatus(item.requestStatus),
+        from: item.startDate ?? item.from ?? '',
+        to: item.endDate ?? item.to ?? '',
+        reason: item.reason ?? '',
+        createdAt: item.createdAt ?? '',
+        createdAtDate: new Date(item.createdAt ?? Date.now()),
+        comment: item.reviewerComment ?? item.comment ?? '',
+        departmentName: item.departmentName ?? '',
+        leaveType: item.leaveRequestTypeName || item.leaveTypeName || item.leaveTypeTitle
+          ? {
+              title: item.leaveRequestTypeName || item.leaveTypeName || item.leaveTypeTitle,
+              isPaid: item.isPaid ?? false,
+            }
+          : undefined,
+      }));
+      this.generateTableData();
+    });
+  }
+
+  private mapStatus(requestStatus: number | string | undefined): any {
+    if (typeof requestStatus === 'string') return requestStatus;
+    switch (requestStatus) {
+      case 1:
+        return 'Pending';
+      case 4:
+        return 'Approved';
+      case 8:
+        return 'Rejected';
+      default:
+        return 'Pending';
+    }
   }
 
   generateCalendarDates() {
@@ -153,32 +208,9 @@ export class CalendarView implements OnInit, OnChanges {
     }
   }
 
-  generateMonthHeaders() {
-    this.monthHeaders = [];
-
-    for (let i = 0; i < this.displayMonths; i++) {
-      const month = (this.startMonth + i) % 12;
-      const year = this.startYear + Math.floor((this.startMonth + i) / 12);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      this.monthHeaders.push({
-        month: this.monthNames[month],
-        year,
-        daysInMonth,
-      });
-    }
-  }
-
-  hasLeaveOnDate(
-    employee: string,
-    date: Date,
-    requests: ILeaveRequest[]
-  ): boolean {
-    return requests.some(
-      (req) =>
-        req.employeeName === employee &&
-        this.isDateInRange(date, new Date(req.from), new Date(req.to))
-    );
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getRequestsForEmployeeAndDate(
@@ -370,5 +402,27 @@ export class CalendarView implements OnInit, OnChanges {
 
   toggleFullscreen() {
     this.isFullscreen = !this.isFullscreen;
+  }
+
+  generateMonthHeaders() {
+    this.monthHeaders = [];
+    for (let i = 0; i < this.displayMonths; i++) {
+      const month = (this.startMonth + i) % 12;
+      const year = this.startYear + Math.floor((this.startMonth + i) / 12);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      this.monthHeaders.push({
+        month: this.monthNames[month],
+        year,
+        daysInMonth,
+      });
+    }
+  }
+
+  hasLeaveOnDate(employee: string, date: Date, requests: ILeaveRequest[]): boolean {
+    return requests.some(
+      (req) =>
+        req.employeeName === employee &&
+        this.isDateInRange(date, new Date(req.from), new Date(req.to))
+    );
   }
 }

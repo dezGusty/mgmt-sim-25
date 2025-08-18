@@ -78,6 +78,17 @@
         </svg>
       </button>
     </div>
+    
+    <div class="flex items-center gap-2 ml-4">
+      <input
+        type="text"
+        [(ngModel)]="employeeSearchTerm"
+        (input)="onEmployeeSearchInput($event)"
+        placeholder="Search employee..."
+        class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-blue-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200"
+        style="min-width: 200px;"
+      />
+    </div>
 
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2">
