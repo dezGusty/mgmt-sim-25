@@ -26,7 +26,7 @@ namespace ManagementSimulator.Infrastructure
                 dbContext.SaveChanges();
             }
 
-            var roleNames = new[] { "Admin", "Manager", "Employee" };
+            var roleNames = new[] { "Admin", "Manager", "Employee", "HR" };
             var roles = new List<EmployeeRole>();
             foreach (var roleName in roleNames)
             {
@@ -45,6 +45,7 @@ namespace ManagementSimulator.Infrastructure
                 var adminRole = roles.First(r => r.Rolename == "Admin");
                 var managerRole = roles.First(r => r.Rolename == "Manager");
                 var employeeRole = roles.First(r => r.Rolename == "Employee");
+                var hrRole = roles.First(r => r.Rolename == "HR");
 
                 // Admin User
                 var adminUser = new User
@@ -72,6 +73,17 @@ namespace ManagementSimulator.Infrastructure
                 };
 
                 dbContext.EmployeeRolesUsers.Add(adminRoleUser);
+
+                var adminHrRoleUser = new EmployeeRoleUser
+                {
+                    UsersId = adminUser.Id,
+                    RolesId = hrRole.Id,
+                    Role = hrRole,
+                    User = adminUser,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                dbContext.EmployeeRolesUsers.Add(adminHrRoleUser);
 
                 // Manager User
                 var managerUser = new User
