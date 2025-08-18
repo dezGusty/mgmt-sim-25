@@ -510,6 +510,33 @@
         <div
           class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
         >
+          <div class="flex items-center gap-4">
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ getStartResultIndexManagers() }}</span>
+              to
+              <span class="font-medium">{{ getMaxDisplayedResultManagers() }}</span>
+              of
+              <span class="font-medium">{{ getTotalManagersCount() }}</span>
+              managers
+            </p>
+            <div class="flex items-center gap-2">
+              <label for="itemsPerPageManagers" class="text-sm text-gray-700">Show:</label>
+              <select
+                id="itemsPerPageManagers"
+                [(ngModel)]="pageSizeManagers"
+                (ngModelChange)="onItemsPerPageChangeManagers()"
+                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-sm text-gray-700">per page</span>
+            </div>
+          </div>
           <div>
             <nav
               class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
@@ -798,7 +825,7 @@
       </div>
 
       <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
+        <div class="flex items-center gap-4">
           <p class="text-sm text-gray-700">
             Showing
             <span class="font-medium">{{
@@ -809,9 +836,25 @@
               getMaxDisplayedResultUnassignedUsers()
             }}</span>
             of
-            <span class="font-medium">{{ unassignedUsers.length }}</span>
+            <span class="font-medium">{{ getUnassignedUsersCount() }}</span>
             unassigned users
           </p>
+          <div class="flex items-center gap-2">
+            <label for="itemsPerPageUnassignedUsers" class="text-sm text-gray-700">Show:</label>
+            <select
+              id="itemsPerPageUnassignedUsers"
+              [(ngModel)]="pageSizeUnassignedUsers"
+              (ngModelChange)="onItemsPerPageChangeUnassignedUsers()"
+              class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span class="text-sm text-gray-700">per page</span>
+          </div>
         </div>
         <div>
           <nav
