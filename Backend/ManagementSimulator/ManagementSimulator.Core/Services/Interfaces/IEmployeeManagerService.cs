@@ -20,5 +20,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<EmployeeManagerResponseDto> UpdateEmployeeForManagerAsync(int employeeId, int managerId, int newEmployeeId);
         Task<EmployeeManagerResponseDto> UpdateManagerForEmployeeAsync(int employeeId, int managerId, int newManagerId);
         Task SetSubordinatesToUnassignedAsync(int managerId);
+        Task<bool> CanManagerActForEmployeeAsync(int managerId, int employeeId);
+        Task<List<int>> GetAllEmployeeIdsForManagerAsync(int managerId);
     }
 }

@@ -13,10 +13,12 @@ namespace ManagementSimulator.Core.Services
 
 
         private readonly IUserRepository _userRepository;
+        private readonly ISecondaryManagerRepository _secondaryManagerRepository;
 
-        public AuthService(IUserRepository userRepository)
+        public AuthService(IUserRepository userRepository, ISecondaryManagerRepository secondaryManagerRepository)
         {
             _userRepository = userRepository;
+            _secondaryManagerRepository = secondaryManagerRepository;
         }
 
         public async Task<bool> LoginAsync(HttpContext httpContext, string email, string password)
@@ -31,9 +33,23 @@ namespace ManagementSimulator.Core.Services
                 new Claim(ClaimTypes.Email, user.Email),
             };
 
+            // Add permanent roles
             foreach (var role in user.Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role.Role.Rolename));
+            }
+
+            // Check if user is currently an active secondary manager
+            var isActiveSecondaryManager = await _secondaryManagerRepository
+                .HasActiveSecondaryManagerAssignmentAsync(user.Id);
+            
+            if (isActiveSecondaryManager)
+            {
+                // Add temporary Manager role if not already present
+                if (!claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Manager"))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, "Manager"));
+                }
             }
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

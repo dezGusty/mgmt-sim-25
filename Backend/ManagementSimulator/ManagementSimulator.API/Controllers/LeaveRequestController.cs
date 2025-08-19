@@ -18,11 +18,13 @@ namespace ManagementSimulator.API.Controllers
     public class LeaveRequestsController : ControllerBase
     {
         private readonly ILeaveRequestService _leaveRequestService;
+        private readonly IEmployeeManagerService _employeeManagerService;
         private readonly ILogger<LeaveRequestsController> _logger;
 
-        public LeaveRequestsController(ILeaveRequestService leaveRequestService, ILogger<LeaveRequestsController> logger)
+        public LeaveRequestsController(ILeaveRequestService leaveRequestService, IEmployeeManagerService employeeManagerService, ILogger<LeaveRequestsController> logger)
         {
             _leaveRequestService = leaveRequestService;
+            _employeeManagerService = employeeManagerService;
             _logger = logger;
         }
         
@@ -303,6 +305,32 @@ namespace ManagementSimulator.API.Controllers
                     Success = false,
                     Timestamp = DateTime.UtcNow
                 });
+            }
+
+            // Get the leave request to check the employee ID
+            var leaveRequest = await _leaveRequestService.GetRequestByIdAsync(id);
+            if (leaveRequest == null)
+            {
+                return NotFound(new
+                {
+                    Message = $"Leave request with ID {id} not found.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            // Check if the manager can act for this employee (considering secondary managers)
+            var canManagerAct = await _employeeManagerService.CanManagerActForEmployeeAsync(managerId, leaveRequest.UserId);
+            if (!canManagerAct)
+            {
+                return Forbid(new
+                {
+                    Message = "You are not authorized to review this employee's leave request. This employee may have an active secondary manager.",
+                    Data = new List<LeaveRequestResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                }.ToString());
             }
 
             await _leaveRequestService.ReviewLeaveRequestAsync(id, dto, managerId);

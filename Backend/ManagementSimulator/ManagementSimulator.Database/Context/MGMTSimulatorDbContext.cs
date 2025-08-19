@@ -98,6 +98,29 @@ namespace ManagementSimulator.Database.Context
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<SecondaryManager>(entity =>
+            {
+                entity.HasKey(sm => new { sm.EmployeeId, sm.SecondaryManagerId, sm.StartDate });
+
+                entity.HasOne(sm => sm.Employee)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.EmployeeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sm => sm.Manager)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.SecondaryManagerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sm => sm.AssignedByAdmin)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.AssignedByAdminId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(sm => sm.Reason)
+                      .HasMaxLength(500);
+            });
+
             modelBuilder.Entity<EmployeeRoleUser>()
                 .HasKey(eru => new { eru.RolesId, eru.UsersId });
             modelBuilder.Entity<EmployeeRoleUser>()
@@ -118,6 +141,7 @@ namespace ManagementSimulator.Database.Context
         public DbSet<LeaveRequestType> LeaveRequestTypes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
+        public DbSet<SecondaryManager> SecondaryManagers { get; set; }
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
         public DbSet<EmployeeRoleUser> EmployeeRolesUsers { get; set; }
     }

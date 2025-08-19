@@ -16,11 +16,13 @@ namespace ManagementSimulator.Core.Services
     {
         private readonly IEmployeeManagerRepository _employeeManagerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ISecondaryManagerRepository _secondaryManagerRepository;
 
-        public EmployeeManagerService(IEmployeeManagerRepository employeeManagerRepository, IUserRepository userRepository)
+        public EmployeeManagerService(IEmployeeManagerRepository employeeManagerRepository, IUserRepository userRepository, ISecondaryManagerRepository secondaryManagerRepository)
         {
             _employeeManagerRepository = employeeManagerRepository;
             _userRepository = userRepository;
+            _secondaryManagerRepository = secondaryManagerRepository;
         }
 
         public async Task AddEmployeeManagerAsync(int employeeId, int managerId)
@@ -67,7 +69,18 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(Database.Entities.User), managerId);
             }
 
-            return employees.Select(e => new UserResponseDto
+            // Filter out employees who have active secondary managers
+            var filteredEmployees = new List<User>();
+            foreach (var employee in employees)
+            {
+                var hasActiveSecondaryManager = await _secondaryManagerRepository.HasActiveSecondaryManagerForEmployeeAsync(employee.Id);
+                if (!hasActiveSecondaryManager)
+                {
+                    filteredEmployees.Add(employee);
+                }
+            }
+
+            return filteredEmployees.Select(e => new UserResponseDto
             {
                 Id = e.Id,
                 FirstName = e.FirstName,
@@ -256,6 +269,51 @@ namespace ManagementSimulator.Core.Services
             }
 
             await _employeeManagerRepository.SetSubordinatesToUnassignedByManagerIdAsync(managerId);
+        }
+
+        public async Task<bool> CanManagerActForEmployeeAsync(int managerId, int employeeId)
+        {
+            // Check if the employee has an active secondary manager
+            var hasActiveSecondaryManager = await _secondaryManagerRepository.HasActiveSecondaryManagerForEmployeeAsync(employeeId);
+            
+            if (hasActiveSecondaryManager)
+            {
+                // If there's an active secondary manager, check if the current manager is the secondary manager
+                var activeSecondaryManagers = await _secondaryManagerRepository.GetActiveSecondaryManagersForEmployeeAsync(employeeId, tracking: false);
+                return activeSecondaryManagers.Any(sm => sm.SecondaryManagerId == managerId);
+            }
+            
+            // If no active secondary manager, check if this is a regular manager relationship
+            var employeeManager = await _employeeManagerRepository.GetEmployeeManagersByIdAsync(employeeId, managerId, includeDeleted: false, tracking: false);
+            return employeeManager != null;
+        }
+
+        public async Task<List<int>> GetAllEmployeeIdsForManagerAsync(int managerId)
+        {
+            var employeeIds = new List<int>();
+
+            // Get employees from primary manager relationships (excluding those with active secondary managers)
+            var primaryEmployees = await _employeeManagerRepository.GetEmployeesForManagerByIdAsync(managerId, tracking: false);
+            if (primaryEmployees != null)
+            {
+                foreach (var employee in primaryEmployees)
+                {
+                    var hasActiveSecondaryManager = await _secondaryManagerRepository.HasActiveSecondaryManagerForEmployeeAsync(employee.Id);
+                    if (!hasActiveSecondaryManager)
+                    {
+                        employeeIds.Add(employee.Id);
+                    }
+                }
+            }
+
+            // Get employees from active secondary manager relationships
+            var secondaryEmployees = await _secondaryManagerRepository.GetEmployeesWithActiveSecondaryManagerAsync(managerId, tracking: false);
+            if (secondaryEmployees != null)
+            {
+                employeeIds.AddRange(secondaryEmployees.Select(emp => emp.Id));
+            }
+
+            return employeeIds.Distinct().ToList();
         }
     }
 }

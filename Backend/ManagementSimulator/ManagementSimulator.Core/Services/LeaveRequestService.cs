@@ -18,14 +18,17 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
+        private readonly IEmployeeManagerService _employeeManagerService;
 
         public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository,
                                    IUserRepository userRepository,
-                                   ILeaveRequestTypeRepository leaveRequestTypeRepository)
+                                   ILeaveRequestTypeRepository leaveRequestTypeRepository,
+                                   IEmployeeManagerService employeeManagerService)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _userRepository = userRepository;
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
+            _employeeManagerService = employeeManagerService;
         }
 
         public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
@@ -234,8 +237,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId, string? name = null)
         {
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
-            var employeeIds = employees.Select(e => e.Id).ToList();
+            // Use the new method that properly handles both primary and secondary managers
+            var employeeIds = await _employeeManagerService.GetAllEmployeeIdsForManagerAsync(managerId);
 
             var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsByUserIdsAsync(employeeIds, name);
             var filtered = allRequests
@@ -263,8 +266,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId, QueriedLeaveRequestRequestDto payload)
         {
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
-            var employeeIds = employees.Select(e => e.Id).ToList();
+            // Use the new method that properly handles both primary and secondary managers
+            var employeeIds = await _employeeManagerService.GetAllEmployeeIdsForManagerAsync(managerId);
 
             var (result, totalCount) = await _leaveRequestRepository.GetAllLeaveRequestsWithRelationshipsFilteredAsync(employeeIds, payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams());
 
@@ -451,9 +454,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(int managerId, string status, int pageSize, int pageNumber)
         {
-            // Mai întâi obținem angajații managerului
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
-            var employeeIds = employees.Select(e => e.Id).ToList();
+            // Use the new method that properly handles both primary and secondary managers
+            var employeeIds = await _employeeManagerService.GetAllEmployeeIdsForManagerAsync(managerId);
 
             // Obținem cererile filtrate, transmițând și lista de employeeIds
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber, employeeIds);
