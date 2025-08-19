@@ -29,5 +29,6 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public int? AnnuallyLeaveDays { get; set; }
         public int? LeaveDaysLeftCurrentYear { get; set; }
         public DateTime? DateOfEmployment { get; set; }
+        public int? Vacation { get; set; }
     }
 }

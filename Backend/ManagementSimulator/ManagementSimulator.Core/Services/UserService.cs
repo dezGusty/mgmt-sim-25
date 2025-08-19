@@ -65,6 +65,7 @@ namespace ManagementSimulator.Core.Services
                 DepartmentId = u.DepartmentId,
                 DepartmentName = u.Department?.Name ?? string.Empty,
                 IsActive = u.DeletedAt == null,
+                Vacation = u.Vacation,
             }).ToList();
         }
 
@@ -105,7 +106,8 @@ namespace ManagementSimulator.Core.Services
                 Title = jt,
                 DateOfEmployment = dto.DateOfEmployment,
                 MustChangePassword = true,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
+                Vacation = dto.Vacation ?? 21
             };
 
             await _userRepository.AddAsync(user);
@@ -307,10 +309,12 @@ namespace ManagementSimulator.Core.Services
             {
                 var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id);
                 var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
-
+                
                 var usedDaysForType = CalculateTotalDays(pendingTypeRequests);
-                var maxAllowedDays = leaveType.MaxDays ?? hrUserDto.TotalLeaveDays;
-
+                var maxAllowedDays = leaveType.Title == "Vacation"
+                    ? user.Vacation
+                    : (leaveType.MaxDays ?? hrUserDto.TotalLeaveDays);
+                
                 var leaveTypeStat = new LeaveTypeStatDto
                 {
                     LeaveTypeId = leaveType.Id,
@@ -319,7 +323,7 @@ namespace ManagementSimulator.Core.Services
                     RemainingDays = maxAllowedDays - usedDaysForType,
                     MaxAllowedDays = maxAllowedDays
                 };
-
+                
                 hrUserDto.LeaveTypeStatistics.Add(leaveTypeStat);
             }
 
@@ -426,6 +430,11 @@ namespace ManagementSimulator.Core.Services
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateUserRequestDto, User>(existing, dto);
 
+            if (dto.Vacation.HasValue)
+            {
+                existing.Vacation = dto.Vacation.Value;
+            }
+
             existing.ModifiedAt = DateTime.UtcNow;
 
             await _userRepository.SaveChangesAsync();
@@ -521,6 +530,7 @@ namespace ManagementSimulator.Core.Services
                     SubordinatesJobTitles = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.Title?.Name ?? string.Empty)).ToList(),
                     SubordinatesJobTitleIds = subordinates.SelectMany(u => u.Subordinates.Select(s => s.Employee.JobTitleId)).ToList(),
                     ManagersIds = managers.SelectMany(u => u.Managers.Select(m => m.ManagerId)).ToList(),
+                    Vacation = u.Vacation,
                 };
             }).ToList();
         }
@@ -637,6 +647,7 @@ namespace ManagementSimulator.Core.Services
                         DepartmentId = u.DepartmentId,
                         DepartmentName = u.Department?.Name ?? string.Empty,
                         IsActive = u.DeletedAt == null,
+                        Vacation = u.Vacation,
                     }),
                     Page = payload.PagedQueryParams.Page ?? 1,
                     PageSize = payload.PagedQueryParams.PageSize ?? 1,
@@ -661,18 +672,19 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = users.Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    FirstName = u.FirstName ?? string.Empty,
-                    LastName = u.LastName ?? string.Empty,
-                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                    JobTitleId = u.JobTitleId,
-                    JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.DepartmentId,
-                    DepartmentName = u.Department?.Name ?? string.Empty,
-                    IsActive = u.DeletedAt == null,
-                }),
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName ?? string.Empty,
+                LastName = u.LastName ?? string.Empty,
+                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                JobTitleId = u.JobTitleId,
+                JobTitleName = u.Title?.Name ?? string.Empty,
+                DepartmentId = u.DepartmentId,
+                DepartmentName = u.Department?.Name ?? string.Empty,
+                IsActive = u.DeletedAt == null,
+                Vacation = u.Vacation,
+            }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
@@ -723,6 +735,7 @@ namespace ManagementSimulator.Core.Services
                     JobTitleName = u.Title?.Name ?? string.Empty,
                     DepartmentId = u.DepartmentId,
                     DepartmentName = u.Department?.Name ?? string.Empty,
+                    Vacation = u.Vacation,
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = pageSize,
@@ -756,19 +769,20 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = managers.Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    FirstName = u.FirstName ?? string.Empty,
-                    LastName = u.LastName ?? string.Empty,
-                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                    JobTitleId = u.JobTitleId,
-                    JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.DepartmentId,
-                    DepartmentName = u.Department?.Name ?? string.Empty,
-                    SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
-                    IsActive = u.DeletedAt == null,
-                }),
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName ?? string.Empty,
+                LastName = u.LastName ?? string.Empty,
+                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                JobTitleId = u.JobTitleId,
+                JobTitleName = u.Title?.Name ?? string.Empty,
+                DepartmentId = u.DepartmentId,
+                DepartmentName = u.Department?.Name ?? string.Empty,
+                SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
+                IsActive = u.DeletedAt == null,
+                Vacation = u.Vacation,
+            }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?

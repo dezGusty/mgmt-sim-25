@@ -204,7 +204,6 @@ namespace ManagementSimulator.Database.Repositories
                     lr.UserId
                 });
 
-            // Aplicăm filtrarea după employeeIds dacă există
             if (employeeIds != null && employeeIds.Any())
             {
                 query = query.Where(r => employeeIds.Contains(r.UserId));

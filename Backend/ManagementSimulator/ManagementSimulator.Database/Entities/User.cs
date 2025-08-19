@@ -11,7 +11,6 @@ namespace ManagementSimulator.Database.Entities
 {
     public class User : BaseEntity
     {
-        // navigation properties
         public int JobTitleId { get; set; }
         public JobTitle Title { get; set; }
         public int DepartmentId { get; set; }
@@ -20,13 +19,12 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
         public ICollection<LeaveRequest> ReviewedRequests { get; set; } = new List<LeaveRequest>();
 
-        public ICollection<EmployeeManager> Managers { get; set; } = new List<EmployeeManager>(); 
+        public ICollection<EmployeeManager> Managers { get; set; } = new List<EmployeeManager>();
         public ICollection<EmployeeManager> Subordinates { get; set; } = new List<EmployeeManager>();
 
         public ICollection<EmployeeRoleUser> Roles { get; set; } = new List<EmployeeRoleUser>();
 
-        // fields
-        [Required,MaxLength(50),EmailAddress]
+        [Required, MaxLength(50), EmailAddress]
         public string Email { get; set; }
 
         [Required, MaxLength(50)]
@@ -39,7 +37,6 @@ namespace ManagementSimulator.Database.Entities
         public bool MustChangePassword { get; set; }
         public DateTime DateOfEmployment { get; set; }
         public string FullName => $"{FirstName} {LastName}";
-
         public int Vacation { get; set; } = 21;
     }
 }

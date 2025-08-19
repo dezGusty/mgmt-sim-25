@@ -17,13 +17,12 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public string DepartmentName { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public DateTime DateOfEmployment { get; set; }
+        public int Vacation { get; set; }
         
-        // Leave information for current year
         public int TotalLeaveDays { get; set; }
         public int UsedLeaveDays { get; set; }
         public int RemainingLeaveDays { get; set; }
         
-        // Additional leave statistics
         public List<LeaveTypeStatDto> LeaveTypeStatistics { get; set; } = new List<LeaveTypeStatDto>();
     }
 

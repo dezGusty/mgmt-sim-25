@@ -353,11 +353,12 @@ namespace ManagementSimulator.Core.Services
             }
 
             int? remainingDays = null;
-            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+            int? maxDaysAllowedForUser = leaveRequestType.Title == "Vacation" ? user.Vacation : leaveRequestType.MaxDays;
+            bool hasUnlimitedDays = maxDaysAllowedForUser == null;
 
             if (!hasUnlimitedDays)
             {
-                remainingDays = leaveRequestType.MaxDays - daysUsed;
+                remainingDays = maxDaysAllowedForUser - daysUsed;
             }
 
             return new RemainingLeaveDaysResponseDto
@@ -365,7 +366,7 @@ namespace ManagementSimulator.Core.Services
                 UserId = userId,
                 LeaveRequestTypeId = leaveRequestTypeId,
                 LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
-                MaxDaysAllowed = leaveRequestType.MaxDays,
+                MaxDaysAllowed = maxDaysAllowedForUser,
                 DaysUsed = daysUsed,
                 RemainingDays = remainingDays,
                 HasUnlimitedDays = hasUnlimitedDays,
@@ -412,11 +413,12 @@ namespace ManagementSimulator.Core.Services
             var requestedDays = CalculateLeaveDays(startDate, endDate);
 
             int? remainingDays = null;
-            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+            int? maxDaysAllowedForUser = leaveRequestType.Title == "Vacation" ? user.Vacation : leaveRequestType.MaxDays;
+            bool hasUnlimitedDays = maxDaysAllowedForUser == null;
 
             if (!hasUnlimitedDays)
             {
-                remainingDays = leaveRequestType.MaxDays - daysUsed - requestedDays;
+                remainingDays = maxDaysAllowedForUser - daysUsed - requestedDays;
             }
 
             return new RemainingLeaveDaysResponseDto
@@ -424,7 +426,7 @@ namespace ManagementSimulator.Core.Services
                 UserId = userId,
                 LeaveRequestTypeId = leaveRequestTypeId,
                 LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
-                MaxDaysAllowed = leaveRequestType.MaxDays,
+                MaxDaysAllowed = maxDaysAllowedForUser,
                 DaysUsed = daysUsed + requestedDays,
                 RemainingDays = remainingDays,
                 HasUnlimitedDays = hasUnlimitedDays,
