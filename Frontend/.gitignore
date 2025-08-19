@@ -41,3 +41,4 @@ testem.log
 .DS_Store
 Thumbs.db
 Backend/ManagementSimulator/ManagementSimulator/appsettings.json
+Backend/ManagementSimulator/ManagementSimulator/appsettings.json

@@ -420,3 +420,4 @@ Backend/ManagementSimulator/appsettings.Development.json
 Backend/ManagementSimulator/ManagementSimulator/appsettings.Development.json
 Backend/ManagementSimulator/ManagementSimulator/appsettings.json
 Backend/ManagementSimulator/ManagementSimulator.API/appsettings.json
+Backend/ManagementSimulator/ManagementSimulator.Database/appsettings.json
