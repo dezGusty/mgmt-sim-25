@@ -157,108 +157,114 @@
     </div>
   </div>
 
-  <div
-    class="overflow-x-auto overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
-    [ngClass]="{ 'max-h-[600px]': !isFullscreen, 'flex-1': isFullscreen }"
-    (wheel)="onWheel($event)"
-    style="scrollbar-color: #d1d5db #f9fafb"
-  >
-    <table class="w-full border-collapse text-sm">
-      <thead class="sticky top-0 bg-white z-10">
-        <tr>
-          <th
-            class="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 font-semibold text-gray-700 min-w-[150px] z-20 text-left cursor-default"
-          >
-            Employee
-          </th>
-          <ng-container *ngFor="let monthHeader of monthHeaders">
-            <th
-              class="border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-center bg-blue-50"
-              [attr.colspan]="monthHeader.daysInMonth"
-            >
-              {{ monthHeader.month }} {{ monthHeader.year }}
-            </th>
-          </ng-container>
-        </tr>
-        <tr>
-          <th
-            class="sticky left-0 bg-gray-100 border border-gray-300 p-1 text-xs text-gray-600 z-20"
-          >
-            Name
-          </th>
-          <th
-            *ngFor="let date of calendarDates"
-            class="border border-gray-300 p-1 text-xs min-w-[40px]"
-            [ngClass]="{
-              'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
-              'bg-gray-50 text-gray-600': !isToday(date)
-            }"
-          >
-            {{ date.getDate() }}
-          </th>
-        </tr>
-      </thead>
 
-      <tbody>
-        <tr
-          *ngFor="let employeeData of tableData; let i = index"
-          class="hover:bg-gray-50 text-sm"
-          [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
-        >
-          <td
-            class="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium text-gray-800 z-10 text-left cursor-default min-w-[150px]"
+  <ng-container *ngIf="tableData.length === 0 && employeeSearchTerm.trim().length > 0; else showCalendarTable">
+    <div class="text-center text-gray-500 font-semibold py-8">
+      No employee found
+    </div>
+  </ng-container>
+  <ng-template #showCalendarTable>
+    <div
+      class="overflow-x-auto overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
+      [ngClass]="{ 'max-h-[600px]': !isFullscreen, 'flex-1': isFullscreen }"
+      (wheel)="onWheel($event)"
+      style="scrollbar-color: #d1d5db #f9fafb"
+    >
+      <table class="w-full border-collapse text-sm">
+        <thead class="sticky top-0 bg-white z-10">
+          <tr>
+            <th
+              class="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 font-semibold text-gray-700 min-w-[150px] z-20 text-left cursor-default"
+            >
+              Employee
+            </th>
+            <ng-container *ngFor="let monthHeader of monthHeaders">
+              <th
+                class="border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-center bg-blue-50"
+                [attr.colspan]="monthHeader.daysInMonth"
+              >
+                {{ monthHeader.month }} {{ monthHeader.year }}
+              </th>
+            </ng-container>
+          </tr>
+          <tr>
+            <th
+              class="sticky left-0 bg-gray-100 border border-gray-300 p-1 text-xs text-gray-600 z-20"
+            >
+              Name
+            </th>
+            <th
+              *ngFor="let date of calendarDates"
+              class="border border-gray-300 p-1 text-xs min-w-[40px]"
+              [ngClass]="{
+                'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
+                'bg-gray-50 text-gray-600': !isToday(date)
+              }"
+            >
+              {{ date.getDate() }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let employeeData of tableData; let i = index"
+            class="hover:bg-gray-50 text-sm"
             [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
           >
-            {{ employeeData.employee }}
-          </td>
-
-          <td
-            *ngFor="let dateData of employeeData.dates"
-            class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
-            [ngClass]="{
-              'hover:bg-gray-100': !dateData.hasLeave,
-              'cursor-pointer':
-                dateData.hasLeave && dateData.requests.length > 0,
-              'cursor-default':
-                !dateData.hasLeave || dateData.requests.length === 0,
-              'opacity-75':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                !isDateInHoveredRequest(dateData.date, employeeData.employee),
-              'opacity-100 ring-2 ring-gray-400':
-                dateData.hasLeave &&
-                dateData.requests.length > 0 &&
-                isDateInHoveredRequest(dateData.date, employeeData.employee)
-            }"
-            [style.background-color]="
-              dateData.hasLeave && dateData.requests.length > 0
-                ? getLeaveTypeColor(dateData.requests[0])
-                : ''
-            "
-            (click)="onCellClick(employeeData.employee, dateData.date)"
-            (mouseenter)="
-              dateData.hasLeave && dateData.requests.length > 0
-                ? onRequestHover(dateData.requests[0])
-                : null
-            "
-            (mouseleave)="onRequestLeave()"
-            [title]="
-              dateData.hasLeave && dateData.requests.length > 0
-                ? dateData.requests[0].reason || 'Concediu'
-                : ''
-            "
-          >
-            <span
-              *ngIf="dateData.hasLeave && dateData.requests.length > 0"
-              class="text-lg font-bold text-white text-shadow"
+            <td
+              class="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium text-gray-800 z-10 text-left cursor-default min-w-[150px]"
+              [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
             >
-              {{ getStatusIcon(dateData.requests[0].status || "pending") }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+              {{ employeeData.employee }}
+            </td>
+            <td
+              *ngFor="let dateData of employeeData.dates"
+              class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
+              [ngClass]="{
+                'hover:bg-gray-100': !dateData.hasLeave,
+                'cursor-pointer':
+                  dateData.hasLeave && dateData.requests.length > 0,
+                'cursor-default':
+                  !dateData.hasLeave || dateData.requests.length === 0,
+                'opacity-75':
+                  dateData.hasLeave &&
+                  dateData.requests.length > 0 &&
+                  !isDateInHoveredRequest(dateData.date, employeeData.employee),
+                'opacity-100 ring-2 ring-gray-400':
+                  dateData.hasLeave &&
+                  dateData.requests.length > 0 &&
+                  isDateInHoveredRequest(dateData.date, employeeData.employee)
+              }"
+              [style.background-color]="
+                dateData.hasLeave && dateData.requests.length > 0
+                  ? getLeaveTypeColor(dateData.requests[0])
+                  : ''
+              "
+              (click)="onCellClick(employeeData.employee, dateData.date)"
+              (mouseenter)="
+                dateData.hasLeave && dateData.requests.length > 0
+                  ? onRequestHover(dateData.requests[0])
+                  : null
+              "
+              (mouseleave)="onRequestLeave()"
+              [title]="
+                dateData.hasLeave && dateData.requests.length > 0
+                  ? dateData.requests[0].reason || 'Concediu'
+                  : ''
+              "
+            >
+              <span
+                *ngIf="dateData.hasLeave && dateData.requests.length > 0"
+                class="text-lg font-bold text-white text-shadow"
+              >
+                {{ getStatusIcon(dateData.requests[0].status || 'pending') }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-template>
 
   <div
     *ngIf="selectedRequest"
