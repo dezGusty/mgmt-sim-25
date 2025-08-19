@@ -156,6 +156,18 @@ namespace ManagementSimulator.Core.Services
             return filtered;
         }
 
+        public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetRequestsByUserPagedAsync(int userId, string? status = null, int pageSize = 10, int pageNumber = 1)
+        {
+            // Use the existing GetFilteredLeaveRequestsAsync method with a single user ID
+            var employeeIds = new List<int> { userId };
+            var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status ?? "ALL", pageSize, pageNumber, employeeIds);
+            
+            // Convert to DTOs
+            var dtos = items.Select(r => r.ToLeaveRequestResponseDto()).ToList();
+            
+            return (dtos, totalCount);
+        }
+
         public async Task<List<LeaveRequestResponseDto>> GetAllRequestsAsync()
         {
             var requests = await _leaveRequestRepository.GetAllAsync();

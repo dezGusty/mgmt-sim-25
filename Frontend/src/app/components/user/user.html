@@ -156,7 +156,7 @@
           <!-- Items per page selector -->
           <div class="flex items-center gap-1">
             <label class="text-xs text-gray-700">Show:</label>
-            <select [(ngModel)]="itemsPerPage" (change)="currentPage = 1; updatePagination()" 
+            <select [(ngModel)]="itemsPerPage" (change)="currentPage = 1; loadRequests()" 
                     class="border border-gray-300 rounded px-1 py-1 text-xs">
               <option value="5">5</option>
               <option value="10">10</option>
@@ -271,9 +271,9 @@
       <div *ngIf="!isLoading && filteredRequests.length > 0" class="px-4 py-3 border-t bg-gray-50 flex items-center justify-between flex-shrink-0">
         <!-- Results info -->
         <div class="text-xs text-gray-700">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to 
-          {{ Math.min(currentPage * itemsPerPage, filteredRequests.length) }} of 
-          {{ filteredRequests.length }} results
+          Showing {{ totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0 }} to 
+          {{ Math.min(currentPage * itemsPerPage, totalCount) }} of 
+          {{ totalCount }} results
         </div>
 
         <!-- Pagination controls -->

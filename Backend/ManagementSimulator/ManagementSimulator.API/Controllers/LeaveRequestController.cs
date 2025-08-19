@@ -531,6 +531,69 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Employee")]
+        [HttpGet("by-employee/filtered")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFilteredLeaveRequestsByEmployeeAsync(
+            [FromQuery] string? status = "ALL",
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int pageNumber = 1)
+        {
+            if (pageSize <= 0)
+                return BadRequest(new { Message = "Page size must be greater than 0", Success = false, Timestamp = DateTime.UtcNow });
+            if (pageNumber <= 0)
+                return BadRequest(new { Message = "Page number must be greater than 0", Success = false, Timestamp = DateTime.UtcNow });
+
+            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(nameIdentifierClaim))
+            {
+                return Unauthorized(new
+                {
+                    Message = "User ID is missing from the token.",
+                    Data = new { Items = new List<LeaveRequestResponseDto>(), TotalCount = 0, TotalPages = 0 },
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            if (!int.TryParse(nameIdentifierClaim, out var userId))
+            {
+                return BadRequest(new
+                {
+                    Message = "Invalid User ID.",
+                    Data = new { Items = new List<LeaveRequestResponseDto>(), TotalCount = 0, TotalPages = 0 },
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            var (items, totalCount) = await _leaveRequestService.GetRequestsByUserPagedAsync(userId, status, pageSize, pageNumber);
+            
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(new
+            {
+                Message = "Leave requests retrieved successfully.",
+                Data = new
+                {
+                    Items = items,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    HasNextPage = pageNumber < totalPages,
+                    HasPreviousPage = pageNumber > 1
+                },
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
         [Authorize(Roles = "Manager")]
         [HttpGet("remaining-days/{userId}/{leaveRequestTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
