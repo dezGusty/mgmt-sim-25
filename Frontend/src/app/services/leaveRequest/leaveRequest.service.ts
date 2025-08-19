@@ -39,6 +39,24 @@ export class LeaveRequestService {
     );
   }
 
+  getCurrentUserLeaveRequestsPaginated(
+    status: string = 'ALL', 
+    pageSize: number = 10, 
+    pageNumber: number = 1
+  ): Observable<IApiResponse<{items: LeaveRequest[], totalCount: number, totalPages: number, hasNextPage: boolean, hasPreviousPage: boolean}>> {
+    return this.http.get<IApiResponse<{items: LeaveRequest[], totalCount: number, totalPages: number, hasNextPage: boolean, hasPreviousPage: boolean}>>(
+      `${this.apiUrl}/by-employee/filtered`,
+      {
+        params: {
+          status,
+          pageSize: pageSize.toString(),
+          pageNumber: pageNumber.toString()
+        },
+        withCredentials: true,
+      }
+    );
+  }
+
   addLeaveRequestByEmployee(
     request: CreateLeaveRequestByEmployeeDto
   ): Observable<IApiResponse<LeaveRequest>> {

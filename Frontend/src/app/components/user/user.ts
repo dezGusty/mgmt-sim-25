@@ -48,6 +48,7 @@ export class User {
   currentPage = 1;
   itemsPerPage = 5;
   totalPages = 0;
+  totalCount = 0;
   paginatedRequests: LeaveRequest[] = [];
 
   constructor(
@@ -61,36 +62,59 @@ export class User {
     this.loadRequests();
   }
 
+  getStatusForBackend(): string {
+    if (!this.showCancelledRequests && this.statusFilter === 'all') {
+      return 'ALL'; // Backend will handle excluding cancelled requests
+    }
+    
+    switch (this.statusFilter) {
+      case 'pending':
+        return 'PENDING';
+      case 'approved':
+        return 'APPROVED';
+      case 'rejected':
+        return 'REJECTED';
+      case 'all':
+      default:
+        return 'ALL';
+    }
+  }
+
   loadRequests() {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.leaveRequestService.getCurrentUserLeaveRequests().subscribe({
+    const status = this.getStatusForBackend();
+    
+    this.leaveRequestService.getCurrentUserLeaveRequestsPaginated(status, this.itemsPerPage, this.currentPage).subscribe({
       next: (data) => {       
-        this.requests = data.data.sort((a, b) => {
-          const dateA = new Date(a.startDate);
-          const dateB = new Date(b.startDate);
-          return dateB.getTime() - dateA.getTime();
-        });
-        
-        this.filteredRequests = [...this.requests];
-        this.updatePagination();
+        if (data.success && data.data) {
+          this.paginatedRequests = data.data.items || [];
+          this.totalPages = data.data.totalPages || 0;
+          this.totalCount = data.data.totalCount || 0;
+          // We no longer need filteredRequests since filtering is done on backend
+          this.filteredRequests = this.paginatedRequests;
+        } else {
+          this.paginatedRequests = [];
+          this.filteredRequests = [];
+          this.totalPages = 0;
+          this.totalCount = 0;
+          this.errorMessage = data.message || 'Failed to load requests.';
+        }
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading requests:', err);
-        console.error('Error details:', {
-          message: err.message,
-          status: err.status,
-          statusText: err.statusText,
-          error: err.error
-        });
         this.isLoading = false;
+        this.paginatedRequests = [];
+        this.filteredRequests = [];
+        this.totalPages = 0;
+        this.totalCount = 0;
 
         if (err.status === 401) {
           this.errorMessage = 'You are not authorized. Please log in again.';
         } else if (err.status === 404) {
-          this.errorMessage = 'No leave requests found.';
+          this.errorMessage = '';  // Don't show error for no data found
         } else if (err.status === 400) {
           this.errorMessage = err.error?.message || 'Invalid request.';
         } else {
@@ -100,14 +124,6 @@ export class User {
     })
   }
 
-  updatePagination() {
-    this.totalPages = Math.ceil(this.filteredRequests.length / this.itemsPerPage);
-    
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    
-    this.paginatedRequests = this.filteredRequests.slice(startIndex, endIndex);
-  }
 
   goBack() {
     this.router.navigate(['/']);
@@ -224,41 +240,9 @@ export class User {
   }
   
   filterRequests() {
-    let results = this.requests;
-    
-    if (!this.showCancelledRequests) {
-      results = results.filter(req => req.requestStatus !== this.RequestStatus.CANCELED);
-    }
-    
-    // Apply status filter
-    if (this.statusFilter !== 'all') {
-      results = results.filter(req => {
-        switch (this.statusFilter) {
-          case 'pending':
-            return req.requestStatus === this.RequestStatus.PENDING;
-          case 'approved':
-            return req.requestStatus === this.RequestStatus.APPROVED;
-          case 'rejected':
-            return req.requestStatus === this.RequestStatus.REJECTED;
-          default:
-            return true;
-        }
-      });
-    }
-    
-    // Apply search term
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.toLowerCase().trim();
-      results = results.filter(req => 
-        req.reason?.toLowerCase().includes(term) ||
-        req.id?.toString().includes(term) ||
-        this.getLeaveRequestTypeName(req.leaveRequestTypeId).toLowerCase().includes(term)
-      );
-    }
-    
-    this.filteredRequests = results;
+    // Reset to first page and reload data with new filters
     this.currentPage = 1;
-    this.updatePagination();
+    this.loadRequests();
   }
 
   onShowCancelledToggle() {
@@ -266,30 +250,36 @@ export class User {
   }
 
   getRequestNumber(request: LeaveRequest): number {
-    const index = this.filteredRequests.findIndex(r => r.id === request.id);
+    const index = this.paginatedRequests.findIndex(r => r.id === request.id);
     return index + 1 + (this.currentPage - 1) * this.itemsPerPage;
   }
 
 
   goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.updatePagination();
+      this.loadRequests();
     }
   }
 
   goToPreviousPage() {
     if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
+      this.goToPage(this.currentPage - 1);
     }
   }
 
   goToNextPage() {
     if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
+      this.goToPage(this.currentPage + 1);
     }
+  }
+
+  goToFirstPage() {
+    this.goToPage(1);
+  }
+
+  goToLastPage() {
+    this.goToPage(this.totalPages);
   }
 
   getPageNumbers(): number[] {
