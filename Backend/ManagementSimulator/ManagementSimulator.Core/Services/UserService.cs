@@ -789,5 +789,28 @@ namespace ManagementSimulator.Core.Services
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
+
+        public async Task<int> AdjustUserVacationAsync(int userId, int daysDelta)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId, tracking: true);
+            if (user == null)
+            {
+                throw new EntryNotFoundException(nameof(User), userId);
+            }
+
+            checked
+            {
+                user.Vacation = user.Vacation + daysDelta;
+            }
+
+            if (user.Vacation < 0)
+            {
+                user.Vacation = 0;
+            }
+
+            user.ModifiedAt = DateTime.UtcNow;
+            await _userRepository.SaveChangesAsync();
+            return user.Vacation;
+        }
     }
 }

@@ -293,8 +293,8 @@ export class UserLeaveBalance implements OnInit {
     const cache = this.getCurrentTypeCache();
     if (!cache) return 0;
 
-    if (cache.remainingDaysData?.totalDays) {
-      return cache.remainingDaysData.totalDays;
+    if (cache.remainingDaysData?.maxDaysAllowed !== undefined && cache.remainingDaysData?.maxDaysAllowed !== null) {
+      return cache.remainingDaysData.maxDaysAllowed;
     }
 
     return cache.staticMaxDays;
@@ -311,7 +311,7 @@ export class UserLeaveBalance implements OnInit {
     const cache = this.getCurrentTypeCache();
     if (!cache) return 0;
 
-    if (cache.remainingDaysData?.remainingDays !== undefined) {
+    if (cache.remainingDaysData?.remainingDays !== undefined && cache.remainingDaysData?.remainingDays !== null) {
       return cache.remainingDaysData.remainingDays;
     }
 

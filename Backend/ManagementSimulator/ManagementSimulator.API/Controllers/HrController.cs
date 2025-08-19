@@ -4,6 +4,7 @@ using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ManagementSimulator.Infrastructure.Exceptions;
 
 namespace ManagementSimulator.API.Controllers
 {
@@ -135,6 +136,59 @@ namespace ManagementSimulator.API.Controllers
                 return StatusCode(500, new
                 {
                     Message = "An error occurred while retrieving leave summary.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPost("users/{id}/vacation")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AdjustUserVacationAsync(int id, [FromBody] HrAdjustVacationRequestDto request)
+        {
+            try
+            {
+                if (id != request.Id)
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Route id and body id mismatch.",
+                        Data = (object?)null,
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var newVacation = await _userService.AdjustUserVacationAsync(request.Id, request.Days);
+
+                return Ok(new
+                {
+                    Message = "Vacation days adjusted successfully.",
+                    Data = new { UserId = request.Id, NewVacation = newVacation },
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"User with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adjusting vacation for user {UserId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while adjusting vacation days.",
                     Data = (object?)null,
                     Success = false,
                     Timestamp = DateTime.UtcNow
