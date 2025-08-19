@@ -1,346 +1,306 @@
 <!-- Main Form -->
-<form #userForm="ngForm" (ngSubmit)="submit(userForm)" 
-      class="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200"
-      style="background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    
+<form #userForm="ngForm" (ngSubmit)="submit(userForm)"
+    class="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+    style="background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4" style="gap: 1.5rem;">
-        
+
         <!-- First Name -->
         <div class="space-y-2" style="transition: all 0.2s ease-in-out;">
-            <label class="block text-sm font-medium text-gray-700 mb-1" 
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 First Name *
             </label>
-            <input type="text"
-                   name="firstName"
-                   [(ngModel)]="firstName"
-                   #firstNameField="ngModel"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                   style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
-                   placeholder="Enter your first name..." 
-                   required
-                   minlength="2"
-                   maxlength="50">
-            <div *ngIf="isFieldInvalid(firstNameField)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
-                <div *ngIf="firstNameField.errors?.['required']" style="margin-bottom: 2px;">First name is required</div>
-                <div *ngIf="firstNameField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters required</div>
-                <div *ngIf="firstNameField.errors?.['maxlength']" style="margin-bottom: 2px;">Maximum 50 characters</div>
+            <input type="text" name="firstName" [(ngModel)]="firstName" #firstNameField="ngModel"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
+                placeholder="Enter your first name..." required minlength="2" maxlength="50">
+            <div *ngIf="isFieldInvalid(firstNameField)" class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+                <div *ngIf="firstNameField.errors?.['required']" style="margin-bottom: 2px;">First name is required
+                </div>
+                <div *ngIf="firstNameField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters
+                    required</div>
+                <div *ngIf="firstNameField.errors?.['maxlength']" style="margin-bottom: 2px;">Maximum 50 characters
+                </div>
             </div>
         </div>
-        
+
         <!-- Last Name -->
         <div class="space-y-2" style="transition: all 0.2s ease-in-out;">
             <label class="block text-sm font-medium text-gray-700 mb-1"
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 Last Name *
             </label>
-            <input type="text"
-                   name="lastName"
-                   [(ngModel)]="lastName"
-                   #lastNameField="ngModel"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                   style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
-                   placeholder="Enter your last name..." 
-                   required
-                   minlength="2"
-                   maxlength="50">
-            <div *ngIf="isFieldInvalid(lastNameField)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+            <input type="text" name="lastName" [(ngModel)]="lastName" #lastNameField="ngModel"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
+                placeholder="Enter your last name..." required minlength="2" maxlength="50">
+            <div *ngIf="isFieldInvalid(lastNameField)" class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
                 <div *ngIf="lastNameField.errors?.['required']" style="margin-bottom: 2px;">Last name is required</div>
-                <div *ngIf="lastNameField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters required</div>
+                <div *ngIf="lastNameField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters
+                    required</div>
                 <div *ngIf="lastNameField.errors?.['maxlength']" style="margin-bottom: 2px;">Maximum 50 characters</div>
             </div>
         </div>
-        
+
         <!-- Email -->
         <div class="space-y-2" style="transition: all 0.2s ease-in-out;">
             <label class="block text-sm font-medium text-gray-700 mb-1"
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 Email *
             </label>
-            <input type="email"
-                   name="email"
-                   [(ngModel)]="email"
-                   #emailField="ngModel"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                   style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
-                   placeholder="e.g. john.doe@gmail.com"
-                   required        
-                   minlength="2"
-                   maxlength="50">
-            <div *ngIf="isFieldInvalid(emailField)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+            <input type="email" name="email" [(ngModel)]="email" #emailField="ngModel"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
+                placeholder="e.g. john.doe@gmail.com" required minlength="2" maxlength="50">
+            <div *ngIf="isFieldInvalid(emailField)" class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
                 <div *ngIf="emailField.errors?.['required']" style="margin-bottom: 2px;">Email is Required</div>
                 <div *ngIf="emailField.errors?.['email']" style="margin-bottom: 2px;">Please enter a valid email</div>
-                <div *ngIf="emailField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters required</div>
+                <div *ngIf="emailField.errors?.['minlength']" style="margin-bottom: 2px;">Minimum 2 characters required
+                </div>
                 <div *ngIf="emailField.errors?.['maxlength']" style="margin-bottom: 2px;">Maximum 50 characters</div>
             </div>
         </div>
-   
+
         <!-- Date of Employment -->
         <div class="space-y-2" style="transition: all 0.2s ease-in-out;">
             <label class="block text-sm font-medium text-gray-700 mb-1"
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 Date of Employment *
             </label>
-            <input type="date"
-                   name="dateOfEmployment"
-                   [max]="maxDate"
-                   [ngModel]="getDateOfEmploymentForInput()"
-                   (ngModelChange)="setDateFromInput($event)"
-                   #DateOfEmploymentField="ngModel"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
-                   style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
-                   required>
-            
-            <div *ngIf="isFieldInvalid(DateOfEmploymentField)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
-                <div *ngIf="DateOfEmploymentField.errors?.['maxDate']" style="margin-bottom: 2px;">Date of employment cannot be in the future</div>
-                <div *ngIf="DateOfEmploymentField.errors?.['required']" style="margin-bottom: 2px;">Date of employment is required</div>
+            <input type="date" name="dateOfEmployment" [max]="maxDate" [ngModel]="getDateOfEmploymentForInput()"
+                (ngModelChange)="setDateFromInput($event)" #DateOfEmploymentField="ngModel"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);"
+                required>
+
+            <div *ngIf="isFieldInvalid(DateOfEmploymentField)" class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+                <div *ngIf="DateOfEmploymentField.errors?.['maxDate']" style="margin-bottom: 2px;">Date of employment
+                    cannot be in the future</div>
+                <div *ngIf="DateOfEmploymentField.errors?.['required']" style="margin-bottom: 2px;">Date of employment
+                    is required</div>
             </div>
         </div>
-        
+
         <!-- Job Title -->
         <div class="space-y-2 relative" style="transition: all 0.2s ease-in-out;">
             <label class="block text-sm font-medium text-gray-700 mb-1"
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 Job Title *
             </label>
-            
+
             <!-- Input field -->
             <div class="relative w-full max-w-full">
-                <input type="text"
-                       [(ngModel)]="searchTextJobTitles"
-                       (ngModelChange)="onSearchTextChangeJobTitles($event)"
-                       (focus)="openDropdownJobTitles()"
-                       (click)="openDropdownJobTitles()"
-                       name="jobTitleSearch"
-                       #jobTitleSearchField="ngModel"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
-                       style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); padding-right: 40px;"
-                       placeholder="Search and select job title..."
-                       autocomplete="off"
-                       [class.border-red-500]="!isJobTitleFieldValid() && jobTitleSearchField.touched"
-                       required>
-                
+                <input type="text" [(ngModel)]="searchTextJobTitles"
+                    (ngModelChange)="onSearchTextChangeJobTitles($event)" (focus)="openDropdownJobTitles()"
+                    (click)="openDropdownJobTitles()" name="jobTitleSearch" #jobTitleSearchField="ngModel"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
+                    style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); padding-right: 40px;"
+                    placeholder="Search and select job title..." autocomplete="off"
+                    [class.border-red-500]="!isJobTitleFieldValid() && jobTitleSearchField.touched" required>
+
                 <!-- Dropdown Arrow -->
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
-                     style="right: 12px; top: 50%; transform: translateY(-50%);">
-                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200" 
-                         [class.rotate-180]="isJobTitlesDropdownOpen"
-                         style="transition: transform 0.2s ease-in-out;"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    style="right: 12px; top: 50%; transform: translateY(-50%);">
+                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200"
+                        [class.rotate-180]="isJobTitlesDropdownOpen" style="transition: transform 0.2s ease-in-out;"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
-                
+
                 <!-- Click outside overlay -->
-                <div *ngIf="isJobTitlesDropdownOpen" 
-                     class="fixed inset-0 z-10" 
-                     style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
-                     (click)="closeDropdownJobTitles()"></div>
+                <div *ngIf="isJobTitlesDropdownOpen" class="fixed inset-0 z-10"
+                    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
+                    (click)="closeDropdownJobTitles()"></div>
             </div>
-            
+
             <!-- Dropdown Results -->
-            <div *ngIf="isJobTitlesDropdownOpen" 
-                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
-                 style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
-                
+            <div *ngIf="isJobTitlesDropdownOpen"
+                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
+                style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
+
                 <!-- Loading State -->
-                <div *ngIf="isLoadingJobTitles" 
-                     class="p-3 text-center text-gray-500"
-                     style="padding: 12px; text-align: center; color: #6b7280;">
+                <div *ngIf="isLoadingJobTitles" class="p-3 text-center text-gray-500"
+                    style="padding: 12px; text-align: center; color: #6b7280;">
                     <div class="inline-flex items-center">
-                        <svg class="animate-spin h-4 w-4 mr-2" style="animation: spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg class="animate-spin h-4 w-4 mr-2" style="animation: spin 1s linear infinite;" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                         <span>Loading...</span>
                     </div>
                 </div>
-                
+
                 <!-- No Results -->
-                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length === 0 && searchTextJobTitles.trim() !== ''" 
-                     class="p-3 text-center text-gray-500"
-                     style="padding: 12px; text-align: center; color: #6b7280;">
+                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length === 0 && searchTextJobTitles.trim() !== ''"
+                    class="p-3 text-center text-gray-500" style="padding: 12px; text-align: center; color: #6b7280;">
                     <span>No job titles found for "{{searchTextJobTitles}}"</span>
                 </div>
-                
+
                 <!-- Results Container -->
-                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length > 0" 
-                     class="max-h-48 overflow-y-auto"
-                     style="max-height: 192px; overflow-y: auto;">
+                <div *ngIf="!isLoadingJobTitles && filteredJobTitles.length > 0" class="max-h-48 overflow-y-auto"
+                    style="max-height: 192px; overflow-y: auto;">
                     <!-- Job Title Options -->
-                    <div *ngFor="let jobTitle of filteredJobTitles"
-                         (click)="selectJobTitle(jobTitle)"
-                         class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
-                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-bottom: 1px solid #f3f4f6;"
-                         [class.bg-green-50]="selectedJobTitleId === jobTitle.id">
-                        
+                    <div *ngFor="let jobTitle of filteredJobTitles" (click)="selectJobTitle(jobTitle)"
+                        class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
+                        style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-bottom: 1px solid #f3f4f6;"
+                        [class.bg-green-50]="selectedJobTitleId === jobTitle.id">
+
                         <!-- Highlight search text -->
                         <span [innerHTML]="highlightSearchText(jobTitle.name || '', searchTextJobTitles)"
-                              style="line-height: 1.4;"></span>
-                        
+                            style="line-height: 1.4;"></span>
+
                         <!-- Selected indicator -->
-                        <span *ngIf="selectedJobTitleId === jobTitle.id" 
-                              class="float-right text-green-600"
-                              style="float: right; color: #059669;">
+                        <span *ngIf="selectedJobTitleId === jobTitle.id" class="float-right text-green-600"
+                            style="float: right; color: #059669;">
                             <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                         </span>
                     </div>
-                    
+
                     <!-- Load More Option -->
-                    <div *ngIf="canLoadMoreJobTitles" 
-                         (click)="loadMoreJobTitles()"
-                         class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
-                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
+                    <div *ngIf="canLoadMoreJobTitles" (click)="loadMoreJobTitles()"
+                        class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
+                        style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
                         <span *ngIf="!isLoadingJobTitles">Load More Job Titles...</span>
                         <span *ngIf="isLoadingJobTitles">Loading...</span>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Hidden field pentru validare -->
-            <input type="hidden" 
-                   [(ngModel)]="selectedJobTitleId" 
-                   name="selectedJobTitleId"
-                   #selectedJobTitleIdField="ngModel"
-                   required
-                   min="1">
-                
+            <input type="hidden" [(ngModel)]="selectedJobTitleId" name="selectedJobTitleId"
+                #selectedJobTitleIdField="ngModel" required min="1">
+
             <!-- Error Messages -->
             <div *ngIf="(!isJobTitleFieldValid() && jobTitleSearchField.touched) || 
-                        (selectedJobTitleIdField.invalid && selectedJobTitleIdField.touched)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+                        (selectedJobTitleIdField.invalid && selectedJobTitleIdField.touched)"
+                class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
                 <div *ngIf="!isJobTitleFieldValid()" style="margin-bottom: 2px;">Please select a valid job title</div>
-                <div *ngIf="selectedJobTitleIdField.errors?.['required']" style="margin-bottom: 2px;">Job Title is required</div>
+                <div *ngIf="selectedJobTitleIdField.errors?.['required']" style="margin-bottom: 2px;">Job Title is
+                    required</div>
             </div>
         </div>
-        
+
         <div class="space-y-2 relative" style="transition: all 0.2s ease-in-out;">
             <label class="block text-sm font-medium text-gray-700 mb-1"
-                   style="font-weight: 500; color: #374151; margin-bottom: 6px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 6px;">
                 Department *
             </label>
-            
+
             <!-- Input field -->
             <div class="relative w-full max-w-full">
-                <input type="text"
-                       [(ngModel)]="searchTextDepartments"
-                       (ngModelChange)="onSearchTextChangeDepartments($event)"
-                       (focus)="openDropdownDepartments()"
-                       (click)="openDropdownDepartments()"
-                       name="departmentSearch"
-                       #departmentSearchField="ngModel"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
-                       style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); padding-right: 40px;"
-                       placeholder="Search and select job title..."
-                       autocomplete="off"
-                       [class.border-red-500]="!isDepartmentFieldValid() && departmentSearchField.touched"
-                       required>
-                
+                <input type="text" [(ngModel)]="searchTextDepartments"
+                    (ngModelChange)="onSearchTextChangeDepartments($event)" (focus)="openDropdownDepartments()"
+                    (click)="openDropdownDepartments()" name="departmentSearch" #departmentSearchField="ngModel"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent pr-10 transition-all duration-200 hover:border-gray-400"
+                    style="border-radius: 8px; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); padding-right: 40px;"
+                    placeholder="Search and select job title..." autocomplete="off"
+                    [class.border-red-500]="!isDepartmentFieldValid() && departmentSearchField.touched" required>
+
                 <!-- Dropdown Arrow -->
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
-                     style="right: 12px; top: 50%; transform: translateY(-50%);">
-                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200" 
-                         [class.rotate-180]="isDepartmentsDropdownOpen"
-                         style="transition: transform 0.2s ease-in-out;"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    style="right: 12px; top: 50%; transform: translateY(-50%);">
+                    <svg class="h-5 w-5 text-gray-400 transition-transform duration-200"
+                        [class.rotate-180]="isDepartmentsDropdownOpen" style="transition: transform 0.2s ease-in-out;"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
-                
+
                 <!-- Click outside overlay -->
-                <div *ngIf="isDepartmentsDropdownOpen" 
-                     class="fixed inset-0 z-10" 
-                     style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
-                     (click)="closeDropdownDepartments()"></div>
+                <div *ngIf="isDepartmentsDropdownOpen" class="fixed inset-0 z-10"
+                    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.05);"
+                    (click)="closeDropdownDepartments()"></div>
             </div>
-            
+
             <!-- Dropdown Results -->
-            <div *ngIf="isDepartmentsDropdownOpen" 
-                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
-                 style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
-                
+            <div *ngIf="isDepartmentsDropdownOpen"
+                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden"
+                style="position: absolute; z-index: 50; width: 100%; margin-top: 4px; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); max-height: 240px; overflow: hidden; animation: slideDown 0.2s ease-out;">
+
                 <!-- Loading State -->
-                <div *ngIf="isLoadingDepartments" 
-                     class="p-3 text-center text-gray-500"
-                     style="padding: 12px; text-align: center; color: #6b7280;">
+                <div *ngIf="isLoadingDepartments" class="p-3 text-center text-gray-500"
+                    style="padding: 12px; text-align: center; color: #6b7280;">
                     <div class="inline-flex items-center">
-                        <svg class="animate-spin h-4 w-4 mr-2" style="animation: spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg class="animate-spin h-4 w-4 mr-2" style="animation: spin 1s linear infinite;" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                         <span>Loading...</span>
                     </div>
                 </div>
-                
+
                 <!-- No Results -->
-                <div *ngIf="!isLoadingDepartments && filteredDepartments.length === 0 && searchTextDepartments.trim() !== ''" 
-                     class="p-3 text-center text-gray-500"
-                     style="padding: 12px; text-align: center; color: #6b7280;">
+                <div *ngIf="!isLoadingDepartments && filteredDepartments.length === 0 && searchTextDepartments.trim() !== ''"
+                    class="p-3 text-center text-gray-500" style="padding: 12px; text-align: center; color: #6b7280;">
                     <span>No departments found for "{{searchTextDepartments}}"</span>
                 </div>
-                
+
                 <!-- Results Container -->
-                <div *ngIf="!isLoadingDepartments && filteredDepartments.length > 0" 
-                     class="max-h-48 overflow-y-auto"
-                     style="max-height: 192px; overflow-y: auto;">
+                <div *ngIf="!isLoadingDepartments && filteredDepartments.length > 0" class="max-h-48 overflow-y-auto"
+                    style="max-height: 192px; overflow-y: auto;">
                     <!-- Job Title Options -->
-                    <div *ngFor="let department of filteredDepartments"
-                         (click)="selectDepartment(department)"
-                         class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
-                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-bottom: 1px solid #f3f4f6;"
-                         [class.bg-green-50]="selectedDepartmentId === department.id">
-                        
+                    <div *ngFor="let department of filteredDepartments" (click)="selectDepartment(department)"
+                        class="px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-150"
+                        style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-bottom: 1px solid #f3f4f6;"
+                        [class.bg-green-50]="selectedDepartmentId === department.id">
+
                         <!-- Highlight search text -->
                         <span [innerHTML]="highlightSearchText(department.name || '', searchTextDepartments)"
-                              style="line-height: 1.4;"></span>
-                        
+                            style="line-height: 1.4;"></span>
+
                         <!-- Selected indicator -->
-                        <span *ngIf="selectedDepartmentId === department.id" 
-                              class="float-right text-green-600"
-                              style="float: right; color: #059669;">
+                        <span *ngIf="selectedDepartmentId === department.id" class="float-right text-green-600"
+                            style="float: right; color: #059669;">
                             <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                         </span>
                     </div>
-                    
+
                     <!-- Load More Option -->
-                    <div *ngIf="canLoadMoreDepartments" 
-                         (click)="loadMoreDepartments()"
-                         class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
-                         style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
+                    <div *ngIf="canLoadMoreDepartments" (click)="loadMoreDepartments()"
+                        class="px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors duration-150 border-t border-gray-200 text-[#20B486] font-medium"
+                        style="padding: 8px 12px; cursor: pointer; transition: background-color 0.15s ease-in-out; border-top: 1px solid #e5e7eb; color: #20B486; font-weight: 500; background: #f8fafc;">
                         <span *ngIf="!isLoadingDepartments">Load More Departmnets...</span>
                         <span *ngIf="isLoadingDepartments">Loading...</span>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Hidden field pentru validare -->
-            <input type="hidden" 
-                   [(ngModel)]="selectedDepartmentId" 
-                   name="selectedDepartmentId"
-                   #selectedDepartmentIdField="ngModel"
-                   required
-                   min="1">
-                
+            <input type="hidden" [(ngModel)]="selectedDepartmentId" name="selectedDepartmentId"
+                #selectedDepartmentIdField="ngModel" required min="1">
+
             <!-- Error Messages -->
             <div *ngIf="(!isDepartmentFieldValid() && departmentSearchField.touched) || 
-                        (selectedDepartmentIdField.invalid && selectedDepartmentIdField.touched)" 
-                 class="mt-1 text-sm text-red-600 animate-pulse"
-                 style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
-                <div *ngIf="!isDepartmentFieldValid()" style="margin-bottom: 2px;">Please select a valid department</div>
-                <div *ngIf="selectedDepartmentIdField.errors?.['required']" style="margin-bottom: 2px;">Department is required</div>
+                        (selectedDepartmentIdField.invalid && selectedDepartmentIdField.touched)"
+                class="mt-1 text-sm text-red-600 animate-pulse"
+                style="color: #dc2626; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out;">
+                <div *ngIf="!isDepartmentFieldValid()" style="margin-bottom: 2px;">Please select a valid department
+                </div>
+                <div *ngIf="selectedDepartmentIdField.errors?.['required']" style="margin-bottom: 2px;">Department is
+                    required</div>
             </div>
         </div>
 
@@ -348,101 +308,98 @@
         <!-- User Roles Section -->
         <div class="md:col-span-2 space-y-3" style="grid-column: span 2; margin-top: 1rem;">
             <label class="block text-sm font-medium text-gray-700 mb-3"
-                   style="font-weight: 500; color: #374151; margin-bottom: 12px;">
+                style="font-weight: 500; color: #374151; margin-bottom: 12px;">
                 User Roles *
             </label>
             <div class="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg border"
-                 style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                
+                style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+
                 <!-- Admin Checkbox -->
                 <div class="flex items-center bg-white p-3 rounded-lg border border-gray-200 hover:border-[#20B486] transition-all duration-200"
-                     style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
-                    <input type="checkbox"
-                           id="adminRole"
-                           name="adminRole"
-                           [(ngModel)]="isAdmin"
-                           #adminRoleField="ngModel"
-                           class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
-                           style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
-                    <label for="adminRole" 
-                           class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
-                           style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
+                    style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+                    <input type="checkbox" id="adminRole" name="adminRole" [(ngModel)]="isAdmin"
+                        #adminRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
+                        style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
+                    <label for="adminRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
+                        style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
                         Admin
                     </label>
                 </div>
-                
+
                 <!-- Manager Checkbox -->
                 <div class="flex items-center bg-white p-3 rounded-lg border border-gray-200 hover:border-[#20B486] transition-all duration-200"
-                     style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
-                    <input type="checkbox"
-                           id="managerRole"
-                           name="managerRole"
-                           [(ngModel)]="isManager"
-                           #managerRoleField="ngModel"
-                           class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
-                           style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
-                    <label for="managerRole" 
-                           class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
-                           style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
+                    style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+                    <input type="checkbox" id="managerRole" name="managerRole" [(ngModel)]="isManager"
+                        #managerRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
+                        style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
+                    <label for="managerRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
+                        style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
                         Manager
                     </label>
                 </div>
+                <!-- HR Checkbox  -->
+                <div class="flex items-center bg-white p-3 rounded-lg border border-gray-200 hover:border-[#20B486] transition-all duration-200"
+                    style="display: flex; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; transition: all 0.2s ease-in-out; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+                    <input type="checkbox" id="hrRole" name="hrRole" [(ngModel)]="isHr" #hrRoleField="ngModel"
+                        class="h-4 w-4 text-[#20B486] focus:ring-[#20B486] border-gray-300 rounded transition-all duration-200"
+                        style="height: 16px; width: 16px; color: #20B486; border-radius: 4px; transition: all 0.2s ease-in-out;">
+                    <label for="hrRole" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
+                        style="margin-left: 8px; font-size: 0.875rem; font-weight: 500; color: #374151; cursor: pointer;">
+                        HR
+                    </label>
+                </div>
+
             </div>
 
-            <div 
-                class="mt-1 text-sm text-green-600 animate-pulse bg-green-50 p-2 rounded border border-green-200 w-80"
+            <div class="mt-1 text-sm text-green-600 animate-pulse bg-green-50 p-2 rounded border border-green-200 w-80"
                 style="color: #26a2dc; font-size: 0.875rem; margin-top: 4px; animation: fadeIn 0.3s ease-out; background: #f0fdf4; padding: 8px; border-radius: 6px; border: 1px solid #bbf7d0;">
                 {{ employeeRoleInfo }}
             </div>
         </div>
     </div>
 
-    <div
-        *ngIf="onSubmitMessage && !isSubmitting"
-        class="mt-4 p-3 rounded-lg"
-        [ngClass]="{
+    <div *ngIf="onSubmitMessage && !isSubmitting" class="mt-4 p-3 rounded-lg" [ngClass]="{
         'bg-green-100 text-green-700': onSubmitMessage.includes('successfully'),
         'bg-red-100 text-red-700': !onSubmitMessage.includes('successfully')
-        }"
-        >
+        }">
         {{ onSubmitMessage }}
     </div>
-    
+
     <!-- Form Actions -->
     <div class="flex justify-end space-x-3 mt-6 pt-6 border-gray-200"
-         style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-        
+        style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+
         <!-- Cancel Button -->
-        <button type="button" 
-                (click)="resetForm(); userForm.resetForm()"
-                class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium"
-                style="padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 8px; color: #374151; font-weight: 500; transition: all 0.2s ease-in-out; background: white; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+        <button type="button" (click)="resetForm(); userForm.resetForm()"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium"
+            style="padding: 8px 24px; border: 1px solid #d1d5db; border-radius: 8px; color: #374151; font-weight: 500; transition: all 0.2s ease-in-out; background: white; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
             Cancel
         </button>
-        
+
         <!-- Submit Button -->
-        <button type="submit" 
-                [disabled]="userForm.invalid || !isJobTitleFieldValid() || isSubmitting" 
-                class="px-6 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center shadow-lg"
-                style="padding: 8px 24px; background: linear-gradient(135deg, #20B486 0%, #1a9870 100%); color: white; border-radius: 8px; font-weight: 500; transition: all 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(32, 180, 134, 0.3); border: none; cursor: pointer;">
-            
+        <button type="submit" [disabled]="userForm.invalid || !isJobTitleFieldValid() || isSubmitting"
+            class="px-6 py-2 bg-[#20B486] text-white rounded-lg hover:bg-[#1a9870] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center shadow-lg"
+            style="padding: 8px 24px; background: linear-gradient(135deg, #20B486 0%, #1a9870 100%); color: white; border-radius: 8px; font-weight: 500; transition: all 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(32, 180, 134, 0.3); border: none; cursor: pointer;">
+
             <!-- Loading Spinner -->
-            <svg *ngIf="isSubmitting" 
-                 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
-                 style="animation: spin 1s linear infinite; margin-left: -4px; margin-right: 8px;"
-                 fill="none" viewBox="0 0 24 24">
+            <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                style="animation: spin 1s linear infinite; margin-left: -4px; margin-right: 8px;" fill="none"
+                viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
             </svg>
-            
+
             <!-- Success Icon when not submitting -->
-            <svg *ngIf="!isSubmitting" 
-                 class="h-4 w-4 mr-2" 
-                 style="height: 16px; width: 16px; margin-right: 8px;"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            <svg *ngIf="!isSubmitting" class="h-4 w-4 mr-2" style="height: 16px; width: 16px; margin-right: 8px;"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                </path>
             </svg>
-            
+
             <span *ngIf="!isSubmitting" style="font-weight: 500;">Add User</span>
             <span *ngIf="isSubmitting" style="font-weight: 500;">Adding User...</span>
         </button>

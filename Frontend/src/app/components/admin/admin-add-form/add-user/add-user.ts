@@ -32,7 +32,7 @@ export class AddUser {
   firstName: string = '';
   lastName: string = '';
   email: string = '';
-  
+
   searchTextJobTitles: string = '';
   filteredJobTitles: IJobTitleViewModel[] = [];
   selectedJobTitleId: number = 0;
@@ -59,9 +59,10 @@ export class AddUser {
   leaveDaysLeftCurrentYear: number = 0;
   isAdmin = false;
   isManager = false;
-  
+  isHr = false;
+
   employeeRoleInfo: string = 'All the users are automatically set to employees.';
-  
+
   isSubmitting: boolean = false;
 
   onSubmitMessage: string = '';
@@ -88,53 +89,54 @@ export class AddUser {
     this.leaveDaysLeftCurrentYear = 0;
     this.isAdmin = false;
     this.isManager = false;
+    this.isHr = false;
     this.closeDropdownJobTitles();
     this.closeDropdownDepartments();
   }
 
-  private loadDepartments(resetPage: boolean = true) : void {
+  private loadDepartments(resetPage: boolean = true): void {
     if (resetPage) {
-          this.currentPageJobTitles = 1;
-          this.filteredDepartments = [];
+      this.currentPageJobTitles = 1;
+      this.filteredDepartments = [];
+    }
+    this.isLoadingJobTitles = true;
+
+    const params: IFilteredDepartmentsRequest = {
+      name: this.searchTextDepartments.trim() || undefined,
+      activityStatus: 0,
+      params: {
+        page: this.currentPageDepartment,
+        pageSize: this.pageSizeDepartments,
+        sortBy: 'name',
+        sortDescending: false
+      }
+    };
+    this.departmentService.getAllDepartmentsFiltered(params).subscribe({
+      next: (response) => {
+        console.log('API Response:', response);
+
+        if (resetPage) {
+          this.filteredDepartments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
+        } else {
+          this.filteredDepartments = [...this.filteredDepartments, ...response.data.data.map(d => this.mapToDepartmentViewModel(d))];
         }
-        this.isLoadingJobTitles = true;
-        
-        const params: IFilteredDepartmentsRequest = {
-          name: this.searchTextDepartments.trim() || undefined,
-          activityStatus: 0,
-          params: {
-            page: this.currentPageDepartment,
-            pageSize: this.pageSizeDepartments,
-            sortBy: 'name',
-            sortDescending: false
-          }
-        };
-        this.departmentService.getAllDepartmentsFiltered(params).subscribe({
-          next: (response) => {
-            console.log('API Response:', response);
-            
-            if (resetPage) {
-              this.filteredDepartments = response.data.data.map(d => this.mapToDepartmentViewModel(d));
-            } else {
-              this.filteredDepartments = [...this.filteredDepartments, ...response.data.data.map(d => this.mapToDepartmentViewModel(d))];
-            }
-            
-            this.canLoadMoreDepartments = response.data.hasNextPage || 
-                              (response.data.totalPages && this.currentPageDepartment < response.data.totalPages) || false;
-            
-            this.isLoadingDepartments = false;
-            this.isDepartmentsDropdownOpen = this.filteredDepartments.length > 0;
-          },
-          error: (error) => {
-            console.error('Error loading deparments:', error);
-            this.isLoadingDepartments = false;
-            this.canLoadMoreDepartments = false;
-            this.onSubmitMessage = 'Error retrieving the departments.';
-          }
-        });
+
+        this.canLoadMoreDepartments = response.data.hasNextPage ||
+          (response.data.totalPages && this.currentPageDepartment < response.data.totalPages) || false;
+
+        this.isLoadingDepartments = false;
+        this.isDepartmentsDropdownOpen = this.filteredDepartments.length > 0;
+      },
+      error: (error) => {
+        console.error('Error loading deparments:', error);
+        this.isLoadingDepartments = false;
+        this.canLoadMoreDepartments = false;
+        this.onSubmitMessage = 'Error retrieving the departments.';
+      }
+    });
   }
 
-  private mapToDepartmentViewModel(department: IDepartment) :IDepartmentViewModel {
+  private mapToDepartmentViewModel(department: IDepartment): IDepartmentViewModel {
     return {
       id: department.id,
       name: department.name,
@@ -150,7 +152,7 @@ export class AddUser {
       this.filteredJobTitles = [];
     }
     this.isLoadingJobTitles = true;
-    
+
     const params: IFilteredJobTitlesRequest = {
       jobTitleName: this.searchTextJobTitles.trim() || undefined,
       activityStatus: JobTitleActivityStatus.ACTIVE,
@@ -164,16 +166,16 @@ export class AddUser {
     this.jobTitleService.getAllJobTitlesFiltered(params).subscribe({
       next: (response) => {
         console.log('API Response:', response);
-        
+
         if (resetPage) {
           this.filteredJobTitles = response.data.data;
         } else {
           this.filteredJobTitles = [...this.filteredJobTitles, ...response.data.data];
         }
-        
-        this.canLoadMoreJobTitles = response.data.hasNextPage || 
-                          (response.data.totalPages && this.currentPageJobTitles < response.data.totalPages) || false;
-        
+
+        this.canLoadMoreJobTitles = response.data.hasNextPage ||
+          (response.data.totalPages && this.currentPageJobTitles < response.data.totalPages) || false;
+
         this.isLoadingJobTitles = false;
         this.isJobTitlesDropdownOpen = this.filteredJobTitles.length > 0;
       },
@@ -200,18 +202,18 @@ export class AddUser {
 
   onSearchTextChangeJobTitles(searchValue: string): void {
     this.searchTextJobTitles = searchValue;
-    this.selectedJobTitleId = 0; 
+    this.selectedJobTitleId = 0;
     this.selectedJobTitleName = '';
-    
+
     this.loadJobTitles(true);
   }
 
-  
+
   onSearchTextChangeDepartments(searchValue: string): void {
     this.searchTextDepartments = searchValue;
-    this.selectedDepartmentId = 0; 
+    this.selectedDepartmentId = 0;
     this.selectedDepartmentName = '';
-    
+
     this.loadDepartments(true);
   }
 
@@ -248,7 +250,7 @@ export class AddUser {
     this.closeDropdownJobTitles();
   }
 
-  selectDepartment(deparment: IDepartmentViewModel  ): void {
+  selectDepartment(deparment: IDepartmentViewModel): void {
     this.selectedDepartmentId = deparment.id;
     this.selectedDepartmentName = deparment.name || '';
     this.searchTextDepartments = deparment.name || '';
@@ -265,7 +267,7 @@ export class AddUser {
     }
   }
 
-  loadMoreDepartments() : void {
+  loadMoreDepartments(): void {
     if (this.canLoadMoreDepartments && !this.isLoadingDepartments) {
       console.log('Loading more - current page:', this.currentPageDepartment);
       this.currentPageDepartment++;
@@ -284,7 +286,7 @@ export class AddUser {
     if (!text || !searchText.trim()) {
       return text || '';
     }
-    
+
     const regex = new RegExp(`(${searchText})`, 'gi');
     return text.replace(regex, '<strong class="bg-yellow-200">$1</strong>');
   }
@@ -308,9 +310,10 @@ export class AddUser {
     this.isSubmitting = true;
 
     let roles: number[] = [];
+    if (this.isHr) roles.push(4);
     if (this.isAdmin) roles.push(3);
     if (this.isManager) roles.push(2);
-    
+
     const userToAdd: IAddUser = {
       id: 0,
       firstName: this.firstName,
@@ -326,7 +329,7 @@ export class AddUser {
       next: (response: IApiResponse<IUser>) => {
         this.isSubmitting = false;
         console.log('User added successfully:', response);
-        
+
         if (response.success) {
           this.onSubmitMessage = 'User added successfully.'
           this.resetForm();
@@ -338,9 +341,9 @@ export class AddUser {
       error: (error) => {
         this.isSubmitting = false;
         console.error('Error adding user:', error);
-        
+
         this.onSubmitMessage = 'An error occured during adding a new user';
-        
+
         if (error.status === 400) {
           this.onSubmitMessage = 'Fill all the mandatory fields!';
         } else if (error.status === 409) {

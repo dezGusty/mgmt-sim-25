@@ -196,7 +196,7 @@ namespace ManagementSimulator.Database.Repositories
             var query = _dbcontext.LeaveRequests
                 .AsNoTracking()
                 .Include(lr => lr.User)
-                    .ThenInclude(u => u.Department) // 🔹 Adăugăm departamentul utilizatorului
+                    .ThenInclude(u => u.Department)
                 .Include(lr => lr.LeaveRequestType)
                 .Select(lr => new
                 {
@@ -232,7 +232,7 @@ namespace ManagementSimulator.Database.Repositories
                 .AsNoTracking()
                 .Where(lr => filteredIds.Contains(lr.Id))
                 .Include(lr => lr.User)
-                    .ThenInclude(u => u.Department) // 🔹 Aici de asemenea
+                    .ThenInclude(u => u.Department)
                 .Include(lr => lr.LeaveRequestType)
                 .OrderByDescending(lr => lr.CreatedAt)
                 .ToListAsync();
