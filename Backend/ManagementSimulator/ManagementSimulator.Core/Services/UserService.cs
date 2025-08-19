@@ -227,6 +227,14 @@ namespace ManagementSimulator.Core.Services
 
             var filteredUsers = users.Where(u => u.DeletedAt == null).AsQueryable();
 
+            if (!string.IsNullOrWhiteSpace(request.Department))
+            {
+                var departmentLower = request.Department.ToLower();
+                filteredUsers = filteredUsers.Where(u =>
+                    u.Department != null &&
+                    u.Department.Name.ToLower().Contains(departmentLower));
+            }
+
             var totalCount = filteredUsers.Count();
 
             var pageSize = request.PageSize ?? 10;
@@ -271,7 +279,8 @@ namespace ManagementSimulator.Core.Services
                 DepartmentId = user.DepartmentId,
                 DepartmentName = user.Department?.Name ?? string.Empty,
                 IsActive = user.DeletedAt == null,
-                DateOfEmployment = user.DateOfEmployment
+                DateOfEmployment = user.DateOfEmployment,
+                Vacation = user.Vacation
             };
 
             var startOfYear = new DateTime(year, 1, 1);
@@ -284,25 +293,24 @@ namespace ManagementSimulator.Core.Services
                            lr.EndDate >= startOfYear)
                 .ToList();
 
-            hrUserDto.TotalLeaveDays = 21;
+            hrUserDto.TotalLeaveDays = user.Vacation;
 
-            var approvedRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved).ToList();
-            var pendingRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending).ToList();
-            
+            var approvedRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved);
+            var pendingRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
+
             hrUserDto.UsedLeaveDays = CalculateTotalDays(pendingRequests);
             hrUserDto.RemainingLeaveDays = hrUserDto.TotalLeaveDays - hrUserDto.UsedLeaveDays;
-            
+
             hrUserDto.LeaveTypeStatistics = new List<LeaveTypeStatDto>();
-            
+
             foreach (var leaveType in leaveRequestTypes)
             {
-                var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id).ToList();
-                var approvedTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved).ToList();
-                var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending).ToList();
-                
+                var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id);
+                var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
+
                 var usedDaysForType = CalculateTotalDays(pendingTypeRequests);
                 var maxAllowedDays = leaveType.MaxDays ?? hrUserDto.TotalLeaveDays;
-                
+
                 var leaveTypeStat = new LeaveTypeStatDto
                 {
                     LeaveTypeId = leaveType.Id,
@@ -311,14 +319,14 @@ namespace ManagementSimulator.Core.Services
                     RemainingDays = maxAllowedDays - usedDaysForType,
                     MaxAllowedDays = maxAllowedDays
                 };
-                
+
                 hrUserDto.LeaveTypeStatistics.Add(leaveTypeStat);
             }
 
             return hrUserDto;
         }
 
-        private int CalculateTotalDays(List<LeaveRequest> leaveRequests)
+        private int CalculateTotalDays(IEnumerable<LeaveRequest> leaveRequests)
         {
             int totalDays = 0;
 

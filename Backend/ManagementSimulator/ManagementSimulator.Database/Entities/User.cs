@@ -39,5 +39,7 @@ namespace ManagementSimulator.Database.Entities
         public bool MustChangePassword { get; set; }
         public DateTime DateOfEmployment { get; set; }
         public string FullName => $"{FirstName} {LastName}";
+
+        public int Vacation { get; set; } = 21;
     }
 }

@@ -28,7 +28,8 @@ namespace ManagementSimulator.API.Controllers
         public async Task<IActionResult> GetAllUsersForHrAsync(
             [FromQuery] int? year = null,
             [FromQuery] int? page = null,
-            [FromQuery] int? pageSize = null)
+            [FromQuery] int? pageSize = null,
+            [FromQuery] string? department = null)
         {
             try
             {
@@ -36,7 +37,8 @@ namespace ManagementSimulator.API.Controllers
                 {
                     Year = year ?? DateTime.Now.Year,
                     Page = page ?? 1,
-                    PageSize = pageSize ?? 10
+                    PageSize = pageSize ?? 10,
+                    Department = department
                 };
 
                 var result = await _userService.GetAllUsersForHrAsync(request);
@@ -93,7 +95,7 @@ namespace ManagementSimulator.API.Controllers
                 {
                     Year = currentYear,
                     Page = 1,
-                    PageSize = 1000
+                    PageSize = 10
                 };
 
                 var result = await _userService.GetAllUsersForHrAsync(request);
