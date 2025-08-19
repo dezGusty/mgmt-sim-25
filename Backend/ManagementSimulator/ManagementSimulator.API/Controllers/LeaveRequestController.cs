@@ -762,7 +762,11 @@ namespace ManagementSimulator.API.Controllers
                 });
             }
 
-            var (items, totalCount) = await _leaveRequestService.GetFilteredLeaveRequestsAsync(managerId, status, pageSize, pageNumber);
+            var (items, totalCount) = await _leaveRequestService.GetFilteredLeaveRequestsAsync(
+                managerId,
+                status ?? "ALL",
+                pageSize,
+                pageNumber);
             
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 

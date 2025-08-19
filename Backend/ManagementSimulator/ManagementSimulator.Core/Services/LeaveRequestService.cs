@@ -353,11 +353,12 @@ namespace ManagementSimulator.Core.Services
             }
 
             int? remainingDays = null;
-            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+            int? maxDaysAllowedForUser = leaveRequestType.Title == "Vacation" ? user.Vacation : leaveRequestType.MaxDays;
+            bool hasUnlimitedDays = maxDaysAllowedForUser == null;
 
             if (!hasUnlimitedDays)
             {
-                remainingDays = leaveRequestType.MaxDays - daysUsed;
+                remainingDays = maxDaysAllowedForUser - daysUsed;
             }
 
             return new RemainingLeaveDaysResponseDto
@@ -365,7 +366,7 @@ namespace ManagementSimulator.Core.Services
                 UserId = userId,
                 LeaveRequestTypeId = leaveRequestTypeId,
                 LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
-                MaxDaysAllowed = leaveRequestType.MaxDays,
+                MaxDaysAllowed = maxDaysAllowedForUser,
                 DaysUsed = daysUsed,
                 RemainingDays = remainingDays,
                 HasUnlimitedDays = hasUnlimitedDays,
@@ -412,11 +413,12 @@ namespace ManagementSimulator.Core.Services
             var requestedDays = CalculateLeaveDays(startDate, endDate);
 
             int? remainingDays = null;
-            bool hasUnlimitedDays = leaveRequestType.MaxDays == null;
+            int? maxDaysAllowedForUser = leaveRequestType.Title == "Vacation" ? user.Vacation : leaveRequestType.MaxDays;
+            bool hasUnlimitedDays = maxDaysAllowedForUser == null;
 
             if (!hasUnlimitedDays)
             {
-                remainingDays = leaveRequestType.MaxDays - daysUsed - requestedDays;
+                remainingDays = maxDaysAllowedForUser - daysUsed - requestedDays;
             }
 
             return new RemainingLeaveDaysResponseDto
@@ -424,7 +426,7 @@ namespace ManagementSimulator.Core.Services
                 UserId = userId,
                 LeaveRequestTypeId = leaveRequestTypeId,
                 LeaveRequestTypeName = leaveRequestType.Title ?? string.Empty,
-                MaxDaysAllowed = leaveRequestType.MaxDays,
+                MaxDaysAllowed = maxDaysAllowedForUser,
                 DaysUsed = daysUsed + requestedDays,
                 RemainingDays = remainingDays,
                 HasUnlimitedDays = hasUnlimitedDays,
@@ -451,14 +453,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(int managerId, string status, int pageSize, int pageNumber)
         {
-            // Mai întâi obținem angajații managerului
             var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
-            // Obținem cererile filtrate, transmițând și lista de employeeIds
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber, employeeIds);
-            
-            // Convertim la DTO-uri
+
             var dtos = items.Select(r => r.ToLeaveRequestResponseDto()).ToList();
 
             return (dtos, totalCount);

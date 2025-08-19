@@ -24,7 +24,8 @@ namespace ManagementSimulator.Core.Mapping
                     .Select(er => er.Role.Rolename)
                     .ToList(),
                 JobTitleId = user.JobTitleId,
-                JobTitleName = user.Title.Name
+                JobTitleName = user.Title.Name,
+                Vacation = user.Vacation
             };
         }
     }

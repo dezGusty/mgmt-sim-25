@@ -53,6 +53,7 @@ export class AdminUsersList implements OnInit {
     dateOfEmployment: new Date(),
     isAdmin: false,
     isManager: false,
+    isHr: false,
   };
 
   jobTitles: IJobTitle[] = [];
@@ -341,6 +342,7 @@ export class AdminUsersList implements OnInit {
       dateOfEmployment: new Date(),
       isAdmin: user.roles?.includes("Admin") ? true : false,
       isManager: user.roles?.includes("Manager") ? true : false,
+      isHr: user.roles?.includes("HR") ? true : false,
     };
     
     this.editErrorMessage = '';
@@ -414,6 +416,7 @@ export class AdminUsersList implements OnInit {
     const roles: string[] = [];
     if (this.editForm.isAdmin) roles.push('Admin');
     if (this.editForm.isManager) roles.push('Manager');
+    if (this.editForm.isHr) roles.push('HR');
     return roles;
   }
 

@@ -30,5 +30,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<bool> SendPasswordResetCodeAsync(string email);
         Task<bool> ResetPasswordWithCodeAsync(string verificationCode, string newPassword);
         Task<User?> GetUserByEmailAsync(string email);
+        Task<PagedResponseDto<HrUserResponseDto>> GetAllUsersForHrAsync(HrUsersRequestDto request);
+        Task<int> AdjustUserVacationAsync(int userId, int daysDelta);
     }
 }

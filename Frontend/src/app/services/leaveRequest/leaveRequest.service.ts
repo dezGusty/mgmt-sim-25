@@ -16,10 +16,10 @@ export interface CreateLeaveRequestByEmployeeDto {
 
 
 export interface RemainingLeaveDaysResponse {
-  remainingDays: number;
-  totalDays: number;
+  remainingDays?: number;
+  maxDaysAllowed?: number;
   usedDays: number;
-  leaveRequestTypeId: number;
+  leaveRequestTypeId?: number;
 }
 
 @Injectable({

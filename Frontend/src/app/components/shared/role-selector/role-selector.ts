@@ -113,6 +113,15 @@ export class RoleSelector implements OnInit {
         route: '/user',
         color: 'text-green-600',
         bgGradient: 'from-green-400 to-green-600'
+      },
+      'HR': {
+        name: 'HR',
+        displayName: 'Human Resources',
+        description: 'Manage employee records and leave requests',
+        icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+        route: '/hr',
+        color: 'text-purple-600',
+        bgGradient: 'from-purple-400 to-purple-600'
       }
     };
     

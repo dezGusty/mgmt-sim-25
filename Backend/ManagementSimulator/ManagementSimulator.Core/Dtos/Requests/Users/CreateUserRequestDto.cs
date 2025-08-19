@@ -16,5 +16,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.Users
         public int JobTitleId { get; set; }
         public List<int> EmployeeRolesId { get; set; } = new List<int>();
         public DateTime DateOfEmployment { get; set; }
+        public int? Vacation { get; set; } 
     }
 }
