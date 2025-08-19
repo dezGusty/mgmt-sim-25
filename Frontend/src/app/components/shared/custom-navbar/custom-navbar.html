@@ -12,12 +12,13 @@
       <div class="flex items-center gap-4">
         <div
           class="flex items-center gap-3 bg-[#020126] px-3 py-2 rounded-lg border border-[#7EE3DB]/30 hover:bg-[#7EE3DB]/10 hover:border-[#7EE3DB]/50 transition-all duration-300 cursor-default group">
-          <div class="flex items-center gap-2">
-            <div class="w-1.5 h-1.5 rounded-full {{ getRoleColor() }} animate-pulse"></div>
-            <span
-              class="text-xs font-semibold uppercase tracking-wide bg-gray-600 text-white bg-white/20 px-2 py-0.5 rounded border border-white/30">
-              {{ getPrimaryRole() }}
-            </span>
+                      <div class="flex items-center gap-2">
+              <div *ngIf="!isRoleSelectorPage()" class="w-1.5 h-1.5 rounded-full {{ getPageColor() }} animate-pulse"></div>
+              <div *ngIf="isRoleSelectorPage()" class="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#7EE3DB] animate-spin"></div>
+                          <span *ngIf="getPageRole()"
+                class="text-xs font-semibold uppercase tracking-wide bg-gray-600 text-white bg-white/20 px-2 py-0.5 rounded border border-white/30">
+                {{ getPageRole() }}
+              </span>
           </div>
           <div class="h-3 w-px bg-[#7EE3DB]/40"></div>
           <span class="text-white/90 group-hover:text-white transition-colors duration-300 text-sm font-medium">

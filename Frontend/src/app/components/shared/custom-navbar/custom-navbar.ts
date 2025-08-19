@@ -44,6 +44,46 @@ export class CustomNavbar implements OnInit {
     }
   }
 
+  getPageColor(): string {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/admin')) {
+      return 'bg-blue-600';
+    } else if (currentUrl.includes('/hr')) {
+      return 'bg-purple-600';
+    } else if (currentUrl.includes('/manager')) {
+      return 'bg-yellow-500';
+    } else if (currentUrl.includes('/user')) {
+      return 'bg-green-600';
+    } else if (currentUrl.includes('/role-selector')) {
+      return 'bg-gray-400'; // Pentru loading
+    } else {
+      return 'bg-gray-600';
+    }
+  }
+
+  getPageRole(): string {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/admin')) {
+      return 'Admin';
+    } else if (currentUrl.includes('/hr')) {
+      return 'HR';
+    } else if (currentUrl.includes('/manager')) {
+      return 'Manager';
+    } else if (currentUrl.includes('/user')) {
+      return 'Employee';
+    } else if (currentUrl.includes('/role-selector')) {
+      return '';
+    } else {
+      return this.getPrimaryRole();
+    }
+  }
+
+  isRoleSelectorPage(): boolean {
+    return this.router.url.includes('/role-selector');
+  }
+
   getRoleTextColor(): string {
     const role = this.getPrimaryRole();
     switch (role) {
