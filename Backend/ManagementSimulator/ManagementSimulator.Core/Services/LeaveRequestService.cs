@@ -453,14 +453,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(int managerId, string status, int pageSize, int pageNumber)
         {
-            // Mai întâi obținem angajații managerului
             var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
-            // Obținem cererile filtrate, transmițând și lista de employeeIds
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber, employeeIds);
-            
-            // Convertim la DTO-uri
+
             var dtos = items.Select(r => r.ToLeaveRequestResponseDto()).ToList();
 
             return (dtos, totalCount);
