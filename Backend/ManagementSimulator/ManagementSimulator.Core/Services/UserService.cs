@@ -13,6 +13,8 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Database.Enums;
+using ManagementSimulator.Database.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -27,6 +29,7 @@ namespace ManagementSimulator.Core.Services
         private readonly IMemoryCache _cache;
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
+        private readonly MGMTSimulatorDbContext _dbContext;
 
         public UserService(
             IUserRepository userRepository,
@@ -37,7 +40,8 @@ namespace ManagementSimulator.Core.Services
             IEmployeeManagerService employeeManagerService,
             IMemoryCache cache,
             ILeaveRequestTypeRepository leaveRequestTypeRepository,
-            ILeaveRequestRepository leaveRequestRepository)
+            ILeaveRequestRepository leaveRequestRepository,
+            MGMTSimulatorDbContext dbContext)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -48,6 +52,7 @@ namespace ManagementSimulator.Core.Services
             _cache = cache;
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
             _leaveRequestRepository = leaveRequestRepository;
+            _dbContext = dbContext;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -309,12 +314,12 @@ namespace ManagementSimulator.Core.Services
             {
                 var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id);
                 var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
-                
+
                 var usedDaysForType = CalculateTotalDays(pendingTypeRequests);
                 var maxAllowedDays = leaveType.Title == "Vacation"
                     ? user.Vacation
                     : (leaveType.MaxDays ?? hrUserDto.TotalLeaveDays);
-                
+
                 var leaveTypeStat = new LeaveTypeStatDto
                 {
                     LeaveTypeId = leaveType.Id,
@@ -323,7 +328,7 @@ namespace ManagementSimulator.Core.Services
                     RemainingDays = maxAllowedDays - usedDaysForType,
                     MaxAllowedDays = maxAllowedDays
                 };
-                
+
                 hrUserDto.LeaveTypeStatistics.Add(leaveTypeStat);
             }
 
@@ -383,47 +388,72 @@ namespace ManagementSimulator.Core.Services
                 }
             }
 
-            if (dto.EmployeeRolesId != null && dto.EmployeeRolesId.Any())
+            if (dto.EmployeeRolesId != null)
             {
                 var existingRelations = await _employeeRoleRepository
-                    .GetEmployeeRoleUsersByUserIdAsync(existing.Id);
+                    .GetEmployeeRoleUsersByUserIdAsync(existing.Id, tracking: false);
 
                 int employeeRole = await _employeeRoleRepository.GetEmployeeRoleUserByNameAsync("Employee");
-                foreach (var relation in existingRelations)
+
+                var roleIdsToKeep = new HashSet<int>();
+                roleIdsToKeep.Add(employeeRole); // Always keep Employee role
+
+                if (dto.EmployeeRolesId.Any())
                 {
-                    if (relation.RolesId != employeeRole)
-                        await _employeeRoleRepository.DeleteEmployeeUserRoleAsync(relation);
+                    var validRoleIds = dto.EmployeeRolesId.Where(id => id > 0).Distinct();
+                    foreach (var roleId in validRoleIds)
+                    {
+                        var role = await _employeeRoleRepository.GetFirstOrDefaultAsync(roleId);
+                        if (role == null)
+                        {
+                            throw new EntryNotFoundException(nameof(EmployeeRole), roleId);
+                        }
+                        roleIdsToKeep.Add(roleId);
+                    }
                 }
 
-                foreach (var roleId in dto.EmployeeRolesId.Distinct())
+                foreach (var relation in existingRelations)
                 {
-                    var role = await _employeeRoleRepository.GetFirstOrDefaultAsync(roleId);
-                    if (role == null)
+                    if (!roleIdsToKeep.Contains(relation.RolesId))
                     {
-                        throw new EntryNotFoundException(nameof(EmployeeRole), roleId);
-                    }
-
-                    var employeeRoleUser = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true, tracking: true);
-                    if (employeeRoleUser != null)
-                    {
-                        if (employeeRoleUser.DeletedAt != null)
+                        var trackedRelation = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, relation.RolesId, includeDeleted: false, tracking: true);
+                        if (trackedRelation != null)
                         {
-                            employeeRoleUser.DeletedAt = null;
-                            await _employeeRoleRepository.SaveChangesAsync();
-                            continue;
+                            await _employeeRoleRepository.DeleteEmployeeUserRoleAsync(trackedRelation);
                         }
                     }
-                    else
+                }
+
+                if (dto.EmployeeRolesId.Any())
+                {
+                    var validRoleIds = dto.EmployeeRolesId.Where(id => id > 0).Distinct();
+                    foreach (var roleId in validRoleIds)
                     {
-                        var employeeRoleUsertToBeAdded = new EmployeeRoleUser
+                        if (roleId == employeeRole) continue;
+
+                        var existingRelation = existingRelations.FirstOrDefault(r => r.RolesId == roleId && r.DeletedAt == null);
+                        if (existingRelation == null)
                         {
-                            RolesId = roleId,
-                            UsersId = existing.Id,
-                            CreatedAt = DateTime.UtcNow,
-                            ModifiedAt = DateTime.UtcNow,
-                            DeletedAt = null
-                        };
-                        await _employeeRoleRepository.AddEmployeeRoleUserAsync(employeeRoleUsertToBeAdded);
+                            var deletedRelation = await _employeeRoleRepository.GetEmployeeRoleUserAsync(existing.Id, roleId, includeDeleted: true, tracking: true);
+                            if (deletedRelation != null && deletedRelation.DeletedAt != null)
+                            {
+                                deletedRelation.DeletedAt = null;
+                                deletedRelation.ModifiedAt = DateTime.UtcNow;
+                                await _employeeRoleRepository.SaveChangesAsync();
+                            }
+                            else if (deletedRelation == null)
+                            {
+                                var employeeRoleUserToBeAdded = new EmployeeRoleUser
+                                {
+                                    RolesId = roleId,
+                                    UsersId = existing.Id,
+                                    CreatedAt = DateTime.UtcNow,
+                                    ModifiedAt = DateTime.UtcNow,
+                                    DeletedAt = null
+                                };
+                                await _employeeRoleRepository.AddEmployeeRoleUserAsync(employeeRoleUserToBeAdded);
+                            }
+                        }
                     }
                 }
             }
@@ -672,19 +702,19 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = users.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.FirstName ?? string.Empty,
-                LastName = u.LastName ?? string.Empty,
-                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                JobTitleId = u.JobTitleId,
-                JobTitleName = u.Title?.Name ?? string.Empty,
-                DepartmentId = u.DepartmentId,
-                DepartmentName = u.Department?.Name ?? string.Empty,
-                IsActive = u.DeletedAt == null,
-                Vacation = u.Vacation,
-            }),
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
@@ -769,20 +799,20 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = managers.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.FirstName ?? string.Empty,
-                LastName = u.LastName ?? string.Empty,
-                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                JobTitleId = u.JobTitleId,
-                JobTitleName = u.Title?.Name ?? string.Empty,
-                DepartmentId = u.DepartmentId,
-                DepartmentName = u.Department?.Name ?? string.Empty,
-                SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
-                IsActive = u.DeletedAt == null,
-                Vacation = u.Vacation,
-            }),
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?

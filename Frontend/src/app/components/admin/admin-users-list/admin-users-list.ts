@@ -29,12 +29,12 @@ export class AdminUsersList implements OnInit {
   searchBy: string = 'globalSearch';
   searchByActivityStatus: 'activeStatus' | 'inactiveStatus' | 'global' = 'global';
   sortDescending: boolean = false;
-  userRoles: Map<string,number> = new Map();
+  userRoles: Map<string, number> = new Map();
 
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
-  
+
   isLoading: boolean = false;
   hasError: boolean = false;
   errorMessage: string = '';
@@ -64,9 +64,9 @@ export class AdminUsersList implements OnInit {
   employeeRoleInfo: string = 'All the users are automatically set to employees.';
 
   constructor(private usersService: UsersService,
-              private jobTitlesService: JobTitlesService,
-              private employeeRoleService: EmployeeRolesService,
-              private departmentService: DepartmentService) {
+    private jobTitlesService: JobTitlesService,
+    private employeeRoleService: EmployeeRolesService,
+    private departmentService: DepartmentService) {
 
   }
 
@@ -87,7 +87,7 @@ export class AdminUsersList implements OnInit {
       jobTitle: this.searchBy === 'jobTitle' ? this.searchTerm : undefined,
       globalSearch: this.searchBy === 'globalSearch' ? this.searchTerm : undefined,
       status: this.searchByActivityStatus === 'activeStatus' ? UserActivityStatus.ACTIVE : this.searchByActivityStatus === 'inactiveStatus'
-         ? UserActivityStatus.INACTIVE : UserActivityStatus.ALL,
+        ? UserActivityStatus.INACTIVE : UserActivityStatus.ALL,
       params: {
         sortBy: this.getSortField(),
         sortDescending: this.sortDescending,
@@ -95,19 +95,19 @@ export class AdminUsersList implements OnInit {
         pageSize: this.itemsPerPage
       }
     };
-    
+
     console.log('Search parameters:', this.searchBy, this.searchTerm);
-    
+
     this.usersService.getAllUsersFiltered(filterRequest).subscribe({
       next: (response: IApiResponse<IFilteredApiResponse<IUser>>) => {
         console.log('API response:', response);
         this.isLoading = false;
-        
+
         if (response.success && response.data) {
           const rawUsers: IUser[] = response.data.data || [];
           this.users = rawUsers.map(user => this.mapToUserViewModel(user));
           this.totalPages = response.data.totalPages || 0;
-          
+
           if (this.users.length === 0) {
             if (this.searchTerm.trim()) {
               this.hasError = true;
@@ -203,13 +203,13 @@ export class AdminUsersList implements OnInit {
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
       department: {
-          id: user.departmentId || 0,
-          name: user.departmentName || 'Unknown'
+        id: user.departmentId || 0,
+        name: user.departmentName || 'Unknown'
       },
       jobTitle: user.jobTitleId ? {
         id: user.jobTitleId,
         name: user.jobTitleName || 'Unknown',
-      } : undefined,    
+      } : undefined,
       roles: user.roles,
       status: user.isActive ? 'active' : 'inactive',
       avatar: `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=20B486&color=fff`
@@ -290,7 +290,7 @@ export class AdminUsersList implements OnInit {
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxVisiblePages = 5;
-    
+
     if (this.totalPages <= maxVisiblePages) {
       for (let i = 1; i <= this.totalPages; i++) {
         pages.push(i);
@@ -298,19 +298,19 @@ export class AdminUsersList implements OnInit {
     } else {
       let startPage = Math.max(1, this.currentPage - 2);
       let endPage = Math.min(this.totalPages, this.currentPage + 2);
-      
+
       if (this.currentPage <= 3) {
         endPage = Math.min(this.totalPages, 5);
       }
       if (this.currentPage >= this.totalPages - 2) {
         startPage = Math.max(1, this.totalPages - 4);
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
     }
-    
+
     return pages;
   }
 
@@ -344,7 +344,7 @@ export class AdminUsersList implements OnInit {
       isManager: user.roles?.includes("Manager") ? true : false,
       isHr: user.roles?.includes("HR") ? true : false,
     };
-    
+
     this.editErrorMessage = '';
   }
 
@@ -361,7 +361,7 @@ export class AdminUsersList implements OnInit {
     });
   }
 
-  loadDepartments() : void {
+  loadDepartments(): void {
     this.departmentService.getAllDepartments().subscribe({
       next: (response) => {
         if (response.success) {
@@ -383,6 +383,12 @@ export class AdminUsersList implements OnInit {
     this.isSubmitting = true;
     this.editErrorMessage = '';
 
+    const selectedRoles = this.getSelectedRoles();
+    const roleIds = selectedRoles.map(rolename => this.userRoles.get(rolename)).filter(id => id !== undefined && id > 0) as number[];
+
+    console.log('Selected roles:', selectedRoles);
+    console.log('Role IDs to send:', roleIds);
+
     const userToUpdate: IUpdateUser = {
       id: this.editForm.id,
       email: this.editForm.email,
@@ -390,7 +396,7 @@ export class AdminUsersList implements OnInit {
       lastName: this.editForm.lastName,
       jobTitleId: this.editForm.jobTitleId,
       dateOfEmployment: this.editForm.dateOfEmployment,
-      employeeRolesId: this.getSelectedRoles().map(rolename => this.userRoles.get(rolename) || 0),
+      employeeRolesId: roleIds,
     };
 
     this.usersService.updateUser(userToUpdate).subscribe({
@@ -398,6 +404,10 @@ export class AdminUsersList implements OnInit {
         this.isSubmitting = false;
         if (response.success) {
           this.showEditModal = false;
+          // Resetăm formularul și reîncărcăm datele
+          this.resetForm();
+          // Forțăm reîncărcarea completă a datelor
+          this.currentPage = 1;
           this.loadUsers();
           console.log('User updated successfully:', response.data);
         } else {
@@ -410,6 +420,21 @@ export class AdminUsersList implements OnInit {
         console.error('Error updating user:', error);
       }
     });
+  }
+
+  private resetForm(): void {
+    this.editForm = {
+      id: 0,
+      firstName: '',
+      lastName: '',
+      email: '',
+      jobTitleId: 0,
+      departmentId: 0,
+      dateOfEmployment: new Date(),
+      isAdmin: false,
+      isManager: false,
+      isHr: false,
+    };
   }
 
   getSelectedRoles(): string[] {

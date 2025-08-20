@@ -27,7 +27,7 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task DeleteEmployeeUserRoleAsync(EmployeeRoleUser employeeRoleUser)
         {
-            employeeRoleUser.DeletedAt = DateTime.UtcNow;
+            _dbContext.EmployeeRolesUsers.Remove(employeeRoleUser);
             await _dbContext.SaveChangesAsync();
         }
 
