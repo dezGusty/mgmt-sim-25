@@ -26,6 +26,7 @@ namespace ManagementSimulator.Core
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmployeeRoleService, EmployeeRoleService>();
             services.AddScoped<IResourceAuthorizationService, ResourceAuthorizationService>();
+            services.AddScoped<ISecondManagerService, SecondManagerService>();
 
             return services;
         }

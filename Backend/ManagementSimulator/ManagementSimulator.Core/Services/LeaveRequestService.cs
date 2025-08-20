@@ -18,14 +18,17 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
+        private readonly IEmployeeManagerService _employeeManagerService;
 
         public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository,
                                    IUserRepository userRepository,
-                                   ILeaveRequestTypeRepository leaveRequestTypeRepository)
+                                   ILeaveRequestTypeRepository leaveRequestTypeRepository,
+                                   IEmployeeManagerService employeeManagerService)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _userRepository = userRepository;
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
+            _employeeManagerService = employeeManagerService;
         }
 
         public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
@@ -158,13 +161,11 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetRequestsByUserPagedAsync(int userId, string? status = null, int pageSize = 10, int pageNumber = 1)
         {
-            // Use the existing GetFilteredLeaveRequestsAsync method with a single user ID
             var employeeIds = new List<int> { userId };
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status ?? "ALL", pageSize, pageNumber, employeeIds);
-            
-            // Convert to DTOs
+
             var dtos = items.Select(r => r.ToLeaveRequestResponseDto()).ToList();
-            
+
             return (dtos, totalCount);
         }
 
@@ -246,7 +247,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<LeaveRequestResponseDto>> GetLeaveRequestsForManagerAsync(int managerId, string? name = null)
         {
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+            var employees = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
             var allRequests = await _leaveRequestRepository.GetAllWithRelationshipsByUserIdsAsync(employeeIds, name);
@@ -275,7 +276,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<LeaveRequestResponseDto>> GetAllLeaveRequestsFilteredAsync(int managerId, QueriedLeaveRequestRequestDto payload)
         {
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+            var employees = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
             var (result, totalCount) = await _leaveRequestRepository.GetAllLeaveRequestsWithRelationshipsFilteredAsync(employeeIds, payload.LastName, payload.Email, payload.PagedQueryParams.ToQueryParams());
@@ -465,7 +466,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(int managerId, string status, int pageSize, int pageNumber)
         {
-            var employees = await _userRepository.GetUsersByManagerIdAsync(managerId);
+            var employees = await _employeeManagerService.GetEmployeesByManagerIdAsync(managerId);
             var employeeIds = employees.Select(e => e.Id).ToList();
 
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status, pageSize, pageNumber, employeeIds);

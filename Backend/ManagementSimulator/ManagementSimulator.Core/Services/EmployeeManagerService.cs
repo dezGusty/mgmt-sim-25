@@ -3,6 +3,7 @@ using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Database.Repositories.Interfaces;
 using ManagementSimulator.Infrastructure.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -16,16 +17,18 @@ namespace ManagementSimulator.Core.Services
     {
         private readonly IEmployeeManagerRepository _employeeManagerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ISecondManagerRepository _secondManagerRepository;
 
-        public EmployeeManagerService(IEmployeeManagerRepository employeeManagerRepository, IUserRepository userRepository)
+        public EmployeeManagerService(IEmployeeManagerRepository employeeManagerRepository, IUserRepository userRepository, ISecondManagerRepository secondManagerRepository)
         {
             _employeeManagerRepository = employeeManagerRepository;
             _userRepository = userRepository;
+            _secondManagerRepository = secondManagerRepository;
         }
 
         public async Task AddEmployeeManagerAsync(int employeeId, int managerId)
         {
-            if(await _userRepository.GetFirstOrDefaultAsync(employeeId) == null)
+            if (await _userRepository.GetFirstOrDefaultAsync(employeeId) == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.User), employeeId);
             }
@@ -60,14 +63,18 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<List<UserResponseDto>> GetEmployeesByManagerIdAsync(int managerId)
         {
-            var employees = await _employeeManagerRepository.GetEmployeesForManagerByIdAsync(managerId, tracking: false);
+            var directEmployees = await _employeeManagerRepository.GetEmployeesForManagerByIdAsync(managerId, tracking: false);
 
-            if (employees == null || !employees.Any())
+            var secondManagerEmployees = await _secondManagerRepository.GetEmployeesForActiveSecondManagerAsync(managerId);
+
+            var allEmployees = directEmployees.Concat(secondManagerEmployees).Distinct().ToList();
+
+            if (allEmployees == null || !allEmployees.Any())
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.User), managerId);
             }
 
-            return employees.Select(e => new UserResponseDto
+            return allEmployees.Select(e => new UserResponseDto
             {
                 Id = e.Id,
                 FirstName = e.FirstName,
@@ -78,21 +85,31 @@ namespace ManagementSimulator.Core.Services
                     .Select(ru => ru.Role.Rolename)
                     .ToList(),
 
-                JobTitleName = e.Title.Name ?? string.Empty,
+                JobTitleName = e.Title?.Name ?? string.Empty,
                 JobTitleId = e.JobTitleId
             }).ToList();
         }
 
         public async Task<List<UserResponseDto>> GetManagersByEmployeeIdAsync(int employeeId)
         {
-            var managers = await _employeeManagerRepository.GetManagersForEmployeesByIdAsync(employeeId, tracking: false);
+            var directManagers = await _employeeManagerRepository.GetManagersForEmployeesByIdAsync(employeeId, tracking: false);
 
-            if (managers == null || !managers.Any())
+            var activeSecondManagers = await _secondManagerRepository.GetActiveSecondManagersAsync();
+            var directManagerIds = directManagers.Select(m => m.Id).ToList();
+
+            var secondManagers = activeSecondManagers
+                .Where(sm => directManagerIds.Contains(sm.ReplacedManagerId))
+                .Select(sm => sm.SecondManagerEmployee)
+                .ToList();
+
+            var allManagers = directManagers.Concat(secondManagers).Distinct().ToList();
+
+            if (allManagers == null || !allManagers.Any())
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.User), employeeId);
             }
 
-            return managers.Select(e => new UserResponseDto
+            return allManagers.Select(e => new UserResponseDto
             {
                 Id = e.Id,
                 FirstName = e.FirstName,
@@ -103,7 +120,7 @@ namespace ManagementSimulator.Core.Services
                     .Select(ru => ru.Role.Rolename)
                     .ToList(),
 
-                JobTitleName = e.Title.Name ?? string.Empty,
+                JobTitleName = e.Title?.Name ?? string.Empty,
                 JobTitleId = e.JobTitleId
             }).ToList();
         }
@@ -242,7 +259,7 @@ namespace ManagementSimulator.Core.Services
                         CreatedAt = DateTime.UtcNow,
                         ModifiedAt = DateTime.UtcNow
                     };
-                    await _employeeManagerRepository.AddEmployeeManagersAsync(newEmployeeManager.EmployeeId,newEmployeeManager.ManagerId);
+                    await _employeeManagerRepository.AddEmployeeManagersAsync(newEmployeeManager.EmployeeId, newEmployeeManager.ManagerId);
                 }
             }
             await _employeeManagerRepository.SaveChangesAsync();

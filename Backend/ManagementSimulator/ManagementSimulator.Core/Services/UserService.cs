@@ -156,7 +156,7 @@ namespace ManagementSimulator.Core.Services
                     temporaryPassword
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new MailNotSentException(user.Email);
             }

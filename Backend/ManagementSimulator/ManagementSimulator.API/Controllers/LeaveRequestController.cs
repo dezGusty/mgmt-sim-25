@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using ManagementSimulator.API.Attributes;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequest;
 using ManagementSimulator.Core.Dtos.Requests.LeaveRequests;
 using ManagementSimulator.Core.Dtos.Responses;
@@ -28,7 +29,7 @@ namespace ManagementSimulator.API.Controllers
             _logger = logger;
         }
         
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -325,7 +326,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization]
         [HttpPatch("review/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -423,7 +424,7 @@ namespace ManagementSimulator.API.Controllers
         }
 
 
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization(AllowViewOnly = true)]
         [HttpGet("by-manager")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -594,7 +595,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization(AllowViewOnly = true)]
         [HttpGet("remaining-days/{userId}/{leaveRequestTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -638,7 +639,7 @@ namespace ManagementSimulator.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization(AllowViewOnly = true)]
         [HttpGet("remaining-days-for-period/{userId}/{leaveRequestTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -785,7 +786,7 @@ namespace ManagementSimulator.API.Controllers
         }
 
        
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization(AllowViewOnly = true)]
         [HttpGet("filtered")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

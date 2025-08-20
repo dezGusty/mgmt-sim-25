@@ -13,12 +13,14 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IUserService _userService;
+    private readonly IResourceAuthorizationService _authorizationService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, IUserService userService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, IUserService userService, IResourceAuthorizationService authorizationService, ILogger<AuthController> logger)
     {
         _authService = authService;
         _userService = userService;
+        _authorizationService = authorizationService;
         _logger = logger;
     }
 
@@ -43,16 +45,34 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpGet("me")]
-    public IActionResult Me()
+    public async Task<IActionResult> Me()
     {
         if (!User.Identity!.IsAuthenticated)
             return Unauthorized(new { message = "User is not authenticated." });
 
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            return Unauthorized(new { message = "Invalid user ID." });
+
+        var originalRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+        var effectiveRoles = new List<string>(originalRoles);
+
+        var isActingAsSecondManager = await _authorizationService.IsUserActingAsSecondManagerAsync(userId);
+        if (isActingAsSecondManager && !effectiveRoles.Contains("Manager"))
+        {
+            effectiveRoles.Add("Manager");
+        }
+
+        var isTemporarilyReplaced = await _authorizationService.IsManagerTemporarilyReplacedAsync(userId);
+
         return Ok(new
         {
-            UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            UserId = userIdClaim,
             Email = User.FindFirst(ClaimTypes.Email)?.Value,
-            Roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList()
+            Roles = effectiveRoles,
+            OriginalRoles = originalRoles,
+            IsActingAsSecondManager = isActingAsSecondManager,
+            IsTemporarilyReplaced = isTemporarilyReplaced
         });
     }
 
@@ -93,19 +113,19 @@ public class AuthController : ControllerBase
                 string.IsNullOrEmpty(request.NewPassword) ||
                 string.IsNullOrEmpty(request.ConfirmPassword))
             {
-                return BadRequest(new { error = "All fields are required" }); // JSON format
+                return BadRequest(new { error = "All fields are required" });
             }
 
             if (request.NewPassword != request.ConfirmPassword)
             {
-                return BadRequest(new { error = "Passwords do not match" }); // JSON format
+                return BadRequest(new { error = "Passwords do not match" });
             }
 
             var success = await _userService.ResetPasswordWithCodeAsync(request.VerificationCode, request.NewPassword);
 
             if (!success)
             {
-                return BadRequest(new { error = "Invalid or expired verification code" }); // JSON format
+                return BadRequest(new { error = "Invalid or expired verification code" });
             }
 
             return Ok(new { message = "Password reset successfully" });
@@ -113,7 +133,7 @@ public class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error resetting password");
-            return StatusCode(500, new { error = "Internal server error" }); // JSON format
+            return StatusCode(500, new { error = "Internal server error" });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using ManagementSimulator.API.Attributes;
 using ManagementSimulator.Core.Dtos.Requests.EmployeeManagers;
 using ManagementSimulator.Core.Dtos.Requests.UserManagers;
 using ManagementSimulator.Core.Dtos.Responses;
@@ -167,7 +168,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        [Authorize(Roles = "Manager")]
+        [ManagerActionAuthorization(AllowViewOnly = true)]
         [HttpGet("employeesByManager")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

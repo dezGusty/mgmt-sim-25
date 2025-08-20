@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Database.Context;
 using ManagementSimulator.Database.Repositories;
 using ManagementSimulator.Database.Repositories.Intefaces;
+using ManagementSimulator.Database.Repositories.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace ManagementSimulator.Database
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
             services.AddScoped<IEmployeeRoleRepository, EmployeeRoleRepository>();
+            services.AddScoped<ISecondManagerRepository, SecondManagerRepository>();
 
             return services;
         }

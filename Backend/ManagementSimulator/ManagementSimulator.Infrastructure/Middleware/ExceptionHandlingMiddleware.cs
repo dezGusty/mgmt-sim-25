@@ -33,6 +33,10 @@ namespace ManagementSimulator.Infrastructure.Middleware
             {
                 await HandleExceptionAsync(context, notFoundEx, HttpStatusCode.NotFound);
             }
+            catch (ManagerViewOnlyException viewOnlyEx)
+            {
+                await HandleExceptionAsync(context, viewOnlyEx, HttpStatusCode.Forbidden);
+            }
             catch(MailNotSentException mailEx)
             {
                 await HandleExceptionAsync(context, mailEx, HttpStatusCode.InternalServerError);
