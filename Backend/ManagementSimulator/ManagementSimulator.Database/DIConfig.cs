@@ -22,6 +22,7 @@ namespace ManagementSimulator.Database
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
             services.AddScoped<IEmployeeRoleRepository, EmployeeRoleRepository>();
+            services.AddScoped<IProjectRepository, ProjectRepository>();
 
             return services;
         }
