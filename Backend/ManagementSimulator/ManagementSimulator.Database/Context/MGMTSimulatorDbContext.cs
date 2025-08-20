@@ -109,6 +109,28 @@ namespace ManagementSimulator.Database.Context
                 .WithMany(u => u.Roles)
                 .HasForeignKey(eru => eru.UsersId);
 
+            modelBuilder.Entity<UserProject>(entity =>
+            {
+                entity.HasKey(up => new { up.UserId, up.ProjectId });
+
+                entity.HasOne(up => up.User)
+                      .WithMany(u => u.UserProjects)
+                      .HasForeignKey(up => up.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(up => up.Project)
+                      .WithMany(p => p.UserProjects)
+                      .HasForeignKey(up => up.ProjectId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Project>()
+                .Property(p => p.Name)
+                .HasMaxLength(100);
+            modelBuilder.Entity<Project>()
+                .HasIndex(p => p.Name)
+                .IsUnique();
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -120,5 +142,7 @@ namespace ManagementSimulator.Database.Context
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
         public DbSet<EmployeeRoleUser> EmployeeRolesUsers { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<UserProject> UserProjects { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<EmployeeManager> Subordinates { get; set; } = new List<EmployeeManager>();
 
         public ICollection<EmployeeRoleUser> Roles { get; set; } = new List<EmployeeRoleUser>();
+        public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
 
         [Required, MaxLength(50), EmailAddress]
         public string Email { get; set; }
@@ -38,5 +39,8 @@ namespace ManagementSimulator.Database.Entities
         public DateTime DateOfEmployment { get; set; }
         public string FullName => $"{FirstName} {LastName}";
         public int Vacation { get; set; } = 21;
+
+        public float TotalAvailability { get; set; }
+        public float RemainingAvailability { get; set; }
     }
 }
