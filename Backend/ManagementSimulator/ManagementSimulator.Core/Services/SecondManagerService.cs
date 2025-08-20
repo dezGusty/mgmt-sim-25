@@ -40,7 +40,6 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<SecondManagerResponseDto> CreateSecondManagerAsync(CreateSecondManagerRequestDto request)
         {
-            // Validez că utilizatorii există
             var secondManagerEmployee = await _userRepository.GetUserByIdAsync(request.SecondManagerEmployeeId);
             if (secondManagerEmployee == null)
                 throw new EntryNotFoundException(nameof(User), request.SecondManagerEmployeeId);
@@ -49,7 +48,6 @@ namespace ManagementSimulator.Core.Services
             if (replacedManager == null)
                 throw new EntryNotFoundException(nameof(User), request.ReplacedManagerId);
 
-            // Validez că data de sfârșit este după data de început
             if (request.EndDate <= request.StartDate)
                 throw new InvalidDateRangeException("Data de sfârșit trebuie să fie după data de început");
 
@@ -63,7 +61,6 @@ namespace ManagementSimulator.Core.Services
 
             await _secondManagerRepository.AddSecondManagerAsync(secondManager);
 
-            // Reiau entitatea cu relațiile încărcate
             var createdSecondManager = await _secondManagerRepository.GetSecondManagerAsync(
                 request.SecondManagerEmployeeId,
                 request.ReplacedManagerId,
@@ -78,7 +75,6 @@ namespace ManagementSimulator.Core.Services
             if (secondManager == null)
                 throw new EntryNotFoundException(nameof(SecondManager), $"{secondManagerEmployeeId}-{replacedManagerId}-{startDate}");
 
-            // Validez că noua dată de sfârșit este după data de început
             if (request.NewEndDate <= secondManager.StartDate)
                 throw new InvalidDateRangeException("Noua dată de sfârșit trebuie să fie după data de început");
 
