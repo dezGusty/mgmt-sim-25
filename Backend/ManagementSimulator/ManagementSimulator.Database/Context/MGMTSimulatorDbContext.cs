@@ -109,6 +109,27 @@ namespace ManagementSimulator.Database.Context
                 .WithMany(u => u.Roles)
                 .HasForeignKey(eru => eru.UsersId);
 
+            modelBuilder.Entity<SecondManager>(entity =>
+            {
+                entity.HasKey(sm => new { sm.SecondManagerEmployeeId, sm.ReplacedManagerId, sm.StartDate });
+
+                entity.HasOne(sm => sm.SecondManagerEmployee)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.SecondManagerEmployeeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sm => sm.ReplacedManager)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.ReplacedManagerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(sm => sm.StartDate)
+                      .IsRequired();
+
+                entity.Property(sm => sm.EndDate)
+                      .IsRequired();
+            });
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -120,5 +141,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
         public DbSet<EmployeeRoleUser> EmployeeRolesUsers { get; set; }
+        public DbSet<SecondManager> SecondManagers { get; set; }
     }
 }
