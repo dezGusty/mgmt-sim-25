@@ -38,12 +38,6 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(User), request.SecondaryManagerId);
             }
 
-            var admin = await _userRepository.GetFirstOrDefaultAsync(assignedByAdminId);
-            if (admin == null)
-            {
-                throw new EntryNotFoundException(nameof(User), assignedByAdminId);
-            }
-
             // Validate date range
             if (request.StartDate >= request.EndDate)
             {
@@ -68,12 +62,9 @@ namespace ManagementSimulator.Core.Services
             var secondaryManager = new SecondaryManager
             {
                 EmployeeId = request.EmployeeId,
-                SecondaryManagerId = request.SecondaryManagerId,
-                AssignedByAdminId = assignedByAdminId,
+                ManagerId = request.SecondaryManagerId,
                 StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                Reason = request.Reason,
-                CreatedAt = DateTime.UtcNow
+                EndDate = request.EndDate
             };
 
             await _secondaryManagerRepository.AddSecondaryManagerAsync(secondaryManager);
@@ -82,16 +73,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = secondaryManager.EmployeeId,
                 EmployeeName = $"{employee.FirstName} {employee.LastName}",
-                SecondaryManagerId = secondaryManager.SecondaryManagerId,
+                SecondaryManagerId = secondaryManager.ManagerId,
                 SecondaryManagerName = $"{manager.FirstName} {manager.LastName}",
-                AssignedByAdminId = secondaryManager.AssignedByAdminId,
-                AssignedByAdminName = $"{admin.FirstName} {admin.LastName}",
                 StartDate = secondaryManager.StartDate,
                 EndDate = secondaryManager.EndDate,
-                Reason = secondaryManager.Reason,
-                IsActive = secondaryManager.IsActive,
-                CreatedAt = secondaryManager.CreatedAt,
-                ModifiedAt = secondaryManager.ModifiedAt
+                IsActive = secondaryManager.IsActive
             };
         }
 
@@ -117,8 +103,6 @@ namespace ManagementSimulator.Core.Services
             }
 
             secondaryManager.EndDate = request.NewEndDate;
-            secondaryManager.Reason = request.Reason ?? secondaryManager.Reason;
-            secondaryManager.ModifiedAt = DateTime.UtcNow;
 
             await _secondaryManagerRepository.UpdateSecondaryManagerAsync(secondaryManager);
 
@@ -126,16 +110,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = secondaryManager.EmployeeId,
                 EmployeeName = $"{secondaryManager.Employee.FirstName} {secondaryManager.Employee.LastName}",
-                SecondaryManagerId = secondaryManager.SecondaryManagerId,
+                SecondaryManagerId = secondaryManager.ManagerId,
                 SecondaryManagerName = $"{secondaryManager.Manager.FirstName} {secondaryManager.Manager.LastName}",
-                AssignedByAdminId = secondaryManager.AssignedByAdminId,
-                AssignedByAdminName = $"{secondaryManager.AssignedByAdmin.FirstName} {secondaryManager.AssignedByAdmin.LastName}",
                 StartDate = secondaryManager.StartDate,
                 EndDate = secondaryManager.EndDate,
-                Reason = secondaryManager.Reason,
-                IsActive = secondaryManager.IsActive,
-                CreatedAt = secondaryManager.CreatedAt,
-                ModifiedAt = secondaryManager.ModifiedAt
+                IsActive = secondaryManager.IsActive
             };
         }
 
@@ -160,16 +139,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = sm.EmployeeId,
                 EmployeeName = $"{sm.Employee.FirstName} {sm.Employee.LastName}",
-                SecondaryManagerId = sm.SecondaryManagerId,
+                SecondaryManagerId = sm.ManagerId,
                 SecondaryManagerName = $"{sm.Manager.FirstName} {sm.Manager.LastName}",
-                AssignedByAdminId = sm.AssignedByAdminId,
-                AssignedByAdminName = $"{sm.AssignedByAdmin.FirstName} {sm.AssignedByAdmin.LastName}",
                 StartDate = sm.StartDate,
                 EndDate = sm.EndDate,
-                Reason = sm.Reason,
-                IsActive = sm.IsActive,
-                CreatedAt = sm.CreatedAt,
-                ModifiedAt = sm.ModifiedAt
+                IsActive = sm.IsActive
             }).ToList();
         }
 
@@ -187,16 +161,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = sm.EmployeeId,
                 EmployeeName = $"{sm.Employee?.FirstName} {sm.Employee?.LastName}",
-                SecondaryManagerId = sm.SecondaryManagerId,
+                SecondaryManagerId = sm.ManagerId,
                 SecondaryManagerName = $"{sm.Manager.FirstName} {sm.Manager.LastName}",
-                AssignedByAdminId = sm.AssignedByAdminId,
-                AssignedByAdminName = $"{sm.AssignedByAdmin.FirstName} {sm.AssignedByAdmin.LastName}",
                 StartDate = sm.StartDate,
                 EndDate = sm.EndDate,
-                Reason = sm.Reason,
-                IsActive = sm.IsActive,
-                CreatedAt = sm.CreatedAt,
-                ModifiedAt = sm.ModifiedAt
+                IsActive = sm.IsActive
             }).ToList();
         }
 
@@ -209,16 +178,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = sm.EmployeeId,
                 EmployeeName = $"{sm.Employee?.FirstName} {sm.Employee?.LastName}",
-                SecondaryManagerId = sm.SecondaryManagerId,
+                SecondaryManagerId = sm.ManagerId,
                 SecondaryManagerName = $"{sm.Manager.FirstName} {sm.Manager.LastName}",
-                AssignedByAdminId = sm.AssignedByAdminId,
-                AssignedByAdminName = $"{sm.AssignedByAdmin.FirstName} {sm.AssignedByAdmin.LastName}",
                 StartDate = sm.StartDate,
                 EndDate = sm.EndDate,
-                Reason = sm.Reason,
-                IsActive = sm.IsActive,
-                CreatedAt = sm.CreatedAt,
-                ModifiedAt = sm.ModifiedAt
+                IsActive = sm.IsActive
             }).ToList();
         }
 
@@ -247,27 +211,7 @@ namespace ManagementSimulator.Core.Services
             }).ToList();
         }
 
-        public async Task<List<SecondaryManagerResponseDto>> GetSecondaryManagersAssignedByAdminAsync(int adminId)
-        {
-            var secondaryManagers = await _secondaryManagerRepository.GetSecondaryManagersAssignedByAdminAsync(
-                adminId, includeDeleted: false, tracking: false);
 
-            return secondaryManagers.Select(sm => new SecondaryManagerResponseDto
-            {
-                EmployeeId = sm.EmployeeId,
-                EmployeeName = $"{sm.Employee.FirstName} {sm.Employee.LastName}",
-                SecondaryManagerId = sm.SecondaryManagerId,
-                SecondaryManagerName = $"{sm.Manager.FirstName} {sm.Manager.LastName}",
-                AssignedByAdminId = sm.AssignedByAdminId,
-                AssignedByAdminName = $"{sm.AssignedByAdmin?.FirstName} {sm.AssignedByAdmin?.LastName}",
-                StartDate = sm.StartDate,
-                EndDate = sm.EndDate,
-                Reason = sm.Reason,
-                IsActive = sm.IsActive,
-                CreatedAt = sm.CreatedAt,
-                ModifiedAt = sm.ModifiedAt
-            }).ToList();
-        }
 
         public async Task<SecondaryManagerResponseDto?> GetSecondaryManagerByIdAsync(int employeeId, int secondaryManagerId, DateTime startDate)
         {
@@ -283,16 +227,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = secondaryManager.EmployeeId,
                 EmployeeName = $"{secondaryManager.Employee.FirstName} {secondaryManager.Employee.LastName}",
-                SecondaryManagerId = secondaryManager.SecondaryManagerId,
+                SecondaryManagerId = secondaryManager.ManagerId,
                 SecondaryManagerName = $"{secondaryManager.Manager.FirstName} {secondaryManager.Manager.LastName}",
-                AssignedByAdminId = secondaryManager.AssignedByAdminId,
-                AssignedByAdminName = $"{secondaryManager.AssignedByAdmin.FirstName} {secondaryManager.AssignedByAdmin.LastName}",
                 StartDate = secondaryManager.StartDate,
                 EndDate = secondaryManager.EndDate,
-                Reason = secondaryManager.Reason,
-                IsActive = secondaryManager.IsActive,
-                CreatedAt = secondaryManager.CreatedAt,
-                ModifiedAt = secondaryManager.ModifiedAt
+                IsActive = secondaryManager.IsActive
             };
         }
 
@@ -304,16 +243,11 @@ namespace ManagementSimulator.Core.Services
             {
                 EmployeeId = sm.EmployeeId,
                 EmployeeName = $"{sm.Employee.FirstName} {sm.Employee.LastName}",
-                SecondaryManagerId = sm.SecondaryManagerId,
+                SecondaryManagerId = sm.ManagerId,
                 SecondaryManagerName = $"{sm.Manager.FirstName} {sm.Manager.LastName}",
-                AssignedByAdminId = sm.AssignedByAdminId,
-                AssignedByAdminName = $"{sm.AssignedByAdmin?.FirstName} {sm.AssignedByAdmin?.LastName}",
                 StartDate = sm.StartDate,
                 EndDate = sm.EndDate,
-                Reason = sm.Reason,
-                IsActive = sm.IsActive,
-                CreatedAt = sm.CreatedAt,
-                ModifiedAt = sm.ModifiedAt
+                IsActive = sm.IsActive
             }).ToList();
         }
 

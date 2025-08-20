@@ -8,6 +8,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.SecondaryManagers
         [Required]
         public DateTime NewEndDate { get; set; }
 
-        public string? Reason { get; set; }
+
     }
 }

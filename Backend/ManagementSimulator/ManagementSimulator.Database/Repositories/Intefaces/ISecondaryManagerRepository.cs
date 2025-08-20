@@ -12,7 +12,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<List<SecondaryManager>> GetSecondaryManagersForEmployeeAsync(int employeeId, bool includeDeleted = false, bool tracking = false);
         Task<List<User>> GetEmployeesWithActiveSecondaryManagerAsync(int secondaryManagerId, bool tracking = false);
         Task<SecondaryManager?> GetSecondaryManagerByIdAsync(int employeeId, int secondaryManagerId, DateTime startDate, bool includeDeleted = false, bool tracking = false);
-        Task<List<SecondaryManager>> GetSecondaryManagersAssignedByAdminAsync(int adminId, bool includeDeleted = false, bool tracking = false);
+
         Task AddSecondaryManagerAsync(SecondaryManager secondaryManager);
         Task UpdateSecondaryManagerAsync(SecondaryManager secondaryManager);
         Task DeleteSecondaryManagerAsync(int employeeId, int secondaryManagerId, DateTime startDate);

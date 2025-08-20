@@ -17,6 +17,6 @@ namespace ManagementSimulator.Core.Dtos.Requests.SecondaryManagers
         [Required]
         public DateTime EndDate { get; set; }
 
-        public string? Reason { get; set; }
+
     }
 }

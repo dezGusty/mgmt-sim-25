@@ -16,7 +16,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<List<SecondaryManagerResponseDto>> GetSecondaryManagersForEmployeeAsync(int employeeId);
         Task<List<SecondaryManagerResponseDto>> GetActiveSecondaryManagersForEmployeeAsync(int employeeId);
         Task<List<UserResponseDto>> GetEmployeesWithActiveSecondaryManagerAsync(int secondaryManagerId);
-        Task<List<SecondaryManagerResponseDto>> GetSecondaryManagersAssignedByAdminAsync(int adminId);
+
         Task<SecondaryManagerResponseDto?> GetSecondaryManagerByIdAsync(int employeeId, int secondaryManagerId, DateTime startDate);
         Task<List<SecondaryManagerResponseDto>> GetExpiredSecondaryManagersAsync();
         Task<bool> HasActiveSecondaryManagerAsync(int employeeId, int secondaryManagerId);

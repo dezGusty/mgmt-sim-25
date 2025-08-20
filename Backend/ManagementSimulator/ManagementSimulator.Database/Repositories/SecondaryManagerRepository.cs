@@ -30,13 +30,9 @@ namespace ManagementSimulator.Database.Repositories
             if (!tracking)
                 query = query.AsNoTracking();
 
-            if (!includeDeleted)
-                query = query.Where(sm => sm.DeletedAt == null);
-
             return await query
                 .Include(sm => sm.Employee)
                 .Include(sm => sm.Manager)
-                .Include(sm => sm.AssignedByAdmin)
                 .ToListAsync();
         }
 
@@ -51,10 +47,8 @@ namespace ManagementSimulator.Database.Repositories
 
             return await query
                 .Where(sm => sm.EmployeeId == employeeId)
-                .Where(sm => sm.DeletedAt == null)
                 .Where(sm => sm.StartDate <= now && sm.EndDate >= now)
                 .Include(sm => sm.Manager)
-                .Include(sm => sm.AssignedByAdmin)
                 .ToListAsync();
         }
 
@@ -65,13 +59,9 @@ namespace ManagementSimulator.Database.Repositories
             if (!tracking)
                 query = query.AsNoTracking();
 
-            if (!includeDeleted)
-                query = query.Where(sm => sm.DeletedAt == null);
-
             return await query
                 .Where(sm => sm.EmployeeId == employeeId)
                 .Include(sm => sm.Manager)
-                .Include(sm => sm.AssignedByAdmin)
                 .OrderByDescending(sm => sm.StartDate)
                 .ToListAsync();
         }
@@ -86,8 +76,7 @@ namespace ManagementSimulator.Database.Repositories
             var now = DateTime.UtcNow;
 
             return await query
-                .Where(sm => sm.SecondaryManagerId == secondaryManagerId)
-                .Where(sm => sm.DeletedAt == null)
+                .Where(sm => sm.ManagerId == secondaryManagerId)
                 .Where(sm => sm.StartDate <= now && sm.EndDate >= now)
                 .Include(sm => sm.Employee)
                 .Include(sm => sm.Employee.Title)
@@ -104,34 +93,14 @@ namespace ManagementSimulator.Database.Repositories
             if (!tracking)
                 query = query.AsNoTracking();
 
-            if (!includeDeleted)
-                query = query.Where(sm => sm.DeletedAt == null);
-
             return await query
-                .Where(sm => sm.EmployeeId == employeeId && sm.SecondaryManagerId == secondaryManagerId && sm.StartDate == startDate)
+                .Where(sm => sm.EmployeeId == employeeId && sm.ManagerId == secondaryManagerId && sm.StartDate == startDate)
                 .Include(sm => sm.Employee)
                 .Include(sm => sm.Manager)
-                .Include(sm => sm.AssignedByAdmin)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<SecondaryManager>> GetSecondaryManagersAssignedByAdminAsync(int adminId, bool includeDeleted = false, bool tracking = false)
-        {
-            IQueryable<SecondaryManager> query = _context.SecondaryManagers;
 
-            if (!tracking)
-                query = query.AsNoTracking();
-
-            if (!includeDeleted)
-                query = query.Where(sm => sm.DeletedAt == null);
-
-            return await query
-                .Where(sm => sm.AssignedByAdminId == adminId)
-                .Include(sm => sm.Employee)
-                .Include(sm => sm.Manager)
-                .OrderByDescending(sm => sm.CreatedAt)
-                .ToListAsync();
-        }
 
         public async Task AddSecondaryManagerAsync(SecondaryManager secondaryManager)
         {
@@ -141,7 +110,6 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task UpdateSecondaryManagerAsync(SecondaryManager secondaryManager)
         {
-            secondaryManager.ModifiedAt = DateTime.UtcNow;
             _context.SecondaryManagers.Update(secondaryManager);
             await SaveChangesAsync();
         }
@@ -149,13 +117,12 @@ namespace ManagementSimulator.Database.Repositories
         public async Task DeleteSecondaryManagerAsync(int employeeId, int secondaryManagerId, DateTime startDate)
         {
             var secondaryManager = await _context.SecondaryManagers
-                .Where(sm => sm.EmployeeId == employeeId && sm.SecondaryManagerId == secondaryManagerId && sm.StartDate == startDate)
+                .Where(sm => sm.EmployeeId == employeeId && sm.ManagerId == secondaryManagerId && sm.StartDate == startDate)
                 .FirstOrDefaultAsync();
 
             if (secondaryManager != null)
             {
-                secondaryManager.DeletedAt = DateTime.UtcNow;
-                secondaryManager.ModifiedAt = DateTime.UtcNow;
+                _context.SecondaryManagers.Remove(secondaryManager);
                 await SaveChangesAsync();
             }
         }
@@ -170,7 +137,6 @@ namespace ManagementSimulator.Database.Repositories
             var now = DateTime.UtcNow;
 
             return await query
-                .Where(sm => sm.DeletedAt == null)
                 .Where(sm => sm.EndDate < now)
                 .Include(sm => sm.Employee)
                 .Include(sm => sm.Manager)
@@ -183,8 +149,7 @@ namespace ManagementSimulator.Database.Repositories
 
             return await _context.SecondaryManagers
                 .AnyAsync(sm => sm.EmployeeId == employeeId 
-                    && sm.SecondaryManagerId == secondaryManagerId
-                    && sm.DeletedAt == null
+                    && sm.ManagerId == secondaryManagerId
                     && sm.StartDate <= now 
                     && sm.EndDate >= now);
         }
@@ -193,8 +158,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             var query = _context.SecondaryManagers
                 .Where(sm => sm.EmployeeId == employeeId
-                    && sm.SecondaryManagerId == secondaryManagerId
-                    && sm.DeletedAt == null
+                    && sm.ManagerId == secondaryManagerId
                     && sm.StartDate <= endDate && sm.EndDate >= startDate);
 
             return await query.AnyAsync();
@@ -206,7 +170,6 @@ namespace ManagementSimulator.Database.Repositories
 
             return await _context.SecondaryManagers
                 .AnyAsync(sm => sm.EmployeeId == employeeId
-                    && sm.DeletedAt == null
                     && sm.StartDate <= now
                     && sm.EndDate >= now);
         }
@@ -216,8 +179,7 @@ namespace ManagementSimulator.Database.Repositories
             var now = DateTime.UtcNow;
 
             return await _context.SecondaryManagers
-                .AnyAsync(sm => sm.SecondaryManagerId == userId
-                    && sm.DeletedAt == null
+                .AnyAsync(sm => sm.ManagerId == userId
                     && sm.StartDate <= now
                     && sm.EndDate >= now);
         }

@@ -280,7 +280,7 @@ namespace ManagementSimulator.Core.Services
             {
                 // If there's an active secondary manager, check if the current manager is the secondary manager
                 var activeSecondaryManagers = await _secondaryManagerRepository.GetActiveSecondaryManagersForEmployeeAsync(employeeId, tracking: false);
-                return activeSecondaryManagers.Any(sm => sm.SecondaryManagerId == managerId);
+                return activeSecondaryManagers.Any(sm => sm.ManagerId == managerId);
             }
             
             // If no active secondary manager, check if this is a regular manager relationship

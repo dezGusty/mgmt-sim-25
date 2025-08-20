@@ -31,20 +31,7 @@ namespace ManagementSimulator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AssignSecondaryManagerAsync([FromBody] CreateSecondaryManagerRequest request)
         {
-            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(nameIdentifierClaim) || !int.TryParse(nameIdentifierClaim, out var adminId))
-            {
-                return Unauthorized(new
-                {
-                    Message = "Admin ID is missing or invalid in the token.",
-                    Data = new SecondaryManagerResponseDto(),
-                    Success = false,
-                    Timestamp = DateTime.UtcNow
-                });
-            }
-
-            var result = await _secondaryManagerService.AssignSecondaryManagerAsync(request, adminId);
+            var result = await _secondaryManagerService.AssignSecondaryManagerAsync(request, 0);
 
             return Created($"/api/secondarymanager/", new
             {
@@ -203,38 +190,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        [HttpGet("assigned-by-admin")]
-        [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetSecondaryManagersAssignedByCurrentAdminAsync()
-        {
-            var nameIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(nameIdentifierClaim) || !int.TryParse(nameIdentifierClaim, out var adminId))
-            {
-                return BadRequest(new
-                {
-                    Message = "Admin ID is missing or invalid in the token.",
-                    Data = new List<SecondaryManagerResponseDto>(),
-                    Success = false,
-                    Timestamp = DateTime.UtcNow
-                });
-            }
-
-            var secondaryManagers = await _secondaryManagerService.GetSecondaryManagersAssignedByAdminAsync(adminId);
-
-            return Ok(new
-            {
-                Message = "Secondary managers assigned by current admin retrieved successfully.",
-                Data = secondaryManagers,
-                Success = true,
-                Timestamp = DateTime.UtcNow
-            });
-        }
 
         [HttpGet("{employeeId}/{secondaryManagerId}/{startDate}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

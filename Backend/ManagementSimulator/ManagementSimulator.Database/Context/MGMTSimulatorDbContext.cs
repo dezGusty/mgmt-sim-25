@@ -100,7 +100,7 @@ namespace ManagementSimulator.Database.Context
 
             modelBuilder.Entity<SecondaryManager>(entity =>
             {
-                entity.HasKey(sm => new { sm.EmployeeId, sm.SecondaryManagerId, sm.StartDate });
+                entity.HasKey(sm => new { sm.EmployeeId, sm.ManagerId, sm.StartDate });
 
                 entity.HasOne(sm => sm.Employee)
                       .WithMany()
@@ -109,16 +109,14 @@ namespace ManagementSimulator.Database.Context
 
                 entity.HasOne(sm => sm.Manager)
                       .WithMany()
-                      .HasForeignKey(sm => sm.SecondaryManagerId)
+                      .HasForeignKey(sm => sm.ManagerId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(sm => sm.AssignedByAdmin)
-                      .WithMany()
-                      .HasForeignKey(sm => sm.AssignedByAdminId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(sm => sm.StartDate)
+                      .IsRequired();
 
-                entity.Property(sm => sm.Reason)
-                      .HasMaxLength(500);
+                entity.Property(sm => sm.EndDate)
+                      .IsRequired();
             });
 
             modelBuilder.Entity<EmployeeRoleUser>()
