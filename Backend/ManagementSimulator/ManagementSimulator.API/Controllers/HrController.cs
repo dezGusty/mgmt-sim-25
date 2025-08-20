@@ -123,8 +123,7 @@ namespace ManagementSimulator.API.Controllers
                         Year = currentYear,
                         TotalLeaveDays = user.TotalLeaveDays,
                         UsedLeaveDays = user.UsedLeaveDays,
-                        RemainingLeaveDays = user.RemainingLeaveDays,
-                        LeaveTypeStatistics = user.LeaveTypeStatistics
+                        RemainingLeaveDays = user.RemainingLeaveDays
                     },
                     Success = true,
                     Timestamp = DateTime.UtcNow

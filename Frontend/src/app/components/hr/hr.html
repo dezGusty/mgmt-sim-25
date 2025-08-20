@@ -25,33 +25,15 @@
 							  <tr *ngFor="let r of records; let i = index; trackBy: trackByIndex">
 								<td class="px-4 py-3 text-sm text-gray-700">{{ getDisplayId(i) }}</td>
 
-								<td class="px-4 py-3 text-sm text-gray-700">
-									<div *ngIf="editingIndex !== i">{{ r.name }}</div>
-									<div *ngIf="editingIndex === i">
-										<input name="name-{{i}}" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm" [(ngModel)]="editModel!.name" />
-									</div>
-								</td>
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.name }}</td>
 
-								<td class="px-4 py-3 text-sm text-gray-700">
-									<div *ngIf="editingIndex !== i">{{ r.department }}</div>
-									<div *ngIf="editingIndex === i">
-										<input name="department-{{i}}" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm" [(ngModel)]="editModel!.department" />
-									</div>
-								</td>
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.department }}</td>
 
 								<td class="px-4 py-3 text-sm text-gray-700">
 									<div *ngIf="editingIndex !== i">{{ r.totalVacationDays }}</div>
-									<div *ngIf="editingIndex === i">
-										<input name="total-{{i}}" type="number" min="0" class="block w-28 px-3 py-2 border border-gray-300 rounded-md text-sm" [(ngModel)]="editModel!.totalVacationDays" />
-									</div>
 								</td>
 
-								<td class="px-4 py-3 text-sm text-gray-700">
-									<div *ngIf="editingIndex !== i">{{ r.usedVacationDays }}</div>
-									<div *ngIf="editingIndex === i">
-										<input name="used-{{i}}" type="number" min="0" class="block w-28 px-3 py-2 border border-gray-300 rounded-md text-sm" [(ngModel)]="editModel!.usedVacationDays" />
-									</div>
-								</td>
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.usedVacationDays }}</td>
 
 								<td class="px-4 py-3 text-sm text-right space-x-2">
 									<div *ngIf="editingIndex !== i">
@@ -72,10 +54,23 @@
 					<div class="text-sm text-gray-600">Showing {{ records.length }} records</div>
 
 					<div class="flex items-center gap-3">
-						<input type="file" #fileInput class="hidden" aria-label="Upload calendar file" (change)="onUploadCalendar($event)" />
-						<button class="px-4 py-2 rounded bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm" (click)="triggerFileInput(fileInput)">
-							Upload calendar
-						</button>
+						<div class="flex items-center gap-2 bg-white rounded-md p-1 shadow-sm">
+							<button
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								(click)="prevPage()"
+							>
+								Previous
+							</button>
+
+							<div class="text-sm px-2">Page {{ currentPage }}</div>
+
+							<button
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								(click)="nextPage()"
+							>
+								Next
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -83,3 +78,15 @@
 		</div>
 	</div>
 </main>
+
+    <!-- Separate upload calendar area -->
+    <div class="max-w-7xl mx-auto p-6 mt-4">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h4 class="text-lg font-medium text-gray-900 mb-2">Upload calendar</h4>
+        <div class="flex items-center gap-3">
+          <input type="file" #fileInputSeparate class="hidden" aria-label="Upload calendar file" (change)="onUploadCalendarSeparate($event)" />
+          <button class="px-4 py-2 rounded bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm" (click)="triggerFileInput(fileInputSeparate)">Upload calendar</button>
+        </div>
+      </div>
+    </div>
+
