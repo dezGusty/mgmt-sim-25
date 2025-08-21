@@ -157,7 +157,16 @@
 
   <!-- Admin Level -->
   <div class="mb-8">
-    <div class="flex items-center space-x-3 mb-4">
+    <div
+      class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
+      (click)="toggleAdminSection()"
+      (keydown.enter)="toggleAdminSection()"
+      (keydown.space)="toggleAdminSection(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-expanded]="!isAdminSectionCollapsed"
+      aria-controls="admin-section-content"
+    >
       <div class="p-2 bg-red-100 rounded-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -172,102 +181,310 @@
           />
         </svg>
       </div>
-      <h4 class="text-md font-medium text-gray-900">System Administrators</h4>
+      <h4 class="text-md font-medium text-gray-900 flex-1">System Administrators</h4>
       <span
         class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full"
-        >{{ getAdminCount() }} users</span
+        >{{ getTotalAdminCount() }} total</span
       >
-    </div>
-
-    <div *ngIf="isLoadingAdmins" class="text-center py-4">
-      <div class="inline-flex items-center">
-        <svg
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        <span class="text-sm text-gray-500">Loading administrators...</span>
-      </div>
-    </div>
-
-    <div
-      *ngIf="hasAdminsError() && !isLoadingAdmins"
-      class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
-    >
-      <div class="flex items-center">
-        <svg
-          class="h-5 w-5 text-red-400 mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <div class="flex-1">
-          <p class="text-sm text-red-700">{{ adminsErrorMessage }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Lista administratorilor -->
-    <div
-      *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8"
-    >
-      <div
-        *ngFor="let admin of admins"
-        class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+      <!-- Chevron Icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isAdminSectionCollapsed"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        <img
-          class="h-10 w-10 rounded-full object-cover"
-          [src]="
-            admin.avatar ||
-            'https://ui-avatars.com/api/?name=' +
-              admin.name +
-              '&background=ef4444&color=fff'
-          "
-          [alt]="admin.name"
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
         />
-        <div>
-          <div class="text-sm font-medium text-gray-900">{{ admin.name }}</div>
-          <div class="text-xs text-gray-500">{{ admin.email }}</div>
-        </div>
-      </div>
+      </svg>
     </div>
 
-    <!-- Mesaj când nu există administratori -->
+    <!-- Admin Section Content -->
     <div
-      *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length === 0"
-      class="text-center py-8 ml-8"
+      *ngIf="!isAdminSectionCollapsed"
+      id="admin-section-content"
+      class="admin-section-content"
     >
-      <div class="text-gray-400 text-sm">
-        No administrators found in the system
+      <div *ngIf="isLoadingAdmins" class="text-center py-4">
+        <div class="inline-flex items-center">
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-sm text-gray-500">Loading administrators...</span>
+        </div>
+      </div>
+
+      <div
+        *ngIf="hasAdminsError() && !isLoadingAdmins"
+        class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+      >
+        <div class="flex items-center">
+          <svg
+            class="h-5 w-5 text-red-400 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm text-red-700">{{ adminsErrorMessage }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista administratorilor -->
+      <div
+  *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8"
+>
+  <div
+    *ngFor="let admin of admins"
+    class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+  >
+    <img
+      class="h-10 w-10 rounded-full object-cover"
+      [src]="
+        admin.avatar ||
+        'https://ui-avatars.com/api/?name=' +
+          admin.name +
+          '&background=ef4444&color=fff'
+      "
+      [alt]="admin.name"
+    />
+    <div>
+      <div class="text-sm font-medium text-gray-900">
+        <span [innerHTML]="admin.name | highlight : getHighlightTerm('name') : 'name'"></span>
+      </div>
+      <div class="text-xs text-gray-500">
+        <span [innerHTML]="admin.email | highlight : getHighlightTerm('email') : 'email'"></span>
+      </div>
+      <div class="text-xs text-gray-500">
+        <span [innerHTML]="admin.jobTitle?.name || '' | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"></span>
+      </div>
+      <div class="flex items-center space-x-2 mt-1">
+        <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Mesaj când nu există administratori -->
+      <div
+        *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length === 0"
+        class="text-center py-8 ml-8"
+      >
+        <div class="text-gray-400 text-sm">
+          No administrators found in the system
+        </div>
+      </div>
+
+      <!-- Pagination for Admins -->
+      <div
+        *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
+        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
+      >
+        <div *ngIf="totalPagesAdmins > 1" class="flex-1 flex justify-between items-center sm:hidden">
+          <button
+            (click)="goToPreviousPageAdmins()"
+            [disabled]="currentPageAdmins === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span class="text-sm text-gray-700">
+            Page {{ currentPageAdmins }} of {{ totalPagesAdmins }}
+          </span>
+          <button
+            (click)="goToNextPageAdmins()"
+            [disabled]="currentPageAdmins === totalPagesAdmins"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ getStartResultIndexAdmins() }}</span>
+              to
+              <span class="font-medium">{{ getMaxDisplayedResultAdmins() }}</span>
+              of
+              <span class="font-medium">{{ getTotalAdminCount() }}</span>
+              administrators
+            </p>
+            <div class="flex items-center gap-2">
+              <label for="itemsPerPageAdmins" class="text-sm text-gray-700">Show:</label>
+              <select
+                id="itemsPerPageAdmins"
+                [(ngModel)]="pageSizeAdmins"
+                (ngModelChange)="onItemsPerPageChangeAdmins()"
+                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent"
+              >
+                <option value="3" selected>3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-sm text-gray-700">per page</span>
+            </div>
+          </div>
+          <div *ngIf="totalPagesAdmins > 1">
+            <nav
+              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
+              <!-- First page button -->
+              <button
+                (click)="goToFirstPageAdmins()"
+                [disabled]="currentPageAdmins === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="First page"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <!-- Previous page button -->
+              <button
+                (click)="goToPreviousPageAdmins()"
+                [disabled]="currentPageAdmins === 1"
+                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Previous page"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <!-- Page numbers -->
+              <button
+                *ngFor="let page of getPageNumbersAdmins()"
+                (click)="goToPageAdmins(page)"
+                [class]="
+                  page === currentPageAdmins
+                    ? 'relative inline-flex items-center px-4 py-2 border border-red-400 bg-red-400 text-sm font-medium text-white'
+                    : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
+                "
+              >
+                {{ page }}
+              </button>
+              <!-- Show ellipsis if there are more pages -->
+              <span
+                *ngIf="
+                  totalPagesAdmins > 5 &&
+                  currentPageAdmins < totalPagesAdmins - 2
+                "
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+              >
+                ...
+              </span>
+              <!-- Next page button -->
+              <button
+                (click)="goToNextPageAdmins()"
+                [disabled]="currentPageAdmins === totalPagesAdmins"
+                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Next page"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <!-- Last page button -->
+              <button
+                (click)="goToLastPageAdmins()"
+                [disabled]="currentPageAdmins === totalPagesAdmins"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Last page"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Manager Level -->
   <div class="mb-8">
-    <div class="flex items-center space-x-3 mb-4">
+    <div
+      class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
+      (click)="toggleManagerSection()"
+      (keydown.enter)="toggleManagerSection()"
+      (keydown.space)="toggleManagerSection(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-expanded]="!isManagerSectionCollapsed"
+      aria-controls="manager-section-content"
+    >
       <div class="p-2 bg-green-100 rounded-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -282,46 +499,16 @@
           />
         </svg>
       </div>
-      <h4 class="text-md font-medium text-gray-900">Team Managers</h4>
+      <h4 class="text-md font-medium text-gray-900 flex-1">Team Managers</h4>
       <span
         class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
-        >{{ getManagerCount() }} managers</span
+        >{{ getTotalManagerCount() }} total</span
       >
-    </div>
-
-    <div *ngIf="isLoadingManagers" class="text-center py-8">
-      <div class="inline-flex items-center">
-        <svg
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        <span class="text-sm text-gray-500">Loading managers...</span>
-      </div>
-    </div>
-
-    <div
-      *ngIf="hasManagersError() && !isLoadingManagers"
-      class="text-center py-12"
-    >
+      <!-- Chevron Icon -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-12 w-12 text-gray-400 mx-auto mb-4"
+        class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isManagerSectionCollapsed"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -330,18 +517,70 @@
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          d="M19 9l-7 7-7-7"
         />
       </svg>
-      <div class="text-gray-400 text-lg mb-2">No managers found</div>
-      <div class="text-gray-500 text-sm mb-4">{{ managersErrorMessage }}</div>
-      <div class="flex justify-center space-x-3"></div>
     </div>
 
-    <!-- Lista managerilor -->
+    <!-- Manager Section Content -->
     <div
-      *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
+      *ngIf="!isManagerSectionCollapsed"
+      id="manager-section-content"
+      class="manager-section-content"
     >
+      <div *ngIf="isLoadingManagers" class="text-center py-8">
+        <div class="inline-flex items-center">
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-sm text-gray-500">Loading managers...</span>
+        </div>
+      </div>
+
+      <div
+        *ngIf="hasManagersError() && !isLoadingManagers"
+        class="text-center py-12"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-12 w-12 text-gray-400 mx-auto mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+        <div class="text-gray-400 text-lg mb-2">No managers found</div>
+        <div class="text-gray-500 text-sm mb-4">{{ managersErrorMessage }}</div>
+        <div class="flex justify-center space-x-3"></div>
+      </div>
+
+      <!-- Lista managerilor -->
+      <div
+        *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
+      >
       <div
         *ngFor="let manager of managers"
         class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"
@@ -359,7 +598,7 @@
               "
               [alt]="manager.name"
             />
-            <div>
+            <div class="flex-1">
               <div class="text-lg font-semibold text-gray-900">
                 <span
                   [innerHTML]="
@@ -394,100 +633,138 @@
                 >
               </div>
             </div>
+            <!-- Employees Dropdown Toggle -->
+            <div
+              *ngIf="manager.subordinatesNames && manager.subordinatesNames.length > 0"
+              class="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
+              (click)="toggleManagerEmployees(manager.id)"
+              (keydown.enter)="toggleManagerEmployees(manager.id)"
+              (keydown.space)="toggleManagerEmployees(manager.id); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+              [attr.aria-expanded]="!isManagerEmployeesCollapsed(manager.id)"
+              [attr.aria-controls]="'employees-' + manager.id"
+              title="Toggle employees list"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-gray-400 transition-transform"
+                [class.rotate-180]="!isManagerEmployeesCollapsed(manager.id)"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           </div>
         </div>
         <div class="p-4">
+          <!-- Employees Section Content -->
           <div
-            *ngIf="
-              manager.subordinatesNames && manager.subordinatesNames.length > 0;
-              else noSubordinates
-            "
+            *ngIf="!isManagerEmployeesCollapsed(manager.id)"
+            [id]="'employees-' + manager.id"
+            class="employees-section-content"
           >
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div
-                *ngFor="
-                  let subordinateName of manager.subordinatesNames;
-                  let i = index
-                "
-                class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg"
-              >
-                <img
-                  class="h-10 w-10 rounded-full object-cover"
-                  [src]="
-                    'https://ui-avatars.com/api/?name=' +
-                    subordinateName +
-                    '&background=6b7280&color=eee'
+            <div
+              *ngIf="
+                manager.subordinatesNames && manager.subordinatesNames.length > 0;
+                else noSubordinates
+              "
+            >
+              <div class="employees-grid-container">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div
+                  *ngFor="
+                    let subordinateName of manager.subordinatesNames;
+                    let i = index
                   "
-                  [alt]="subordinateName"
-                />
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-gray-900 truncate">
-                    <span
-                      [innerHTML]="
-                        subordinateName
-                          | highlight : getHighlightTerm('name') : 'name'
-                      "
-                    ></span>
-                  </div>
-                  <div class="text-xs text-gray-500">
-                    <span
-                      [innerHTML]="(manager.subordinatesEmails?.[i] || '') | highlight : getHighlightTerm('email') : 'email'"
-                    ></span>
-                  </div>
-                  <div class="text-xs text-gray-500 truncate">
-                    <span
-                      [innerHTML]="(manager.subordinatesJobTitleNames?.[i] || '') | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"
-                    ></span>
-                  </div>
-                  <div
-                    *ngIf="isManager(manager.subordinatesIds?.[i])"
-                    class="flex items-center space-x-2 mt-1"
-                  >
-                    <span
-                      class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full"
-                      >Manager</span
+                  class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg"
+                >
+                  <img
+                    class="h-10 w-10 rounded-full object-cover"
+                    [src]="
+                      'https://ui-avatars.com/api/?name=' +
+                      subordinateName +
+                      '&background=6b7280&color=eee'
+                    "
+                    [alt]="subordinateName"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      <span
+                        [innerHTML]="
+                          subordinateName
+                            | highlight : getHighlightTerm('name') : 'name'
+                        "
+                      ></span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      <span
+                        [innerHTML]="(manager.subordinatesEmails?.[i] || '') | highlight : getHighlightTerm('email') : 'email'"
+                      ></span>
+                    </div>
+                    <div class="text-xs text-gray-500 truncate">
+                      <span
+                        [innerHTML]="(manager.subordinatesJobTitleNames?.[i] || '') | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"
+                      ></span>
+                    </div>
+                    <div
+                      *ngIf="isManager(manager.subordinatesIds?.[i])"
+                      class="flex items-center space-x-2 mt-1"
                     >
-                  </div>
-                  <div
-                    *ngIf="isAdmin(manager.subordinatesIds?.[i])"
-                    class="flex items-center space-x-2 mt-1"
-                  >
-                    <span
-                      class="px-2 py-1 bg-red-600 text-white text-xs rounded-full"
-                      >Admin</span
+                      <span
+                        class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full"
+                        >Manager</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="isAdmin(manager.subordinatesIds?.[i])"
+                      class="flex items-center space-x-2 mt-1"
                     >
+                      <span
+                        class="px-2 py-1 bg-red-600 text-white text-xs rounded-full"
+                        >Admin</span
+                      >
+                    </div>
+                    <div class="ml-3 flex-shrink-0">
+                      <button
+                        class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors"
+                        (click)="assignManager({
+                        id: manager.subordinatesIds?.[i] || 0,
+                        name: subordinateName,
+                        email: manager.subordinatesEmails?.[i] || '',
+                        managersIds: []
+                      }, false)"
+                      >
+                        Reassign
+                      </button>
+                    </div>
                   </div>
-                  <div class="ml-3 flex-shrink-0">
-                    <button
-                      class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors"
-                      (click)="assignManager({
-                      id: manager.subordinatesIds?.[i] || 0,
-                      name: subordinateName,
-                      email: manager.subordinatesEmails?.[i] || '',
-                      managersIds: []
-                    }, false)"
-                    >
-                      Reassign
-                    </button>
-                  </div>
+                </div>
                 </div>
               </div>
             </div>
+            <ng-template #noSubordinates>
+              <div class="text-center py-4">
+                <div class="text-gray-400 text-sm">No team members assigned</div>
+              </div>
+            </ng-template>
           </div>
-          <ng-template #noSubordinates>
-            <div class="text-center py-4">
-              <div class="text-gray-400 text-sm">No team members assigned</div>
-            </div>
-          </ng-template>
         </div>
       </div>
 
       <!-- Paginare pentru manageri -->
       <div
-        *ngIf="totalPagesManagers > 1"
+        *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
         class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
       >
-        <div class="flex-1 flex justify-between items-center sm:hidden">
+        <div *ngIf="totalPagesManagers > 1" class="flex-1 flex justify-between items-center sm:hidden">
           <button
             (click)="goToPreviousPageManagers()"
             [disabled]="currentPageManagers === 1"
@@ -517,7 +794,7 @@
               to
               <span class="font-medium">{{ getMaxDisplayedResultManagers() }}</span>
               of
-              <span class="font-medium">{{ getTotalManagersCount() }}</span>
+              <span class="font-medium">{{ getTotalManagerCount() }}</span>
               managers
             </p>
             <div class="flex items-center gap-2">
@@ -528,7 +805,7 @@
                 (ngModelChange)="onItemsPerPageChangeManagers()"
                 class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
               >
-                <option value="5">5</option>
+                <option value="5" selected>5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -537,7 +814,7 @@
               <span class="text-sm text-gray-700">per page</span>
             </div>
           </div>
-          <div>
+          <div *ngIf="totalPagesManagers > 1">
             <nav
               class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
               aria-label="Pagination"
@@ -647,13 +924,23 @@
             </nav>
           </div>
         </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Unassigned Users -->
-  <div class="border-l-4 border-orange-400 pl-4 mb-8">
-    <div class="flex items-center space-x-3 mb-4">
+  <div class="mb-8">
+    <div
+      class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
+      (click)="toggleUnassignedUsersSection()"
+      (keydown.enter)="toggleUnassignedUsersSection()"
+      (keydown.space)="toggleUnassignedUsersSection(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-expanded]="!isUnassignedUsersSectionCollapsed"
+      aria-controls="unassigned-users-section-content"
+    >
       <div class="p-2 bg-orange-100 rounded-lg">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -668,141 +955,166 @@
           />
         </svg>
       </div>
-      <h4 class="text-md font-medium text-gray-900">Unassigned Users</h4>
+      <h4 class="text-md font-medium text-gray-900 flex-1">Unassigned Users</h4>
       <span
         class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full"
-        >{{ getUnassignedUsersCount() }} users</span
+        >{{ getTotalUnassignedUsersCount() }} total</span
       >
+      <!-- Chevron Icon -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isUnassignedUsersSectionCollapsed"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
     </div>
 
-    <!-- Loading pentru utilizatori neasignați -->
-    <div *ngIf="isLoadingUnassignedUsers" class="text-center py-4 ml-8">
-      <div class="inline-flex items-center">
-        <svg
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        <span class="text-sm text-gray-500">Loading unassigned users...</span>
-      </div>
-    </div>
-
-    <!-- Mesaj de eroare pentru utilizatori neasignați -->
+    <!-- Unassigned Users Content -->
     <div
-      *ngIf="hasUnassignedUsersError() && !isLoadingUnassignedUsers"
-      class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4 ml-8"
+      *ngIf="!isUnassignedUsersSectionCollapsed"
+      id="unassigned-users-section-content"
+      class="space-y-4 slideDown"
     >
-      <div class="flex items-center">
-        <svg
-          class="h-5 w-5 text-orange-400 mr-2"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <div class="flex-1">
-          <p class="text-sm text-orange-700">
-            {{ unassignedUsersErrorMessage }}
-          </p>
+      <!-- Loading pentru utilizatori neasignați -->
+      <div *ngIf="isLoadingUnassignedUsers" class="text-center py-4 ml-8">
+        <div class="inline-flex items-center">
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-sm text-gray-500">Loading unassigned users...</span>
         </div>
       </div>
-    </div>
 
-    <!-- Lista utilizatorilor neasignați -->
-    <div
-      *ngIf="
-        !hasUnassignedUsersError() &&
-        !isLoadingUnassignedUsers &&
-        unassignedUsers.length > 0
-      "
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8"
-    >
+      <!-- Mesaj de eroare pentru utilizatori neasignați -->
       <div
-        *ngFor="let user of unassignedUsers"
-        class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50"
+        *ngIf="hasUnassignedUsersError() && !isLoadingUnassignedUsers"
+        class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4 ml-8"
       >
-        <div class="flex items-center space-x-3">
-          <img
-            class="h-8 w-8 rounded-full object-cover"
-            [src]="
-              user.avatar ||
-              'https://ui-avatars.com/api/?name=' +
-                user.name +
-                '&background=f97316&color=fff'
-            "
-            [alt]="user.name"
-          />
-          <div>
-            <div class="text-sm font-medium text-gray-900">
-              <span
-                [innerHTML]="
-                  user.name | highlight : getHighlightTerm('name') : 'name'
-                "
-              ></span>
-            </div>
-            <div class="text-xs text-gray-500">
-              <span
-                [innerHTML]="
-                  user.email | highlight : getHighlightTerm('email') : 'email'
-                "
-              ></span>
-            </div>
-            <div class="text-xs text-gray-500">
-              <span
-                [innerHTML]="
-                  user.jobTitle?.name || ''
-                    | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
-                "
-              ></span>
-            </div>
+        <div class="flex items-center">
+          <svg
+            class="h-5 w-5 text-orange-400 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm text-orange-700">
+              {{ unassignedUsersErrorMessage }}
+            </p>
           </div>
         </div>
-        <button
-          class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium"
-          (click)="assignManager(user, false)"
+      </div>
+
+      <!-- Lista utilizatorilor neasignați -->
+      <div
+        *ngIf="
+          !hasUnassignedUsersError() &&
+          !isLoadingUnassignedUsers &&
+          unassignedUsers.length > 0
+        "
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8"
+      >
+        <div
+          *ngFor="let user of unassignedUsers"
+          class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50"
         >
-          Assign
-        </button>
+          <div class="flex items-center space-x-3">
+            <img
+              class="h-8 w-8 rounded-full object-cover"
+              [src]="
+                user.avatar ||
+                'https://ui-avatars.com/api/?name=' +
+                  user.name +
+                  '&background=f97316&color=fff'
+              "
+              [alt]="user.name"
+            />
+            <div>
+              <div class="text-sm font-medium text-gray-900">
+                <span
+                  [innerHTML]="
+                    user.name | highlight : getHighlightTerm('name') : 'name'
+                  "
+                ></span>
+              </div>
+              <div class="text-xs text-gray-500">
+                <span
+                  [innerHTML]="
+                    user.email | highlight : getHighlightTerm('email') : 'email'
+                  "
+                ></span>
+              </div>
+              <div class="text-xs text-gray-500">
+                <span
+                  [innerHTML]="
+                    user.jobTitle?.name || ''
+                      | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
+                  "
+                ></span>
+              </div>
+              <div class="flex items-center space-x-2 mt-1">
+                <span class="px-2 py-1 bg-orange-600 text-white text-xs rounded-full">Unassigned</span>
+              </div>
+            </div>
+          </div>
+          <button
+            class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium"
+            (click)="assignManager(user, false)"
+          >
+            Assign
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div
-      *ngIf="
-        !hasUnassignedUsersError() &&
-        !isLoadingUnassignedUsers &&
-        unassignedUsers.length === 0
-      "
-      class="text-center py-8 ml-8"
-    >
-      <div class="text-green-600 text-sm font-medium">
-        All users are assigned to managers!
+      <div
+        *ngIf="
+          !hasUnassignedUsersError() &&
+          !isLoadingUnassignedUsers &&
+          unassignedUsers.length === 0
+        "
+        class="text-center py-8 ml-8"
+      >
+        <div class="text-green-600 text-sm font-medium">
+          All users are assigned to managers!
+        </div>
       </div>
-    </div>
 
-    <div
-      *ngIf="totalPagesUnassignedUsers > 1"
-      class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
-    >
+      <div
+        *ngIf="totalPagesUnassignedUsers > 1"
+        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
+      >
       <div class="flex-1 flex justify-between items-center sm:hidden">
         <button
           (click)="goToPreviousPageUnassignedUsers()"
@@ -836,7 +1148,7 @@
               getMaxDisplayedResultUnassignedUsers()
             }}</span>
             of
-            <span class="font-medium">{{ getUnassignedUsersCount() }}</span>
+            <span class="font-medium">{{ getTotalUnassignedUsersCount() }}</span>
             unassigned users
           </p>
           <div class="flex items-center gap-2">
@@ -847,6 +1159,7 @@
               (ngModelChange)="onItemsPerPageChangeUnassignedUsers()"
               class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent"
             >
+              <option value="3">3</option>
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="25">25</option>
@@ -969,6 +1282,7 @@
             </button>
           </nav>
         </div>
+      </div>
       </div>
     </div>
   </div>
