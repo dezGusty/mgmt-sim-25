@@ -302,31 +302,6 @@ namespace ManagementSimulator.Core.Services
 
             hrUserDto.UsedLeaveDays = CalculateTotalDays(pendingRequests);
             hrUserDto.RemainingLeaveDays = hrUserDto.TotalLeaveDays - hrUserDto.UsedLeaveDays;
-
-            hrUserDto.LeaveTypeStatistics = new List<LeaveTypeStatDto>();
-
-            foreach (var leaveType in leaveRequestTypes)
-            {
-                var typeRequests = yearLeaveRequests.Where(lr => lr.LeaveRequestTypeId == leaveType.Id);
-                var pendingTypeRequests = typeRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
-                
-                var usedDaysForType = CalculateTotalDays(pendingTypeRequests);
-                var maxAllowedDays = leaveType.Title == "Vacation"
-                    ? user.Vacation
-                    : (leaveType.MaxDays ?? hrUserDto.TotalLeaveDays);
-                
-                var leaveTypeStat = new LeaveTypeStatDto
-                {
-                    LeaveTypeId = leaveType.Id,
-                    LeaveTypeName = leaveType.Title,
-                    UsedDays = usedDaysForType,
-                    RemainingDays = maxAllowedDays - usedDaysForType,
-                    MaxAllowedDays = maxAllowedDays
-                };
-                
-                hrUserDto.LeaveTypeStatistics.Add(leaveTypeStat);
-            }
-
             return hrUserDto;
         }
 
@@ -672,19 +647,19 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = users.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.FirstName ?? string.Empty,
-                LastName = u.LastName ?? string.Empty,
-                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                JobTitleId = u.JobTitleId,
-                JobTitleName = u.Title?.Name ?? string.Empty,
-                DepartmentId = u.DepartmentId,
-                DepartmentName = u.Department?.Name ?? string.Empty,
-                IsActive = u.DeletedAt == null,
-                Vacation = u.Vacation,
-            }),
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
@@ -696,6 +671,48 @@ namespace ManagementSimulator.Core.Services
         {
             return await _userRepository.GetAllAdminsAsync(lastName, email);
         }
+
+        /*public async Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload)
+        {
+            var (admins, totalCount) = await _userRepository.GetAllAdminsFilteredAsync(
+                payload.Name,
+                payload.Email,
+                payload.Department,
+                payload.JobTitle,
+                payload.GlobalSearch,
+                payload.PagedQueryParams.ToQueryParams());
+
+            if (admins == null || !admins.Any())
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = new List<UserResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<UserResponseDto>
+            {
+                Data = admins.Select(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
+            };
+        }*/
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload)
         {
@@ -769,20 +786,20 @@ namespace ManagementSimulator.Core.Services
             return new PagedResponseDto<UserResponseDto>
             {
                 Data = managers.Select(u => new UserResponseDto
-            {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.FirstName ?? string.Empty,
-                LastName = u.LastName ?? string.Empty,
-                Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                JobTitleId = u.JobTitleId,
-                JobTitleName = u.Title?.Name ?? string.Empty,
-                DepartmentId = u.DepartmentId,
-                DepartmentName = u.Department?.Name ?? string.Empty,
-                SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
-                IsActive = u.DeletedAt == null,
-                Vacation = u.Vacation,
-            }),
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    SubordinatesIds = u.Subordinates.Select(u => u.EmployeeId).ToList(),
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
@@ -811,6 +828,21 @@ namespace ManagementSimulator.Core.Services
             user.ModifiedAt = DateTime.UtcNow;
             await _userRepository.SaveChangesAsync();
             return user.Vacation;
+        }
+
+        public async Task<int> GetTotalAdminsCountAsync()
+        {
+            return await _userRepository.GetTotalAdminsCountAsync(includeDeleted: false);
+        }
+
+        public async Task<int> GetTotalManagersCountAsync()
+        {
+            return await _userRepository.GetTotalManagersCountAsync(includeDeleted: false);
+        }
+
+        public async Task<int> GetTotalUnassignedUsersCountAsync()
+        {
+            return await _userRepository.GetTotalUnassignedUsersCountAsync(includeDeleted: false);
         }
     }
 }

@@ -183,6 +183,68 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
+        /*public async Task<(List<User>? Data, int TotalCount)> GetAllAdminsFilteredAsync(string? name, string? email, string? globalSearch, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
+                .Where(u => u.Roles.Where(r => r.DeletedAt == null).Any(r => r.Role.Rolename == "Admin"))
+                .Include(u => u.Roles.Where(r => r.DeletedAt == null))
+                    .ThenInclude(u => u.Role)
+                .Include(u => u.Title)
+                .Include(u => u.Department);
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(globalSearch))
+            {
+                query = query.Where(u =>
+                    (u.FirstName != null && u.FirstName.Contains(globalSearch)) ||
+                    (u.LastName != null && u.LastName.Contains(globalSearch)) ||
+                    (u.Email != null && u.Email.Contains(globalSearch)) ||
+                    (u.Title != null && u.Title.Name != null && u.Title.Name.Contains(globalSearch)) ||
+                    (u.Department != null && u.Department.Name != null && u.Department.Name.Contains(globalSearch))
+                );
+            }
+            else
+            {
+                // Individual filters
+                if (!string.IsNullOrEmpty(name))
+                {
+                    query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(name));
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    query = query.Where(u => u.Email.Contains(email));
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // Sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // Paging
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }*/
+
         public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
@@ -487,6 +549,36 @@ namespace ManagementSimulator.Database.Repositories
                                 .ToListAsync();
                 return (pagedData, totalCount);
             }
+        }
+
+        public async Task<int> GetTotalAdminsCountAsync(bool includeDeleted = false)
+        {
+            var query = GetRecords(includeDeletedEntities: includeDeleted)
+                .Where(u => u.Roles.Where(r => r.DeletedAt == null).Any(r => r.Role.Rolename == "Admin"));
+
+            return await query.CountAsync();
+        }
+
+        public async Task<int> GetTotalManagersCountAsync(bool includeDeleted = false)
+        {
+            IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
+                                     .Include(u => u.Subordinates.Where(s => s.DeletedAt == null))
+                                     .Where(u => u.Subordinates.Count > 0);
+
+            return await query.CountAsync();
+        }
+
+        public async Task<int> GetTotalUnassignedUsersCountAsync(bool includeDeleted = false)
+        {
+            IQueryable<User> query = _dbContext.Users;
+
+            if (!includeDeleted)
+                query = query.Where(u => u.DeletedAt == null);
+
+            query = query.Include(u => u.Managers)
+                         .Where(u => u.Managers.Where(m => m.DeletedAt == null).Count() == 0);
+
+            return await query.CountAsync();
         }
     }
 }

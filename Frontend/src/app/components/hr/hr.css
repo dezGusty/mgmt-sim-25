@@ -1,0 +1,9 @@
+/* HR component custom styles - project uses Tailwind for most styling */
+
+:host { display: block; }
+
+table th, table td { vertical-align: middle; }
+
+.overflow-x-auto { -webkit-overflow-scrolling: touch; }
+
+.file-input-hidden { display: none; }

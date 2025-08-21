@@ -1,7 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/authService/auth';
+
+interface UserRole {
+  name: string;
+  displayName: string;
+  description: string;
+  route: string;
+}
 
 @Component({
   selector: 'custom-navbar',
@@ -13,11 +20,83 @@ export class CustomNavbar implements OnInit {
   userRoles: string[] = [];
   showHomeButton = true;
   userEmail: string = '';
+  showRoleDropdown = false;
+  availableRoles: UserRole[] = [];
 
   constructor(private router: Router, private authService: Auth) { }
 
   ngOnInit(): void {
     this.loadUserData();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.role-dropdown-container')) {
+      this.showRoleDropdown = false;
+    }
+  }
+
+  toggleRoleDropdown(): void {
+    if (this.userRoles.length > 1) {
+      this.showRoleDropdown = !this.showRoleDropdown;
+    }
+  }
+
+  switchRole(role: UserRole): void {
+    this.showRoleDropdown = false;
+    this.router.navigate([role.route]);
+  }
+
+  goToRoleSelector(): void {
+    this.showRoleDropdown = false;
+    this.router.navigate(['/role-selector']);
+  }
+
+  getRoleColor(roleName: string): string {
+    switch (roleName) {
+      case 'Admin':
+        return 'bg-blue-600';
+      case 'HR':
+        return 'bg-purple-600';
+      case 'Manager':
+        return 'bg-yellow-500';
+      case 'Employee':
+        return 'bg-green-600';
+      default:
+        return 'bg-gray-600';
+    }
+  }
+
+  private mapRoleToInterface(roleName: string): UserRole | null {
+    const roleMapping: { [key: string]: UserRole } = {
+      'Admin': {
+        name: 'Admin',
+        displayName: 'Administrator',
+        description: 'Full system access and user management capabilities',
+        route: '/admin'
+      },
+      'Manager': {
+        name: 'Manager',
+        displayName: 'Manager',
+        description: 'Team management and leave request approvals',
+        route: '/manager'
+      },
+      'Employee': {
+        name: 'Employee',
+        displayName: 'Employee',
+        description: 'Submit and manage your leave requests',
+        route: '/user'
+      },
+      'HR': {
+        name: 'HR',
+        displayName: 'Human Resources',
+        description: 'Manage employee records and leave requests',
+        route: '/hr'
+      }
+    };
+
+    return roleMapping[roleName] || null;
   }
 
   getPrimaryRole(): string {
@@ -28,7 +107,7 @@ export class CustomNavbar implements OnInit {
     return this.userRoles[0] || 'User';
   }
 
-  getRoleColor(): string {
+  getRoleColorForPrimary(): string {
     const role = this.getPrimaryRole();
     switch (role) {
       case 'Admin':
@@ -46,7 +125,7 @@ export class CustomNavbar implements OnInit {
 
   getPageColor(): string {
     const currentUrl = this.router.url;
-    
+
     if (currentUrl.includes('/admin')) {
       return 'bg-blue-600';
     } else if (currentUrl.includes('/hr')) {
@@ -56,7 +135,7 @@ export class CustomNavbar implements OnInit {
     } else if (currentUrl.includes('/user')) {
       return 'bg-green-600';
     } else if (currentUrl.includes('/role-selector')) {
-      return 'bg-gray-400'; // Pentru loading
+      return 'bg-gray-400';
     } else {
       return 'bg-gray-600';
     }
@@ -64,7 +143,7 @@ export class CustomNavbar implements OnInit {
 
   getPageRole(): string {
     const currentUrl = this.router.url;
-    
+
     if (currentUrl.includes('/admin')) {
       return 'Admin';
     } else if (currentUrl.includes('/hr')) {
@@ -107,6 +186,10 @@ export class CustomNavbar implements OnInit {
           if (data.roles) {
             this.userRoles = data.roles;
             this.showHomeButton = this.userRoles.length > 1;
+
+            this.availableRoles = this.userRoles
+              .map(role => this.mapRoleToInterface(role))
+              .filter(role => role !== null) as UserRole[];
           }
         }
       }

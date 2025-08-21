@@ -38,7 +38,8 @@ export class AuthGuard implements CanActivate {
               return this.router.parseUrl('/manager');
             if (roles.includes('Employee'))
               return this.router.parseUrl('/user');
-            return this.router.parseUrl('/');
+            if (roles.includes('HR'))
+              return this.router.parseUrl('/hr');
           }
           return true;
         }
@@ -49,7 +50,7 @@ export class AuthGuard implements CanActivate {
         }
       }
 
-      return this.router.parseUrl('/login');
+      return this.router.parseUrl('/role-selector');
     } catch {
       return this.router.parseUrl('/login');
     }

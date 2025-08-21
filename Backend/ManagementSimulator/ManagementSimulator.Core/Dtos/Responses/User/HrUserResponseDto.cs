@@ -18,20 +18,9 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public bool IsActive { get; set; } = true;
         public DateTime DateOfEmployment { get; set; }
         public int Vacation { get; set; }
-        
+
         public int TotalLeaveDays { get; set; }
         public int UsedLeaveDays { get; set; }
         public int RemainingLeaveDays { get; set; }
-        
-        public List<LeaveTypeStatDto> LeaveTypeStatistics { get; set; } = new List<LeaveTypeStatDto>();
-    }
-
-    public class LeaveTypeStatDto
-    {
-        public int LeaveTypeId { get; set; }
-        public string LeaveTypeName { get; set; } = string.Empty;
-        public int UsedDays { get; set; }
-        public int RemainingDays { get; set; }
-        public int MaxAllowedDays { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component } from '@angular/core'; 
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ import { HighlightPipe } from '../../../../pipes/highlight.pipe';
 export class AdminUserRelationships implements OnInit {
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
-  managers: IUserViewModel[] = []; 
+  managers: IUserViewModel[] = [];
   admins: IUserViewModel[] = [];
   unassignedUsers: IUserViewModel[] = [];
 
@@ -35,13 +35,20 @@ export class AdminUserRelationships implements OnInit {
 
   UserSearchType = UserSearchType;
 
-  pageSizeManagers: number = 10;
+  allAdmins: IUserViewModel[] = [];   // full dataset   // current page slice
+  totalAdminsCount: number = 0;
+  totalPagesAdmins: number = 0;
+  currentPageAdmins: number = 1;
+  pageSizeAdmins: number = 3;
+  pageSizeManagers: number = 5;
   currentPageManagers: number = 1;
   totalPagesManagers: number = 0;
+  totalManagersCount: number = 0;
 
-  pageSizeUnassignedUsers: number = 10;
+  pageSizeUnassignedUsers: number = 3;
   currentPageUnassignedUsers: number = 1;
   totalPagesUnassignedUsers: number = 0;
+  totalUnassignedUsersCount: number = 0;
 
   showAssignRelationShipComponent: boolean = false;
   selectedEmployee!: {
@@ -70,6 +77,14 @@ export class AdminUserRelationships implements OnInit {
   
   hasInitialDataLoaded: boolean = false;
 
+  // Dropdown state management
+  isAdminSectionCollapsed: boolean = true;
+  isManagerSectionCollapsed: boolean = true;
+  isUnassignedUsersSectionCollapsed: boolean = true;
+  
+  // Track collapsed state for each manager's employees
+  managerEmployeesCollapsed: Map<number, boolean> = new Map();
+
   constructor(private userService: UsersService) {}
 
   ngOnInit(): void {
@@ -80,36 +95,105 @@ export class AdminUserRelationships implements OnInit {
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
+    // Load exact counts from backend
+    this.loadExactCounts();
   }
 
-  loadAdmins(): void {
-    this.isLoadingAdmins = true;
-    this.adminsErrorMessage = '';
+  private loadExactCounts(): void {
+    // Load exact counts from backend endpoints
+    this.loadTotalAdminsCount();
+    this.loadTotalManagersCount();
+    this.loadTotalUnassignedUsersCount();
+  }
 
-    this.userService.getAllAdmins().subscribe({
+  private loadTotalAdminsCount(): void {
+    this.userService.getTotalAdminsCount().subscribe({
       next: (response) => {
-        this.isLoadingAdmins = false;
-        const rawAdmins: IUser[] = response.data;
-        
-        if (!rawAdmins || rawAdmins.length === 0) {
-          this.adminsErrorMessage = 'No admins were found.';
-          this.admins = [];
-        } else {
-          this.admins = rawAdmins.map((admin) => this.mapToUserViewModel(admin));
-          this.adminsErrorMessage = '';
-        }
-        
-        this.checkIfInitialDataLoaded();
+        this.totalAdminsCount = response.data;
       },
       error: (err) => {
-        this.isLoadingAdmins = false;
-        this.adminsErrorMessage = 'Error during retrieving admins.';
-        this.admins = [];
-        console.error('Failed to fetch admins:', err);
-        this.checkIfInitialDataLoaded();
+        console.error('Failed to fetch total admins count:', err);
+        // Keep existing count as fallback
       },
     });
   }
+
+  private loadTotalManagersCount(): void {
+    this.userService.getTotalManagersCount().subscribe({
+      next: (response) => {
+        // Directly use response.data which contains the total count
+        this.totalManagersCount = response.data;
+      },
+      error: (err) => {
+        console.error('Failed to fetch total managers count:', err);
+        // Preserve existing count on error
+      },
+    });
+  }
+
+  private loadTotalUnassignedUsersCount(): void {
+    this.userService.getTotalUnassignedUsersCount().subscribe({
+      next: (response) => {
+        this.totalUnassignedUsersCount = response.data;
+      },
+      error: (err) => {
+        console.error('Failed to fetch total unassigned users count:', err);
+        // Keep existing count as fallback
+      },
+    });
+  }
+
+
+loadAdmins(): void {
+  this.isLoadingAdmins = true;
+  this.adminsErrorMessage = '';
+
+  this.userService.getAllAdmins().subscribe({
+    next: (response) => {
+      this.isLoadingAdmins = false;
+      const rawAdmins: IUser[] = response.data;
+
+      if (!rawAdmins || rawAdmins.length === 0) {
+        this.adminsErrorMessage = 'No admins were found.';
+        this.admins = [];
+        this.allAdmins = [];
+        this.totalPagesAdmins = 0;
+      } else {
+        // keep full dataset
+        this.allAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
+
+        // Calculate total pages based on full dataset size and page size
+        this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
+
+        // show first slice
+        this.currentPageAdmins = 1;
+        this.sliceAdmins();
+      }
+
+      this.checkIfInitialDataLoaded();
+    },
+    error: (err) => {
+      this.isLoadingAdmins = false;
+      this.adminsErrorMessage = 'Error during retrieving admins.';
+      this.admins = [];
+      this.allAdmins = [];
+      this.totalPagesAdmins = 0;
+      console.error('Failed to fetch admins:', err);
+      this.checkIfInitialDataLoaded();
+    },
+  });
+}
+
+
+  private sliceAdmins(): void {
+    const startIndex = (this.currentPageAdmins - 1) * this.pageSizeAdmins;
+    const endIndex = Math.min(startIndex + this.pageSizeAdmins, this.allAdmins.length);
+    this.admins = this.allAdmins.slice(startIndex, endIndex);
+    
+    // Recalculate total pages in case page size changed
+    this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
+  }
+
 
   loadManagersWithRelationships(): void {
     this.isLoadingManagers = true;
@@ -163,9 +247,11 @@ export class AdminUserRelationships implements OnInit {
           this.managersErrorMessage = this.getManagersEmptyMessage();
           this.managers = [];
           this.totalPagesManagers = 0;
+          // Don't set totalManagersCount to 0 here - let the dedicated API handle it
         } else {
           this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
           this.totalPagesManagers = response.data.totalPages;
+          // Don't calculate totalManagersCount from pagination - use the dedicated API endpoint
           this.managersErrorMessage = '';
         }
         
@@ -176,6 +262,7 @@ export class AdminUserRelationships implements OnInit {
         this.managersErrorMessage = 'Error retrieving the managers.';
         this.managers = [];
         this.totalPagesManagers = 0;
+        // Don't reset totalManagersCount on error - keep the value from dedicated API
         console.error('Failed to fetch managers with relationships:', err);
         this.checkIfInitialDataLoaded();
       },
@@ -233,11 +320,13 @@ export class AdminUserRelationships implements OnInit {
           this.unassignedUsersErrorMessage = this.getUnassignedUsersEmptyMessage();
           this.unassignedUsers = [];
           this.totalPagesUnassignedUsers = 0;
+          // Don't set totalUnassignedUsersCount to 0 here - let the dedicated API handle it
         } else {
           this.unassignedUsers = rawUnassignedUsers.map((user) =>
             this.mapToUserViewModel(user)
           );
           this.totalPagesUnassignedUsers = response.data.totalPages;
+          // Don't calculate totalUnassignedUsersCount from pagination - use the dedicated API endpoint
           this.unassignedUsersErrorMessage = '';
         }
         
@@ -248,6 +337,7 @@ export class AdminUserRelationships implements OnInit {
         this.unassignedUsersErrorMessage = 'Error loading the unassigned users.';
         this.unassignedUsers = [];
         this.totalPagesUnassignedUsers = 0;
+        // Don't reset totalUnassignedUsersCount on error - keep the value from dedicated API
         console.error('Failed to fetch unassigned users:', err);
         this.checkIfInitialDataLoaded();
       },
@@ -358,18 +448,6 @@ export class AdminUserRelationships implements OnInit {
     return this.getStartResultIndexManagers() + this.managers.length - 1;
   }
 
-  getTotalManagersCount(): number {
-    // Calculate approximate total count based on pagination info
-    if (this.totalPagesManagers > 1) {
-      // If we're on the last page, calculate based on current page items
-      if (this.currentPageManagers === this.totalPagesManagers) {
-        return ((this.totalPagesManagers - 1) * this.pageSizeManagers) + this.managers.length;
-      }
-      // If not on last page, estimate total as full pages
-      return this.totalPagesManagers * this.pageSizeManagers;
-    }
-    return this.managers.length;
-  }
 
   goToPageManagers(page: number): void {
     if (
@@ -575,17 +653,12 @@ export class AdminUserRelationships implements OnInit {
     return this.unassignedUsers.length > 0;
   }
 
+  getTotalUnassignedUsersCount(): number {
+    return this.totalUnassignedUsersCount;
+  }
+
   getUnassignedUsersCount(): number {
-    // Calculate approximate total count based on pagination info
-    if (this.totalPagesUnassignedUsers > 1) {
-      // If we're on the last page, calculate based on current page items
-      if (this.currentPageUnassignedUsers === this.totalPagesUnassignedUsers) {
-        return ((this.totalPagesUnassignedUsers - 1) * this.pageSizeUnassignedUsers) + this.unassignedUsers.length;
-      }
-      // If not on last page, estimate total as full pages
-      return this.totalPagesUnassignedUsers * this.pageSizeUnassignedUsers;
-    }
-    return this.unassignedUsers.length;
+    return this.getTotalUnassignedUsersCount();
   }
 
   getSubordinateCount(manager: any): number {
@@ -596,9 +669,17 @@ export class AdminUserRelationships implements OnInit {
     return this.admins.length;
   }
 
+  getTotalAdminCount(): number {
+    return this.totalAdminsCount;
+  }
+
   getManagerCount(): number {
     return this.managers.filter((user) => user.roles?.includes('Manager'))
       .length;
+  }
+
+  getTotalManagerCount(): number {
+    return this.totalManagersCount;
   }
 
   assignManager(user: IUserViewModel, isPost: boolean = false): void {
@@ -634,6 +715,8 @@ export class AdminUserRelationships implements OnInit {
     this.loadAdmins();
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
+    // Refresh counts after relationship changes
+    this.loadExactCounts();
   }
 
   onSearchKeypress(event: KeyboardEvent): void {
@@ -684,5 +767,97 @@ export class AdminUserRelationships implements OnInit {
     this.loadUnassignedUsers();
   }
 
+  // Admin pagination methods (client-side)
+goToPageAdmins(page: number): void {
+  if (page >= 1 && page <= this.totalPagesAdmins && page !== this.currentPageAdmins) {
+    this.currentPageAdmins = page;
+    this.sliceAdmins();
+  }
+}
+
+goToNextPageAdmins(): void {
+  if (this.currentPageAdmins < this.totalPagesAdmins) {
+    this.currentPageAdmins++;
+    this.sliceAdmins();
+  }
+}
+
+goToPreviousPageAdmins(): void {
+  if (this.currentPageAdmins > 1) {
+    this.currentPageAdmins--;
+    this.sliceAdmins();
+  }
+}
+
+goToFirstPageAdmins(): void {
+  if (this.currentPageAdmins !== 1) {
+    this.currentPageAdmins = 1;
+    this.sliceAdmins();
+  }
+}
+
+goToLastPageAdmins(): void {
+  if (this.currentPageAdmins !== this.totalPagesAdmins) {
+    this.currentPageAdmins = this.totalPagesAdmins;
+    this.sliceAdmins();
+  }
+}
+
+getPageNumbersAdmins(): number[] {
+  const pages: number[] = [];
+  const maxVisiblePages = 5;
+  const half = Math.floor(maxVisiblePages / 2);
+
+  let start = Math.max(1, this.currentPageAdmins - half);
+  let end = Math.min(this.totalPagesAdmins, start + maxVisiblePages - 1);
+
+  if (end - start + 1 < maxVisiblePages) {
+    start = Math.max(1, end - maxVisiblePages + 1);
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+}
+
+getStartResultIndexAdmins(): number {
+  return (this.currentPageAdmins - 1) * this.pageSizeAdmins + 1;
+}
+
+getMaxDisplayedResultAdmins(): number {
+  // Use the actual length of the current page's admins array
+  return this.getStartResultIndexAdmins() + this.admins.length - 1;
+}
+
+onItemsPerPageChangeAdmins(): void {
+  this.currentPageAdmins = 1;
+  this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
+  this.sliceAdmins();
+}
+
   Math = Math;
+
+  // Dropdown toggle methods
+  toggleAdminSection(): void {
+    this.isAdminSectionCollapsed = !this.isAdminSectionCollapsed;
+  }
+
+  toggleManagerSection(): void {
+    this.isManagerSectionCollapsed = !this.isManagerSectionCollapsed;
+  }
+
+  toggleUnassignedUsersSection(): void {
+    this.isUnassignedUsersSectionCollapsed = !this.isUnassignedUsersSectionCollapsed;
+  }
+
+  toggleManagerEmployees(managerId: number): void {
+    const currentState = this.managerEmployeesCollapsed.get(managerId) || false;
+    this.managerEmployeesCollapsed.set(managerId, !currentState);
+  }
+
+  isManagerEmployeesCollapsed(managerId: number): boolean {
+    return this.managerEmployeesCollapsed.get(managerId) ?? true;
+  }
 }
