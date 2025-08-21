@@ -3,6 +3,7 @@ import { ManagerMainPage } from './components/manager/main-page';
 import { Home } from './components/home/home';
 import { Login } from './components/login/login';
 import { User } from './components/user/user';
+import {Hr} from './components/hr/hr';
 import { ResetPassword } from './components/reset-password/reset-password';
 import { AdminMainPage } from './components/admin/main-page';
 import { AuthGuard } from './guards/auth.guard';
@@ -36,6 +37,12 @@ export const routes: Routes = [
     component: AdminMainPage,
     canActivate: [AuthGuard],
     data: { roles: ['Admin'] },
+  },
+  {
+    path: 'hr',
+    component: Hr,
+    canActivate: [AuthGuard],
+    data: { roles: ['HR'] },
   },
   {
     path: 'user',

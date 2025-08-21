@@ -1,0 +1,106 @@
+<main class="min-h-screen bg-gray-50">
+	<custom-navbar></custom-navbar>
+
+	<div class="max-w-7xl mx-auto p-6">
+		<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+			<div class="p-6">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-xl font-semibold text-gray-900">HR - Employee Vacation Overview</h3>
+					<p class="text-sm text-gray-600">Manage employee leave balances</p>
+				</div>
+
+				<div class="overflow-x-auto">
+					<table class="min-w-full divide-y divide-gray-200">
+						<thead class="bg-gray-50">
+							<tr>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Vacation Days</th>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used Vacation Days</th>
+								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Vacation Days</th>
+								<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+							</tr>
+						</thead>
+						<tbody class="bg-white divide-y divide-gray-200">
+							  <tr *ngFor="let r of records; let i = index; trackBy: trackByIndex">
+								<td class="px-4 py-3 text-sm text-gray-700">{{ getDisplayId(i) }}</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.name }}</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.department }}</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<div *ngIf="editingIndex !== i">{{ r.totalVacationDays }}</div>
+
+									<div *ngIf="editingIndex === i" class="flex items-center gap-2">
+										<input
+											type="number"
+											[(ngModel)]="editModel!.totalVacationDays"
+											min="0"
+											class="w-20 text-center px-2 py-1 border border-gray-300 rounded text-sm"
+										/>
+									</div>
+								</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">{{ r.usedVacationDays }}</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<div *ngIf="editingIndex !== i">{{ r.remainingVacationDays }}</div>
+									<div *ngIf="editingIndex === i">{{ (editModel!.totalVacationDays ?? r.totalVacationDays) - r.usedVacationDays }}</div>
+								</td>
+
+								<td class="px-4 py-3 text-sm text-right space-x-2">
+									<div *ngIf="editingIndex !== i">
+										<button class="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700" (click)="startEdit(i)">Edit</button>
+									</div>
+
+									<div *ngIf="editingIndex === i">
+										<button class="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 mr-2" (click)="saveEdit(i)">Save</button>
+										<button class="inline-flex items-center px-3 py-1 rounded bg-gray-100 text-sm hover:bg-gray-200" (click)="cancelEdit()">Cancel</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="mt-6 flex items-center justify-between">
+					<div class="text-sm text-gray-600">Showing {{ records.length }} records</div>
+
+					<div class="flex items-center gap-3">
+						<div class="flex items-center gap-2 bg-white rounded-md p-1 shadow-sm">
+							<button
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								(click)="prevPage()"
+							>
+								Previous
+							</button>
+
+							<div class="text-sm px-2">Page {{ currentPage }}</div>
+
+							<button
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								(click)="nextPage()"
+							>
+								Next
+							</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</main>
+
+    <div class="max-w-7xl mx-auto p-6 mt-4">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h4 class="text-lg font-medium text-gray-900 mb-2">Upload calendar</h4>
+        <div class="flex items-center gap-3">
+		  <input type="file" #fileInputSeparate class="hidden" aria-label="Upload calendar file" accept=".xml,.csv" (change)="onUploadCalendarSeparate($event)" />
+          <button class="px-4 py-2 rounded bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm" (click)="triggerFileInput(fileInputSeparate)">Upload calendar</button>
+        </div>
+      </div>
+    </div>
+
