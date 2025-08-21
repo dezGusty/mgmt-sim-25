@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { IAddUser, IUpdateUser, IUser } from '../../models/entities/iuser';
 import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-request';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
@@ -69,6 +69,40 @@ export class UsersService {
   getAllAdmins() : Observable<IApiResponse<IUser[]>> {
     return this.http.get<IApiResponse<IUser[]>>(`${this.baseUrl}/admins`);
   }
+
+  /*getAllAdminsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
+    let paramsToSend = new HttpParams();
+
+    if (params?.name) {
+      paramsToSend = paramsToSend.set('name', params.name);
+    }
+
+    if (params?.email) {
+      paramsToSend = paramsToSend.set('email', params.email);
+    }
+
+    if (params?.globalSearch) {
+      paramsToSend = paramsToSend.set('globalSearch', params.globalSearch);
+    }
+
+    if (params?.params.sortBy) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortBy', params.params.sortBy);
+    }
+
+    if (params?.params.sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.SortDescending', params.params.sortDescending.toString());
+    }
+
+    if (params?.params.page) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.Page', params.params.page.toString());
+    }
+
+    if (params?.params.pageSize) {
+      paramsToSend = paramsToSend.set('PagedQueryParams.PageSize', params.params.pageSize.toString());
+    }
+
+    return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/admins/queried`, { params: paramsToSend });
+  }*/
 
   getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
@@ -212,5 +246,22 @@ export class UsersService {
     }
     
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/managers`, { params: paramsToSend });
+  }
+
+  getTotalAdminsCount(): Observable<IApiResponse<number>> {
+    return this.http.get<IApiResponse<number>>(`${this.baseUrl}/admins/count`);
+  }
+
+  getTotalManagersCount(): Observable<IApiResponse<number>> {
+    return this.http.get<IApiResponse<number>>(`${this.baseUrl}/managers/count`).pipe(
+      tap((response: IApiResponse<number>) => {
+        console.log('[DEBUG] Managers count API response:', JSON.stringify(response));
+        console.log('[DEBUG] API endpoint:', `${this.baseUrl}/managers/count`);
+      })
+    );
+  }
+
+  getTotalUnassignedUsersCount(): Observable<IApiResponse<number>> {
+    return this.http.get<IApiResponse<number>>(`${this.baseUrl}/unassignedUsers/count`);
   }
 }

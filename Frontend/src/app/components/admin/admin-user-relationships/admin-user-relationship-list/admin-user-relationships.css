@@ -32,3 +32,88 @@
 :host ::ng-deep .text-pink-700 {
   color: #be185d;
 }
+
+/* Dropdown section animations */
+.admin-section-content,
+.manager-section-content,
+.employees-section-content {
+  animation: slideDown 250ms ease-in-out;
+  transform-origin: top;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Chevron rotation transition */
+.transition-transform {
+  transition: transform 250ms ease-in-out;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Header hover effects */
+.cursor-pointer:hover {
+  background-color: #f9fafb;
+}
+
+.cursor-pointer:focus {
+  outline: 2px solid #20B486;
+  outline-offset: 2px;
+}
+
+/* Employees grid scroll container */
+.employees-grid-container {
+  max-height: 400px; /* Approximate height for 4 rows */
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 8px;
+  padding-right: 4px; /* Space for scrollbar */
+}
+
+/* Custom scrollbar styling */
+.employees-grid-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.employees-grid-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.employees-grid-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.employees-grid-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar styling */
+.employees-grid-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Responsive height adjustments for different screen sizes */
+@media (min-width: 768px) {
+  .employees-grid-container {
+    max-height: 320px; /* Adjust for 2-column layout */
+  }
+}
+
+@media (min-width: 1024px) {
+  .employees-grid-container {
+    max-height: 280px; /* Adjust for 3-column layout */
+  }
+}
