@@ -22,7 +22,6 @@ interface HrRecord {
 export class Hr {
   records: HrRecord[] = [];
 
-  // paging
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
@@ -40,8 +39,7 @@ export class Hr {
   loadPage(year: number, page: number, pageSize: number) {
     this.hrService.getUsers(year, page, pageSize).subscribe({
       next: (res: any) => {
-        // backend returns wrapper { message, data: { data: [...], totalCount, page, pageSize, totalPages } }
-        const paged = res?.data || res; // try to handle both shapes
+        const paged = res?.data || res; 
         const items = paged?.data || paged?.Data || paged;
         this.records = (items || []).map((u: IHrUserDto) => ({
           id: u.id,
@@ -71,7 +69,6 @@ export class Hr {
   startEdit(index: number) {
     this.editingIndex = index;
     const r = this.records[index];
-    // allow only editing vacation (totalVacationDays)
     this.editModel = { id: r.id, totalVacationDays: r.totalVacationDays };
   }
 
@@ -82,7 +79,6 @@ export class Hr {
 
     this.hrService.adjustVacation(id, days).subscribe({
       next: (res: any) => {
-        // on success, update local record
         const r = this.records[index];
         r.totalVacationDays = days;
         r.remainingVacationDays = r.totalVacationDays - r.usedVacationDays;
@@ -112,13 +108,56 @@ export class Hr {
   }
 
   onUploadCalendarSeparate(event: any) {
-    const files: FileList = event.target.files;
-    if (!files || files.length === 0) return;
-    console.log('Calendar files (separate):', Array.from(files).map(f => f.name));
+    const files: FileList = event?.target?.files || event;
+    if (!files || (files instanceof FileList && files.length === 0)) return;
+
+    const fileArray: File[] = files instanceof FileList ? Array.from(files) : Array.isArray(files) ? files : [files];
+    const allowed = ['.xml', '.csv'];
+    const valid = fileArray.filter(f => {
+      const name = (f.name || '').toLowerCase();
+      return allowed.some(ext => name.endsWith(ext));
+    });
+
+    if (valid.length === 0) {
+      console.warn('No valid calendar files selected. Only .xml and .csv are allowed.');
+      return;
+    }
+
+    console.log('Calendar files (separate):', valid.map(f => f.name));
   }
 
   triggerFileInput(fileInput: HTMLInputElement) {
+    if ((window as any).showOpenFilePicker) {
+      this.openCalendarPicker();
+      return;
+    }
+
     fileInput.click();
+  }
+
+  async openCalendarPicker() {
+    try {
+      const handles = await (window as any).showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: 'Calendar files',
+            accept: {
+              'text/xml': ['.xml'],
+              'text/csv': ['.csv']
+            }
+          }
+        ],
+        startIn: 'desktop'
+      });
+
+      if (!handles || handles.length === 0) return;
+
+      const file = await handles[0].getFile();
+      this.onUploadCalendarSeparate(file);
+    } catch (err) {
+      console.warn('showOpenFilePicker failed or was cancelled, falling back to input element', err);
+    }
   }
 
 }

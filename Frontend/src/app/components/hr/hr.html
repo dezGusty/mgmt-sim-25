@@ -79,12 +79,11 @@
 	</div>
 </main>
 
-    <!-- Separate upload calendar area -->
     <div class="max-w-7xl mx-auto p-6 mt-4">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h4 class="text-lg font-medium text-gray-900 mb-2">Upload calendar</h4>
         <div class="flex items-center gap-3">
-          <input type="file" #fileInputSeparate class="hidden" aria-label="Upload calendar file" (change)="onUploadCalendarSeparate($event)" />
+		  <input type="file" #fileInputSeparate class="hidden" aria-label="Upload calendar file" accept=".xml,.csv" (change)="onUploadCalendarSeparate($event)" />
           <button class="px-4 py-2 rounded bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm" (click)="triggerFileInput(fileInputSeparate)">Upload calendar</button>
         </div>
       </div>
