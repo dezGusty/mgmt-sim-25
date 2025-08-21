@@ -1,0 +1,41 @@
+.view-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.gradient-border {
+  background: linear-gradient(45deg, #7EE3DB, #88F8BF);
+  padding: 2px;
+  border-radius: 12px;
+}
+
+.gradient-border-inner {
+  background: white;
+  border-radius: 10px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Additional hover effects for manager view cards */
+.manager-card {
+  transition: all 0.3s ease;
+}
+
+.manager-card:hover {
+  transform: scale(1.02) translateY(-4px);
+}
+
+.manager-card:active {
+  transform: scale(0.98);
+}

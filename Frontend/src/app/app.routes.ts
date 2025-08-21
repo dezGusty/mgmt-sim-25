@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { ManagerMainPage } from './components/manager/main-page';
+import { ManagerViewSelector } from './components/manager/manager-view-selector/manager-view-selector';
+import { LeaveManagementView } from './components/manager/leave-management-view/leave-management-view';
+import { ProjectManagementView } from './components/manager/project-management-view/project-management-view';
 import { Home } from './components/home/home';
 import { Login } from './components/login/login';
 import { User } from './components/user/user';
@@ -28,7 +31,19 @@ export const routes: Routes = [
   },
   {
     path: 'manager',
-    component: ManagerMainPage,
+    component: ManagerViewSelector,
+    canActivate: [AuthGuard],
+    data: { roles: ['Manager'] },
+  },
+  {
+    path: 'manager/leave',
+    component: LeaveManagementView,
+    canActivate: [AuthGuard],
+    data: { roles: ['Manager'] },
+  },
+  {
+    path: 'manager/projects',
+    component: ProjectManagementView,
     canActivate: [AuthGuard],
     data: { roles: ['Manager'] },
   },
