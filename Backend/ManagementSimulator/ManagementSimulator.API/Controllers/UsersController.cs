@@ -135,6 +135,34 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
+        /*[Authorize(Roles = "Admin")]
+        [HttpGet("admins/queried")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllAdminsFilteredAsync([FromQuery] QueriedUserRequestDto payload)
+        {
+            var admins = await _userService.GetAllAdminsFilteredAsync(payload);
+            if (admins == null || admins.Data == null || !admins.Data.Any())
+            {
+                return NotFound(new
+                {
+                    Message = "No filtered admin users found.",
+                    Data = new List<UserResponseDto>(),
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Filtered admin users retrieved successfully.",
+                Data = admins,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }*/
+
         [Authorize(Roles = "Admin")]
         [HttpGet("queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -334,6 +362,54 @@ namespace ManagementSimulator.API.Controllers
             {
                 Message = $"User with ID {id} restored successfully.",
                 Data = new List<UserResponseDto>(),
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admins/count")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTotalAdminsCountAsync()
+        {
+            var count = await _userService.GetTotalAdminsCountAsync();
+            return Ok(new
+            {
+                Message = "Total admins count retrieved successfully.",
+                Data = count,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("managers/count")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTotalManagersCountAsync()
+        {
+            var count = await _userService.GetTotalManagersCountAsync();
+            return Ok(new
+            {
+                Message = "Total managers count retrieved successfully.",
+                Data = count,
+                Success = true,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("unassignedUsers/count")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTotalUnassignedUsersCountAsync()
+        {
+            var count = await _userService.GetTotalUnassignedUsersCountAsync();
+            return Ok(new
+            {
+                Message = "Total unassigned users count retrieved successfully.",
+                Data = count,
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });
