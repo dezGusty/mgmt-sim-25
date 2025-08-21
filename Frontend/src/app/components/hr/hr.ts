@@ -75,12 +75,20 @@ export class Hr {
   saveEdit(index: number) {
     if (!this.editModel || this.editModel.id == null) return;
     const id = this.editModel.id;
-    const days = this.editModel.totalVacationDays as number;
+    const days = Number(this.editModel.totalVacationDays ?? 0);
+    const current = this.records[index]?.totalVacationDays ?? 0;
+    const delta = days - current; 
 
-    this.hrService.adjustVacation(id, days).subscribe({
+    if (delta === 0) {
+      this.cancelEdit();
+      return;
+    }
+
+    this.hrService.adjustVacation(id, delta).subscribe({
       next: (res: any) => {
+        const newVacation = res?.Data?.NewVacation ?? res?.data?.NewVacation ?? res?.Data?.newVacation ?? res?.data?.newVacation ?? days;
         const r = this.records[index];
-        r.totalVacationDays = days;
+        r.totalVacationDays = typeof newVacation === 'number' ? newVacation : days;
         r.remainingVacationDays = r.totalVacationDays - r.usedVacationDays;
         this.cancelEdit();
       },

@@ -22,7 +22,5 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public int TotalLeaveDays { get; set; }
         public int UsedLeaveDays { get; set; }
         public int RemainingLeaveDays { get; set; }
-
-        // LeaveTypeStatistics removed per request
     }
 }

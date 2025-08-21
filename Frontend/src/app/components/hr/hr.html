@@ -31,6 +31,15 @@
 
 								<td class="px-4 py-3 text-sm text-gray-700">
 									<div *ngIf="editingIndex !== i">{{ r.totalVacationDays }}</div>
+
+									<div *ngIf="editingIndex === i" class="flex items-center gap-2">
+										<input
+											type="number"
+											[(ngModel)]="editModel!.totalVacationDays"
+											min="0"
+											class="w-20 text-center px-2 py-1 border border-gray-300 rounded text-sm"
+										/>
+									</div>
 								</td>
 
 								<td class="px-4 py-3 text-sm text-gray-700">{{ r.usedVacationDays }}</td>

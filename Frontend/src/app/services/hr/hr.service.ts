@@ -48,10 +48,7 @@ export class HrService {
     }
 
     return this.http.get<any>(`${this.baseUrl}/users`, { params }).pipe(
-      // The backend wraps results in PagedResponseDto; normalize here
-      // We'll map in the component; for now return raw
-      // but keep type as IPagedResponse<IHrUserDto>
-      // Consumer should use response.data
+
     ) as Observable<IPagedResponse<IHrUserDto>>;
   }
 
