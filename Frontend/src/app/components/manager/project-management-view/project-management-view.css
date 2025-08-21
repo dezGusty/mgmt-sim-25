@@ -40,7 +40,22 @@
 
 /* Modal styles */
 .modal-overlay {
+  /* explicit semi-transparent backdrop to avoid full black screens when utility classes aren't applied */
+  background-color: rgba(0,0,0,0.5);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  /* ensure modal itself captures pointer events and animates */
+  pointer-events: auto;
+  animation: slideUp 0.3s ease-out;
 }
 
 .modal-content {
