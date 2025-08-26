@@ -27,6 +27,7 @@ export class Login {
         this.auth.me().subscribe({
           next: (user: any) => {
             console.log('User data:', user);
+            this.auth.updateCurrentUser(user);
             
             if (user && user.roles && user.roles.length === 1) {
               const singleRole = user.roles[0];

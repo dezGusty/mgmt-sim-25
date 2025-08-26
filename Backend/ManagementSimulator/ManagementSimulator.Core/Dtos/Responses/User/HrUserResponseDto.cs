@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ManagementSimulator.Core.Dtos.Responses;
 
 namespace ManagementSimulator.Core.Dtos.Responses.User
 {
@@ -22,5 +23,6 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public int TotalLeaveDays { get; set; }
         public int UsedLeaveDays { get; set; }
         public int RemainingLeaveDays { get; set; }
+        public List<LeaveTypeStatDto> LeaveTypeStatistics { get; set; } = new List<LeaveTypeStatDto>();
     }
 }

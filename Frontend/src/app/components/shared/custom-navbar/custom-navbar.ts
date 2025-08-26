@@ -22,6 +22,8 @@ export class CustomNavbar implements OnInit {
   userEmail: string = '';
   showRoleDropdown = false;
   availableRoles: UserRole[] = [];
+  isActingAsSecondManager = false;
+  isTemporarilyReplaced = false;
 
   constructor(private router: Router, private authService: Auth) { }
 
@@ -183,6 +185,11 @@ export class CustomNavbar implements OnInit {
         const data = await response.json();
         if (data) {
           this.userEmail = data.email || '';
+          this.isActingAsSecondManager = data.isActingAsSecondManager || false;
+          this.isTemporarilyReplaced = data.isTemporarilyReplaced || false;
+
+          this.authService.updateCurrentUser(data);
+
           if (data.roles) {
             this.userRoles = data.roles;
             this.showHomeButton = this.userRoles.length > 1;

@@ -74,6 +74,7 @@ export class LeaveRequests {
     startDate: string;
     endDate: string;
     reason: string;
+    reviewerId?: number;
   }): Observable<IApiResponse<CreateLeaveRequestResponse>> {
     return this.http
       .post<IApiResponse<CreateLeaveRequestResponse>>(this.apiUrl, data, {

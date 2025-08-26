@@ -8,6 +8,7 @@ import { IProject } from '../../../models/entities/iproject';
 import { IFilteredProjectsRequest } from '../../../models/requests/ifiltered-projects-request';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Auth } from '../../../services/authService/auth';
 
 @Component({
   selector: 'app-project-management-view',
@@ -71,8 +72,17 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private authService: Auth
   ) {}
+
+  get isViewOnly(): boolean {
+    return this.authService.isTemporarilyReplaced();
+  }
+
+  get canModify(): boolean {
+    return !this.isViewOnly;
+  }
 
   ngOnInit() {
     this.loadProjects();

@@ -4,6 +4,7 @@ using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSimulator.Database.Migrations
 {
     [DbContext(typeof(MGMTSimulatorDbContext))]
-    partial class MGMTSimulatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250820173416_AddSecondaryManager")]
+    partial class AddSecondaryManager
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeManager", b =>
@@ -77,7 +80,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("EmployeeManagers", (string)null);
+                    b.ToTable("EmployeeManagers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeRole", b =>
@@ -107,7 +110,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Rolename")
                         .IsUnique();
 
-                    b.ToTable("EmployeeRoles", (string)null);
+                    b.ToTable("EmployeeRoles");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeRoleUser", b =>
@@ -131,7 +134,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("EmployeeRolesUsers", (string)null);
+                    b.ToTable("EmployeeRolesUsers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.JobTitle", b =>
@@ -161,7 +164,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("JobTitles", (string)null);
+                    b.ToTable("JobTitles");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.LeaveRequest", b =>
@@ -214,7 +217,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LeaveRequests", (string)null);
+                    b.ToTable("LeaveRequests");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.LeaveRequestType", b =>
@@ -254,7 +257,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("IsPaid", "Title")
                         .IsUnique();
 
-                    b.ToTable("LeaveRequestTypes", (string)null);
+                    b.ToTable("LeaveRequestTypes");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.SecondManager", b =>
@@ -275,7 +278,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("ReplacedManagerId");
 
-                    b.ToTable("SecondManagers", (string)null);
+                    b.ToTable("SecondManagers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.User", b =>
@@ -338,7 +341,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("JobTitleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeManager", b =>

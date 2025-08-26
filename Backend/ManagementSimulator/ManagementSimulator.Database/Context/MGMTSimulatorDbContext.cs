@@ -56,7 +56,6 @@ namespace ManagementSimulator.Database.Context
             modelBuilder.Entity<JobTitle>()
                 .HasIndex(jt => jt.Name)
                 .IsUnique();
-
             modelBuilder.Entity<LeaveRequestType>()
                 .Property(lrt => lrt.Title)
                 .HasMaxLength(50);
@@ -109,6 +108,27 @@ namespace ManagementSimulator.Database.Context
                 .WithMany(u => u.Roles)
                 .HasForeignKey(eru => eru.UsersId);
 
+            modelBuilder.Entity<SecondManager>(entity =>
+            {
+                entity.HasKey(sm => new { sm.SecondManagerEmployeeId, sm.ReplacedManagerId, sm.StartDate });
+
+                entity.HasOne(sm => sm.SecondManagerEmployee)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.SecondManagerEmployeeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sm => sm.ReplacedManager)
+                      .WithMany()
+                      .HasForeignKey(sm => sm.ReplacedManagerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(sm => sm.StartDate)
+                      .IsRequired();
+
+                entity.Property(sm => sm.EndDate)
+                      .IsRequired();
+            });
+
             modelBuilder.Entity<UserProject>(entity =>
             {
                 entity.HasKey(up => new { up.UserId, up.ProjectId });
@@ -142,6 +162,7 @@ namespace ManagementSimulator.Database.Context
         public DbSet<EmployeeManager> EmployeeManagers { get; set; }
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
         public DbSet<EmployeeRoleUser> EmployeeRolesUsers { get; set; }
+        public DbSet<SecondManager> SecondManagers { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
     }

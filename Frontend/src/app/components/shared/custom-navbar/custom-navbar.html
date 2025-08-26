@@ -15,19 +15,29 @@
             class="flex items-center gap-3 bg-[#020126] px-3 py-2 rounded-lg border border-[#7EE3DB]/30 hover:bg-[#7EE3DB]/10 hover:border-[#7EE3DB]/50 transition-all duration-300 cursor-pointer group"
             (click)="toggleRoleDropdown()">
             <div class="flex items-center gap-2">
-              <div *ngIf="!isRoleSelectorPage()" class="w-1.5 h-1.5 rounded-full {{ getPageColor() }} animate-pulse"></div>
-              <div *ngIf="isRoleSelectorPage()" class="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#7EE3DB] animate-spin"></div>
+              <div *ngIf="!isRoleSelectorPage()" class="w-1.5 h-1.5 rounded-full {{ getPageColor() }} animate-pulse">
+              </div>
+              <div *ngIf="isRoleSelectorPage()"
+                class="w-4 h-4 rounded-full border-2 border-white/20 border-t-[#7EE3DB] animate-spin"></div>
               <span *ngIf="getPageRole()"
                 class="text-xs font-semibold uppercase tracking-wide bg-gray-600 text-white bg-white/20 px-2 py-0.5 rounded border border-white/30">
                 {{ getPageRole() }}
               </span>
+
+              <!-- Second Manager Badge -->
+              <span *ngIf="isActingAsSecondManager"
+                class="text-xs font-semibold uppercase tracking-wide bg-orange-500 text-white px-2 py-0.5 rounded border border-orange-400">
+                Second Manager
+              </span>
+
+              <!-- View Only Badge -->
+              <span *ngIf="isTemporarilyReplaced"
+                class="text-xs font-semibold uppercase tracking-wide bg-gray-500 text-white px-2 py-0.5 rounded border border-gray-400">
+                View Only
+              </span>
               <!-- Dropdown arrow -->
-              <svg *ngIf="userRoles.length > 1" 
-                   class="w-4 h-4 text-white/70 transition-transform duration-200" 
-                   [class.rotate-180]="showRoleDropdown"
-                   fill="none" 
-                   stroke="currentColor" 
-                   viewBox="0 0 24 24">
+              <svg *ngIf="userRoles.length > 1" class="w-4 h-4 text-white/70 transition-transform duration-200"
+                [class.rotate-180]="showRoleDropdown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </div>
@@ -38,15 +48,14 @@
           </div>
 
           <!-- Role Dropdown -->
-          <div *ngIf="showRoleDropdown && userRoles.length > 1" 
-               class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+          <div *ngIf="showRoleDropdown && userRoles.length > 1"
+            class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
             <div class="p-3 border-b border-gray-100">
               <p class="text-xs text-gray-500 font-medium">SWITCH ROLE</p>
             </div>
             <div class="py-2">
-              <div *ngFor="let role of availableRoles" 
-                   (click)="switchRole(role)"
-                   class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150">
+              <div *ngFor="let role of availableRoles" (click)="switchRole(role)"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150">
                 <div class="w-2 h-2 rounded-full {{ getRoleColor(role.name) }}"></div>
                 <div class="flex-1">
                   <p class="text-sm font-medium text-gray-900">{{ role.displayName }}</p>
@@ -57,7 +66,7 @@
             </div>
             <div class="p-3 border-t border-gray-100">
               <button (click)="goToRoleSelector()"
-                      class="w-full text-center text-sm text-[#7EE3DB] hover:text-[#88F8BF] font-medium transition-colors duration-150">
+                class="w-full text-center text-sm text-[#7EE3DB] hover:text-[#88F8BF] font-medium transition-colors duration-150">
                 View All Roles
               </button>
             </div>

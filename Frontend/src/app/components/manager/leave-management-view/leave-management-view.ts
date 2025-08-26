@@ -8,6 +8,7 @@ import { CustomNavbar } from '../../shared/custom-navbar/custom-navbar';
 import { ILeaveRequest } from '../../../models/leave-request';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Auth } from '../../../services/authService/auth';
 
 @Component({
   selector: 'app-leave-management-view',
@@ -34,7 +35,15 @@ export class LeaveManagementView implements OnDestroy {
     distinctUntilChanged()
   );
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: Auth) {}
+
+  get isViewOnly(): boolean {
+    return this.authService.isTemporarilyReplaced();
+  }
+
+  get canModify(): boolean {
+    return !this.isViewOnly;
+  }
 
   viewMode: 'card' | 'table' | 'calendar' = 'table';
 

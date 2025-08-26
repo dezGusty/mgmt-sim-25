@@ -24,14 +24,14 @@ interface UserRole {
 })
 export class RoleSelector implements OnInit {
   userRoles: UserRole[] = [];
-  userName = ''; 
+  userName = '';
   isLoading = true;
   errorMessage = '';
 
   constructor(
     private router: Router,
     private auth: Auth
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadUserRoles();
@@ -40,44 +40,30 @@ export class RoleSelector implements OnInit {
   loadUserRoles() {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.auth.me().subscribe({
       next: (user: any) => {
-        // Construiește numele utilizatorului
-        this.userName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim() 
-                       || user.email || user.Email || 'User';
-        
-        // Obține rolurile utilizatorului
+        this.auth.updateCurrentUser(user);
+
+        this.userName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim()
+          || user.email || user.Email || 'User';
+
         const userRoles = user.Roles || user.roles || [];
-        
-        // Mapează rolurile la interfața UserRole
+
         this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
-                                  .filter((role: UserRole | null) => role !== null);
-        
+          .filter((role: UserRole | null) => role !== null);
+
         this.isLoading = false;
-        
-        // Verifică dacă utilizatorul are roluri
+
         if (this.userRoles.length === 0) {
           this.errorMessage = 'No accessible roles found for your account. Please contact your administrator.';
         }
-        
-        // Dacă utilizatorul are un singur rol, redirectează automat
-        // (opțional - poți să comentezi aceste linii dacă vrei să afișezi întotdeauna selectorul)
-        /*
-        if (this.userRoles.length === 1) {
-          console.log('User has only one role, auto-redirecting...');
-          setTimeout(() => {
-            this.selectRole(this.userRoles[0]);
-          }, 1000); // Delay de 1 secundă pentru UX mai bun
-        }
-        */
       },
       error: (err) => {
         console.error('Failed to get user info:', err);
         this.errorMessage = 'Failed to retrieve user information. You will be redirected to login.';
         this.isLoading = false;
-        
-        // Redirectează către login după 3 secunde
+
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
@@ -124,16 +110,13 @@ export class RoleSelector implements OnInit {
         bgGradient: 'from-purple-400 to-purple-600'
       }
     };
-    
+
     return roleMapping[roleName] || null;
   }
 
   selectRole(role: UserRole) {
     console.log(`User selected role: ${role.name}, navigating to: ${role.route}`);
-    
-    // Opțional: poți să salvezi rolul selectat în localStorage pentru referințe viitoare
-    // localStorage.setItem('selectedRole', role.name);
-    
+
     this.router.navigate([role.route]);
   }
 
@@ -141,7 +124,6 @@ export class RoleSelector implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // Metodă pentru logout (opțională)
   logout() {
     this.auth.logout().subscribe({
       next: () => {
@@ -149,7 +131,6 @@ export class RoleSelector implements OnInit {
       },
       error: (err) => {
         console.error('Logout error:', err);
-        // Forțează navigarea către login chiar dacă logout-ul server-side eșuează
         this.router.navigate(['/login']);
       }
     });

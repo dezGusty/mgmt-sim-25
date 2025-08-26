@@ -12,6 +12,8 @@ import { ILeaveRequest } from '../../../../models/leave-request';
 import { CreateLeaveRequestResponse } from '../../../../models/create-leave-request-response';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
+import { Auth } from '../../../../services/authService/auth';
+import { SecondManagerService } from '../../../../services/second-manager/second-manager.service';
 
 @Component({
   selector: 'app-add-request-form',
@@ -23,6 +25,7 @@ import { DateUtils } from '../../../../utils/date.utils';
     EmployeeService,
     LeaveRequests,
     LeaveRequestService,
+    SecondManagerService,
   ],
 })
 export class AddRequestForm implements OnInit, OnDestroy {
@@ -113,7 +116,9 @@ export class AddRequestForm implements OnInit, OnDestroy {
     private leaveTypeService: LeaveRequestTypeService,
     private employeeService: EmployeeService,
     private leaveRequests: LeaveRequests,
-    private leaveRequestService: LeaveRequestService
+    private leaveRequestService: LeaveRequestService,
+    private authService: Auth,
+    private secondManagerService: SecondManagerService
   ) {}
 
   ngOnInit() {
@@ -255,7 +260,7 @@ export class AddRequestForm implements OnInit, OnDestroy {
     }, 300);
   }
 
-  handleSubmit() {
+  async handleSubmit() {
     if (
       !this.userId ||
       !this.leaveRequestTypeId ||
@@ -270,6 +275,20 @@ export class AddRequestForm implements OnInit, OnDestroy {
     this.showValidationErrors = false;
     this.errorMessage = '';
 
+    let reviewerId: number | undefined;
+
+    // Dacă utilizatorul este manager secundar, obținem ID-ul managerului principal
+    if (this.authService.isActingAsSecondManager()) {
+      try {
+        const response = await this.secondManagerService.getSecondManagerInfo().toPromise();
+        if (response?.success && response.data) {
+          reviewerId = response.data.managerId;
+        }
+      } catch (error) {
+        console.error('Error getting primary manager ID:', error);
+      }
+    }
+
     this.leaveRequests
       .addLeaveRequest({
         userId: this.userId,
@@ -277,6 +296,7 @@ export class AddRequestForm implements OnInit, OnDestroy {
         startDate: this.startDate,
         endDate: this.endDate,
         reason: this.reason || '',
+        reviewerId: reviewerId
       })
       .subscribe({
         next: (response) => {

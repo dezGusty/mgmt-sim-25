@@ -105,8 +105,12 @@
 
       <div class="flex gap-2 ml-auto">
         <button
-          class="bg-[#20B486] hover:bg-[#1a9e75] shadow-md text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium"
-          (click)="showAddRequestForm = true"
+          [disabled]="!canModify"
+          [class]="canModify 
+            ? 'bg-[#20B486] hover:bg-[#1a9e75] shadow-md text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium'
+            : 'bg-gray-400 text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 cursor-not-allowed font-medium'"
+          (click)="canModify && (showAddRequestForm = true)"
+          [title]="!canModify ? 'Nu puteți adăuga cereri în modul view-only' : ''"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

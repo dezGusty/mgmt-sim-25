@@ -9,6 +9,7 @@ import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { RequestUtils } from '../../../../utils/request.utils';
 import { Observable, Subscription } from 'rxjs';
+import { Auth } from '../../../../services/authService/auth';
 
 @Component({
   selector: 'app-add-requests',
@@ -40,7 +41,15 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   totalCount: number = 0;
   isLoading: boolean = false;
 
-  constructor(private leaveRequests: LeaveRequests) {}
+  constructor(private leaveRequests: LeaveRequests, private authService: Auth) {}
+
+  get isViewOnly(): boolean {
+    return this.authService.isTemporarilyReplaced();
+  }
+
+  get canModify(): boolean {
+    return !this.isViewOnly;
+  }
 
   Math = Math;
 

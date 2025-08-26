@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../../shared/custom-navbar/custom-navbar';
+import { Auth } from '../../../services/authService/auth';
 
 interface ManagerView {
   name: string;
@@ -24,14 +25,16 @@ export class ManagerViewSelector implements OnInit {
   userName = 'Manager';
   isLoading = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: Auth) {}
 
   ngOnInit() {
     this.loadManagerViews();
   }
 
   loadManagerViews() {
-    this.managerViews = [
+    const isSecondManager = this.authService.isActingAsSecondManager();
+    
+    const views = [
       {
         name: 'leave-management',
         displayName: 'Leave Management',
@@ -40,8 +43,11 @@ export class ManagerViewSelector implements OnInit {
         route: '/manager/leave',
         color: 'text-green-600',
         bgGradient: 'from-green-400 to-green-600'
-      },
-      {
+      }
+    ];
+
+    if (!isSecondManager) {
+      views.push({
         name: 'project-management',
         displayName: 'Project Management',
         description: 'Oversee project assignments, resource allocation, and team workloads',
@@ -49,8 +55,10 @@ export class ManagerViewSelector implements OnInit {
         route: '/manager/projects',
         color: 'text-blue-600',
         bgGradient: 'from-blue-400 to-blue-600'
-      }
-    ];
+      });
+    }
+
+    this.managerViews = views;
   }
 
   selectView(view: ManagerView) {

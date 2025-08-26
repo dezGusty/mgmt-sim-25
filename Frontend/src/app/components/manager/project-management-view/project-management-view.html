@@ -109,8 +109,12 @@
       <!-- Action Buttons -->
       <div class="flex gap-2 ml-auto">
         <button
-          class="bg-[#20B486] hover:bg-[#1a9e75] shadow-md text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium"
-          (click)="addProject()"
+          [disabled]="!canModify"
+          [class]="canModify 
+            ? 'bg-[#20B486] hover:bg-[#1a9e75] shadow-md text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:cursor-pointer transition-all duration-200 transform hover:scale-105 font-medium'
+            : 'bg-gray-400 text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 cursor-not-allowed font-medium'"
+          (click)="canModify && addProject()"
+          [title]="!canModify ? 'Nu puteți adăuga proiecte în modul view-only' : ''"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -249,8 +253,26 @@
                   >
                     View Details
                   </button>
-                  <button (click)="startEditProject(project)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-                  <button (click)="openAssignForm(project)" class="text-green-600 hover:text-green-900">Assign</button>
+                  <button 
+                    [disabled]="!canModify"
+                    [class]="canModify 
+                      ? 'text-indigo-600 hover:text-indigo-900 mr-3 cursor-pointer'
+                      : 'text-gray-400 mr-3 cursor-not-allowed'"
+                    (click)="canModify && startEditProject(project)"
+                    [title]="!canModify ? 'Nu puteți edita proiecte în modul view-only' : ''"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    [disabled]="!canModify"
+                    [class]="canModify 
+                      ? 'text-green-600 hover:text-green-900 cursor-pointer'
+                      : 'text-gray-400 cursor-not-allowed'"
+                    (click)="canModify && openAssignForm(project)"
+                    [title]="!canModify ? 'Nu puteți asigna utilizatori în modul view-only' : ''"
+                  >
+                    Assign
+                  </button>
                 </td>
               </tr>
             </tbody>
