@@ -72,8 +72,45 @@ export class ProjectService {
     );
   }
 
-  updateProject(id: number, project: Partial<IProject>): Observable<IApiResponse<IProject>> {
-    return this.http.put<IApiResponse<IProject>>(`${this.apiUrl}/${id}`, project);
+  updateProject(id: number, project: Partial<IProject>): Observable<IApiResponse<IProject | null>> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, project, { observe: 'response' }).pipe(
+      map(resp => {
+        const status = resp.status;
+        const body = resp.body;
+        
+        // Handle successful responses
+        if (status >= 200 && status < 300) {
+          // If backend already returns the envelope { success, data, ... }
+          if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+            return body as IApiResponse<IProject | null>;
+          }
+          // If backend returns the project directly, wrap it
+          return { 
+            data: body as IProject || null, 
+            message: 'Project updated successfully', 
+            success: true, 
+            timestamp: new Date() 
+          } as IApiResponse<IProject | null>;
+        }
+        
+        // Handle other status codes
+        return { 
+          data: null, 
+          message: 'Failed to update project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<IProject | null>;
+      }),
+      catchError(err => {
+        console.error('updateProject error', err);
+        return of({ 
+          data: null, 
+          message: err?.message || 'Failed to update project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<IProject | null>);
+      })
+    );
   }
 
   deleteProject(id: number): Observable<IApiResponse<void>> {

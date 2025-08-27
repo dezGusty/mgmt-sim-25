@@ -296,17 +296,30 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
   startEditProject(project: IProject) {
     this.editingProjectId = project.id;
-    this.newProject = { ...project };
+    this.newProject = { 
+      ...project,
+      startDate: project.startDate,
+      endDate: project.endDate
+    };
     this.showAddProjectForm = true;
   }
 
   saveProjectEdit() {
     if (!this.editingProjectId) return;
+    
+    this.errorMessage = null;
+    this.isSubmitting = true;
+    
     const payload: Partial<IProject> = { ...this.newProject };
     this.projectService.updateProject(this.editingProjectId, payload).subscribe({
       next: (res) => {
+        this.isSubmitting = false;
         if (res.success) {
+          // Clear error message and close modal
+          this.errorMessage = null;
           this.showAddProjectForm = false;
+          this.editingProjectId = null;
+          
           // If updated project body available, update local list, otherwise reload current page
           if ((res as any).data) {
             const updated = (res as any).data as IProject;
@@ -321,12 +334,12 @@ export class ProjectManagementView implements OnInit, OnDestroy {
           } else {
             this.loadProjects();
           }
-          this.editingProjectId = null;
         } else {
           this.errorMessage = res.message || 'Failed to update project';
         }
       },
       error: (err) => {
+        this.isSubmitting = false;
         console.error('Update project error', err);
         this.errorMessage = 'Failed to update project';
       }
@@ -376,6 +389,23 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString();
+  }
+
+  formatDateForInput(date: Date | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onStartDateChange(event: any) {
+    this.newProject.startDate = new Date(event.target.value);
+  }
+
+  onEndDateChange(event: any) {
+    this.newProject.endDate = new Date(event.target.value);
   }
 
   formatPercentage(value: number): string {
