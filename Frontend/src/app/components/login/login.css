@@ -1,1 +1,181 @@
-/* Stiluri pentru Login component */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(20px) rotate(-180deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.floating-bubble {
+  animation: floating 4s ease-in-out infinite;
+}
+
+.floating-bubble.delay-1000 {
+  animation-delay: 1s;
+}
+
+.floating-bubble.delay-2000 {
+  animation-delay: 2s;
+}
+
+.floating-bubble.delay-3000 {
+  animation-delay: 3s;
+}
+
+.floating-bubble.delay-4000 {
+  animation-delay: 4s;
+}
+
+.floating-bubble.delay-5000 {
+  animation-delay: 5s;
+}
+
+.floating-bubble.delay-6000 {
+  animation-delay: 6s;
+}
+
+.animate-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.form-group input:focus {
+  box-shadow: 0 0 0 3px rgba(126, 227, 219, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.form-group input:focus::placeholder {
+  color: #d1d5db;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(45deg, transparent, rgba(126, 227, 219, 0.3), transparent);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.form-group:focus-within::before {
+  opacity: 1;
+}
+
+
+button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+}
+
+button[type="submit"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+button[type="submit"]:hover::before {
+  left: 100%;
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@media (max-width: 1024px) {
+  .floating-bubble {
+    display: none;
+  }
+}
+
+button[type="submit"]:disabled {
+  background: linear-gradient(45deg, #e5e7eb, #f3f4f6);
+  color: #9ca3af;
+}
+
+
+* {
+  transition: all 0.2s ease;
+}

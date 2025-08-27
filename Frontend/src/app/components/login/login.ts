@@ -55,7 +55,10 @@ export class Login {
         } else if (err.message) {
           errorMessage = err.message;
         }
-        alert("Login failed: " + errorMessage);
+        this.errorMessage = errorMessage;
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 5000);
       }
     });
   }

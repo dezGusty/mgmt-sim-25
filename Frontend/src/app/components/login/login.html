@@ -1,60 +1,74 @@
-<div class="min-h-screen bg-gradient-to-r from-[#88F8BF] via-[#7EE3DB] to-[#7EE3DB] flex items-center justify-center">
-  <!-- Principal container -->
-  <div class="w-full max-w-5xl flex flex-col lg:flex-row rounded-xl shadow-2xl overflow-hidden">
+<div class="min-h-screen bg-gradient-to-br from-[#88F8BF] via-[#7EE3DB] to-[#5FB3D4] flex items-center justify-center relative overflow-hidden">
 
-    <!-- Left Section - Company Name -->
+  <!-- Principal container -->
+  <div class="w-full max-w-5xl flex flex-col lg:flex-row rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md bg-white/10 border border-white/20">
+
+    <!-- Left Section - Company Logo -->
     <div
-      class="w-full lg:w-2/5 bg-[#020126] text-white p-12 flex flex-col justify-center items-center relative overflow-hidden">
-      <!-- Background patterns -->
-      <div class="absolute top-0 left-0 w-full h-full opacity-10">
-        <div class="absolute top-10 left-10 w-40 h-40 rounded-full bg-[#7EE3DB]"></div>
-        <div class="absolute bottom-10 right-10 w-60 h-60 rounded-full bg-[#88F8BF]"></div>
+      class="w-full lg:w-2/5 bg-gradient-to-br from-[#020126] to-[#1a1a3e] text-white p-12 flex flex-col justify-center items-center relative overflow-hidden">
+      <!-- Background patterns with animations -->
+      <div class="absolute top-0 left-0 w-full h-full opacity-15">
+        <div class="absolute top-8 left-8 w-24 h-24 rounded-full bg-[#7EE3DB] animate-pulse-slow"></div>
+        <div class="absolute top-1/2 right-8 w-28 h-28 rounded-full bg-[#88F8BF] animate-float"></div>
+        <div class="absolute bottom-12 left-16 w-20 h-20 rounded-full bg-[#5FB3D4] animate-bounce-slow"></div>
+        <div class="floating-bubble absolute top-16 right-1/3 w-8 h-8 rounded-full bg-white/12 backdrop-blur-sm delay-2000"></div>
+        <div class="floating-bubble absolute bottom-8 right-12 w-6 h-6 rounded-full bg-white/10 backdrop-blur-sm delay-4000"></div>
       </div>
 
       <!-- Company Details -->
       <div class="relative z-10 text-center">
-        <h1 class="text-4xl font-bold mb-4">SIEMENS</h1>
-        <div class="h-1 w-16 bg-[#7EE3DB] mx-auto mb-6"></div>
-        <h2 class="text-2xl font-light mb-8">Leave Management</h2>
-        <p class="text-gray-300">Manage your time off efficiently</p>
+        <div class="mb-6 transform hover:scale-105 transition-transform duration-300">
+          <div class="relative inline-block">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#7EE3DB]/20 to-[#88F8BF]/20 rounded-full blur-xl scale-110"></div>
+            <img src="/FTD.png" alt="FTD Logo" class="relative w-40 h-40 mx-auto object-contain filter drop-shadow-2xl brightness-110 contrast-110">
+          </div>
+        </div>
+        <div class="h-1 w-16 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] mx-auto mb-6 rounded-full"></div>
+        <h2 class="text-2xl font-light mb-8 tracking-wide">Management App</h2>
+        <p class="text-gray-300 text-sm font-light">Organize projects and manage time off</p>
       </div>
     </div>
 
     <!-- Right Section - Login Form -->
-    <div class="w-full lg:w-3/5 bg-white p-8 md:p-12">
+    <div class="w-full lg:w-3/5 backdrop-blur-md bg-white/20 p-8 md:p-12 border-l border-white/30">
       <div class="max-w-md mx-auto">
+        <!-- Error message display -->
+        <div *ngIf="errorMessage" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded-lg bg-red-50 border border-red-200 animate-in fade-in duration-300 shadow-xl max-w-md w-full mx-4">
+          <p class="text-red-600 text-sm font-medium">{{ errorMessage }}</p>
+        </div>
+        
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Login</h1>
-          <p class="text-gray-600 mt-2">Access your account</p>
+          <h1 class="text-3xl font-bold text-gray-800 drop-shadow-lg mb-2">Login</h1>
+          <p class="text-gray-700 drop-shadow-md">Access your account</p>
         </div>
 
         <!-- Form -->
         <form class="space-y-6" (ngSubmit)="onLogin()" #loginForm="ngForm">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-800 drop-shadow-sm mb-2">Email</label>
             <input name="email" [(ngModel)]="email" type="email" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-4 py-3 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EE3DB] focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-gray-800"
               placeholder="Enter your email" />
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-800 drop-shadow-sm mb-2">Password</label>
             <input name="password" [(ngModel)]="password" type="password" required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-4 py-3 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7EE3DB] focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-gray-800"
               placeholder="Enter your password" />
           </div>
 
           <button type="submit" [disabled]="!loginForm.form.valid"
-            class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] rounded hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold transition-all duration-200 transform hover:scale-105 py-2 px-4">
+            class="w-full bg-[#4ECDC4] hover:bg-[#45B7B8] text-black font-bold py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#26A69A] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl border border-[#26A69A]">
             Sign In
           </button>
         </form>
 
-
         <!-- Forgot password -->
-        <div class="mt-3 text-right">
+        <div class="mt-6 text-center">
           <a routerLink="/reset-password"
-            class="text-slate-400 hover:text-[#7EE3DB] text-sm font-medium transition-colors cursor-pointer">
+            class="text-gray-700 hover:text-gray-900 text-sm font-medium transition-all duration-200 cursor-pointer hover:underline drop-shadow-sm">
             Reset Password?
           </a>
         </div>
@@ -63,3 +77,4 @@
     </div>
 
   </div>
+</div>
