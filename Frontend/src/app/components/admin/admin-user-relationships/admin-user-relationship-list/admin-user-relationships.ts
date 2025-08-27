@@ -11,6 +11,8 @@ import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../../../models/responses/ifiltered-api-response';
 import { UserSearchType } from '../../../../models/enums/user-search-type';
 import { HighlightPipe } from '../../../../pipes/highlight.pipe';
+import { SecondManagerService } from '../../../../services/second-manager/second-manager.service';
+import { ISecondManagerResponse, ISecondManagerViewModel } from '../../../../models/entities/isecond-manager';
 
 @Component({
   selector: 'app-admin-user-relationships',
@@ -24,6 +26,11 @@ export class AdminUserRelationships implements OnInit {
   managers: IUserViewModel[] = [];
   admins: IUserViewModel[] = [];
   unassignedUsers: IUserViewModel[] = [];
+  
+  // Second managers data
+  activeSecondManagers: ISecondManagerViewModel[] = [];
+  isLoadingSecondManagers: boolean = false;
+  secondManagersErrorMessage: string = '';
 
   searchTerm: string = '';
   searchBy: UserSearchType = UserSearchType.Global;
@@ -85,7 +92,10 @@ export class AdminUserRelationships implements OnInit {
   // Track collapsed state for each manager's employees
   managerEmployeesCollapsed: Map<number, boolean> = new Map();
 
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    private secondManagerService: SecondManagerService
+  ) {}
 
   ngOnInit(): void {
     this.loadInitialData();
@@ -95,6 +105,7 @@ export class AdminUserRelationships implements OnInit {
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
+    this.loadActiveSecondManagers();
     // Load exact counts from backend
     this.loadExactCounts();
   }
@@ -374,7 +385,7 @@ loadAdmins(): void {
   }
 
   private checkIfInitialDataLoaded(): void {
-    if (!this.isLoadingManagers && !this.isLoadingAdmins && !this.isLoadingUnassignedUsers) {
+    if (!this.isLoadingManagers && !this.isLoadingAdmins && !this.isLoadingUnassignedUsers && !this.isLoadingSecondManagers) {
       this.hasInitialDataLoaded = true;
     }
   }
@@ -859,5 +870,47 @@ onItemsPerPageChangeAdmins(): void {
 
   isManagerEmployeesCollapsed(managerId: number): boolean {
     return this.managerEmployeesCollapsed.get(managerId) ?? true;
+  }
+
+  // Second managers methods
+  loadActiveSecondManagers(): void {
+    this.isLoadingSecondManagers = true;
+    this.secondManagersErrorMessage = '';
+
+    this.secondManagerService.getActiveSecondManagers().subscribe({
+      next: (response) => {
+        this.isLoadingSecondManagers = false;
+        console.log('Active second managers API response:', response);
+        this.activeSecondManagers = response.map(sm => this.mapSecondManagerToViewModel(sm));
+        this.secondManagersErrorMessage = '';
+        this.checkIfInitialDataLoaded();
+      },
+      error: (err) => {
+        this.isLoadingSecondManagers = false;
+        this.secondManagersErrorMessage = 'Error loading active second managers.';
+        this.activeSecondManagers = [];
+        console.error('Failed to fetch active second managers:', err);
+        this.checkIfInitialDataLoaded();
+      }
+    });
+  }
+
+  mapSecondManagerToViewModel(secondManager: ISecondManagerResponse): ISecondManagerViewModel {
+    return {
+      id: secondManager.secondManagerEmployeeId,
+      name: `${secondManager.secondManagerEmployee.firstName} ${secondManager.secondManagerEmployee.lastName}`,
+      email: secondManager.secondManagerEmployee.email,
+      jobTitle: secondManager.secondManagerEmployee.jobTitleName,
+      department: secondManager.secondManagerEmployee.departmentName,
+      replacedManagerId: secondManager.replacedManagerId,
+      replacedManagerName: `${secondManager.replacedManager.firstName} ${secondManager.replacedManager.lastName}`,
+      startDate: secondManager.startDate,
+      endDate: secondManager.endDate,
+      isActive: secondManager.isActive
+    };
+  }
+
+  getActiveSecondManagerForManager(managerId: number): ISecondManagerViewModel | null {
+    return this.activeSecondManagers.find(sm => sm.replacedManagerId === managerId) || null;
   }
 }
