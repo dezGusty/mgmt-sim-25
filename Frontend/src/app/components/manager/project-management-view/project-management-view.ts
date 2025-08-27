@@ -411,4 +411,18 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   formatPercentage(value: number): string {
     return `${value.toFixed(1)}%`;
   }
+
+  formatFTE(value: number): string {
+    return `${value.toFixed(1)} FTE`;
+  }
+
+  getRemainingFTEColor(remainingFTEs: number): string {
+    if (remainingFTEs <= 0) {
+      return 'text-red-600 font-semibold'; // No capacity left - red
+    } else if (remainingFTEs <= 0.5) {
+      return 'text-yellow-600 font-medium'; // Low capacity - yellow
+    } else {
+      return 'text-green-600 font-medium'; // Good capacity - green
+    }
+  }
 }
