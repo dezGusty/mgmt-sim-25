@@ -366,7 +366,9 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.projectService.assignUserToProject(this.selectedProject.id, this.assignUserId, this.assignPercentage).subscribe({
       next: (res) => {
         if (res.success) {
-          this.showAssignForm = false;
+          // Clear error message and close form on success
+          this.errorMessage = null;
+          this.closeAssignForm();
           this.loadProjects();
         } else {
           this.errorMessage = res.message || 'Failed to assign user';
@@ -377,6 +379,13 @@ export class ProjectManagementView implements OnInit, OnDestroy {
         this.errorMessage = 'Failed to assign user';
       }
     });
+  }
+
+  closeAssignForm() {
+    this.showAssignForm = false;
+    this.selectedProject = null;
+    this.assignUserId = null;
+    this.assignPercentage = 0;
   }
 
   getStatusColor(isActive: boolean): string {

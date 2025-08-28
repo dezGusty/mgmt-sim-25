@@ -298,8 +298,7 @@
       <div *ngIf="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           *ngFor="let project of projects"
-          class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-          (click)="selectProject(project)"
+          class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
         >
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -308,7 +307,7 @@
                 {{ getStatusText(project.isActive) }}
               </span>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 mb-4">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Start Date:</span>
                 <span class="text-gray-900">{{ formatDate(project.startDate) }}</span>
@@ -328,6 +327,38 @@
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Allocation:</span>
                 <span class="text-gray-900">{{ formatPercentage(project.totalAssignedPercentage) }}</span>
+              </div>
+            </div>
+            
+            <!-- Action buttons for card view -->
+            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+              <button
+                (click)="selectProject(project)"
+                class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+              >
+                View Details
+              </button>
+              <div class="flex gap-2">
+                <button 
+                  [disabled]="!canModify"
+                  [class]="canModify 
+                    ? 'text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer'
+                    : 'text-gray-400 text-sm font-medium cursor-not-allowed'"
+                  (click)="canModify && startEditProject(project)"
+                  [title]="!canModify ? 'Nu puteți edita proiecte în modul view-only' : ''"
+                >
+                  Edit
+                </button>
+                <button 
+                  [disabled]="!canModify"
+                  [class]="canModify 
+                    ? 'text-green-600 hover:text-green-900 text-sm font-medium cursor-pointer'
+                    : 'text-gray-400 text-sm font-medium cursor-not-allowed'"
+                  (click)="canModify && openAssignForm(project)"
+                  [title]="!canModify ? 'Nu puteți asigna utilizatori în modul view-only' : ''"
+                >
+                  Assign
+                </button>
               </div>
             </div>
           </div>
@@ -375,7 +406,7 @@
   </div>
 
   <!-- Project Detail Modal (placeholder) -->
-  <div *ngIf="selectedProject" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay" style="background-color: rgba(0,0,0,0.5);" (click)="closeProjectDetail()">
+  <div *ngIf="selectedProject && !showAssignForm" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay" style="background-color: rgba(0,0,0,0.5);" (click)="closeProjectDetail()">
     <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold">{{ selectedProject.name || 'Unnamed Project' }}</h2>
@@ -456,7 +487,7 @@
   </div>
 
   <!-- Assign User Modal -->
-  <div *ngIf="showAssignForm && selectedProject" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay" style="background-color: rgba(0,0,0,0.5);" (click)="showAssignForm=false">
+  <div *ngIf="showAssignForm && selectedProject" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay" style="background-color: rgba(0,0,0,0.5);" (click)="closeAssignForm()">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4" (click)="$event.stopPropagation()">
       <h2 class="text-xl font-semibold mb-4">Assign User to {{ selectedProject.name }}</h2>
       <div class="space-y-3">
@@ -469,7 +500,7 @@
           <input type="number" [(ngModel)]="assignPercentage" class="w-full border px-3 py-2 rounded" />
         </div>
         <div class="flex justify-end gap-2">
-          <button class="px-4 py-2 rounded border" (click)="showAssignForm=false">Cancel</button>
+          <button class="px-4 py-2 rounded border" (click)="closeAssignForm()">Cancel</button>
           <button class="px-4 py-2 rounded bg-green-600 text-white" (click)="assignUser()">Assign</button>
         </div>
       </div>

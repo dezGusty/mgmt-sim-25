@@ -118,12 +118,48 @@ export class ProjectService {
   }
 
   assignUserToProject(projectId: number, userId: number, assignedPercentage: number): Observable<IApiResponse<void>> {
-
     const payload = {
       userId,
       timePercentagePerProject: assignedPercentage
     };
-    return this.http.post<IApiResponse<void>>(`${this.apiUrl}/${projectId}/users`, payload);
+    return this.http.post<any>(`${this.apiUrl}/${projectId}/users`, payload, { observe: 'response' }).pipe(
+      map(resp => {
+        const status = resp.status;
+        const body = resp.body;
+        
+        // Handle successful responses (201 Created or other 2xx)
+        if (status >= 200 && status < 300) {
+          // If backend already returns the envelope { success, data, ... }
+          if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+            return body as IApiResponse<void>;
+          }
+          // If backend returns the assignment directly (CreatedAtAction response), wrap it
+          return { 
+            data: undefined, 
+            message: 'User assigned to project successfully', 
+            success: true, 
+            timestamp: new Date() 
+          } as IApiResponse<void>;
+        }
+        
+        // Handle other status codes
+        return { 
+          data: undefined, 
+          message: 'Failed to assign user to project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<void>;
+      }),
+      catchError(err => {
+        console.error('assignUserToProject error', err);
+        return of({ 
+          data: undefined, 
+          message: err?.message || 'Failed to assign user to project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<void>);
+      })
+    );
   }
 
   removeUserFromProject(projectId: number, userId: number): Observable<IApiResponse<void>> {
