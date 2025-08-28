@@ -7,6 +7,8 @@ export interface IProject {
   isActive: boolean;
   assignedUsersCount: number;
   totalAssignedPercentage: number;
+  totalAssignedFTEs: number;
+  remainingFTEs: number;
   createdAt?: Date;
   deletedAt?: Date;
   modifiedAt?: Date;
@@ -20,6 +22,8 @@ export interface IProjectWithUsers {
   budgetedFTEs: number;
   isActive: boolean;
   assignedUsers: IUserProject[];
+  totalAssignedFTEs: number;
+  remainingFTEs: number;
   createdAt?: Date;
   deletedAt?: Date;
   modifiedAt?: Date;

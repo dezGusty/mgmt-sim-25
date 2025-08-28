@@ -30,6 +30,7 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly MGMTSimulatorDbContext _dbContext;
+        private readonly IAvailabilityService _availabilityService;
 
         public UserService(
             IUserRepository userRepository,
@@ -41,7 +42,8 @@ namespace ManagementSimulator.Core.Services
             IMemoryCache cache,
             ILeaveRequestTypeRepository leaveRequestTypeRepository,
             ILeaveRequestRepository leaveRequestRepository,
-            MGMTSimulatorDbContext dbContext)
+            MGMTSimulatorDbContext dbContext,
+            IAvailabilityService availabilityService)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -53,6 +55,7 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
             _leaveRequestRepository = leaveRequestRepository;
             _dbContext = dbContext;
+            _availabilityService = availabilityService;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -112,7 +115,8 @@ namespace ManagementSimulator.Core.Services
                 DateOfEmployment = dto.DateOfEmployment,
                 MustChangePassword = true,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
-                Vacation = dto.Vacation ?? 21
+                Vacation = dto.Vacation ?? 21,
+                EmploymentType = dto.EmploymentType
             };
 
             await _userRepository.AddAsync(user);
@@ -165,6 +169,9 @@ namespace ManagementSimulator.Core.Services
             {
                 throw new MailNotSentException(user.Email);
             }
+
+            // Update availability based on employment type
+            await _availabilityService.UpdateUserAvailabilityAsync(user.Id);
 
             return user.ToUserResponseDto();
         }
@@ -468,6 +475,13 @@ namespace ManagementSimulator.Core.Services
             existing.ModifiedAt = DateTime.UtcNow;
 
             await _userRepository.SaveChangesAsync();
+
+            // Update availability if employment type changed or other relevant fields
+            if (dto.EmploymentType.HasValue)
+            {
+                await _availabilityService.UpdateUserAvailabilityAsync(existing.Id);
+            }
+
             return existing.ToUserResponseDto();
         }
 

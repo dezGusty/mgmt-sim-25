@@ -72,8 +72,45 @@ export class ProjectService {
     );
   }
 
-  updateProject(id: number, project: Partial<IProject>): Observable<IApiResponse<IProject>> {
-    return this.http.put<IApiResponse<IProject>>(`${this.apiUrl}/${id}`, project);
+  updateProject(id: number, project: Partial<IProject>): Observable<IApiResponse<IProject | null>> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, project, { observe: 'response' }).pipe(
+      map(resp => {
+        const status = resp.status;
+        const body = resp.body;
+        
+        // Handle successful responses
+        if (status >= 200 && status < 300) {
+          // If backend already returns the envelope { success, data, ... }
+          if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+            return body as IApiResponse<IProject | null>;
+          }
+          // If backend returns the project directly, wrap it
+          return { 
+            data: body as IProject || null, 
+            message: 'Project updated successfully', 
+            success: true, 
+            timestamp: new Date() 
+          } as IApiResponse<IProject | null>;
+        }
+        
+        // Handle other status codes
+        return { 
+          data: null, 
+          message: 'Failed to update project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<IProject | null>;
+      }),
+      catchError(err => {
+        console.error('updateProject error', err);
+        return of({ 
+          data: null, 
+          message: err?.message || 'Failed to update project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<IProject | null>);
+      })
+    );
   }
 
   deleteProject(id: number): Observable<IApiResponse<void>> {
@@ -81,12 +118,48 @@ export class ProjectService {
   }
 
   assignUserToProject(projectId: number, userId: number, assignedPercentage: number): Observable<IApiResponse<void>> {
-
     const payload = {
       userId,
       timePercentagePerProject: assignedPercentage
     };
-    return this.http.post<IApiResponse<void>>(`${this.apiUrl}/${projectId}/users`, payload);
+    return this.http.post<any>(`${this.apiUrl}/${projectId}/users`, payload, { observe: 'response' }).pipe(
+      map(resp => {
+        const status = resp.status;
+        const body = resp.body;
+        
+        // Handle successful responses (201 Created or other 2xx)
+        if (status >= 200 && status < 300) {
+          // If backend already returns the envelope { success, data, ... }
+          if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+            return body as IApiResponse<void>;
+          }
+          // If backend returns the assignment directly (CreatedAtAction response), wrap it
+          return { 
+            data: undefined, 
+            message: 'User assigned to project successfully', 
+            success: true, 
+            timestamp: new Date() 
+          } as IApiResponse<void>;
+        }
+        
+        // Handle other status codes
+        return { 
+          data: undefined, 
+          message: 'Failed to assign user to project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<void>;
+      }),
+      catchError(err => {
+        console.error('assignUserToProject error', err);
+        return of({ 
+          data: undefined, 
+          message: err?.message || 'Failed to assign user to project', 
+          success: false, 
+          timestamp: new Date() 
+        } as IApiResponse<void>);
+      })
+    );
   }
 
   removeUserFromProject(projectId: number, userId: number): Observable<IApiResponse<void>> {

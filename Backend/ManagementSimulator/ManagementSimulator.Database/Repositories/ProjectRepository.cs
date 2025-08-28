@@ -176,6 +176,15 @@ namespace ManagementSimulator.Database.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<UserProject>> GetUserProjectsByUserIdAsync(int userId)
+        {
+            return await _dbContext.UserProjects
+                .Include(up => up.Project)
+                .Where(up => up.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<UserProject> AddUserToProjectAsync(UserProject userProject)
         {
             _dbContext.UserProjects.Add(userProject);

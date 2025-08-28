@@ -40,6 +40,7 @@ namespace ManagementSimulator.Database.Entities
         public string FullName => $"{FirstName} {LastName}";
         public int Vacation { get; set; } = 21;
 
+        public EmploymentType EmploymentType { get; set; } = EmploymentType.FullTime;
         public float TotalAvailability { get; set; }
         public float RemainingAvailability { get; set; }
     }
