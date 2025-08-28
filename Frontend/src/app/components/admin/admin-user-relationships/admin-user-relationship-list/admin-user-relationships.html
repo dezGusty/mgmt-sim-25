@@ -335,27 +335,27 @@
                 <!-- Manager Principal -->
                 <div class="flex items-center space-x-3">
                   <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]" [src]="
-                    manager.avatar ||
-                    'https://ui-avatars.com/api/?name=' +
-                      manager.name +
-                      '&background=20B486&color=fff'
+                manager.avatar ||
+                'https://ui-avatars.com/api/?name=' +
+                  manager.name +
+                  '&background=20B486&color=fff'
                   " [alt]="manager.name" />
                   <div>
                     <div class="text-lg font-semibold text-gray-900">
                       <span [innerHTML]="
-                        manager.name | highlight : getHighlightTerm('name') : 'name'
+                    manager.name | highlight : getHighlightTerm('name') : 'name'
                       "></span>
                     </div>
                     <div class="text-xs text-gray-500">
                       <span [innerHTML]="
-                        manager.email
-                          | highlight : getHighlightTerm('email') : 'email'
+                    manager.email
+                      | highlight : getHighlightTerm('email') : 'email'
                       "></span>
                     </div>
                     <div class="text-sm text-gray-600">
                       <span [innerHTML]="
-                        manager.jobTitle?.name || ''
-                          | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
+                    manager.jobTitle?.name || ''
+                      | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
                       "></span>
                       - {{ manager.department?.name }}
                     </div>
@@ -389,6 +389,11 @@
                     </div>
                     <div class="flex items-center space-x-1 mt-1">
                       <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Manager Secund</span>
+                      <button
+                        class="text-red-500 hover:text-red-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                        (click)="removeSecondManager(secondManager)" title="Remove second manager">
+                        Remove
+                      </button>
                     </div>
                     <div class="text-xs text-gray-400 mt-0.5">
                       Până la {{ secondManager.endDate | date:'dd/MM' }}
@@ -452,7 +457,7 @@
                         <div *ngIf="isAdmin(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
                           <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
                         </div>
-                        <div class="ml-3 flex-shrink-0">
+                        <div class="ml-3 flex-shrink-0 space-x-2">
                           <button
                             class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors"
                             (click)="assignManager({
@@ -460,8 +465,21 @@
                         name: subordinateName,
                         email: manager.subordinatesEmails?.[i] || '',
                         managersIds: []
-                      }, false)">
+                       }, false)">
                             Reassign
+                          </button>
+                          <button
+                            [class]="getActiveSecondManagerForManager(manager.id) 
+                               ? 'text-gray-400 cursor-not-allowed text-xs font-medium px-2 py-1 rounded'
+                               : 'text-amber-600 hover:text-amber-800 text-xs font-medium px-2 py-1 rounded hover:bg-amber-50 transition-colors'"
+                            [disabled]="getActiveSecondManagerForManager(manager.id) !== null" [title]="getActiveSecondManagerForManager(manager.id) 
+                               ? 'There is already an active second manager for this manager'
+                               : 'Make this employee a second manager'" (click)="openSecondManagerModal({
+                         id: manager.subordinatesIds?.[i] || 0,
+                         name: subordinateName,
+                         email: manager.subordinatesEmails?.[i] || ''
+                       }, manager.id)">
+                            Make Second Manager
                           </button>
                         </div>
                       </div>
@@ -817,4 +835,76 @@
   <app-admin-assign-relationship *ngIf="showAssignRelationShipComponent" [employee]="selectedEmployee"
     [isUsedForPost]="postRelationship" (onAssign)="onAssignManagers($event)" (onClose)="closeAssignModal()">
   </app-admin-assign-relationship>
+
+  <!-- Second Manager Modal -->
+  <div *ngIf="showSecondManagerModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity" (click)="closeSecondManagerModal()">
+    </div>
+
+    <!-- Modal dialog -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">
+            Make Second Manager
+          </h3>
+          <button (click)="closeSecondManagerModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal content -->
+        <form (ngSubmit)="onSubmitSecondManager()" class="p-4">
+          <div class="space-y-4">
+            <!-- Selected Employee Info -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900">{{ selectedSecondManagerEmployee?.name }}</div>
+              <div class="text-xs text-gray-500">{{ selectedSecondManagerEmployee?.email }}</div>
+              <div class="text-xs text-amber-600 mt-1">Will temporarily replace manager</div>
+            </div>
+
+            <!-- Start Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+              <input type="date" [(ngModel)]="secondManagerForm.startDate" name="startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required />
+            </div>
+
+            <!-- End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+              <input type="date" [(ngModel)]="secondManagerForm.endDate" name="endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required />
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="secondManagerErrorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ secondManagerErrorMessage }}
+          </div>
+
+          <!-- Modal footer -->
+          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button type="button" (click)="closeSecondManagerModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              [disabled]="isSubmittingSecondManager">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!isSecondManagerFormValid() || isSubmittingSecondManager">
+              <span *ngIf="isSubmittingSecondManager">Creating...</span>
+              <span *ngIf="!isSubmittingSecondManager">Create Second Manager</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
