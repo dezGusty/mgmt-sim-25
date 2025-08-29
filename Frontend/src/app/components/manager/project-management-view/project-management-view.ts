@@ -139,11 +139,10 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       next: (response) => {
   console.debug('Filtered projects request', backendRequest);
   console.debug('Filtered projects response', response);
-        // Backend returns PagedResponseDto in response.data
+
         if (response.success && response.data) {
           this.projects = response.data.data || [];
           this.totalPages = response.data.totalPages || 0;
-          // Use TotalCount from backend if present, otherwise estimate
           this.totalCount = response.data.totalCount || (this.totalPages * this.itemsPerPage);
         } else {
           this.errorMessage = response.message || 'Failed to load projects';
@@ -262,14 +261,12 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.projectService.createProject(this.newProject).subscribe({
       next: (res) => {
         if (token !== this.createRequestToken) {
-          // This response is stale because the user cancelled/closed the modal.
+
           return;
         }
         this.isSubmitting = false;
         if (res.success) {
           this.showAddProjectForm = false;
-          // If server returned the created project, insert it locally for instant feedback.
-          // After successful create, reload first page from server to reflect DB state (avoid optimistic-only views)
           this.currentPage = 1;
           this.loadProjects();
         } else {
@@ -288,7 +285,6 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   onCancelAddProject() {
-    // Invalidate any pending create responses and close modal
     this.createRequestToken++;
     this.isSubmitting = false;
     this.showAddProjectForm = false;
@@ -315,19 +311,16 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       next: (res) => {
         this.isSubmitting = false;
         if (res.success) {
-          // Clear error message and close modal
           this.errorMessage = null;
           this.showAddProjectForm = false;
           this.editingProjectId = null;
           
-          // If updated project body available, update local list, otherwise reload current page
           if ((res as any).data) {
             const updated = (res as any).data as IProject;
             const idx = this.projects.findIndex(p => p.id === updated.id);
             if (idx >= 0) {
               this.projects[idx] = updated;
             } else {
-              // If not on current page, reload to reflect changes
               this.currentPage = 1;
               this.loadProjects();
             }
@@ -346,7 +339,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     });
   }
 
-  // Assign user flows
+
   openAssignForm(project: IProject) {
     this.selectedProject = project;
     this.showAssignForm = true;
@@ -366,7 +359,6 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.projectService.assignUserToProject(this.selectedProject.id, this.assignUserId, this.assignPercentage).subscribe({
       next: (res) => {
         if (res.success) {
-          // Clear error message and close form on success
           this.errorMessage = null;
           this.closeAssignForm();
           this.loadProjects();

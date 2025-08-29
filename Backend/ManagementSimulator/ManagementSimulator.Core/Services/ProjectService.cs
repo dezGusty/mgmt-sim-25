@@ -35,7 +35,6 @@ namespace ManagementSimulator.Core.Services
             {
                 if (userProject.User != null)
                 {
-                    // Convert the project assignment percentage to actual FTEs based on user's employment type
                     var userTotalAvailability = _availabilityService.CalculateTotalAvailability(userProject.User.EmploymentType);
                     var projectFTEAllocation = (userProject.TimePercentagePerProject / 100f) * userTotalAvailability;
                     totalAssignedFTEs += projectFTEAllocation;
@@ -54,10 +53,9 @@ namespace ManagementSimulator.Core.Services
             foreach (var project in projects)
             {
                 var (totalFTEs, remainingFTEs) = await CalculateProjectFTEsAsync(project.Id, project.BudgetedFTEs);
-                
-                // Calculate project capacity utilization percentage
+
                 var projectUtilizationPercentage = project.BudgetedFTEs > 0 ? (totalFTEs / project.BudgetedFTEs) * 100f : 0f;
-                
+
                 result.Add(new ProjectResponseDto
                 {
                     Id = project.Id,
@@ -89,7 +87,7 @@ namespace ManagementSimulator.Core.Services
 
             var projectUsers = await _projectRepository.GetProjectUsersAsync(id);
             var (totalFTEs, remainingFTEs) = await CalculateProjectFTEsAsync(id, project.BudgetedFTEs);
-            
+
             // Calculate project capacity utilization percentage
             var projectUtilizationPercentage = project.BudgetedFTEs > 0 ? (totalFTEs / project.BudgetedFTEs) * 100f : 0f;
 
@@ -190,6 +188,8 @@ namespace ManagementSimulator.Core.Services
             await _projectRepository.SaveChangesAsync();
 
             var projectUsers = await _projectRepository.GetProjectUsersAsync(id);
+            var (totalFTEs, remainingFTEs) = await CalculateProjectFTEsAsync(id, existing.BudgetedFTEs);
+            var projectUtilizationPercentage = existing.BudgetedFTEs > 0 ? (totalFTEs / existing.BudgetedFTEs * 100f) : 0f;
 
             return new ProjectResponseDto
             {
@@ -200,7 +200,9 @@ namespace ManagementSimulator.Core.Services
                 BudgetedFTEs = existing.BudgetedFTEs,
                 IsActive = existing.IsActive,
                 AssignedUsersCount = projectUsers.Count,
-                TotalAssignedPercentage = projectUsers.Sum(up => up.TimePercentagePerProject),
+                TotalAssignedPercentage = projectUtilizationPercentage,
+                TotalAssignedFTEs = totalFTEs,
+                RemainingFTEs = remainingFTEs,
                 CreatedAt = existing.CreatedAt,
                 DeletedAt = existing.DeletedAt,
                 ModifiedAt = existing.ModifiedAt
@@ -251,15 +253,13 @@ namespace ManagementSimulator.Core.Services
                     TotalPages = 0
                 };
 
-            // Calculate FTEs for each project
             var projectResponses = new List<ProjectResponseDto>();
             foreach (var p in result)
             {
                 var (totalFTEs, remainingFTEs) = await CalculateProjectFTEsAsync(p.Id, p.BudgetedFTEs);
-                
-                // Calculate project capacity utilization percentage
+
                 var projectUtilizationPercentage = p.BudgetedFTEs > 0 ? (totalFTEs / p.BudgetedFTEs) * 100f : 0f;
-                
+
                 projectResponses.Add(new ProjectResponseDto
                 {
                     Id = p.Id,
@@ -308,7 +308,6 @@ namespace ManagementSimulator.Core.Services
                 throw new UniqueConstraintViolationException(nameof(UserProject), "UserId_ProjectId");
             }
 
-            // Validate that the assignment doesn't exceed user's availability
             var isValidAssignment = await _availabilityService.ValidateProjectAssignmentAsync(
                 request.UserId, request.TimePercentagePerProject);
             if (!isValidAssignment)
@@ -325,7 +324,6 @@ namespace ManagementSimulator.Core.Services
 
             await _projectRepository.AddUserToProjectAsync(userProject);
 
-            // Update user's availability after assignment
             await _availabilityService.UpdateUserAvailabilityAsync(request.UserId);
 
             return new UserProjectResponseDto
@@ -354,13 +352,12 @@ namespace ManagementSimulator.Core.Services
             }
 
             var result = await _projectRepository.RemoveUserFromProjectAsync(userId, projectId);
-            
-            // Update user's availability after removal
+
             if (result)
             {
                 await _availabilityService.UpdateUserAvailabilityAsync(userId);
             }
-            
+
             return result;
         }
 
@@ -378,7 +375,6 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(User), userId);
             }
 
-            // Validate that the updated assignment doesn't exceed user's availability
             var isValidAssignment = await _availabilityService.ValidateProjectAssignmentAsync(
                 userId, request.TimePercentagePerProject, projectId);
             if (!isValidAssignment)
@@ -399,7 +395,6 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(UserProject), $"UserId:{userId}, ProjectId:{projectId}");
             }
 
-            // Update user's availability after assignment change
             await _availabilityService.UpdateUserAvailabilityAsync(userId);
 
             return new UserProjectResponseDto
