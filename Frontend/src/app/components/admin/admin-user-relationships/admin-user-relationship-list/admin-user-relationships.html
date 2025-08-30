@@ -5,61 +5,34 @@
     <div class="flex flex-wrap items-center gap-3">
       <!-- Search Input -->
       <div class="flex-1 min-w-60">
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          (keypress)="onSearchKeypress($event)"
+        <input type="text" [(ngModel)]="searchTerm" (keypress)="onSearchKeypress($event)"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
-          [placeholder]="getSearchPlaceholder()"
-        />
+          [placeholder]="getSearchPlaceholder()" />
       </div>
 
       <!-- Search/Sort By Dropdown -->
       <div class="w-48">
-        <select
-          [(ngModel)]="searchBy"
-          class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
-        >
-          <option
-            [value]="UserSearchType.Global"
-            [selected]="searchBy === UserSearchType.Global"
-          >
+        <select [(ngModel)]="searchBy"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]">
+          <option [value]="UserSearchType.Global" [selected]="searchBy === UserSearchType.Global">
             Global Search
           </option>
-          <option
-            [value]="UserSearchType.ManagerName"
-            [selected]="searchBy === UserSearchType.ManagerName"
-          >
+          <option [value]="UserSearchType.ManagerName" [selected]="searchBy === UserSearchType.ManagerName">
             By Manager Name
           </option>
-          <option
-            [value]="UserSearchType.EmployeeName"
-            [selected]="searchBy === UserSearchType.EmployeeName"
-          >
+          <option [value]="UserSearchType.EmployeeName" [selected]="searchBy === UserSearchType.EmployeeName">
             By Employee Name
           </option>
-          <option
-            [value]="UserSearchType.ManagerEmail"
-            [selected]="searchBy === UserSearchType.ManagerEmail"
-          >
+          <option [value]="UserSearchType.ManagerEmail" [selected]="searchBy === UserSearchType.ManagerEmail">
             By Manager Email
           </option>
-          <option
-            [value]="UserSearchType.EmployeeEmail"
-            [selected]="searchBy === UserSearchType.EmployeeEmail"
-          >
+          <option [value]="UserSearchType.EmployeeEmail" [selected]="searchBy === UserSearchType.EmployeeEmail">
             By Employee Email
           </option>
-          <option
-            [value]="UserSearchType.JobTitle"
-            [selected]="searchBy === UserSearchType.JobTitle"
-          >
+          <option [value]="UserSearchType.JobTitle" [selected]="searchBy === UserSearchType.JobTitle">
             By Job Title
           </option>
-          <option
-            [value]="UserSearchType.UnassignedName"
-            [selected]="searchBy === UserSearchType.UnassignedName"
-          >
+          <option [value]="UserSearchType.UnassignedName" [selected]="searchBy === UserSearchType.UnassignedName">
             Unassigned
           </option>
         </select>
@@ -67,89 +40,39 @@
 
       <!-- Sort Order Toggle -->
       <div class="flex items-center">
-        <button
-          (click)="toggleSortOrder()"
+        <button (click)="toggleSortOrder()"
           class="flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] transition-colors"
-          [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'"
-        >
-          <svg
-            *ngIf="!sortDescending"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 11l5-5m0 0l5 5m-5-5v12"
-            />
+          [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'">
+          <svg *ngIf="!sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
           </svg>
-          <svg
-            *ngIf="sortDescending"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 13l-5 5m0 0l-5-5m5 5V6"
-            />
+          <svg *ngIf="sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
           </svg>
           <span class="ml-1 text-xs text-gray-600">{{
             sortDescending ? "Z-A" : "A-Z"
-          }}</span>
+            }}</span>
         </button>
       </div>
 
       <!-- Search Button -->
-      <button
-        (click)="onSearch()"
-        class="px-4 py-2 bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+      <button (click)="onSearch()"
+        class="px-4 py-2 bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         Search
       </button>
 
       <!-- Clear Button -->
-      <button
-        *ngIf="searchTerm || searchBy !== UserSearchType.Global"
-        (click)="clearSearch()"
+      <button *ngIf="searchTerm || searchBy !== UserSearchType.Global" (click)="clearSearch()"
         class="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg text-sm transition-colors"
-        title="Clear search"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
+        title="Clear search">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
@@ -159,99 +82,48 @@
   <div class="mb-8">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
-      (click)="toggleAdminSection()"
-      (keydown.enter)="toggleAdminSection()"
-      (keydown.space)="toggleAdminSection(); $event.preventDefault()"
-      tabindex="0"
-      role="button"
-      [attr.aria-expanded]="!isAdminSectionCollapsed"
-      aria-controls="admin-section-content"
-    >
+      (click)="toggleAdminSection()" (keydown.enter)="toggleAdminSection()"
+      (keydown.space)="toggleAdminSection(); $event.preventDefault()" tabindex="0" role="button"
+      [attr.aria-expanded]="!isAdminSectionCollapsed" aria-controls="admin-section-content">
       <div class="p-2 bg-red-100 rounded-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-5 h-5 text-red-600"
-        >
-          <path
-            fill-rule="evenodd"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-red-600">
+          <path fill-rule="evenodd"
             d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.814 3.051 10.923 7.613 13.777a.75.75 0 00.774 0C15.199 20.673 18.25 15.564 18.25 9.75a12.74 12.74 0 00-.635-4.235.75.75 0 00-.722-.515 11.209 11.209 0 01-7.877-3.08z"
-            clip-rule="evenodd"
-          />
+            clip-rule="evenodd" />
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">System Administrators</h4>
-      <span
-        class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full"
-        >{{ getTotalAdminCount() }} total</span
-      >
+      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getTotalAdminCount() }}
+        total</span>
       <!-- Chevron Icon -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-gray-400 transition-transform"
-        [class.rotate-180]="!isAdminSectionCollapsed"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isAdminSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
 
     <!-- Admin Section Content -->
-    <div
-      *ngIf="!isAdminSectionCollapsed"
-      id="admin-section-content"
-      class="admin-section-content"
-    >
+    <div *ngIf="!isAdminSectionCollapsed" id="admin-section-content" class="admin-section-content">
       <div *ngIf="isLoadingAdmins" class="text-center py-4">
         <div class="inline-flex items-center">
-          <svg
-            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
           </svg>
           <span class="text-sm text-gray-500">Loading administrators...</span>
         </div>
       </div>
 
-      <div
-        *ngIf="hasAdminsError() && !isLoadingAdmins"
-        class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
-      >
+      <div *ngIf="hasAdminsError() && !isLoadingAdmins" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
         <div class="flex items-center">
-          <svg
-            class="h-5 w-5 text-red-400 mr-2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
+          <svg class="h-5 w-5 text-red-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
-            />
+              clip-rule="evenodd" />
           </svg>
           <div class="flex-1">
             <p class="text-sm text-red-700">{{ adminsErrorMessage }}</p>
@@ -260,72 +132,54 @@
       </div>
 
       <!-- Lista administratorilor -->
-      <div
-  *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8"
->
-  <div
-    *ngFor="let admin of admins"
-    class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-  >
-    <img
-      class="h-10 w-10 rounded-full object-cover"
-      [src]="
+      <div *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-8">
+        <div *ngFor="let admin of admins"
+          class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <img class="h-10 w-10 rounded-full object-cover" [src]="
         admin.avatar ||
         'https://ui-avatars.com/api/?name=' +
           admin.name +
           '&background=ef4444&color=fff'
-      "
-      [alt]="admin.name"
-    />
-    <div>
-      <div class="text-sm font-medium text-gray-900">
-        <span [innerHTML]="admin.name | highlight : getHighlightTerm('name') : 'name'"></span>
+      " [alt]="admin.name" />
+          <div>
+            <div class="text-sm font-medium text-gray-900">
+              <span [innerHTML]="admin.name | highlight : getHighlightTerm('name') : 'name'"></span>
+            </div>
+            <div class="text-xs text-gray-500">
+              <span [innerHTML]="admin.email | highlight : getHighlightTerm('email') : 'email'"></span>
+            </div>
+            <div class="text-xs text-gray-500">
+              <span
+                [innerHTML]="admin.jobTitle?.name || '' | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"></span>
+            </div>
+            <div class="flex items-center space-x-2 mt-1">
+              <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="text-xs text-gray-500">
-        <span [innerHTML]="admin.email | highlight : getHighlightTerm('email') : 'email'"></span>
-      </div>
-      <div class="text-xs text-gray-500">
-        <span [innerHTML]="admin.jobTitle?.name || '' | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"></span>
-      </div>
-      <div class="flex items-center space-x-2 mt-1">
-        <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
-      </div>
-    </div>
-  </div>
-</div>
 
       <!-- Mesaj când nu există administratori -->
-      <div
-        *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length === 0"
-        class="text-center py-8 ml-8"
-      >
+      <div *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length === 0" class="text-center py-8 ml-8">
         <div class="text-gray-400 text-sm">
           No administrators found in the system
         </div>
       </div>
 
       <!-- Pagination for Admins -->
-      <div
-        *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
-        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
-      >
+      <div *ngIf="!hasAdminsError() && !isLoadingAdmins && admins.length > 0"
+        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6">
         <div *ngIf="totalPagesAdmins > 1" class="flex-1 flex justify-between items-center sm:hidden">
-          <button
-            (click)="goToPreviousPageAdmins()"
-            [disabled]="currentPageAdmins === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-          >
+          <button (click)="goToPreviousPageAdmins()" [disabled]="currentPageAdmins === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
             Previous
           </button>
           <span class="text-sm text-gray-700">
             Page {{ currentPageAdmins }} of {{ totalPagesAdmins }}
           </span>
-          <button
-            (click)="goToNextPageAdmins()"
-            [disabled]="currentPageAdmins === totalPagesAdmins"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-          >
+          <button (click)="goToNextPageAdmins()" [disabled]="currentPageAdmins === totalPagesAdmins"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
             Next
           </button>
         </div>
@@ -343,12 +197,9 @@
             </p>
             <div class="flex items-center gap-2">
               <label for="itemsPerPageAdmins" class="text-sm text-gray-700">Show:</label>
-              <select
-                id="itemsPerPageAdmins"
-                [(ngModel)]="pageSizeAdmins"
+              <select id="itemsPerPageAdmins" [(ngModel)]="pageSizeAdmins"
                 (ngModelChange)="onItemsPerPageChangeAdmins()"
-                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent"
-              >
+                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-400 focus:border-transparent">
                 <option value="3" selected>3</option>
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -360,110 +211,61 @@
             </div>
           </div>
           <div *ngIf="totalPagesAdmins > 1">
-            <nav
-              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <!-- First page button -->
-              <button
-                (click)="goToFirstPageAdmins()"
-                [disabled]="currentPageAdmins === 1"
+              <button (click)="goToFirstPageAdmins()" [disabled]="currentPageAdmins === 1"
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="First page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
+                title="First page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
                     d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
               <!-- Previous page button -->
-              <button
-                (click)="goToPreviousPageAdmins()"
-                [disabled]="currentPageAdmins === 1"
+              <button (click)="goToPreviousPageAdmins()" [disabled]="currentPageAdmins === 1"
                 class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Previous page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
+                title="Previous page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
                     d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
               <!-- Page numbers -->
-              <button
-                *ngFor="let page of getPageNumbersAdmins()"
-                (click)="goToPageAdmins(page)"
-                [class]="
+              <button *ngFor="let page of getPageNumbersAdmins()" (click)="goToPageAdmins(page)" [class]="
                   page === currentPageAdmins
                     ? 'relative inline-flex items-center px-4 py-2 border border-red-400 bg-red-400 text-sm font-medium text-white'
                     : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
-                "
-              >
+                ">
                 {{ page }}
               </button>
               <!-- Show ellipsis if there are more pages -->
-              <span
-                *ngIf="
+              <span *ngIf="
                   totalPagesAdmins > 5 &&
                   currentPageAdmins < totalPagesAdmins - 2
                 "
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
-              >
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
                 ...
               </span>
               <!-- Next page button -->
-              <button
-                (click)="goToNextPageAdmins()"
-                [disabled]="currentPageAdmins === totalPagesAdmins"
+              <button (click)="goToNextPageAdmins()" [disabled]="currentPageAdmins === totalPagesAdmins"
                 class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Next page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
+                title="Next page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
                     d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
               <!-- Last page button -->
-              <button
-                (click)="goToLastPageAdmins()"
-                [disabled]="currentPageAdmins === totalPagesAdmins"
+              <button (click)="goToLastPageAdmins()" [disabled]="currentPageAdmins === totalPagesAdmins"
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Last page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
+                title="Last page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
                     d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
+                    clip-rule="evenodd" />
                 </svg>
               </button>
             </nav>
@@ -477,100 +279,46 @@
   <div class="mb-8">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
-      (click)="toggleManagerSection()"
-      (keydown.enter)="toggleManagerSection()"
-      (keydown.space)="toggleManagerSection(); $event.preventDefault()"
-      tabindex="0"
-      role="button"
-      [attr.aria-expanded]="!isManagerSectionCollapsed"
-      aria-controls="manager-section-content"
-    >
+      (click)="toggleManagerSection()" (keydown.enter)="toggleManagerSection()"
+      (keydown.space)="toggleManagerSection(); $event.preventDefault()" tabindex="0" role="button"
+      [attr.aria-expanded]="!isManagerSectionCollapsed" aria-controls="manager-section-content">
       <div class="p-2 bg-green-100 rounded-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-5 h-5 text-green-600"
-        >
-          <path
-            fill-rule="evenodd"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-600">
+          <path fill-rule="evenodd"
             d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-            clip-rule="evenodd"
-          />
+            clip-rule="evenodd" />
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Team Managers</h4>
-      <span
-        class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
-        >{{ getTotalManagerCount() }} total</span
-      >
+      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getTotalManagerCount() }}
+        total</span>
       <!-- Chevron Icon -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-gray-400 transition-transform"
-        [class.rotate-180]="!isManagerSectionCollapsed"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isManagerSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
 
     <!-- Manager Section Content -->
-    <div
-      *ngIf="!isManagerSectionCollapsed"
-      id="manager-section-content"
-      class="manager-section-content"
-    >
+    <div *ngIf="!isManagerSectionCollapsed" id="manager-section-content" class="manager-section-content">
       <div *ngIf="isLoadingManagers" class="text-center py-8">
         <div class="inline-flex items-center">
-          <svg
-            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
           </svg>
           <span class="text-sm text-gray-500">Loading managers...</span>
         </div>
       </div>
 
-      <div
-        *ngIf="hasManagersError() && !isLoadingManagers"
-        class="text-center py-12"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-12 w-12 text-gray-400 mx-auto mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+      <div *ngIf="hasManagersError() && !isLoadingManagers" class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <div class="text-gray-400 text-lg mb-2">No managers found</div>
         <div class="text-gray-500 text-sm mb-4">{{ managersErrorMessage }}</div>
@@ -578,352 +326,279 @@
       </div>
 
       <!-- Lista managerilor -->
-      <div
-        *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
-      >
-      <div
-        *ngFor="let manager of managers"
-        class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"
-      >
-        <!-- Header-ul managerului -->
-        <div class="bg-white border-b border-gray-200 p-4">
-          <div class="flex items-center space-x-3">
-            <img
-              class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]"
-              [src]="
+      <div *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0">
+        <div *ngFor="let manager of managers" class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+          <!-- Header-ul managerului cu manager secund -->
+          <div class="bg-white border-b border-gray-200 p-4">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start space-x-4 flex-1">
+                <!-- Manager Principal -->
+                <div class="flex items-center space-x-3">
+                  <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]" [src]="
                 manager.avatar ||
                 'https://ui-avatars.com/api/?name=' +
                   manager.name +
                   '&background=20B486&color=fff'
-              "
-              [alt]="manager.name"
-            />
-            <div class="flex-1">
-              <div class="text-lg font-semibold text-gray-900">
-                <span
-                  [innerHTML]="
+                  " [alt]="manager.name" />
+                  <div>
+                    <div class="text-lg font-semibold text-gray-900">
+                      <span [innerHTML]="
                     manager.name | highlight : getHighlightTerm('name') : 'name'
-                  "
-                ></span>
-              </div>
-              <div class="text-xs text-gray-500">
-                <span
-                  [innerHTML]="
+                      "></span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      <span [innerHTML]="
                     manager.email
                       | highlight : getHighlightTerm('email') : 'email'
-                  "
-                ></span>
-              </div>
-              <div class="text-sm text-gray-600">
-                <span
-                  [innerHTML]="
+                      "></span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                      <span [innerHTML]="
                     manager.jobTitle?.name || ''
                       | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
-                  "
-                ></span>
-                - {{ manager.department?.name }}
+                      "></span>
+                      - {{ manager.department?.name }}
+                    </div>
+                    <div class="flex items-center space-x-2 mt-1">
+                      <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager Principal</span>
+                      <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Manager Secund (dacă există) - în stânga, după manager principal -->
+                <div *ngIf="getActiveSecondManagerForManager(manager.id) as secondManager"
+                  class="flex items-center space-x-2 flex-shrink-0">
+                  <img class="h-8 w-8 rounded-full object-cover border border-gray-300" [src]="
+                    secondManager.avatar ||
+                    'https://ui-avatars.com/api/?name=' +
+                      secondManager.name +
+                      '&background=20B486&color=fff'
+                  " [alt]="secondManager.name" />
+                  <div class="max-w-xs">
+                    <div class="text-sm font-medium text-gray-900">
+                      <span [innerHTML]="
+                        secondManager.name | highlight : getHighlightTerm('name') : 'name'
+                      "></span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      <span [innerHTML]="
+                        secondManager.email
+                          | highlight : getHighlightTerm('email') : 'email'
+                      "></span>
+                    </div>
+                    <div class="flex items-center space-x-1 mt-1">
+                      <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Manager Secund</span>
+                      <button
+                        class="text-red-500 hover:text-red-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                        (click)="removeSecondManager(secondManager)" title="Remove second manager">
+                        Remove
+                      </button>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-0.5">
+                      Până la {{ secondManager.endDate | date:'dd/MM' }}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="flex items-center space-x-2 mt-1">
-                <span
-                  class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full"
-                  >Manager</span
-                >
-                <span class="text-xs text-gray-500"
-                  >{{ getSubordinateCount(manager) }} direct reports</span
-                >
+
+              <!-- Employees Dropdown Toggle - în dreapta -->
+              <div *ngIf="manager.subordinatesNames && manager.subordinatesNames.length > 0"
+                class="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
+                (click)="toggleManagerEmployees(manager.id)" (keydown.enter)="toggleManagerEmployees(manager.id)"
+                (keydown.space)="toggleManagerEmployees(manager.id); $event.preventDefault()" tabindex="0" role="button"
+                [attr.aria-expanded]="!isManagerEmployeesCollapsed(manager.id)"
+                [attr.aria-controls]="'employees-' + manager.id" title="Toggle employees list">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+                  [class.rotate-180]="!isManagerEmployeesCollapsed(manager.id)" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
-            </div>
-            <!-- Employees Dropdown Toggle -->
-            <div
-              *ngIf="manager.subordinatesNames && manager.subordinatesNames.length > 0"
-              class="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
-              (click)="toggleManagerEmployees(manager.id)"
-              (keydown.enter)="toggleManagerEmployees(manager.id)"
-              (keydown.space)="toggleManagerEmployees(manager.id); $event.preventDefault()"
-              tabindex="0"
-              role="button"
-              [attr.aria-expanded]="!isManagerEmployeesCollapsed(manager.id)"
-              [attr.aria-controls]="'employees-' + manager.id"
-              title="Toggle employees list"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-gray-400 transition-transform"
-                [class.rotate-180]="!isManagerEmployeesCollapsed(manager.id)"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
             </div>
           </div>
-        </div>
-        <div class="p-4">
-          <!-- Employees Section Content -->
-          <div
-            *ngIf="!isManagerEmployeesCollapsed(manager.id)"
-            [id]="'employees-' + manager.id"
-            class="employees-section-content"
-          >
-            <div
-              *ngIf="
+          <div class="p-4">
+            <!-- Employees Section Content -->
+            <div *ngIf="!isManagerEmployeesCollapsed(manager.id)" [id]="'employees-' + manager.id"
+              class="employees-section-content">
+              <div *ngIf="
                 manager.subordinatesNames && manager.subordinatesNames.length > 0;
                 else noSubordinates
-              "
-            >
-              <div class="employees-grid-container">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div
-                  *ngFor="
+              ">
+                <div class="employees-grid-container">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div *ngFor="
                     let subordinateName of manager.subordinatesNames;
                     let i = index
-                  "
-                  class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg"
-                >
-                  <img
-                    class="h-10 w-10 rounded-full object-cover"
-                    [src]="
+                  " class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
+                      <img class="h-10 w-10 rounded-full object-cover" [src]="
                       'https://ui-avatars.com/api/?name=' +
                       subordinateName +
                       '&background=6b7280&color=eee'
-                    "
-                    [alt]="subordinateName"
-                  />
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-gray-900 truncate">
-                      <span
-                        [innerHTML]="
+                    " [alt]="subordinateName" />
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">
+                          <span [innerHTML]="
                           subordinateName
                             | highlight : getHighlightTerm('name') : 'name'
-                        "
-                      ></span>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                      <span
-                        [innerHTML]="(manager.subordinatesEmails?.[i] || '') | highlight : getHighlightTerm('email') : 'email'"
-                      ></span>
-                    </div>
-                    <div class="text-xs text-gray-500 truncate">
-                      <span
-                        [innerHTML]="(manager.subordinatesJobTitleNames?.[i] || '') | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"
-                      ></span>
-                    </div>
-                    <div
-                      *ngIf="isManager(manager.subordinatesIds?.[i])"
-                      class="flex items-center space-x-2 mt-1"
-                    >
-                      <span
-                        class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full"
-                        >Manager</span
-                      >
-                    </div>
-                    <div
-                      *ngIf="isAdmin(manager.subordinatesIds?.[i])"
-                      class="flex items-center space-x-2 mt-1"
-                    >
-                      <span
-                        class="px-2 py-1 bg-red-600 text-white text-xs rounded-full"
-                        >Admin</span
-                      >
-                    </div>
-                    <div class="ml-3 flex-shrink-0">
-                      <button
-                        class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors"
-                        (click)="assignManager({
+                        "></span>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          <span
+                            [innerHTML]="(manager.subordinatesEmails?.[i] || '') | highlight : getHighlightTerm('email') : 'email'"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 truncate">
+                          <span
+                            [innerHTML]="(manager.subordinatesJobTitleNames?.[i] || '') | highlight : getHighlightTerm('jobTitle') : 'jobTitle'"></span>
+                        </div>
+                        <div *ngIf="isManager(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                          <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager</span>
+                        </div>
+                        <div *ngIf="isAdmin(manager.subordinatesIds?.[i])" class="flex items-center space-x-2 mt-1">
+                          <span class="px-2 py-1 bg-red-600 text-white text-xs rounded-full">Admin</span>
+                        </div>
+                        <div class="ml-3 flex-shrink-0 space-x-2">
+                          <button
+                            class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium px-2 py-1 rounded hover:bg-green-50 transition-colors"
+                            (click)="assignManager({
                         id: manager.subordinatesIds?.[i] || 0,
                         name: subordinateName,
                         email: manager.subordinatesEmails?.[i] || '',
                         managersIds: []
-                      }, false)"
-                      >
-                        Reassign
-                      </button>
+                       }, false)">
+                            Reassign
+                          </button>
+                          <button
+                            [class]="getActiveSecondManagerForManager(manager.id) 
+                               ? 'text-gray-400 cursor-not-allowed text-xs font-medium px-2 py-1 rounded'
+                               : 'text-amber-600 hover:text-amber-800 text-xs font-medium px-2 py-1 rounded hover:bg-amber-50 transition-colors'"
+                            [disabled]="getActiveSecondManagerForManager(manager.id) !== null" [title]="getActiveSecondManagerForManager(manager.id) 
+                               ? 'There is already an active second manager for this manager'
+                               : 'Make this employee a second manager'" (click)="openSecondManagerModal({
+                         id: manager.subordinatesIds?.[i] || 0,
+                         name: subordinateName,
+                         email: manager.subordinatesEmails?.[i] || ''
+                       }, manager.id)">
+                            Make Second Manager
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
+              <ng-template #noSubordinates>
+                <div class="text-center py-4">
+                  <div class="text-gray-400 text-sm">No team members assigned</div>
                 </div>
-              </div>
-            </div>
-            <ng-template #noSubordinates>
-              <div class="text-center py-4">
-                <div class="text-gray-400 text-sm">No team members assigned</div>
-              </div>
-            </ng-template>
-          </div>
-        </div>
-      </div>
-
-      <!-- Paginare pentru manageri -->
-      <div
-        *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
-        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
-      >
-        <div *ngIf="totalPagesManagers > 1" class="flex-1 flex justify-between items-center sm:hidden">
-          <button
-            (click)="goToPreviousPageManagers()"
-            [disabled]="currentPageManagers === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span class="text-sm text-gray-700">
-            Page {{ currentPageManagers }} of {{ totalPagesManagers }}
-          </span>
-          <button
-            (click)="goToNextPageManagers()"
-            [disabled]="currentPageManagers === totalPagesManagers"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-
-        <div
-          class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
-        >
-          <div class="flex items-center gap-4">
-            <p class="text-sm text-gray-700">
-              Showing
-              <span class="font-medium">{{ getStartResultIndexManagers() }}</span>
-              to
-              <span class="font-medium">{{ getMaxDisplayedResultManagers() }}</span>
-              of
-              <span class="font-medium">{{ getTotalManagerCount() }}</span>
-              managers
-            </p>
-            <div class="flex items-center gap-2">
-              <label for="itemsPerPageManagers" class="text-sm text-gray-700">Show:</label>
-              <select
-                id="itemsPerPageManagers"
-                [(ngModel)]="pageSizeManagers"
-                (ngModelChange)="onItemsPerPageChangeManagers()"
-                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
-              >
-                <option value="5" selected>5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-              <span class="text-sm text-gray-700">per page</span>
+              </ng-template>
             </div>
           </div>
-          <div *ngIf="totalPagesManagers > 1">
-            <nav
-              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
-              <!-- First page button -->
-              <button
-                (click)="goToFirstPageManagers()"
-                [disabled]="currentPageManagers === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="First page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-              <!-- Previous page button -->
-              <button
-                (click)="goToPreviousPageManagers()"
-                [disabled]="currentPageManagers === 1"
-                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Previous page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-              <!-- Page numbers -->
-              <button
-                *ngFor="let page of getPageNumbersManagers()"
-                (click)="goToPageManagers(page)"
-                [class]="
+        </div>
+
+        <!-- Paginare pentru manageri -->
+        <div *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0"
+          class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6">
+          <div *ngIf="totalPagesManagers > 1" class="flex-1 flex justify-between items-center sm:hidden">
+            <button (click)="goToPreviousPageManagers()" [disabled]="currentPageManagers === 1"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            <span class="text-sm text-gray-700">
+              Page {{ currentPageManagers }} of {{ totalPagesManagers }}
+            </span>
+            <button (click)="goToNextPageManagers()" [disabled]="currentPageManagers === totalPagesManagers"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ getStartResultIndexManagers() }}</span>
+                to
+                <span class="font-medium">{{ getMaxDisplayedResultManagers() }}</span>
+                of
+                <span class="font-medium">{{ getTotalManagerCount() }}</span>
+                managers
+              </p>
+              <div class="flex items-center gap-2">
+                <label for="itemsPerPageManagers" class="text-sm text-gray-700">Show:</label>
+                <select id="itemsPerPageManagers" [(ngModel)]="pageSizeManagers"
+                  (ngModelChange)="onItemsPerPageChangeManagers()"
+                  class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#20B486] focus:border-transparent">
+                  <option value="5" selected>5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span class="text-sm text-gray-700">per page</span>
+              </div>
+            </div>
+            <div *ngIf="totalPagesManagers > 1">
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <!-- First page button -->
+                <button (click)="goToFirstPageManagers()" [disabled]="currentPageManagers === 1"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  title="First page">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <!-- Previous page button -->
+                <button (click)="goToPreviousPageManagers()" [disabled]="currentPageManagers === 1"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  title="Previous page">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <!-- Page numbers -->
+                <button *ngFor="let page of getPageNumbersManagers()" (click)="goToPageManagers(page)" [class]="
                   page === currentPageManagers
                     ? 'relative inline-flex items-center px-4 py-2 border border-[#20B486] bg-[#20B486] text-sm font-medium text-white'
                     : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
-                "
-              >
-                {{ page }}
-              </button>
-              <!-- Show ellipsis if there are more pages -->
-              <span
-                *ngIf="
+                ">
+                  {{ page }}
+                </button>
+                <!-- Show ellipsis if there are more pages -->
+                <span *ngIf="
                   totalPagesManagers > 5 &&
                   currentPageManagers < totalPagesManagers - 2
                 "
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
-              >
-                ...
-              </span>
-              <!-- Next page button -->
-              <button
-                (click)="goToNextPageManagers()"
-                [disabled]="currentPageManagers === totalPagesManagers"
-                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Next page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-              <!-- Last page button -->
-              <button
-                (click)="goToLastPageManagers()"
-                [disabled]="currentPageManagers === totalPagesManagers"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                title="Last page"
-              >
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-            </nav>
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  ...
+                </span>
+                <!-- Next page button -->
+                <button (click)="goToNextPageManagers()" [disabled]="currentPageManagers === totalPagesManagers"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  title="Next page">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <!-- Last page button -->
+                <button (click)="goToLastPageManagers()" [disabled]="currentPageManagers === totalPagesManagers"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  title="Last page">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
@@ -933,101 +608,51 @@
   <div class="mb-8">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
-      (click)="toggleUnassignedUsersSection()"
-      (keydown.enter)="toggleUnassignedUsersSection()"
-      (keydown.space)="toggleUnassignedUsersSection(); $event.preventDefault()"
-      tabindex="0"
-      role="button"
-      [attr.aria-expanded]="!isUnassignedUsersSectionCollapsed"
-      aria-controls="unassigned-users-section-content"
-    >
+      (click)="toggleUnassignedUsersSection()" (keydown.enter)="toggleUnassignedUsersSection()"
+      (keydown.space)="toggleUnassignedUsersSection(); $event.preventDefault()" tabindex="0" role="button"
+      [attr.aria-expanded]="!isUnassignedUsersSectionCollapsed" aria-controls="unassigned-users-section-content">
       <div class="p-2 bg-orange-100 rounded-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-5 h-5 text-orange-600"
-        >
-          <path
-            fill-rule="evenodd"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-600">
+          <path fill-rule="evenodd"
             d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
-            clip-rule="evenodd"
-          />
+            clip-rule="evenodd" />
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Unassigned Users</h4>
-      <span
-        class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full"
-        >{{ getTotalUnassignedUsersCount() }} total</span
-      >
+      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{
+        getTotalUnassignedUsersCount() }} total</span>
       <!-- Chevron Icon -->
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-5 w-5 text-gray-400 transition-transform"
-        [class.rotate-180]="!isUnassignedUsersSectionCollapsed"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+        [class.rotate-180]="!isUnassignedUsersSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
 
     <!-- Unassigned Users Content -->
-    <div
-      *ngIf="!isUnassignedUsersSectionCollapsed"
-      id="unassigned-users-section-content"
-      class="space-y-4 slideDown"
-    >
+    <div *ngIf="!isUnassignedUsersSectionCollapsed" id="unassigned-users-section-content" class="space-y-4 slideDown">
       <!-- Loading pentru utilizatori neasignați -->
       <div *ngIf="isLoadingUnassignedUsers" class="text-center py-4 ml-8">
         <div class="inline-flex items-center">
-          <svg
-            class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
           </svg>
           <span class="text-sm text-gray-500">Loading unassigned users...</span>
         </div>
       </div>
 
       <!-- Mesaj de eroare pentru utilizatori neasignați -->
-      <div
-        *ngIf="hasUnassignedUsersError() && !isLoadingUnassignedUsers"
-        class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4 ml-8"
-      >
+      <div *ngIf="hasUnassignedUsersError() && !isLoadingUnassignedUsers"
+        class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4 ml-8">
         <div class="flex items-center">
-          <svg
-            class="h-5 w-5 text-orange-400 mr-2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
+          <svg class="h-5 w-5 text-orange-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
-            />
+              clip-rule="evenodd" />
           </svg>
           <div class="flex-1">
             <p class="text-sm text-orange-700">
@@ -1038,262 +663,248 @@
       </div>
 
       <!-- Lista utilizatorilor neasignați -->
-      <div
-        *ngIf="
+      <div *ngIf="
           !hasUnassignedUsersError() &&
           !isLoadingUnassignedUsers &&
           unassignedUsers.length > 0
-        "
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8"
-      >
-        <div
-          *ngFor="let user of unassignedUsers"
-          class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50"
-        >
+        " class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-8">
+        <div *ngFor="let user of unassignedUsers"
+          class="flex items-center justify-between p-3 border border-orange-200 rounded-lg hover:bg-orange-50">
           <div class="flex items-center space-x-3">
-            <img
-              class="h-8 w-8 rounded-full object-cover"
-              [src]="
+            <img class="h-8 w-8 rounded-full object-cover" [src]="
                 user.avatar ||
                 'https://ui-avatars.com/api/?name=' +
                   user.name +
                   '&background=f97316&color=fff'
-              "
-              [alt]="user.name"
-            />
+              " [alt]="user.name" />
             <div>
               <div class="text-sm font-medium text-gray-900">
-                <span
-                  [innerHTML]="
+                <span [innerHTML]="
                     user.name | highlight : getHighlightTerm('name') : 'name'
-                  "
-                ></span>
+                  "></span>
               </div>
               <div class="text-xs text-gray-500">
-                <span
-                  [innerHTML]="
+                <span [innerHTML]="
                     user.email | highlight : getHighlightTerm('email') : 'email'
-                  "
-                ></span>
+                  "></span>
               </div>
               <div class="text-xs text-gray-500">
-                <span
-                  [innerHTML]="
+                <span [innerHTML]="
                     user.jobTitle?.name || ''
                       | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
-                  "
-                ></span>
+                  "></span>
               </div>
               <div class="flex items-center space-x-2 mt-1">
                 <span class="px-2 py-1 bg-orange-600 text-white text-xs rounded-full">Unassigned</span>
               </div>
             </div>
           </div>
-          <button
-            class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium"
-            (click)="assignManager(user, false)"
-          >
+          <button class="text-[#20B486] hover:text-[#1a9c75] text-xs font-medium" (click)="assignManager(user, false)">
             Assign
           </button>
         </div>
       </div>
 
-      <div
-        *ngIf="
+      <div *ngIf="
           !hasUnassignedUsersError() &&
           !isLoadingUnassignedUsers &&
           unassignedUsers.length === 0
-        "
-        class="text-center py-8 ml-8"
-      >
+        " class="text-center py-8 ml-8">
         <div class="text-green-600 text-sm font-medium">
           All users are assigned to managers!
         </div>
       </div>
 
-      <div
-        *ngIf="totalPagesUnassignedUsers > 1"
-        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6"
-      >
-      <div class="flex-1 flex justify-between items-center sm:hidden">
-        <button
-          (click)="goToPreviousPageUnassignedUsers()"
-          [disabled]="currentPageUnassignedUsers === 1"
-          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >
-          Previous
-        </button>
-        <span class="text-sm text-gray-700">
-          Page {{ currentPageUnassignedUsers }} of
-          {{ totalPagesUnassignedUsers }}
-        </span>
-        <button
-          (click)="goToNextPageUnassignedUsers()"
-          [disabled]="currentPageUnassignedUsers === totalPagesUnassignedUsers"
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >
-          Next
-        </button>
-      </div>
-
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div class="flex items-center gap-4">
-          <p class="text-sm text-gray-700">
-            Showing
-            <span class="font-medium">{{
-              getStartResultIndexUnassignedUsers()
-            }}</span>
-            to
-            <span class="font-medium">{{
-              getMaxDisplayedResultUnassignedUsers()
-            }}</span>
-            of
-            <span class="font-medium">{{ getTotalUnassignedUsersCount() }}</span>
-            unassigned users
-          </p>
-          <div class="flex items-center gap-2">
-            <label for="itemsPerPageUnassignedUsers" class="text-sm text-gray-700">Show:</label>
-            <select
-              id="itemsPerPageUnassignedUsers"
-              [(ngModel)]="pageSizeUnassignedUsers"
-              (ngModelChange)="onItemsPerPageChangeUnassignedUsers()"
-              class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-            >
-              <option value="3">3</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-            <span class="text-sm text-gray-700">per page</span>
-          </div>
+      <div *ngIf="totalPagesUnassignedUsers > 1"
+        class="bg-white px-4 py-3 flex items-center justify-between border border-gray-200 rounded-lg sm:px-6 mt-6">
+        <div class="flex-1 flex justify-between items-center sm:hidden">
+          <button (click)="goToPreviousPageUnassignedUsers()" [disabled]="currentPageUnassignedUsers === 1"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+            Previous
+          </button>
+          <span class="text-sm text-gray-700">
+            Page {{ currentPageUnassignedUsers }} of
+            {{ totalPagesUnassignedUsers }}
+          </span>
+          <button (click)="goToNextPageUnassignedUsers()"
+            [disabled]="currentPageUnassignedUsers === totalPagesUnassignedUsers"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+            Next
+          </button>
         </div>
-        <div>
-          <nav
-            class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-            aria-label="Pagination"
-          >
-            <!-- First page button -->
-            <button
-              (click)="goToFirstPageUnassignedUsers()"
-              [disabled]="currentPageUnassignedUsers === 1"
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              title="First page"
-            >
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-            <!-- Previous page button -->
-            <button
-              (click)="goToPreviousPageUnassignedUsers()"
-              [disabled]="currentPageUnassignedUsers === 1"
-              class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              title="Previous page"
-            >
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-            <!-- Page numbers -->
-            <button
-              *ngFor="let page of getPageNumbersUnassignedUsers()"
-              (click)="goToPageUnassignedUsers(page)"
-              [class]="
+
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{
+                getStartResultIndexUnassignedUsers()
+                }}</span>
+              to
+              <span class="font-medium">{{
+                getMaxDisplayedResultUnassignedUsers()
+                }}</span>
+              of
+              <span class="font-medium">{{ getTotalUnassignedUsersCount() }}</span>
+              unassigned users
+            </p>
+            <div class="flex items-center gap-2">
+              <label for="itemsPerPageUnassignedUsers" class="text-sm text-gray-700">Show:</label>
+              <select id="itemsPerPageUnassignedUsers" [(ngModel)]="pageSizeUnassignedUsers"
+                (ngModelChange)="onItemsPerPageChangeUnassignedUsers()"
+                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span class="text-sm text-gray-700">per page</span>
+            </div>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <!-- First page button -->
+              <button (click)="goToFirstPageUnassignedUsers()" [disabled]="currentPageUnassignedUsers === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="First page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M15.707 15.707a1 1 0 01-1.414 0L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+              <!-- Previous page button -->
+              <button (click)="goToPreviousPageUnassignedUsers()" [disabled]="currentPageUnassignedUsers === 1"
+                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Previous page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+              <!-- Page numbers -->
+              <button *ngFor="let page of getPageNumbersUnassignedUsers()" (click)="goToPageUnassignedUsers(page)"
+                [class]="
                 page === currentPageUnassignedUsers
                   ? 'relative inline-flex items-center px-4 py-2 border border-orange-400 bg-orange-400 text-sm font-medium text-white'
                   : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
-              "
-            >
-              {{ page }}
-            </button>
-            <!-- Show ellipsis if there are more pages -->
-            <span
-              *ngIf="
+              ">
+                {{ page }}
+              </button>
+              <!-- Show ellipsis if there are more pages -->
+              <span *ngIf="
                 totalPagesUnassignedUsers > 5 &&
                 currentPageUnassignedUsers < totalPagesUnassignedUsers - 2
               "
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
-            >
-              ...
-            </span>
-            <!-- Next page button -->
-            <button
-              (click)="goToNextPageUnassignedUsers()"
-              [disabled]="
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                ...
+              </span>
+              <!-- Next page button -->
+              <button (click)="goToNextPageUnassignedUsers()" [disabled]="
                 currentPageUnassignedUsers === totalPagesUnassignedUsers
-              "
-              class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              title="Next page"
-            >
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-            <!-- Last page button -->
-            <button
-              (click)="goToLastPageUnassignedUsers()"
-              [disabled]="
+              " class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Next page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+              <!-- Last page button -->
+              <button (click)="goToLastPageUnassignedUsers()" [disabled]="
                 currentPageUnassignedUsers === totalPagesUnassignedUsers
-              "
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-              title="Last page"
-            >
-              <svg
-                class="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-          </nav>
+              " class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                title="Last page">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M10.293 15.707a1 1 0 010-1.414L13.586 11H3a1 1 0 110-2h10.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   </div>
 
   <!-- Modal Component -->
-  <app-admin-assign-relationship
-    *ngIf="showAssignRelationShipComponent"
-    [employee]="selectedEmployee"
-    [isUsedForPost]="postRelationship"
-    (onAssign)="onAssignManagers($event)"
-    (onClose)="closeAssignModal()"
-  >
+  <app-admin-assign-relationship *ngIf="showAssignRelationShipComponent" [employee]="selectedEmployee"
+    [isUsedForPost]="postRelationship" (onAssign)="onAssignManagers($event)" (onClose)="closeAssignModal()">
   </app-admin-assign-relationship>
+
+  <!-- Second Manager Modal -->
+  <div *ngIf="showSecondManagerModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity" (click)="closeSecondManagerModal()">
+    </div>
+
+    <!-- Modal dialog -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">
+            Make Second Manager
+          </h3>
+          <button (click)="closeSecondManagerModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal content -->
+        <form (ngSubmit)="onSubmitSecondManager()" class="p-4">
+          <div class="space-y-4">
+            <!-- Selected Employee Info -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900">{{ selectedSecondManagerEmployee?.name }}</div>
+              <div class="text-xs text-gray-500">{{ selectedSecondManagerEmployee?.email }}</div>
+              <div class="text-xs text-amber-600 mt-1">Will temporarily replace manager</div>
+            </div>
+
+            <!-- Start Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+              <input type="date" [(ngModel)]="secondManagerForm.startDate" name="startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required />
+            </div>
+
+            <!-- End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+              <input type="date" [(ngModel)]="secondManagerForm.endDate" name="endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required />
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="secondManagerErrorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ secondManagerErrorMessage }}
+          </div>
+
+          <!-- Modal footer -->
+          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button type="button" (click)="closeSecondManagerModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              [disabled]="isSubmittingSecondManager">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!isSecondManagerFormValid() || isSubmittingSecondManager">
+              <span *ngIf="isSubmittingSecondManager">Creating...</span>
+              <span *ngIf="!isSubmittingSecondManager">Create Second Manager</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

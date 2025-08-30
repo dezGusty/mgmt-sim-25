@@ -53,7 +53,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeManager", b =>
@@ -77,7 +77,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("EmployeeManagers", (string)null);
+                    b.ToTable("EmployeeManagers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeRole", b =>
@@ -107,7 +107,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Rolename")
                         .IsUnique();
 
-                    b.ToTable("EmployeeRoles", (string)null);
+                    b.ToTable("EmployeeRoles");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeRoleUser", b =>
@@ -131,7 +131,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("EmployeeRolesUsers", (string)null);
+                    b.ToTable("EmployeeRolesUsers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.JobTitle", b =>
@@ -161,7 +161,7 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("JobTitles", (string)null);
+                    b.ToTable("JobTitles");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.LeaveRequest", b =>
@@ -214,7 +214,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LeaveRequests", (string)null);
+                    b.ToTable("LeaveRequests");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.LeaveRequestType", b =>
@@ -254,7 +254,49 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("IsPaid", "Title")
                         .IsUnique();
 
-                    b.ToTable("LeaveRequestTypes", (string)null);
+                    b.ToTable("LeaveRequestTypes");
+                });
+
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<float>("BudgetedFTEs")
+                        .HasColumnType("real");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.SecondManager", b =>
@@ -275,7 +317,7 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("ReplacedManagerId");
 
-                    b.ToTable("SecondManagers", (string)null);
+                    b.ToTable("SecondManagers");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.User", b =>
@@ -326,6 +368,12 @@ namespace ManagementSimulator.Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<float>("RemainingAvailability")
+                        .HasColumnType("real");
+
+                    b.Property<float>("TotalAvailability")
+                        .HasColumnType("real");
+
                     b.Property<int>("Vacation")
                         .HasColumnType("int");
 
@@ -338,7 +386,25 @@ namespace ManagementSimulator.Database.Migrations
 
                     b.HasIndex("JobTitleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.UserProject", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("TimePercentagePerProject")
+                        .HasColumnType("real");
+
+                    b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("UserProjects");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeManager", b =>
@@ -443,6 +509,25 @@ namespace ManagementSimulator.Database.Migrations
                     b.Navigation("Title");
                 });
 
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.UserProject", b =>
+                {
+                    b.HasOne("ManagementSimulator.Database.Entities.Project", "Project")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSimulator.Database.Entities.User", "User")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ManagementSimulator.Database.Entities.Department", b =>
                 {
                     b.Navigation("Users");
@@ -463,6 +548,11 @@ namespace ManagementSimulator.Database.Migrations
                     b.Navigation("LeaveRequests");
                 });
 
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.Project", b =>
+                {
+                    b.Navigation("UserProjects");
+                });
+
             modelBuilder.Entity("ManagementSimulator.Database.Entities.User", b =>
                 {
                     b.Navigation("LeaveRequests");
@@ -474,6 +564,8 @@ namespace ManagementSimulator.Database.Migrations
                     b.Navigation("Roles");
 
                     b.Navigation("Subordinates");
+
+                    b.Navigation("UserProjects");
                 });
 #pragma warning restore 612, 618
         }

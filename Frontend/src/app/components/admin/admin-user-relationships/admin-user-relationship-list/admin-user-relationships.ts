@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'; 
+import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,8 @@ import { IApiResponse } from '../../../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../../../models/responses/ifiltered-api-response';
 import { UserSearchType } from '../../../../models/enums/user-search-type';
 import { HighlightPipe } from '../../../../pipes/highlight.pipe';
+import { SecondManagerService } from '../../../../services/second-manager/second-manager.service';
+import { ISecondManagerResponse, ISecondManagerViewModel } from '../../../../models/entities/isecond-manager';
 
 @Component({
   selector: 'app-admin-user-relationships',
@@ -24,6 +26,22 @@ export class AdminUserRelationships implements OnInit {
   managers: IUserViewModel[] = [];
   admins: IUserViewModel[] = [];
   unassignedUsers: IUserViewModel[] = [];
+
+  // Second managers data
+  activeSecondManagers: ISecondManagerViewModel[] = [];
+  isLoadingSecondManagers: boolean = false;
+  secondManagersErrorMessage: string = '';
+
+  // Second manager modal data
+  showSecondManagerModal: boolean = false;
+  selectedSecondManagerEmployee: { id: number; name: string; email: string } | null = null;
+  replacedManagerId: number = 0;
+  isSubmittingSecondManager: boolean = false;
+  secondManagerErrorMessage: string = '';
+  secondManagerForm = {
+    startDate: '',
+    endDate: ''
+  };
 
   searchTerm: string = '';
   searchBy: UserSearchType = UserSearchType.Global;
@@ -58,7 +76,7 @@ export class AdminUserRelationships implements OnInit {
   };
   managersToAssigned: {
     id: number,
-    firstName: string,  
+    firstName: string,
     lastName: string,
     email: string,
     jobTitleName: string,
@@ -70,22 +88,23 @@ export class AdminUserRelationships implements OnInit {
   isLoadingManagers: boolean = false;
   isLoadingAdmins: boolean = false;
   isLoadingUnassignedUsers: boolean = false;
-  
+
   managersErrorMessage: string = '';
   adminsErrorMessage: string = '';
   unassignedUsersErrorMessage: string = '';
-  
+
   hasInitialDataLoaded: boolean = false;
 
-  // Dropdown state management
   isAdminSectionCollapsed: boolean = true;
   isManagerSectionCollapsed: boolean = true;
   isUnassignedUsersSectionCollapsed: boolean = true;
-  
-  // Track collapsed state for each manager's employees
+
   managerEmployeesCollapsed: Map<number, boolean> = new Map();
 
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    private secondManagerService: SecondManagerService
+  ) { }
 
   ngOnInit(): void {
     this.loadInitialData();
@@ -95,12 +114,11 @@ export class AdminUserRelationships implements OnInit {
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
-    // Load exact counts from backend
+    this.loadActiveSecondManagers();
     this.loadExactCounts();
   }
 
   private loadExactCounts(): void {
-    // Load exact counts from backend endpoints
     this.loadTotalAdminsCount();
     this.loadTotalManagersCount();
     this.loadTotalUnassignedUsersCount();
@@ -113,7 +131,6 @@ export class AdminUserRelationships implements OnInit {
       },
       error: (err) => {
         console.error('Failed to fetch total admins count:', err);
-        // Keep existing count as fallback
       },
     });
   }
@@ -121,12 +138,10 @@ export class AdminUserRelationships implements OnInit {
   private loadTotalManagersCount(): void {
     this.userService.getTotalManagersCount().subscribe({
       next: (response) => {
-        // Directly use response.data which contains the total count
         this.totalManagersCount = response.data;
       },
       error: (err) => {
         console.error('Failed to fetch total managers count:', err);
-        // Preserve existing count on error
       },
     });
   }
@@ -138,59 +153,54 @@ export class AdminUserRelationships implements OnInit {
       },
       error: (err) => {
         console.error('Failed to fetch total unassigned users count:', err);
-        // Keep existing count as fallback
       },
     });
   }
 
 
-loadAdmins(): void {
-  this.isLoadingAdmins = true;
-  this.adminsErrorMessage = '';
+  loadAdmins(): void {
+    this.isLoadingAdmins = true;
+    this.adminsErrorMessage = '';
 
-  this.userService.getAllAdmins().subscribe({
-    next: (response) => {
-      this.isLoadingAdmins = false;
-      const rawAdmins: IUser[] = response.data;
+    this.userService.getAllAdmins().subscribe({
+      next: (response) => {
+        this.isLoadingAdmins = false;
+        const rawAdmins: IUser[] = response.data;
 
-      if (!rawAdmins || rawAdmins.length === 0) {
-        this.adminsErrorMessage = 'No admins were found.';
+        if (!rawAdmins || rawAdmins.length === 0) {
+          this.adminsErrorMessage = 'No admins were found.';
+          this.admins = [];
+          this.allAdmins = [];
+          this.totalPagesAdmins = 0;
+        } else {
+          this.allAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
+
+          this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
+
+          this.currentPageAdmins = 1;
+          this.sliceAdmins();
+        }
+
+        this.checkIfInitialDataLoaded();
+      },
+      error: (err) => {
+        this.isLoadingAdmins = false;
+        this.adminsErrorMessage = 'Error during retrieving admins.';
         this.admins = [];
         this.allAdmins = [];
         this.totalPagesAdmins = 0;
-      } else {
-        // keep full dataset
-        this.allAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-
-        // Calculate total pages based on full dataset size and page size
-        this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-
-        // show first slice
-        this.currentPageAdmins = 1;
-        this.sliceAdmins();
-      }
-
-      this.checkIfInitialDataLoaded();
-    },
-    error: (err) => {
-      this.isLoadingAdmins = false;
-      this.adminsErrorMessage = 'Error during retrieving admins.';
-      this.admins = [];
-      this.allAdmins = [];
-      this.totalPagesAdmins = 0;
-      console.error('Failed to fetch admins:', err);
-      this.checkIfInitialDataLoaded();
-    },
-  });
-}
+        console.error('Failed to fetch admins:', err);
+        this.checkIfInitialDataLoaded();
+      },
+    });
+  }
 
 
   private sliceAdmins(): void {
     const startIndex = (this.currentPageAdmins - 1) * this.pageSizeAdmins;
     const endIndex = Math.min(startIndex + this.pageSizeAdmins, this.allAdmins.length);
     this.admins = this.allAdmins.slice(startIndex, endIndex);
-    
-    // Recalculate total pages in case page size changed
+
     this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
   }
 
@@ -210,7 +220,7 @@ loadAdmins(): void {
           searchParams.managerName = this.currentSearchTerm;
           break;
         case UserSearchType.EmployeeName:
-          searchParams.employeeName = this.currentSearchTerm; 
+          searchParams.employeeName = this.currentSearchTerm;
           break;
         case UserSearchType.ManagerEmail:
           searchParams.managerEmail = this.currentSearchTerm;
@@ -242,19 +252,17 @@ loadAdmins(): void {
         this.isLoadingManagers = false;
         console.log('Managers API response:', response);
         const rawUsers: IUser[] = response.data.data;
-        
+
         if (!rawUsers || rawUsers.length === 0) {
           this.managersErrorMessage = this.getManagersEmptyMessage();
           this.managers = [];
           this.totalPagesManagers = 0;
-          // Don't set totalManagersCount to 0 here - let the dedicated API handle it
         } else {
           this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
           this.totalPagesManagers = response.data.totalPages;
-          // Don't calculate totalManagersCount from pagination - use the dedicated API endpoint
           this.managersErrorMessage = '';
         }
-        
+
         this.checkIfInitialDataLoaded();
       },
       error: (err) => {
@@ -262,7 +270,6 @@ loadAdmins(): void {
         this.managersErrorMessage = 'Error retrieving the managers.';
         this.managers = [];
         this.totalPagesManagers = 0;
-        // Don't reset totalManagersCount on error - keep the value from dedicated API
         console.error('Failed to fetch managers with relationships:', err);
         this.checkIfInitialDataLoaded();
       },
@@ -315,21 +322,19 @@ loadAdmins(): void {
         this.isLoadingUnassignedUsers = false;
         console.log('Unassigned users API response:', response);
         const rawUnassignedUsers: IUser[] = response.data.data;
-        
+
         if (!rawUnassignedUsers || rawUnassignedUsers.length === 0) {
           this.unassignedUsersErrorMessage = this.getUnassignedUsersEmptyMessage();
           this.unassignedUsers = [];
           this.totalPagesUnassignedUsers = 0;
-          // Don't set totalUnassignedUsersCount to 0 here - let the dedicated API handle it
         } else {
           this.unassignedUsers = rawUnassignedUsers.map((user) =>
             this.mapToUserViewModel(user)
           );
           this.totalPagesUnassignedUsers = response.data.totalPages;
-          // Don't calculate totalUnassignedUsersCount from pagination - use the dedicated API endpoint
           this.unassignedUsersErrorMessage = '';
         }
-        
+
         this.checkIfInitialDataLoaded();
       },
       error: (err) => {
@@ -337,7 +342,6 @@ loadAdmins(): void {
         this.unassignedUsersErrorMessage = 'Error loading the unassigned users.';
         this.unassignedUsers = [];
         this.totalPagesUnassignedUsers = 0;
-        // Don't reset totalUnassignedUsersCount on error - keep the value from dedicated API
         console.error('Failed to fetch unassigned users:', err);
         this.checkIfInitialDataLoaded();
       },
@@ -346,7 +350,7 @@ loadAdmins(): void {
 
   getManagersEmptyMessage(): string {
     if (this.currentSearchTerm.trim()) {
-      switch(this.currentSearchBy){
+      switch (this.currentSearchBy) {
         case UserSearchType.Global:
           return 'No managers found for the global search term.';
         case UserSearchType.ManagerName:
@@ -374,7 +378,7 @@ loadAdmins(): void {
   }
 
   private checkIfInitialDataLoaded(): void {
-    if (!this.isLoadingManagers && !this.isLoadingAdmins && !this.isLoadingUnassignedUsers) {
+    if (!this.isLoadingManagers && !this.isLoadingAdmins && !this.isLoadingUnassignedUsers && !this.isLoadingSecondManagers) {
       this.hasInitialDataLoaded = true;
     }
   }
@@ -394,13 +398,13 @@ loadAdmins(): void {
       email: user.email,
       jobTitle: user.jobTitleId
         ? {
-            id: user.jobTitleId,
-            name: user.jobTitleName || 'Unknown',
-          }
+          id: user.jobTitleId,
+          name: user.jobTitleName || 'Unknown',
+        }
         : undefined,
       department: {
-              id: user.departmentId || 0,
-              name: user.departmentName || 'Unknown',
+        id: user.departmentId || 0,
+        name: user.departmentName || 'Unknown',
       },
       subordinatesIds: user.subordinatesIds || [],
       subordinatesNames: user.subordinatesNames || [],
@@ -605,20 +609,18 @@ loadAdmins(): void {
     this.currentHighlightTerm = this.searchTerm;
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
-    
-    // Always load managers unless only searching unassigned users by name
+
     if (this.currentSearchBy !== UserSearchType.UnassignedName) {
       this.loadManagersWithRelationships();
     }
-    
-    // Load unassigned users for relevant search types
-    if (this.currentSearchBy === UserSearchType.Global || 
-        this.currentSearchBy === UserSearchType.UnassignedName ||
-        this.currentSearchBy === UserSearchType.ManagerEmail || 
-        this.currentSearchBy === UserSearchType.EmployeeEmail || 
-        this.currentSearchBy === UserSearchType.ManagerName ||
-        this.currentSearchBy === UserSearchType.EmployeeName ||
-        this.currentSearchBy === UserSearchType.JobTitle) {
+
+    if (this.currentSearchBy === UserSearchType.Global ||
+      this.currentSearchBy === UserSearchType.UnassignedName ||
+      this.currentSearchBy === UserSearchType.ManagerEmail ||
+      this.currentSearchBy === UserSearchType.EmployeeEmail ||
+      this.currentSearchBy === UserSearchType.ManagerName ||
+      this.currentSearchBy === UserSearchType.EmployeeName ||
+      this.currentSearchBy === UserSearchType.JobTitle) {
       this.loadUnassignedUsers();
     }
   }
@@ -715,7 +717,6 @@ loadAdmins(): void {
     this.loadAdmins();
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
-    // Refresh counts after relationship changes
     this.loadExactCounts();
   }
 
@@ -767,79 +768,76 @@ loadAdmins(): void {
     this.loadUnassignedUsers();
   }
 
-  // Admin pagination methods (client-side)
-goToPageAdmins(page: number): void {
-  if (page >= 1 && page <= this.totalPagesAdmins && page !== this.currentPageAdmins) {
-    this.currentPageAdmins = page;
-    this.sliceAdmins();
+  goToPageAdmins(page: number): void {
+    if (page >= 1 && page <= this.totalPagesAdmins && page !== this.currentPageAdmins) {
+      this.currentPageAdmins = page;
+      this.sliceAdmins();
+    }
   }
-}
 
-goToNextPageAdmins(): void {
-  if (this.currentPageAdmins < this.totalPagesAdmins) {
-    this.currentPageAdmins++;
-    this.sliceAdmins();
+  goToNextPageAdmins(): void {
+    if (this.currentPageAdmins < this.totalPagesAdmins) {
+      this.currentPageAdmins++;
+      this.sliceAdmins();
+    }
   }
-}
 
-goToPreviousPageAdmins(): void {
-  if (this.currentPageAdmins > 1) {
-    this.currentPageAdmins--;
-    this.sliceAdmins();
+  goToPreviousPageAdmins(): void {
+    if (this.currentPageAdmins > 1) {
+      this.currentPageAdmins--;
+      this.sliceAdmins();
+    }
   }
-}
 
-goToFirstPageAdmins(): void {
-  if (this.currentPageAdmins !== 1) {
+  goToFirstPageAdmins(): void {
+    if (this.currentPageAdmins !== 1) {
+      this.currentPageAdmins = 1;
+      this.sliceAdmins();
+    }
+  }
+
+  goToLastPageAdmins(): void {
+    if (this.currentPageAdmins !== this.totalPagesAdmins) {
+      this.currentPageAdmins = this.totalPagesAdmins;
+      this.sliceAdmins();
+    }
+  }
+
+  getPageNumbersAdmins(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    const half = Math.floor(maxVisiblePages / 2);
+
+    let start = Math.max(1, this.currentPageAdmins - half);
+    let end = Math.min(this.totalPagesAdmins, start + maxVisiblePages - 1);
+
+    if (end - start + 1 < maxVisiblePages) {
+      start = Math.max(1, end - maxVisiblePages + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  getStartResultIndexAdmins(): number {
+    return (this.currentPageAdmins - 1) * this.pageSizeAdmins + 1;
+  }
+
+  getMaxDisplayedResultAdmins(): number {
+    return this.getStartResultIndexAdmins() + this.admins.length - 1;
+  }
+
+  onItemsPerPageChangeAdmins(): void {
     this.currentPageAdmins = 1;
+    this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
     this.sliceAdmins();
   }
-}
-
-goToLastPageAdmins(): void {
-  if (this.currentPageAdmins !== this.totalPagesAdmins) {
-    this.currentPageAdmins = this.totalPagesAdmins;
-    this.sliceAdmins();
-  }
-}
-
-getPageNumbersAdmins(): number[] {
-  const pages: number[] = [];
-  const maxVisiblePages = 5;
-  const half = Math.floor(maxVisiblePages / 2);
-
-  let start = Math.max(1, this.currentPageAdmins - half);
-  let end = Math.min(this.totalPagesAdmins, start + maxVisiblePages - 1);
-
-  if (end - start + 1 < maxVisiblePages) {
-    start = Math.max(1, end - maxVisiblePages + 1);
-  }
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  return pages;
-}
-
-getStartResultIndexAdmins(): number {
-  return (this.currentPageAdmins - 1) * this.pageSizeAdmins + 1;
-}
-
-getMaxDisplayedResultAdmins(): number {
-  // Use the actual length of the current page's admins array
-  return this.getStartResultIndexAdmins() + this.admins.length - 1;
-}
-
-onItemsPerPageChangeAdmins(): void {
-  this.currentPageAdmins = 1;
-  this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-  this.sliceAdmins();
-}
 
   Math = Math;
 
-  // Dropdown toggle methods
   toggleAdminSection(): void {
     this.isAdminSectionCollapsed = !this.isAdminSectionCollapsed;
   }
@@ -859,5 +857,179 @@ onItemsPerPageChangeAdmins(): void {
 
   isManagerEmployeesCollapsed(managerId: number): boolean {
     return this.managerEmployeesCollapsed.get(managerId) ?? true;
+  }
+
+  loadActiveSecondManagers(): void {
+    this.isLoadingSecondManagers = true;
+    this.secondManagersErrorMessage = '';
+
+    this.secondManagerService.getActiveSecondManagers().subscribe({
+      next: (response) => {
+        this.isLoadingSecondManagers = false;
+        console.log('Active second managers API response:', response);
+        this.activeSecondManagers = response.map(sm => this.mapSecondManagerToViewModel(sm));
+        this.secondManagersErrorMessage = '';
+        this.checkIfInitialDataLoaded();
+      },
+      error: (err) => {
+        this.isLoadingSecondManagers = false;
+        this.secondManagersErrorMessage = 'Error loading active second managers.';
+        this.activeSecondManagers = [];
+        console.error('Failed to fetch active second managers:', err);
+        this.checkIfInitialDataLoaded();
+      }
+    });
+  }
+
+  mapSecondManagerToViewModel(secondManager: ISecondManagerResponse): ISecondManagerViewModel {
+    return {
+      id: secondManager.secondManagerEmployeeId,
+      name: `${secondManager.secondManagerEmployee.firstName} ${secondManager.secondManagerEmployee.lastName}`,
+      email: secondManager.secondManagerEmployee.email,
+      jobTitle: secondManager.secondManagerEmployee.jobTitleName,
+      department: secondManager.secondManagerEmployee.departmentName,
+      replacedManagerId: secondManager.replacedManagerId,
+      replacedManagerName: `${secondManager.replacedManager.firstName} ${secondManager.replacedManager.lastName}`,
+      startDate: secondManager.startDate,
+      endDate: secondManager.endDate,
+      isActive: secondManager.isActive
+    };
+  }
+
+  getActiveSecondManagerForManager(managerId: number): ISecondManagerViewModel | null {
+    return this.activeSecondManagers.find(sm => sm.replacedManagerId === managerId) || null;
+  }
+
+  openSecondManagerModal(employee: { id: number; name: string; email: string }, managerId: number): void {
+    const existingSecondManager = this.getActiveSecondManagerForManager(managerId);
+    if (existingSecondManager) {
+      alert(`There is already an active second manager (${existingSecondManager.name}) for this manager until ${new Date(existingSecondManager.endDate).toLocaleDateString()}. Please wait until the current assignment expires or remove it first.`);
+      return;
+    }
+
+    this.selectedSecondManagerEmployee = employee;
+    this.replacedManagerId = managerId;
+    this.showSecondManagerModal = true;
+    this.secondManagerErrorMessage = '';
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 30);
+
+    this.secondManagerForm = {
+      startDate: tomorrow.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
+    };
+  }
+
+  closeSecondManagerModal(): void {
+    this.showSecondManagerModal = false;
+    this.selectedSecondManagerEmployee = null;
+    this.replacedManagerId = 0;
+    this.secondManagerErrorMessage = '';
+    this.isSubmittingSecondManager = false;
+    this.secondManagerForm = {
+      startDate: '',
+      endDate: ''
+    };
+  }
+
+  isSecondManagerFormValid(): boolean {
+    if (!this.secondManagerForm.startDate || !this.secondManagerForm.endDate) {
+      return false;
+    }
+
+    const startDate = new Date(this.secondManagerForm.startDate);
+    const endDate = new Date(this.secondManagerForm.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (startDate < today) {
+      return false;
+    }
+
+    if (endDate <= startDate) {
+      return false;
+    }
+
+    return true;
+  }
+
+  onSubmitSecondManager(): void {
+    if (!this.isSecondManagerFormValid() || !this.selectedSecondManagerEmployee) {
+      return;
+    }
+
+    this.isSubmittingSecondManager = true;
+    this.secondManagerErrorMessage = '';
+
+    const currentTime = new Date();
+    const timeString = currentTime.toISOString().split('T')[1];
+
+    const startDateTime = `${this.secondManagerForm.startDate}T${timeString}`;
+    const endDateTime = `${this.secondManagerForm.endDate}T${timeString}`;
+
+    const createRequest = {
+      secondManagerEmployeeId: this.selectedSecondManagerEmployee.id,
+      replacedManagerId: this.replacedManagerId,
+      startDate: startDateTime,
+      endDate: endDateTime
+    };
+
+    this.secondManagerService.createSecondManager(createRequest).subscribe({
+      next: (response) => {
+        this.isSubmittingSecondManager = false;
+        console.log('Second manager created successfully:', response);
+
+        this.loadActiveSecondManagers();
+
+        this.closeSecondManagerModal();
+
+        alert('Second manager created successfully!');
+      },
+      error: (err) => {
+        this.isSubmittingSecondManager = false;
+        console.error('Failed to create second manager:', err);
+
+        if (err.error && err.error.message) {
+          this.secondManagerErrorMessage = err.error.message;
+        } else {
+          this.secondManagerErrorMessage = 'Failed to create second manager. Please try again.';
+        }
+      }
+    });
+  }
+
+  removeSecondManager(secondManager: ISecondManagerViewModel): void {
+    const confirmMessage = `Are you sure you want to remove ${secondManager.name} as second manager? This action cannot be undone.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    this.secondManagerService.deleteSecondManager(
+      secondManager.id,
+      secondManager.replacedManagerId,
+      secondManager.startDate
+    ).subscribe({
+      next: () => {
+        console.log('Second manager removed successfully');
+
+        this.loadActiveSecondManagers();
+
+        alert(`${secondManager.name} has been removed as second manager successfully!`);
+      },
+      error: (err: any) => {
+        console.error('Failed to remove second manager:', err);
+
+        let errorMessage = 'Failed to remove second manager. Please try again.';
+        if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        }
+
+        alert(errorMessage);
+      }
+    });
   }
 }
