@@ -1,0 +1,477 @@
+<main class="min-h-screen bg-gray-50">
+  <custom-navbar></custom-navbar>
+
+  <div class="p-6 container mx-auto">
+    <!-- Header with Back Button -->
+    <div class="flex items-center mb-6">
+      <button
+        (click)="goBack()"
+        class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Project Management
+      </button>
+      <h1 class="text-2xl font-bold text-gray-900 ml-4">
+        {{ project?.name || 'Project Details' }}
+      </h1>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Loading project details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm text-red-800">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading && project" class="space-y-6">
+      <!-- Project Information Card -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Project Information</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div>
+            <label class="text-sm font-medium text-gray-500">Start Date</label>
+            <p class="text-gray-900">{{ formatDate(project.startDate) }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">End Date</label>
+            <p class="text-gray-900">{{ formatDate(project.endDate) }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Budgeted FTEs</label>
+            <p class="text-gray-900">{{ project.budgetedFTEs }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Remaining FTEs</label>
+            <p class="text-gray-900 font-semibold" [ngClass]="calculateRemainingFTEs() <= 0 ? 'text-red-600' : 'text-green-600'">
+              {{ calculateRemainingFTEs().toFixed(2) }}
+            </p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500 block mb-1">Status</label>
+            <span [ngClass]="project.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+              {{ project.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex">
+            <button
+              (click)="setActiveTab('view')"
+              [class]="activeTab === 'view' 
+                ? 'border-blue-500 text-blue-600 bg-blue-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+            >
+              View Employees
+            </button>
+            <button
+              (click)="setActiveTab('edit')"
+              [class]="activeTab === 'edit' 
+                ? 'border-indigo-500 text-indigo-600 bg-indigo-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [disabled]="!canModify"
+            >
+              Edit Project
+            </button>
+            <button
+              (click)="setActiveTab('assign')"
+              [class]="activeTab === 'assign' 
+                ? 'border-green-500 text-green-600 bg-green-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [disabled]="!canModify"
+            >
+              Assign Employees
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+          <!-- View Tab -->
+          <div *ngIf="activeTab === 'view'">
+            <!-- View Mode Toggle -->
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex gap-2">
+                <button
+                  (click)="setViewMode('table')"
+                  [class]="viewMode === 'table' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
+                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
+                >
+                  Table View
+                </button>
+                <button
+                  (click)="setViewMode('cards')"
+                  [class]="viewMode === 'cards' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
+                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
+                >
+                  Cards View
+                </button>
+              </div>
+
+              <!-- Search -->
+              <div class="relative max-w-md">
+                <svg
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+                <input
+                  type="text"
+                  [value]="searchTerm"
+                  (input)="onSearchTermChange($any($event.target).value || '')"
+                  placeholder="Search by name or job title..."
+                  class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                />
+              </div>
+            </div>
+
+            <!-- Table View -->
+            <div *ngIf="viewMode === 'table'" class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Employee Name
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job Title
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Employment Type
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Allocation %
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hours/Week
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr *ngFor="let projectUser of filteredProjectUsers" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ getUserFullName(projectUser.user) }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ projectUser.user?.jobTitleName || 'N/A' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ getEmploymentTypeDisplay(projectUser.user?.employmentType) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ (projectUser.timePercentagePerProject || projectUser.assignedPercentage || 0) }}%
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ calculateHoursPerWeek(projectUser.timePercentagePerProject || projectUser.assignedPercentage, projectUser.user?.employmentType) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cards View -->
+            <div *ngIf="viewMode === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                *ngFor="let projectUser of filteredProjectUsers"
+                class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6"
+              >
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span class="text-blue-600 font-medium text-sm">
+                        {{ getUserInitials(projectUser.user) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      {{ getUserFullName(projectUser.user) }}
+                    </p>
+                    <p class="text-sm text-gray-500 truncate">
+                      {{ projectUser.user?.jobTitleName || 'N/A' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-between items-center">
+                  <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-900">
+                      {{ (projectUser.timePercentagePerProject || projectUser.assignedPercentage || 0) }}%
+                    </p>
+                    <p class="text-xs text-gray-500">Allocation</p>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-900">
+                      {{ calculateHoursPerWeek(projectUser.timePercentagePerProject || projectUser.assignedPercentage, projectUser.user?.employmentType) }}
+                    </p>
+                    <p class="text-xs text-gray-500">Hours/Week</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="filteredProjectUsers.length === 0" class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No people assigned</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                {{ searchTerm ? 'No people match your search criteria.' : 'This project has no people assigned yet.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Edit Tab -->
+          <div *ngIf="activeTab === 'edit'">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Edit Project Details</h3>
+            
+            <div class="max-w-4xl">
+              <form class="space-y-6">
+                <!-- Project Name - Full Width -->
+                <div class="grid grid-cols-1">
+                  <div>
+                    <label for="projectName" class="block text-sm font-medium text-gray-700 mb-2">
+                      Project Name
+                    </label>
+                    <input
+                      type="text"
+                      id="projectName"
+                      [(ngModel)]="editProjectName"
+                      name="projectName"
+                      [disabled]="!canModify"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter project name"
+                    />
+                  </div>
+                </div>
+
+                <!-- Dates and FTEs - Two Column Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Start Date -->
+                  <div>
+                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-2">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      [(ngModel)]="editStartDate"
+                      name="startDate"
+                      [disabled]="!canModify"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <!-- End Date -->
+                  <div>
+                    <label for="endDate" class="block text-sm font-medium text-gray-700 mb-2">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      [(ngModel)]="editEndDate"
+                      name="endDate"
+                      [disabled]="!canModify"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <!-- Budget and Status - Two Column Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Budgeted FTEs -->
+                  <div>
+                    <label for="budgetedFTEs" class="block text-sm font-medium text-gray-700 mb-2">
+                      Budgeted FTEs
+                    </label>
+                    <input
+                      type="number"
+                      id="budgetedFTEs"
+                      [(ngModel)]="editBudgetedFTEs"
+                      name="budgetedFTEs"
+                      [disabled]="!canModify"
+                      min="0"
+                      step="0.25"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter budgeted FTEs"
+                    />
+                  </div>
+
+                  <!-- Status -->
+                  <div>
+                    <label for="isActive" class="block text-sm font-medium text-gray-700 mb-2">
+                      Project Status
+                    </label>
+                    <select
+                      id="isActive"
+                      [(ngModel)]="editIsActive"
+                      name="isActive"
+                      [disabled]="!canModify"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option [value]="true">Active</option>
+                      <option [value]="false">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200" *ngIf="canModify">
+                  <button
+                    type="button"
+                    (click)="resetProjectEditForm()"
+                    class="px-6 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    (click)="saveProjectDetails()"
+                    [disabled]="!isProjectFormValid()"
+                    class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+
+                <!-- Read-only message -->
+                <div *ngIf="!canModify" class="text-sm text-gray-500 text-center py-8 bg-gray-50 rounded-md border border-gray-200">
+                  <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-7V8m0 0V6m0 2h2m-2 0H10"></path>
+                  </svg>
+                  You are in view-only mode. Project details cannot be modified.
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Assign Tab -->
+          <div *ngIf="activeTab === 'assign'">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-gray-900">Assign New Employees</h3>
+              <button
+                (click)="openAssignForm()"
+                [disabled]="!canModify"
+                [class]="canModify 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Assign Person
+              </button>
+            </div>
+
+            <!-- Current Assignments Summary -->
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+              <h4 class="font-medium text-blue-900 mb-2">Current Assignments</h4>
+              <div class="text-sm text-blue-800">
+                <p>Total People: {{ projectUsers.length }}</p>
+                <p>Total Allocated FTEs: {{ project.totalAssignedFTEs || 0 }}</p>
+                <p>Remaining FTEs: {{ project.remainingFTEs || 0 }}</p>
+              </div>
+            </div>
+
+            <!-- Available Users -->
+            <div *ngIf="availableUsers.length > 0">
+              <h4 class="font-medium text-gray-900 mb-3">Available People</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div
+                  *ngFor="let user of availableUsers"
+                  class="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <p class="font-medium text-gray-900">{{ getUserFullName(user) }}</p>
+                  <p class="text-sm text-gray-500">{{ user.jobTitleName || 'N/A' }}</p>
+                  <p class="text-xs text-gray-400 mt-1">{{ user.departmentName || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assign Form Modal -->
+            <div *ngIf="showAssignForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+              <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Assign Person to Project</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Person</label>
+                    <select
+                      [(ngModel)]="assignUserId"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">Choose a person...</option>
+                      <option *ngFor="let user of availableUsers" [value]="user.id">
+                        {{ getUserFullName(user) }} - {{ user.jobTitleName }}
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Allocation Percentage</label>
+                    <select
+                      [(ngModel)]="assignPercentage"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">Select percentage...</option>
+                      <option *ngFor="let percentage of availablePercentages" [value]="percentage.value">
+                        {{ percentage.label }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                  <button
+                    (click)="closeAssignForm()"
+                    class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    (click)="assignUser()"
+                    [disabled]="!assignUserId || !assignPercentage"
+                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Assign
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

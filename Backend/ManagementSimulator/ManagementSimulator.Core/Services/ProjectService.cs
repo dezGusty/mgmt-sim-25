@@ -130,6 +130,8 @@ namespace ManagementSimulator.Core.Services
                     UserId = up.UserId,
                     UserName = up.User?.FullName,
                     UserEmail = up.User?.Email,
+                    JobTitleName = up.User?.Title?.Name,
+                    EmploymentType = up.User?.EmploymentType.ToString(),
                     ProjectId = up.ProjectId,
                     ProjectName = project.Name,
                     TimePercentagePerProject = up.TimePercentagePerProject

@@ -55,7 +55,8 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<Project> query = _dbContext.Projects
                 .Include(p => p.UserProjects)
-                .ThenInclude(up => up.User);
+                .ThenInclude(up => up.User)
+                .ThenInclude(u => u.Title);
 
             if (!tracking)
                 query = query.AsNoTracking();

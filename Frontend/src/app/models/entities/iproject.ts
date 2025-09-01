@@ -34,6 +34,12 @@ export interface IUserProject {
   userId: number;
   projectId: number;
   assignedPercentage: number;
+  timePercentagePerProject: number;
+  userName?: string;
+  userEmail?: string;
+  jobTitleId?: number;
+  jobTitleName?: string;
+  employmentType?: string;
   user?: {
     id: number;
     firstName?: string;

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { IProject, IProjectWithUsers } from '../../models/entities/iproject';
+import { IProject, IProjectWithUsers, IUserProject } from '../../models/entities/iproject';
 import { IFilteredProjectsRequest } from '../../models/requests/ifiltered-projects-request';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
@@ -27,11 +27,9 @@ export class ProjectService {
     return this.http.post<any>(`${this.apiUrl}/filtered`, request, { observe: 'response' }).pipe(
       map(resp => {
         const body = resp.body;
-        // If backend already returns the envelope { success, data, ... }
         if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
           return body as IApiResponse<IFilteredApiResponse<IProject>>;
         }
-        // Otherwise assume backend returned the paged response directly and wrap it
         return {
           data: body as IFilteredApiResponse<IProject>,
           success: true,
@@ -48,7 +46,108 @@ export class ProjectService {
   }
 
   getProjectById(id: number): Observable<IApiResponse<IProjectWithUsers>> {
-    return this.http.get<IApiResponse<IProjectWithUsers>>(`${this.apiUrl}/${id}`);
+    const url = `${this.apiUrl}/${id}`;
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+          return response as IApiResponse<IProjectWithUsers>;
+        }
+        if (response && typeof response === 'object' && 'id' in response) {
+          return {
+            data: response as IProjectWithUsers,
+            success: true,
+            message: 'Project loaded successfully',
+            timestamp: new Date()
+          } as IApiResponse<IProjectWithUsers>;
+        }
+        return {
+          data: null as any,
+          success: false,
+          message: 'Invalid response format',
+          timestamp: new Date()
+        } as IApiResponse<IProjectWithUsers>;
+      }),
+      catchError(err => {
+        console.error('getProjectById error', err);
+        return of({
+          data: null as any,
+          success: false,
+          message: err?.message || 'Error loading project',
+          timestamp: new Date()
+        } as IApiResponse<IProjectWithUsers>);
+      })
+    );
+  }
+
+  getProjectWithUsers(id: number): Observable<IApiResponse<IProjectWithUsers>> {
+    const url = `${this.apiUrl}/${id}/with-users?_t=${Date.now()}`;  // Add timestamp to prevent caching
+    console.log('Making API call to:', url);
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+          return response as IApiResponse<IProjectWithUsers>;
+        }
+        if (response && typeof response === 'object') {
+          return {
+            data: response as IProjectWithUsers,
+            success: true,
+            message: 'Project loaded successfully',
+            timestamp: new Date()
+          } as IApiResponse<IProjectWithUsers>;
+        }
+        return {
+          data: null as any,
+          success: false,
+          message: 'Invalid response format',
+          timestamp: new Date()
+        } as IApiResponse<IProjectWithUsers>;
+      }),
+      catchError(err => {
+        console.error('getProjectWithUsers error', err);
+        return of({
+          data: null as any,
+          success: false,
+          message: err?.message || 'Error loading project with users',
+          timestamp: new Date()
+        } as IApiResponse<IProjectWithUsers>);
+      })
+    );
+  }
+
+  getProjectUsers(projectId: number): Observable<IApiResponse<IUserProject[]>> {
+    const url = `${this.apiUrl}/${projectId}/users`;
+    return this.http.get<any>(url).pipe(
+      map(response => {
+
+        if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+          return response as IApiResponse<IUserProject[]>;
+        }
+        if (Array.isArray(response)) {
+          return {
+            data: response as IUserProject[],
+            success: true,
+            message: 'Project users loaded successfully',
+            timestamp: new Date()
+          } as IApiResponse<IUserProject[]>;
+        }
+
+        return {
+          data: [],
+          success: false,
+          message: 'Invalid response format',
+          timestamp: new Date()
+        } as IApiResponse<IUserProject[]>;
+      }),
+      catchError(err => {
+        console.error('getProjectUsers error', err);
+        return of({
+          data: [],
+          success: false,
+          message: err?.message || 'Error loading project users',
+          timestamp: new Date()
+        } as IApiResponse<IUserProject[]>);
+      })
+    );
   }
 
   createProject(project: Partial<IProject>): Observable<IApiResponse<IProject | null>> {
@@ -78,13 +177,10 @@ export class ProjectService {
         const status = resp.status;
         const body = resp.body;
         
-        // Handle successful responses
         if (status >= 200 && status < 300) {
-          // If backend already returns the envelope { success, data, ... }
           if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
             return body as IApiResponse<IProject | null>;
           }
-          // If backend returns the project directly, wrap it
           return { 
             data: body as IProject || null, 
             message: 'Project updated successfully', 
@@ -93,7 +189,6 @@ export class ProjectService {
           } as IApiResponse<IProject | null>;
         }
         
-        // Handle other status codes
         return { 
           data: null, 
           message: 'Failed to update project', 
@@ -127,13 +222,10 @@ export class ProjectService {
         const status = resp.status;
         const body = resp.body;
         
-        // Handle successful responses (201 Created or other 2xx)
         if (status >= 200 && status < 300) {
-          // If backend already returns the envelope { success, data, ... }
           if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
             return body as IApiResponse<void>;
           }
-          // If backend returns the assignment directly (CreatedAtAction response), wrap it
           return { 
             data: undefined, 
             message: 'User assigned to project successfully', 
@@ -142,7 +234,6 @@ export class ProjectService {
           } as IApiResponse<void>;
         }
         
-        // Handle other status codes
         return { 
           data: undefined, 
           message: 'Failed to assign user to project', 
@@ -155,9 +246,7 @@ export class ProjectService {
         
         let errorMessage = 'Failed to assign user to project';
         
-        // Handle 409 Conflict (duplicate assignment)
         if (err.status === 409) {
-          // Try to extract message from error response body
           if (err.error && typeof err.error === 'string') {
             errorMessage = err.error;
           } else if (err.error && err.error.message) {

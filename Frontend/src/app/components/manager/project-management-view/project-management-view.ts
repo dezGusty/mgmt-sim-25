@@ -194,6 +194,10 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.router.navigate(['/manager']);
   }
 
+  navigateToProjectDetails(project: IProject) {
+    this.router.navigate(['/manager/projects', project.id]);
+  }
+
   setFilter(filter: 'All' | 'Active' | 'Inactive') {
     this.currentFilter = filter;
     this.currentPage = 1;
