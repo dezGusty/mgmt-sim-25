@@ -269,6 +269,12 @@ namespace ManagementSimulator.Core.Services
                 <div class='highlight'>
                     <p><strong>Actions needed:</strong></p>
                     <p>Please login to the MGMT system to review and approve/reject this request.</p>
+                    <p style='margin-top: 20px;'>
+                        <a href='http://localhost:4200/manager/leave' 
+                           style='display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                            Review Leave Request
+                        </a>
+                    </p>
                 </div>
         
                 <p>Best regards,<br>The FTD Team</p>
