@@ -347,5 +347,269 @@ namespace ManagementSimulator.Core.Services
 
             await SendEmailAsync(managerEmail, subject, body);
         }
+
+        public async Task SendLeaveRequestApprovedEmailAsync(string employeeEmail, string employeeName, string managerName, string leaveType, DateTime startDate, DateTime endDate, int numberOfDays, string? reviewerComment)
+        {
+            var subject = $"Leave Request Approved - {leaveType}";
+
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Leave Request Approved</title>
+    </head>
+    <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;'>
+        <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f4f4f4;'>
+            <tr>
+                <td align='center' style='padding: 20px 0;'>
+                    <table width='600' cellpadding='0' cellspacing='0' style='background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <td style='background-color: #10b981; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;'>
+                                <h1 style='color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;'>✅ Leave Request Approved</h1>
+                                <p style='color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;'>Your request has been approved by your manager</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style='padding: 30px;'>
+                                
+                                <!-- Greeting -->
+                                <p style='font-size: 18px; color: #333333; margin: 0 0 20px 0; font-weight: bold;'>
+                                    Congratulations {employeeName}! 🎉
+                                </p>
+                                
+                                <!-- Description -->
+                                <p style='font-size: 16px; color: #666666; margin: 0 0 30px 0; line-height: 1.5;'>
+                                    Your leave request has been approved by <strong>{managerName}</strong>. You can now plan your time off accordingly.
+                                </p>
+                                
+                                <!-- Details Card -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <h3 style='color: #166534; margin: 0 0 20px 0; font-size: 18px;'>📋 Approved Request Details</h3>
+                                            
+                                            <table width='100%' cellpadding='0' cellspacing='0'>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Leave Type</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{leaveType}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Status</span><br>
+                                                        <span style='font-size: 14px; color: #10b981; font-weight: 600;'>✅ Approved</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Start Date</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{startDate:dd MMM yyyy}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>End Date</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{endDate:dd MMM yyyy}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Duration</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{numberOfDays} day{(numberOfDays == 1 ? "" : "s")}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Approved By</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{managerName}</span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                {(string.IsNullOrEmpty(reviewerComment) ? "" : $@"
+                                <!-- Manager Comment -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <span style='font-size: 12px; color: #1e40af; text-transform: uppercase; font-weight: bold;'>Manager Comment</span><br>
+                                            <span style='font-size: 14px; color: #1e40af; font-style: italic;'>""{reviewerComment}""</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                ")}
+                                
+                                <!-- Next Steps -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <h3 style='color: #92400e; margin: 0 0 15px 0; font-size: 18px;'>📝 Next Steps</h3>
+                                            <ul style='color: #92400e; margin: 0; padding-left: 20px; line-height: 1.6;'>
+                                                <li>Inform your team about your upcoming absence</li>
+                                                <li>Set up out-of-office messages if needed</li>
+                                                <li>Ensure all pending tasks are completed or delegated</li>
+                                                <li>Enjoy your well-deserved time off!</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style='background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;'>
+                                <p style='font-size: 12px; color: #666666; margin: 0; line-height: 1.4;'>
+                                    This is an automated notification from the <span style='color: #20B486; font-weight: bold;'><a href='http://localhost:4200/' style='color: #20B486;'>FTD Management System</a></span>.<br>
+                                    Please do not reply to this email. For support, contact your system administrator.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>";
+
+            await SendEmailAsync(employeeEmail, subject, body);
+        }
+
+        public async Task SendLeaveRequestRejectedEmailAsync(string employeeEmail, string employeeName, string managerName, string leaveType, DateTime startDate, DateTime endDate, int numberOfDays, string? reviewerComment)
+        {
+            var subject = $"Leave Request Rejected - {leaveType}";
+
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Leave Request Rejected</title>
+    </head>
+    <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;'>
+        <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #f4f4f4;'>
+            <tr>
+                <td align='center' style='padding: 20px 0;'>
+                    <table width='600' cellpadding='0' cellspacing='0' style='background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <td style='background-color: #ef4444; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;'>
+                                <h1 style='color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;'>❌ Leave Request Rejected</h1>
+                                <p style='color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;'>Your request has been reviewed by your manager</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style='padding: 30px;'>
+                                
+                                <!-- Greeting -->
+                                <p style='font-size: 18px; color: #333333; margin: 0 0 20px 0; font-weight: bold;'>
+                                    Hello {employeeName},
+                                </p>
+                                
+                                <!-- Description -->
+                                <p style='font-size: 16px; color: #666666; margin: 0 0 30px 0; line-height: 1.5;'>
+                                    Unfortunately, your leave request has been rejected by <strong>{managerName}</strong>. Please review the details below and contact your manager if you have any questions.
+                                </p>
+                                
+                                <!-- Details Card -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <h3 style='color: #991b1b; margin: 0 0 20px 0; font-size: 18px;'>📋 Rejected Request Details</h3>
+                                            
+                                            <table width='100%' cellpadding='0' cellspacing='0'>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Leave Type</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{leaveType}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Status</span><br>
+                                                        <span style='font-size: 14px; color: #ef4444; font-weight: 600;'>❌ Rejected</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Start Date</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{startDate:dd MMM yyyy}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>End Date</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{endDate:dd MMM yyyy}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Duration</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{numberOfDays} day{(numberOfDays == 1 ? "" : "s")}</span>
+                                                    </td>
+                                                    <td width='50%' style='padding: 8px 0;'>
+                                                        <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Rejected By</span><br>
+                                                        <span style='font-size: 14px; color: #333333; font-weight: 500;'>{managerName}</span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                {(string.IsNullOrEmpty(reviewerComment) ? "" : $@"
+                                <!-- Manager Comment -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <span style='font-size: 12px; color: #92400e; text-transform: uppercase; font-weight: bold;'>Manager Comment</span><br>
+                                            <span style='font-size: 14px; color: #92400e; font-style: italic;'>""{reviewerComment}""</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                ")}
+                                
+                                <!-- Next Steps -->
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; margin-bottom: 25px;'>
+                                    <tr>
+                                        <td style='padding: 20px;'>
+                                            <h3 style='color: #1e40af; margin: 0 0 15px 0; font-size: 18px;'>💡 Next Steps</h3>
+                                            <ul style='color: #1e40af; margin: 0; padding-left: 20px; line-height: 1.6;'>
+                                                <li>Contact your manager to discuss the rejection</li>
+                                                <li>Consider submitting a new request with different dates</li>
+                                                <li>Ensure you have sufficient leave days available</li>
+                                                <li>Check if there are any conflicting requests</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style='background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;'>
+                                <p style='font-size: 12px; color: #666666; margin: 0; line-height: 1.4;'>
+                                    This is an automated notification from the <span style='color: #20B486; font-weight: bold;'><a href='http://localhost:4200/' style='color: #20B486;'>FTD Management System</a></span>.<br>
+                                    Please do not reply to this email. For support, contact your system administrator.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>";
+
+            await SendEmailAsync(employeeEmail, subject, body);
+        }
     }
 }

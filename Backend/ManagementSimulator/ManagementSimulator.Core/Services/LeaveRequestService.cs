@@ -207,11 +207,17 @@ namespace ManagementSimulator.Core.Services
             request.RequestStatus = dto.RequestStatus;
             request.ReviewerComment = dto.ReviewerComment;
             request.ReviewerId = managerId;
-
-
             request.ModifiedAt = DateTime.UtcNow;
 
             await _leaveRequestRepository.UpdateAsync(request);
+
+            try
+            {
+                await SendLeaveRequestReviewNotificationToEmployeeAsync(request, dto, managerId);
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         public async Task<bool> DeleteLeaveRequestAsync(int id)
@@ -519,6 +525,47 @@ namespace ManagementSimulator.Core.Services
                 catch (Exception ex)
                 {
                 }
+            }
+        }
+
+        private async Task SendLeaveRequestReviewNotificationToEmployeeAsync(LeaveRequest leaveRequest, ReviewLeaveRequestDto reviewDto, int managerId)
+        {
+            var employee = await _userRepository.GetUserWithReferencesByIdAsync(leaveRequest.UserId);
+            if (employee == null) return;
+
+            var manager = await _userRepository.GetUserWithReferencesByIdAsync(managerId);
+            if (manager == null) return;
+
+            var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(leaveRequest.LeaveRequestTypeId);
+            if (leaveRequestType == null) return;
+
+            var numberOfDays = CalculateLeaveDays(leaveRequest.StartDate, leaveRequest.EndDate);
+
+            if (reviewDto.RequestStatus == RequestStatus.Approved)
+            {
+                await _emailService.SendLeaveRequestApprovedEmailAsync(
+                    employee.Email,
+                    $"{employee.FirstName} {employee.LastName}",
+                    $"{manager.FirstName} {manager.LastName}",
+                    leaveRequestType.Title,
+                    leaveRequest.StartDate,
+                    leaveRequest.EndDate,
+                    numberOfDays,
+                    reviewDto.ReviewerComment
+                );
+            }
+            else if (reviewDto.RequestStatus == RequestStatus.Rejected)
+            {
+                await _emailService.SendLeaveRequestRejectedEmailAsync(
+                    employee.Email,
+                    $"{employee.FirstName} {employee.LastName}",
+                    $"{manager.FirstName} {manager.LastName}",
+                    leaveRequestType.Title,
+                    leaveRequest.StartDate,
+                    leaveRequest.EndDate,
+                    numberOfDays,
+                    reviewDto.ReviewerComment
+                );
             }
         }
     }
