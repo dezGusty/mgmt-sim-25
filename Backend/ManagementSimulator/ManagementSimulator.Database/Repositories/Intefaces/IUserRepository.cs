@@ -28,5 +28,6 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<int> GetTotalAdminsCountAsync(bool includeDeleted = false);
         Task<int> GetTotalManagersCountAsync(bool includeDeleted = false);
         Task<int> GetTotalUnassignedUsersCountAsync(bool includeDeleted = false);
+        Task<(List<User> Data, int TotalCount)> GetAllManagersWithTeamsFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false);
     }
 }
