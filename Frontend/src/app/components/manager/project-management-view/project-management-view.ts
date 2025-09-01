@@ -6,6 +6,7 @@ import { CustomNavbar } from '../../shared/custom-navbar/custom-navbar';
 import { ProjectService } from '../../../services/projects/project.service';
 import { UsersService } from '../../../services/users/users-service';
 import { IProject } from '../../../models/entities/iproject';
+import { IProjectWithUsers, IUserProject } from '../../../models/entities/iproject';
 import { IFilteredProjectsRequest } from '../../../models/requests/ifiltered-projects-request';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -43,6 +44,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   assignmentWarning: string | null = null;
   projects: IProject[] = [];
   selectedProject: IProject | null = null;
+  selectedProjectWithUsers: IProjectWithUsers | null = null;
   errorMessage: string | null = null;
   isLoading: boolean = false;
   showAddProjectForm = false;
@@ -352,6 +354,20 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.showAssignForm = true;
     this.assignUserId = null;
     this.assignPercentage = 0;
+    this.assignmentWarning = null;
+    
+    // Load full project details with user assignments
+    this.projectService.getProjectById(project.id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Store the full project details for validation
+          this.selectedProjectWithUsers = response.data;
+        }
+      },
+      error: (err) => {
+        console.error('Error loading project details:', err);
+      }
+    });
   }
 
   assignUser() {
@@ -366,17 +382,17 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
     // Check user availability before proceeding
     this.usersService.getUserById(this.assignUserId).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          const user = response.data;
-          const assignmentPercentage = this.assignPercentage / 100; // Convert to decimal
+      next: (userResponse) => {
+        if (userResponse.success && userResponse.data) {
+          const user = userResponse.data;
+          // Calculate the actual FTE allocation based on user's total availability
+          const actualFTEAllocation = (this.assignPercentage / 100) * (user.totalAvailability || 1);
           
-          if (user.remainingAvailability !== undefined && assignmentPercentage > user.remainingAvailability) {
-            this.errorMessage = `Cannot assign employee: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(0)}% remaining availability.`;
+          if (user.remainingAvailability !== undefined && actualFTEAllocation > user.remainingAvailability) {
+            this.errorMessage = `Cannot assign employee: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(2)}% remaining availability.`;
             return;
           }
 
-          // Proceed with assignment
           this.proceedWithAssignment();
         } else {
           this.errorMessage = 'Failed to retrieve employee information';
@@ -396,15 +412,31 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       next: (res) => {
         if (res.success) {
           this.errorMessage = null;
+          this.assignmentWarning = null;
           this.closeAssignForm();
           this.loadProjects();
         } else {
-          this.errorMessage = res.message || 'Failed to assign employee';
+          // Check if this is a duplicate assignment error (409 conflict)
+          if (res.message && res.message.toLowerCase().includes('already assigned')) {
+            this.assignmentWarning = 'Employee is already assigned to this project.';
+            this.errorMessage = null;
+          } else {
+            this.errorMessage = res.message || 'Failed to assign employee';
+            this.assignmentWarning = null;
+          }
         }
       },
       error: (err) => {
         console.error('Assign employee error', err);
-        this.errorMessage = 'Failed to assign employee';
+        
+        // Handle 409 Conflict error (duplicate assignment)
+        if (err.status === 409) {
+          this.assignmentWarning = 'Employee is already assigned to this project.';
+          this.errorMessage = null;
+        } else {
+          this.errorMessage = 'Failed to assign employee';
+          this.assignmentWarning = null;
+        }
       }
     });
   }
@@ -412,6 +444,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   closeAssignForm() {
     this.showAssignForm = false;
     this.selectedProject = null;
+    this.selectedProjectWithUsers = null;
     this.assignUserId = null;
     this.assignPercentage = 0;
     this.assignmentWarning = null;
@@ -423,14 +456,24 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       return;
     }
 
+    // Check if user is already assigned to this project
+    if (this.selectedProjectWithUsers && this.selectedProjectWithUsers.assignedUsers) {
+      const existingAssignment = this.selectedProjectWithUsers.assignedUsers.find((up: IUserProject) => up.userId === this.assignUserId);
+      if (existingAssignment) {
+        this.assignmentWarning = `Warning: Employee is already assigned to this project with ${existingAssignment.assignedPercentage}% allocation.`;
+        return;
+      }
+    }
+
     this.usersService.getUserById(this.assignUserId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           const user = response.data;
-          const assignmentPercentage = this.assignPercentage / 100; // Convert to decimal
+          // Calculate the actual FTE allocation based on user's total availability
+          const actualFTEAllocation = (this.assignPercentage / 100) * (user.totalAvailability || 1);
           
-          if (user.remainingAvailability !== undefined && assignmentPercentage > user.remainingAvailability) {
-            this.assignmentWarning = `Warning: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(0)}% remaining availability.`;
+          if (user.remainingAvailability !== undefined && actualFTEAllocation > user.remainingAvailability) {
+            this.assignmentWarning = `Warning: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(2)}% remaining availability.`;
           } else {
             this.assignmentWarning = null;
           }
@@ -473,11 +516,11 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   formatPercentage(value: number): string {
-    return `${value.toFixed(1)}%`;
+    return `${value.toFixed(2)}%`;
   }
 
   formatFTE(value: number): string {
-    return `${value.toFixed(1)} FTE`;
+    return `${value.toFixed(2)} FTE`;
   }
 
   getRemainingFTEColor(remainingFTEs: number): string {

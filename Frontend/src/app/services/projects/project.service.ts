@@ -152,9 +152,30 @@ export class ProjectService {
       }),
       catchError(err => {
         console.error('assignUserToProject error', err);
+        
+        let errorMessage = 'Failed to assign user to project';
+        
+        // Handle 409 Conflict (duplicate assignment)
+        if (err.status === 409) {
+          // Try to extract message from error response body
+          if (err.error && typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error && err.error.message) {
+            errorMessage = err.error.message;
+          } else if (err.error && err.error.title) {
+            errorMessage = err.error.title;
+          } else {
+            errorMessage = 'Employee is already assigned to this project';
+          }
+        } else if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
         return of({ 
           data: undefined, 
-          message: err?.message || 'Failed to assign user to project', 
+          message: errorMessage, 
           success: false, 
           timestamp: new Date() 
         } as IApiResponse<void>);
