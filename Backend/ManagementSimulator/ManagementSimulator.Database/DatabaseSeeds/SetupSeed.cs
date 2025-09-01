@@ -1,10 +1,30 @@
 ﻿using ManagementSimulator.Database.Context;
 using ManagementSimulator.Database.Entities;
+using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Infrastructure
 {
     public static class SetupSeed
     {
+        private static void SetAvailabilityForEmploymentType(User user)
+        {
+            switch (user.EmploymentType)
+            {
+                case EmploymentType.FullTime:
+                    user.TotalAvailability = 1.0f;
+                    user.RemainingAvailability = 1.0f;
+                    break;
+                case EmploymentType.PartTime:
+                    user.TotalAvailability = 0.5f;
+                    user.RemainingAvailability = 0.5f;
+                    break;
+                default:
+                    user.TotalAvailability = 1.0f;
+                    user.RemainingAvailability = 1.0f;
+                    break;
+            }
+        }
+
         public static void Seed(MGMTSimulatorDbContext dbContext)
         {
             var itDepartment = dbContext.Departments.FirstOrDefault(d => d.Name == "IT");
@@ -47,7 +67,6 @@ namespace ManagementSimulator.Infrastructure
                 var employeeRole = roles.First(r => r.Rolename == "Employee");
                 var hrRole = roles.First(r => r.Rolename == "HR");
 
-                // Admin User
                 var adminUser = new User
                 {
                     FirstName = "Admin",
@@ -57,8 +76,11 @@ namespace ManagementSimulator.Infrastructure
                     JobTitleId = itAdminTitle.Id,
                     DepartmentId = itDepartment.Id,
                     Title = itAdminTitle,
-                    DateOfEmployment = DateTime.UtcNow
+                    DateOfEmployment = DateTime.UtcNow,
+                    EmploymentType = EmploymentType.FullTime
                 };
+
+                SetAvailabilityForEmploymentType(adminUser);
 
                 dbContext.Users.Add(adminUser);
                 dbContext.SaveChanges();
@@ -85,7 +107,6 @@ namespace ManagementSimulator.Infrastructure
 
                 dbContext.EmployeeRolesUsers.Add(adminHrRoleUser);
 
-                // Manager User
                 var managerUser = new User
                 {
                     FirstName = "Manager",
@@ -94,8 +115,11 @@ namespace ManagementSimulator.Infrastructure
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("manager123"),
                     JobTitleId = itAdminTitle.Id,
                     DepartmentId = itDepartment.Id,
-                    DateOfEmployment = DateTime.UtcNow
+                    DateOfEmployment = DateTime.UtcNow,
+                    EmploymentType = EmploymentType.FullTime
                 };
+
+                SetAvailabilityForEmploymentType(managerUser);
 
                 dbContext.Users.Add(managerUser);
                 dbContext.SaveChanges();
@@ -111,7 +135,6 @@ namespace ManagementSimulator.Infrastructure
 
                 dbContext.EmployeeRolesUsers.Add(managerRoleUser);
 
-                // Employee User
                 var employeeUser = new User
                 {
                     FirstName = "Employee",
@@ -120,8 +143,11 @@ namespace ManagementSimulator.Infrastructure
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("employee123"),
                     JobTitleId = itAdminTitle.Id,
                     DepartmentId = itDepartment.Id,
-                    DateOfEmployment = DateTime.UtcNow
+                    DateOfEmployment = DateTime.UtcNow,
+                    EmploymentType = EmploymentType.PartTime
                 };
+
+                SetAvailabilityForEmploymentType(employeeUser);
 
                 dbContext.Users.Add(employeeUser);
                 dbContext.SaveChanges();

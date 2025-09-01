@@ -493,11 +493,16 @@
       <div class="space-y-3">
         <div>
           <label class="block text-sm text-gray-700">User ID</label>
-          <input type="number" [(ngModel)]="assignUserId" class="w-full border px-3 py-2 rounded" />
+          <input type="number" [(ngModel)]="assignUserId" class="w-full border px-3 py-2 rounded" (ngModelChange)="checkUserAvailability()" />
         </div>
         <div>
           <label class="block text-sm text-gray-700">Assigned Percentage</label>
-          <input type="number" [(ngModel)]="assignPercentage" class="w-full border px-3 py-2 rounded" />
+          <select [(ngModel)]="assignPercentage" class="w-full border px-3 py-2 rounded" (ngModelChange)="checkUserAvailability()">
+            <option *ngFor="let option of availablePercentages" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
+        <div *ngIf="assignmentWarning" class="p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+          {{ assignmentWarning }}
         </div>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2 rounded border" (click)="closeAssignForm()">Cancel</button>

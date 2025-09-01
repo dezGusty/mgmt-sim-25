@@ -16,7 +16,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
 
         /// <summary>
         /// Calculates the remaining availability for a user after considering all project assignments
-        /// For part-time employees, project percentages are halved (50% project allocation = 25% of total capacity)
+        /// The calculation is done in FTE terms where the percentage allocation is applied to their total availability
+        /// Example: Part-time employee (0.5 FTE) with 50% project allocation uses 0.25 FTE, leaving 0.25 FTE remaining
         /// </summary>
         /// <param name="userId">The user ID to calculate remaining availability for</param>
         /// <returns>The remaining availability as a float</returns>
@@ -45,13 +46,13 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<bool> ValidateProjectAssignmentAsync(int userId, float projectAllocationPercentage, int? excludeProjectId = null);
 
         /// <summary>
-        /// Gets the effective project allocation percentage for a user based on their employment type
-        /// For part-time employees, converts project percentage to actual capacity usage
-        /// Example: 50% project allocation for part-time = 25% of total capacity
+        /// Converts a project allocation percentage to actual FTE allocation based on employment type
+        /// The percentage is relative to the user's total availability (employment type capacity)
+        /// Example: 50% project allocation for part-time employee (0.5 FTE) = 0.25 FTE actual allocation
         /// </summary>
         /// <param name="projectAllocationPercentage">The project allocation percentage (0-100)</param>
         /// <param name="employmentType">The employment type</param>
-        /// <returns>The effective allocation percentage</returns>
+        /// <returns>The actual FTE allocation</returns>
         float CalculateEffectiveAllocation(float projectAllocationPercentage, EmploymentType employmentType);
     }
 }

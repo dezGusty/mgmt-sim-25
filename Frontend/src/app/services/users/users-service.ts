@@ -70,6 +70,10 @@ export class UsersService {
     return this.http.get<IApiResponse<IUser[]>>(`${this.baseUrl}/admins`);
   }
 
+  getUserById(id: number): Observable<IApiResponse<IUser>> {
+    return this.http.get<IApiResponse<IUser>>(`${this.baseUrl}/${id}`);
+  }
+
   /*getAllAdminsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
 

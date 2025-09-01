@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../../shared/custom-navbar/custom-navbar';
 import { ProjectService } from '../../../services/projects/project.service';
+import { UsersService } from '../../../services/users/users-service';
 import { IProject } from '../../../models/entities/iproject';
 import { IFilteredProjectsRequest } from '../../../models/requests/ifiltered-projects-request';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
@@ -35,6 +36,11 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   showAssignForm = false;
   assignUserId: number | null = null;
   assignPercentage: number = 0;
+  availablePercentages = [
+    { value: 50, label: '50%' },
+    { value: 100, label: '100%' }
+  ];
+  assignmentWarning: string | null = null;
   projects: IProject[] = [];
   selectedProject: IProject | null = null;
   errorMessage: string | null = null;
@@ -73,7 +79,8 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private projectService: ProjectService,
-    private authService: Auth
+    private authService: Auth,
+    private usersService: UsersService
   ) {}
 
   get isViewOnly(): boolean {
@@ -349,13 +356,42 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
   assignUser() {
     if (!this.selectedProject || !this.assignUserId) {
-      this.errorMessage = 'Select a project and a user id';
+      this.errorMessage = 'Select a project and an employee id';
       return;
     }
     if (this.assignPercentage < 0 || this.assignPercentage > 100) {
       this.errorMessage = 'Assigned percentage must be between 0 and 100';
       return;
     }
+
+    // Check user availability before proceeding
+    this.usersService.getUserById(this.assignUserId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const user = response.data;
+          const assignmentPercentage = this.assignPercentage / 100; // Convert to decimal
+          
+          if (user.remainingAvailability !== undefined && assignmentPercentage > user.remainingAvailability) {
+            this.errorMessage = `Cannot assign employee: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(0)}% remaining availability.`;
+            return;
+          }
+
+          // Proceed with assignment
+          this.proceedWithAssignment();
+        } else {
+          this.errorMessage = 'Failed to retrieve employee information';
+        }
+      },
+      error: (err) => {
+        console.error('Error checking employee availability:', err);
+        this.errorMessage = 'Failed to verify employee availability';
+      }
+    });
+  }
+
+  private proceedWithAssignment() {
+    if (!this.selectedProject || !this.assignUserId) return;
+
     this.projectService.assignUserToProject(this.selectedProject.id, this.assignUserId, this.assignPercentage).subscribe({
       next: (res) => {
         if (res.success) {
@@ -363,12 +399,12 @@ export class ProjectManagementView implements OnInit, OnDestroy {
           this.closeAssignForm();
           this.loadProjects();
         } else {
-          this.errorMessage = res.message || 'Failed to assign user';
+          this.errorMessage = res.message || 'Failed to assign employee';
         }
       },
       error: (err) => {
-        console.error('Assign user error', err);
-        this.errorMessage = 'Failed to assign user';
+        console.error('Assign employee error', err);
+        this.errorMessage = 'Failed to assign employee';
       }
     });
   }
@@ -378,6 +414,33 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     this.selectedProject = null;
     this.assignUserId = null;
     this.assignPercentage = 0;
+    this.assignmentWarning = null;
+  }
+
+  checkUserAvailability() {
+    if (!this.assignUserId || this.assignPercentage <= 0) {
+      this.assignmentWarning = null;
+      return;
+    }
+
+    this.usersService.getUserById(this.assignUserId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const user = response.data;
+          const assignmentPercentage = this.assignPercentage / 100; // Convert to decimal
+          
+          if (user.remainingAvailability !== undefined && assignmentPercentage > user.remainingAvailability) {
+            this.assignmentWarning = `Warning: Assignment exceeds available capacity. Employee has ${(user.remainingAvailability * 100).toFixed(0)}% remaining availability.`;
+          } else {
+            this.assignmentWarning = null;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error checking employee availability:', err);
+        this.assignmentWarning = null;
+      }
+    });
   }
 
   getStatusColor(isActive: boolean): string {

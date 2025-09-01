@@ -35,39 +35,33 @@ namespace ManagementSimulator.Core.Services
                 return 0f;
 
             var totalAvailability = CalculateTotalAvailability(user.EmploymentType);
-            
+
             // Get all project assignments for the user
             var userProjects = await _projectRepository.GetUserProjectsByUserIdAsync(userId);
-            
-            // Calculate total allocated percentage based on employment type
-            var totalAllocatedPercentage = 0f;
+
+            // Calculate total allocated capacity in FTE terms
+            var totalAllocatedFTE = 0f;
             foreach (var userProject in userProjects)
             {
-                // For part-time employees, project allocations are more impactful
-                // E.g., 50% project allocation for part-time = 100% of their capacity
-                var effectiveAllocation = CalculateEffectiveAllocation(userProject.TimePercentagePerProject, user.EmploymentType);
-                totalAllocatedPercentage += effectiveAllocation;
+                // Convert percentage to actual FTE allocation
+                // For both full-time and part-time, percentage is relative to their total availability
+                var actualFTEAllocation = (userProject.TimePercentagePerProject / 100f) * totalAvailability;
+                totalAllocatedFTE += actualFTEAllocation;
             }
 
-            // Convert percentage to decimal and subtract from total availability
-            var allocatedCapacity = totalAllocatedPercentage / 100f;
-            var remainingAvailability = totalAvailability - allocatedCapacity;
-            
+            // Calculate remaining availability
+            var remainingAvailability = totalAvailability - totalAllocatedFTE;
+
             // Ensure we don't return negative availability
             return remainingAvailability > 0 ? remainingAvailability : 0f;
         }
 
         public float CalculateEffectiveAllocation(float projectAllocationPercentage, EmploymentType employmentType)
         {
-            // For full-time employees, project allocation percentage is as-is
-            // For part-time employees, project allocation has double the impact on their total capacity
-            // Example: 50% project allocation for part-time employee = 100% of their 0.5 FTE capacity
-            return employmentType switch
-            {
-                EmploymentType.FullTime => projectAllocationPercentage, // 1:1 ratio
-                EmploymentType.PartTime => projectAllocationPercentage * 2f, // 2:1 ratio (double impact)
-                _ => projectAllocationPercentage // Default behavior
-            };
+            // This method converts a project allocation percentage to actual FTE usage
+            // For both employment types, the percentage is relative to their total capacity
+            var totalAvailability = CalculateTotalAvailability(employmentType);
+            return (projectAllocationPercentage / 100f) * totalAvailability;
         }
 
         public async Task<bool> UpdateUserAvailabilityAsync(int userId)
@@ -97,7 +91,6 @@ namespace ManagementSimulator.Core.Services
                 user.TotalAvailability = CalculateTotalAvailability(user.EmploymentType);
                 user.RemainingAvailability = await CalculateRemainingAvailabilityAsync(user.Id);
 
-                // Only count as updated if values actually changed
                 if (previousTotal != user.TotalAvailability || previousRemaining != user.RemainingAvailability)
                 {
                     updateCount++;
@@ -119,7 +112,7 @@ namespace ManagementSimulator.Core.Services
                 return false;
 
             var totalAvailability = CalculateTotalAvailability(user.EmploymentType);
-            
+
             // Get all project assignments for the user, excluding the specified project if provided
             var userProjects = await _projectRepository.GetUserProjectsByUserIdAsync(userId);
             if (excludeProjectId.HasValue)
@@ -127,22 +120,21 @@ namespace ManagementSimulator.Core.Services
                 userProjects = userProjects.Where(up => up.ProjectId != excludeProjectId.Value).ToList();
             }
 
-            // Calculate current total allocated percentage
-            var currentTotalAllocated = 0f;
+            // Calculate current total allocated FTE
+            var currentTotalAllocatedFTE = 0f;
             foreach (var userProject in userProjects)
             {
-                var effectiveAllocation = CalculateEffectiveAllocation(userProject.TimePercentagePerProject, user.EmploymentType);
-                currentTotalAllocated += effectiveAllocation;
+                var actualFTEAllocation = (userProject.TimePercentagePerProject / 100f) * totalAvailability;
+                currentTotalAllocatedFTE += actualFTEAllocation;
             }
 
-            // Calculate the effective allocation for the new assignment
-            var newEffectiveAllocation = CalculateEffectiveAllocation(projectAllocationPercentage, user.EmploymentType);
-            
-            // Check if the total allocation would exceed 100% of their capacity
-            var totalAllocatedPercentage = currentTotalAllocated + newEffectiveAllocation;
-            var maxAllowedPercentage = totalAvailability * 100f; // Convert FTE to percentage
+            // Calculate the FTE allocation for the new assignment
+            var newFTEAllocation = (projectAllocationPercentage / 100f) * totalAvailability;
 
-            return totalAllocatedPercentage <= maxAllowedPercentage;
+            // Check if the total allocation would exceed their total availability
+            var totalAllocatedFTE = currentTotalAllocatedFTE + newFTEAllocation;
+
+            return totalAllocatedFTE <= totalAvailability;
         }
     }
 }
