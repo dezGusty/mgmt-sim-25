@@ -206,5 +206,82 @@ namespace ManagementSimulator.Core.Services
 
             await SendEmailAsync(email, subject, body);
         }
+
+        public async Task SendLeaveRequestNotificationToManagerAsync(string managerEmail, string managerName, string employeeName, string leaveType, DateTime startDate, DateTime endDate, int numberOfDays, string reason)
+        {
+            var subject = $"New Leave Request - {employeeName}";
+
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background-color: #f8f9fa; padding: 20px; text-align: center; }}
+            .content {{ padding: 20px; }}
+            .info-box {{ 
+                background-color: #e9ecef; 
+                border: 1px solid #ced4da; 
+                padding: 15px; 
+                margin: 20px 0; 
+                border-radius: 5px;
+            }}
+            .highlight {{ 
+                background-color: #d1ecf1; 
+                border: 1px solid #bee5eb; 
+                padding: 15px; 
+                margin: 20px 0; 
+                border-radius: 5px;
+            }}
+            .footer {{ 
+                background-color: #f8f9fa; 
+                padding: 15px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: #6c757d;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>New Leave Request</h2>
+            </div>
+    
+            <div class='content'>
+                <p>Hello <strong>{managerName}</strong>,</p>
+        
+                <p>The employee <strong>{employeeName}</strong> has created a new leave request that requires your approval.</p>
+        
+                <div class='info-box'>
+                    <p><strong>Leave request details:</strong></p>
+                    <ul>
+                        <li><strong>Employee:</strong> {employeeName}</li>
+                        <li><strong>Leave type:</strong> {leaveType}</li>
+                        <li><strong>Start date:</strong> {startDate:dd/MM/yyyy}</li>
+                        <li><strong>End date:</strong> {endDate:dd/MM/yyyy}</li>
+                        <li><strong>Number of days:</strong> {numberOfDays}</li>
+                        <li><strong>Reason:</strong> {reason}</li>
+                    </ul>
+                </div>
+        
+                <div class='highlight'>
+                    <p><strong>Actions needed:</strong></p>
+                    <p>Please login to the MGMT system to review and approve/reject this request.</p>
+                </div>
+        
+                <p>Best regards,<br>The FTD Team</p>
+            </div>
+    
+            <div class='footer'>
+                <p>This email was generated automatically. Please do not reply to this message.</p>
+            </div>
+        </div>
+    </body>
+    </html>";
+
+            await SendEmailAsync(managerEmail, subject, body);
+        }
     }
 }
