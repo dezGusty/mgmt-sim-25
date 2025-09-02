@@ -45,18 +45,18 @@ namespace ManagementSimulator.Core.Services
                 mailMessage.To.Add(toEmail);
 
                 await client.SendMailAsync(mailMessage);
-                _logger.LogInformation($"Email trimis cu succes către {toEmail}");
+                _logger.LogInformation($"The email was successfully sent to {toEmail}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Eroare la trimiterea email-ului către {toEmail}: {ex.Message}");
+                _logger.LogError($"Error sending email to {toEmail}: {ex.Message}");
                 throw;
             }
         }
 
         public async Task SendWelcomeEmailWithPasswordAsync(string email, string firstName, string temporaryPassword)
         {
-            var subject = "Contul dvs. a fost creat";
+            var subject = "Your account has been created";
 
             var body = $@"
         <!DOCTYPE html>
@@ -135,7 +135,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task SendPasswordResetCodeAsync(string email, string firstName, string resetCode)
         {
-            var subject = "Cod de resetare parolă - Siemens MGMT";
+            var subject = "Password Reset Code - FTD Management System";
 
             var body = $@"
     <!DOCTYPE html>
@@ -174,7 +174,7 @@ namespace ManagementSimulator.Core.Services
     <body>
         <div class='container'>
             <div class='header'>
-                <h2>Password Reset - Siemens MGMT</h2>
+                <h2>Password Reset - FTD Management System</h2>
             </div>
     
             <div class='content'>
@@ -194,7 +194,7 @@ namespace ManagementSimulator.Core.Services
         
                 <p>Use this code on the reset password page to set your new password.</p>
         
-                <p>Best regards,<br>The Siemens MGMT Team</p>
+                <p>Best regards,<br>The FTD Management System Team</p>
             </div>
     
             <div class='footer'>
