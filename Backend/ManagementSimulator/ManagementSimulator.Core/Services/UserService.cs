@@ -581,7 +581,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsFilteredAsync(QueriedUserRequestDto payload)
         {
-            var (users, totalCount) = await _userRepository.GetAllManagersFilteredAsync(
+            var (users, totalCount) = await _userRepository.GetAllManagersWithTeamsFilteredAsync(
                 payload.GlobalSearch,
                 payload.ManagerName,
                 payload.EmployeeName,
