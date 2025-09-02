@@ -314,7 +314,7 @@ namespace ManagementSimulator.Core.Services
                                             <table cellpadding='0' cellspacing='0' style='margin: 0 auto;'>
                                                 <tr>
                                                     <td style='background-color: #2196f3; border-radius: 6px; padding: 15px 30px; text-align: center;'>
-                                                        <a href='http://localhost:4200/manager/leave' 
+                                                        <a href='http://localhost:4200/manager/leave?employeeName={Uri.EscapeDataString(employeeName)}' 
                                                            style='color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; display: block;'>
                                                             Review Request
                                                         </a>
