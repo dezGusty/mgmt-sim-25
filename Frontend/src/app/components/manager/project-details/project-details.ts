@@ -237,7 +237,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
         email: userProject.userEmail || '',
         jobTitleId: userProject.jobTitleId || 0,
         jobTitleName: userProject.jobTitleName || 'N/A',
-        employmentType: userProject.employmentType || 'FullTime',
+        employmentType: userProject.employmentType ?? 0, // Default to FullTime (0) if undefined
         roles: []
       };
 
@@ -289,9 +289,9 @@ export class ProjectDetails implements OnInit, OnDestroy {
     return parseFloat(totalFTEs.toFixed(2));
   }
 
-  private calculateUserTotalAvailability(employmentType?: string): number {
-    // FullTime = 1.0 FTE, PartTime = 0.5 FTE
-    if (employmentType === 'PartTime') {
+  private calculateUserTotalAvailability(employmentType?: number): number {
+    // FullTime (0) = 1.0 FTE, PartTime (1) = 0.5 FTE
+    if (employmentType === 1) {
       return 0.5;
     }
     return 1.0; // Default to full-time
@@ -528,15 +528,15 @@ export class ProjectDetails implements OnInit, OnDestroy {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
   }
 
-  getEmploymentTypeDisplay(employmentType?: string): string {
-    if (!employmentType) return 'N/A';
-    return employmentType === 'FullTime' ? 'Full-time' : 'Part-time';
+  getEmploymentTypeDisplay(employmentType?: number): string {
+    if (employmentType === undefined) return 'N/A';
+    return employmentType === 0 ? 'Full-time' : 'Part-time';
   }
 
-  calculateHoursPerWeek(timePercentage?: number, employmentType?: string): string {
-    if (!timePercentage || !employmentType) return 'N/A';
-    
-    const hoursPerDay = employmentType === 'FullTime' ? 8 : 4;
+  calculateHoursPerWeek(timePercentage?: number, employmentType?: number): string {
+    if (!timePercentage || employmentType === undefined) return 'N/A';
+
+    const hoursPerDay = employmentType === 0 ? 8 : 4;
     const workingDaysPerWeek = 5;
     const totalHoursPerWeek = hoursPerDay * workingDaysPerWeek;
     const allocatedHours = (timePercentage / 100) * totalHoursPerWeek;

@@ -12,7 +12,7 @@ namespace ManagementSimulator.Core.Dtos.Responses
         public string? UserName { get; set; }
         public string? UserEmail { get; set; }
         public string? JobTitleName { get; set; }
-        public string? EmploymentType { get; set; }
+        public int EmploymentType { get; set; } // 0 = FullTime, 1 = PartTime
         public int ProjectId { get; set; }
         public string? ProjectName { get; set; }
         public float TimePercentagePerProject { get; set; }

@@ -39,7 +39,7 @@ export interface IUserProject {
   userEmail?: string;
   jobTitleId?: number;
   jobTitleName?: string;
-  employmentType?: string;
+  employmentType?: number; // 0 = FullTime, 1 = PartTime
   user?: {
     id: number;
     firstName?: string;

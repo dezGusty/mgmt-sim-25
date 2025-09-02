@@ -132,7 +132,7 @@ namespace ManagementSimulator.Core.Services
                     UserName = up.User?.FullName,
                     UserEmail = up.User?.Email,
                     JobTitleName = up.User?.Title?.Name,
-                    EmploymentType = up.User?.EmploymentType.ToString(),
+                    EmploymentType = (int)(up.User?.EmploymentType ?? Database.Enums.EmploymentType.FullTime),
                     ProjectId = up.ProjectId,
                     ProjectName = project.Name,
                     TimePercentagePerProject = up.TimePercentagePerProject

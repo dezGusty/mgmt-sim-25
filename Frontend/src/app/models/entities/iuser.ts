@@ -16,7 +16,7 @@ export interface IUser {
   managersIds?: number[];
   isActive?: boolean;
   dateOfEmployment?: Date;
-  employmentType?: string; // 'FullTime' or 'PartTime'
+  employmentType?: number; // 0 = FullTime, 1 = PartTime
   totalAvailability?: number; // 1.0 for full-time, 0.5 for part-time
   remainingAvailability?: number;
 }
@@ -30,7 +30,7 @@ export interface IAddUser {
   departmentId: number;
   employeeRolesId: number[];
   dateOfEmployment: Date;
-  employmentType?: string;
+  employmentType?: number; // 0 = FullTime, 1 = PartTime
 }
 
 export interface IUpdateUser {
@@ -41,5 +41,5 @@ export interface IUpdateUser {
   jobTitleId?: number;
   employeeRolesId?: number[];
   dateOfEmployment?: Date;
-  employmentType?: string;
+  employmentType?: number; // 0 = FullTime, 1 = PartTime
 }
