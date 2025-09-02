@@ -295,5 +295,24 @@ namespace ManagementSimulator.API.Controllers
                 return StatusCode(500, new { error = "Internal server error" });
             }
         }
+
+        [HttpGet("{id}/available-users")]
+        public async Task<IActionResult> GetAvailableUsersForProject(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string search = "")
+        {
+            try
+            {
+                var users = await _projectService.GetAvailableUsersForProjectAsync(id, page, pageSize, search);
+                return Ok(users);
+            }
+            catch (EntryNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving available users for project {ProjectId}", id);
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
     }
 }

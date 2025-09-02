@@ -8,6 +8,10 @@ import { UsersService } from '../../../services/users/users-service';
 import { IProjectWithUsers, IUserProject } from '../../../models/entities/iproject';
 import { IUser } from '../../../models/entities/iuser';
 import { IProjectUser } from '../../../models/entities/iproject-user';
+import { IFilteredUsersRequest } from '../../../models/requests/ifiltered-users-request';
+import { IFilteredApiResponse } from '../../../models/responses/ifiltered-api-response';
+import { IPendingAssignment } from '../../../models/entities/ipending-assignment';
+import { IPendingRemoval } from '../../../models/entities/ipending-removal';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
@@ -50,10 +54,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
   assignUserId: number | null = null;
   assignPercentage: number = 0;
   availableUsers: IUser[] = [];
-  availablePercentages = [
-    { value: 50, label: '50%' },
-    { value: 100, label: '100%' }
-  ];
   
   // Search and filter
   searchTerm: string = '';
@@ -63,6 +63,27 @@ export class ProjectDetails implements OnInit, OnDestroy {
     distinctUntilChanged()
   );
   private searchSubscription?: Subscription;
+
+  // Available users pagination and management
+  availableUsersData: IFilteredApiResponse<IUser> | null = null;
+  availableUsersCurrentPage: number = 1;
+  availableUsersPageSize: number = 10;
+  availableUsersSearch: string = '';
+  isLoadingAvailableUsers: boolean = false;
+  private availableUsersSearchSubject = new BehaviorSubject<string>('');
+  debouncedAvailableUsersSearch$ = this.availableUsersSearchSubject.pipe(
+    debounceTime(300),
+    distinctUntilChanged()
+  );
+  private availableUsersSearchSubscription?: Subscription;
+
+  // Assignment management
+  pendingAssignments: IPendingAssignment[] = [];
+  pendingRemovals: IPendingRemoval[] = [];
+  selectedAllocation: { [userId: number]: number } = {};
+
+  // Math reference for template
+  Math = Math;
   
   constructor(
     private router: Router,
@@ -118,11 +139,15 @@ export class ProjectDetails implements OnInit, OnDestroy {
     });
     
     this.setupSearchSubscription();
+    this.setupAvailableUsersSearchSubscription();
   }
 
   ngOnDestroy() {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+    if (this.availableUsersSearchSubscription) {
+      this.availableUsersSearchSubscription.unsubscribe();
     }
   }
 
@@ -130,6 +155,13 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.searchSubscription = this.debouncedSearchTerm$.subscribe(term => {
       // The filtering is handled by the getter, so we don't need to do anything here
       // This is just to trigger change detection
+    });
+  }
+
+  private setupAvailableUsersSearchSubscription() {
+    this.availableUsersSearchSubscription = this.debouncedAvailableUsersSearch$.subscribe(term => {
+      this.availableUsersCurrentPage = 1;
+      this.loadAvailableUsers();
     });
   }
 
@@ -147,7 +179,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
     console.log('=== Loading project details ===');
     console.log('Project ID:', this.projectId);
     
-    // Use the with-users endpoint to get project and users in one call
     this.projectService.getProjectWithUsers(this.projectId).subscribe({
       next: (response) => {
         console.log('=== API Response received ===');
@@ -235,7 +266,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
   }
 
   private calculateTimeAllocation(percentage: number): number {
-    // Assuming full-time is 40 hours per week
     const fullTimeHours = 40;
     return (percentage / 100) * fullTimeHours;
   }
@@ -245,12 +275,26 @@ export class ProjectDetails implements OnInit, OnDestroy {
       return 0;
     }
     
-    const totalPercentage = this.projectUsers.reduce((sum, user) => {
-      return sum + (user.timePercentagePerProject || 0);
-    }, 0);
+    let totalFTEs = 0;
     
-    // Convert percentage to FTE (100% = 1 FTE)
-    return totalPercentage / 100;
+    this.projectUsers.forEach(projectUser => {
+      if (projectUser.user && projectUser.timePercentagePerProject) {
+        const userTotalAvailability = this.calculateUserTotalAvailability(projectUser.user.employmentType);
+        
+        const projectFTEAllocation = (projectUser.timePercentagePerProject / 100) * userTotalAvailability;
+        totalFTEs += projectFTEAllocation;
+      }
+    });
+    
+    return parseFloat(totalFTEs.toFixed(2));
+  }
+
+  private calculateUserTotalAvailability(employmentType?: string): number {
+    // FullTime = 1.0 FTE, PartTime = 0.5 FTE
+    if (employmentType === 'PartTime') {
+      return 0.5;
+    }
+    return 1.0; // Default to full-time
   }
 
   calculateRemainingFTEs(): number {
@@ -260,7 +304,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
     
     const totalAssigned = this.calculateTotalAssignedFTEs();
     const remaining = this.project.budgetedFTEs - totalAssigned;
-    return Math.max(0, remaining); // Don't show negative values
+    return Math.max(0, remaining);
   }
 
   setViewMode(mode: 'cards' | 'table') {
@@ -270,7 +314,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
   setActiveTab(tab: 'view' | 'edit' | 'assign') {
     this.activeTab = tab;
     
-    // Reset forms when switching tabs
     if (tab !== 'edit') {
       this.closeEditForm();
     }
@@ -278,13 +321,12 @@ export class ProjectDetails implements OnInit, OnDestroy {
       this.closeAssignForm();
     }
     
-    // Initialize project edit form when switching to edit tab
     if (tab === 'edit') {
       this.initializeProjectEditForm();
     }
     
-    // Load available users when switching to assign tab
-    if (tab === 'assign' && this.availableUsers.length === 0) {
+    if (tab === 'assign') {
+      this.resetAssignmentState();
       this.loadAvailableUsers();
     }
   }
@@ -310,7 +352,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.projectService.updateUserAssignment(this.projectId, this.editingUserId, this.editPercentage).subscribe({
       next: (response) => {
         if (response.success) {
-          this.loadProjectDetails(); // This will reload both project and users
+          this.loadProjectDetails();
           this.closeEditForm();
         } else {
           this.errorMessage = response.message || 'Failed to update assignment';
@@ -340,16 +382,97 @@ export class ProjectDetails implements OnInit, OnDestroy {
   }
 
   private loadAvailableUsers() {
-    this.usersService.getAllUsersIncludeRelationships().subscribe({
-      next: (response: any) => {
+    if (!this.projectId) return;
+    
+    this.isLoadingAvailableUsers = true;
+    
+    this.projectService.getAvailableUsersForProject(
+      this.projectId,
+      this.availableUsersCurrentPage,
+      this.availableUsersPageSize,
+      this.availableUsersSearch
+    ).subscribe({
+      next: (response) => {
         if (response.success && response.data) {
-          // Filter out users that are already assigned to this project
-          const assignedUserIds = this.projectUsers.map(pu => pu.userId);
-          this.availableUsers = response.data.filter((user: IUser) => !assignedUserIds.includes(user.id));
+          const filteredUsers = response.data.data.filter((user: IUser) => 
+            !this.isPendingAssignment(user.id) &&
+            (user.remainingAvailability || 0) > 0
+          );
+          
+          this.availableUsersData = {
+            ...response.data,
+            data: filteredUsers
+          };
+        } else {
+          this.loadAllUsersForAssignmentFallback();
         }
+        this.isLoadingAvailableUsers = false;
       },
       error: (error: any) => {
-        console.error('Error loading available users:', error);
+        console.error('Error loading available users from project endpoint, falling back:', error);
+        this.loadAllUsersForAssignmentFallback();
+      }
+    });
+  }
+
+  private loadAllUsersForAssignmentFallback() {
+    const request: IFilteredUsersRequest = {
+      globalSearch: this.availableUsersSearch || undefined,
+      params: {
+        page: this.availableUsersCurrentPage,
+        pageSize: this.availableUsersPageSize,
+        sortBy: 'firstName',
+        sortDescending: false
+      }
+    };
+    
+    this.usersService.getUnassignedUsers(request).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const assignedUserIds = this.projectUsers.map(pu => pu.userId);
+          const filteredUsers = response.data.data.filter((user: IUser) => 
+            !assignedUserIds.includes(user.id) && 
+            !this.isPendingAssignment(user.id) &&
+            (user.remainingAvailability || 0) > 0
+          );
+          
+          this.availableUsersData = {
+            ...response.data,
+            data: filteredUsers
+          };
+        } else {
+          this.loadAllUsersForAssignmentFinal(request);
+        }
+        this.isLoadingAvailableUsers = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading unassigned users, final fallback to all users:', error);
+        this.loadAllUsersForAssignmentFinal(request);
+      }
+    });
+  }
+
+  private loadAllUsersForAssignmentFinal(request: IFilteredUsersRequest) {
+    this.usersService.getUsersIncludeRelationshipsFiltered(request).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const assignedUserIds = this.projectUsers.map(pu => pu.userId);
+          const filteredUsers = response.data.data.filter((user: IUser) => 
+            !assignedUserIds.includes(user.id) && 
+            !this.isPendingAssignment(user.id) &&
+            (user.remainingAvailability || 0) > 0
+          );
+          
+          this.availableUsersData = {
+            ...response.data,
+            data: filteredUsers
+          };
+        }
+        this.isLoadingAvailableUsers = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading all users for assignment:', error);
+        this.isLoadingAvailableUsers = false;
       }
     });
   }
@@ -360,9 +483,8 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.projectService.assignUserToProject(this.projectId, this.assignUserId, this.assignPercentage).subscribe({
       next: (response) => {
         if (response.success) {
-          this.loadProjectDetails(); // This will reload both project and users
+          this.loadProjectDetails();
           this.closeAssignForm();
-          // Refresh available users list
           this.loadAvailableUsers();
         } else {
           this.errorMessage = response.message || 'Failed to assign user';
@@ -437,7 +559,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
     if (!date) return '';
     const d = new Date(date);
     
-    // Use local date formatting to avoid timezone issues
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -473,9 +594,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.projectService.updateProject(this.projectId, updateData).subscribe({
       next: (response) => {
         if (response.success) {
-          // Reload project details to reflect changes
           this.loadProjectDetails();
-          // Optionally switch back to view tab
           this.setActiveTab('view');
         } else {
           this.errorMessage = response.message || 'Failed to update project details';
@@ -490,5 +609,203 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/manager/projects']);
+  }
+
+  // Reset assignment state
+  resetAssignmentState() {
+    this.pendingAssignments = [];
+    this.pendingRemovals = [];
+    this.selectedAllocation = {};
+  }
+
+  // Check if there are pending changes
+  hasPendingChanges(): boolean {
+    return this.pendingAssignments.length > 0 || this.pendingRemovals.length > 0;
+  }
+
+  // Available users search
+  onAvailableUsersSearchChange() {
+    this.availableUsersSearch = this.availableUsersSearch || '';
+    this.availableUsersSearchSubject.next(this.availableUsersSearch);
+  }
+
+  // Pagination methods
+  previousAvailablePage() {
+    if (this.availableUsersCurrentPage > 1) {
+      this.availableUsersCurrentPage--;
+      this.loadAvailableUsers();
+    }
+  }
+
+  nextAvailablePage() {
+    if (this.availableUsersCurrentPage < (this.availableUsersData?.totalPages || 1)) {
+      this.availableUsersCurrentPage++;
+      this.loadAvailableUsers();
+    }
+  }
+
+  // Capacity calculation methods
+  getCurrentAssignedFTEs(): number {
+    return this.calculateTotalAssignedFTEs();
+  }
+
+  getPreviewAssignedFTEs(): number {
+    const currentFTEs = this.getCurrentAssignedFTEs();
+    
+    // Calculate FTEs for pending additions (considering employment type)
+    const pendingAdditions = this.pendingAssignments.reduce((sum, assignment) => {
+      const userTotalAvailability = this.calculateUserTotalAvailability(assignment.user.employmentType);
+      const assignmentFTEs = (assignment.percentage / 100) * userTotalAvailability;
+      return sum + assignmentFTEs;
+    }, 0);
+    
+    // Calculate FTEs for pending removals (considering employment type)
+    const pendingRemovals = this.pendingRemovals.reduce((sum, removal) => {
+      if (removal.user) {
+        const userTotalAvailability = this.calculateUserTotalAvailability(removal.user.employmentType);
+        const removalFTEs = (removal.originalPercentage / 100) * userTotalAvailability;
+        return sum + removalFTEs;
+      }
+      return sum;
+    }, 0);
+    
+    return parseFloat((currentFTEs + pendingAdditions - pendingRemovals).toFixed(2));
+  }
+
+  getPreviewRemainingFTEs(): number {
+    if (!this.project) return 0;
+    const remaining = this.project.budgetedFTEs - this.getPreviewAssignedFTEs();
+    return parseFloat(remaining.toFixed(2));
+  }
+
+  getCapacityUsagePercentage(): number {
+    if (!this.project || this.project.budgetedFTEs === 0) return 0;
+    return parseFloat(((this.getPreviewAssignedFTEs() / this.project.budgetedFTEs) * 100).toFixed(1));
+  }
+
+  isCapacityExceeded(): boolean {
+    return this.getPreviewRemainingFTEs() < 0;
+  }
+
+  wouldExceedCapacity(user: IUser, percentage: number): boolean {
+    if (!this.project) return false;
+    
+    // Calculate what the FTEs would be if we add this assignment
+    const userTotalAvailability = this.calculateUserTotalAvailability(user.employmentType);
+    const proposedFTEs = (percentage / 100) * userTotalAvailability;
+    const currentAssignedFTEs = this.getPreviewAssignedFTEs();
+    const projectedTotalFTEs = currentAssignedFTEs + proposedFTEs;
+    
+    return projectedTotalFTEs > this.project.budgetedFTEs;
+  }
+
+  // Assignment preview methods
+  getAssignmentPreviewCount(): number {
+    const currentCount = this.projectUsers.length;
+    const pendingAdditions = this.pendingAssignments.length;
+    const pendingRemovals = this.pendingRemovals.length;
+    return currentCount + pendingAdditions - pendingRemovals;
+  }
+
+  // User allocation methods
+  getAvailablePercentagesForUser(user: IUser): number[] {
+    const maxAvailable = Math.floor((user.remainingAvailability || 0) * 100);
+    const percentages: number[] = [];
+    
+    // Generate percentages in 25% increments: 25, 50, 75, 100
+    for (let i = 25; i <= maxAvailable && i <= 100; i += 25) {
+      if (!this.wouldExceedCapacity(user, i)) {
+        percentages.push(i);
+      }
+    }
+    
+    return percentages;
+  }
+
+  // Pending assignment checks
+  isPendingAssignment(userId: number): boolean {
+    return this.pendingAssignments.some(assignment => assignment.user.id === userId);
+  }
+
+  isPendingRemoval(userId: number): boolean {
+    return this.pendingRemovals.some(removal => removal.userId === userId);
+  }
+
+  // Assignment management
+  addToPendingAssignments(user: IUser, percentage: number) {
+    if (!percentage || this.isPendingAssignment(user.id)) return;
+    
+    // Check if this assignment would exceed the project capacity
+    if (this.wouldExceedCapacity(user, percentage)) {
+      const remainingFTEs = this.getPreviewRemainingFTEs();
+      alert(`Cannot assign ${user.firstName} ${user.lastName} at ${percentage}%. This would exceed the project capacity by ${Math.abs(remainingFTEs).toFixed(2)} FTEs. Available capacity: ${Math.max(0, remainingFTEs).toFixed(2)} FTEs.`);
+      return;
+    }
+    
+    this.pendingAssignments.push({
+      user: user,
+      percentage: percentage
+    });
+    
+    // Clear the selection
+    this.selectedAllocation[user.id] = 0;
+    
+    // Reload available users to update the list
+    this.loadAvailableUsers();
+  }
+
+  removeFromPendingAssignments(userId: number) {
+    this.pendingAssignments = this.pendingAssignments.filter(assignment => assignment.user.id !== userId);
+    // Reload available users to update the list
+    this.loadAvailableUsers();
+  }
+
+  addToPendingRemovals(projectUser: IProjectUser) {
+    if (!projectUser.user || this.isPendingRemoval(projectUser.userId)) return;
+    
+    this.pendingRemovals.push({
+      userId: projectUser.userId,
+      user: projectUser.user,
+      originalPercentage: projectUser.timePercentagePerProject || 0
+    });
+  }
+
+  removeFromPendingRemovals(userId: number) {
+    this.pendingRemovals = this.pendingRemovals.filter(removal => removal.userId !== userId);
+  }
+
+  // Save and cancel operations
+  async saveAssignmentChanges() {
+    if (!this.canModify || !this.projectId || !this.hasPendingChanges()) return;
+    
+    try {
+      // Process removals first
+      for (const removal of this.pendingRemovals) {
+        await this.projectService.removeUserFromProject(this.projectId, removal.userId).toPromise();
+      }
+      
+      // Process new assignments
+      for (const assignment of this.pendingAssignments) {
+        await this.projectService.assignUserToProject(
+          this.projectId, 
+          assignment.user.id, 
+          assignment.percentage
+        ).toPromise();
+      }
+      
+      // Reload project details and reset state
+      this.loadProjectDetails();
+      this.resetAssignmentState();
+      this.loadAvailableUsers();
+      
+    } catch (error: any) {
+      this.errorMessage = 'Error saving assignment changes';
+      console.error('Error saving assignment changes:', error);
+    }
+  }
+
+  cancelAssignmentChanges() {
+    this.resetAssignmentState();
+    this.loadAvailableUsers();
   }
 }

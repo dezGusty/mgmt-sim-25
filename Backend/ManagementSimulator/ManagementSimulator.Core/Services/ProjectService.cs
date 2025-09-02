@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Projects;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Repositories.Intefaces;
@@ -100,7 +101,7 @@ namespace ManagementSimulator.Core.Services
                 BudgetedFTEs = project.BudgetedFTEs,
                 IsActive = project.IsActive,
                 AssignedUsersCount = projectUsers.Count,
-                TotalAssignedPercentage = projectUtilizationPercentage, // Changed to show project capacity utilization
+                TotalAssignedPercentage = projectUtilizationPercentage,
                 TotalAssignedFTEs = totalFTEs,
                 RemainingFTEs = remainingFTEs,
                 CreatedAt = project.CreatedAt,
@@ -429,6 +430,74 @@ namespace ManagementSimulator.Core.Services
                 ProjectName = project.Name,
                 TimePercentagePerProject = up.TimePercentagePerProject
             }).ToList();
+        }
+
+        public async Task<PagedResponseDto<UserResponseDto>> GetAvailableUsersForProjectAsync(int projectId, int page, int pageSize, string search)
+        {
+            var project = await _projectRepository.GetProjectByIdAsync(projectId);
+            if (project == null)
+            {
+                throw new EntryNotFoundException(nameof(Project), projectId);
+            }
+
+            var assignedUserIds = await _projectRepository.GetProjectUsersAsync(projectId);
+            var assignedIds = assignedUserIds.Select(up => up.UserId).ToHashSet();
+
+            var allUsers = await _userRepository.GetAllUsersWithReferencesAsync();
+            var availableUsers = allUsers.Where(u =>
+                u.DeletedAt == null &&
+                !assignedIds.Contains(u.Id))
+                .ToList();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                availableUsers = availableUsers.Where(u =>
+                    u.FirstName.ToLower().Contains(searchLower) ||
+                    u.LastName.ToLower().Contains(searchLower) ||
+                    u.Email.ToLower().Contains(searchLower) ||
+                    (u.Title?.Name != null && u.Title.Name.ToLower().Contains(searchLower))
+                ).ToList();
+            }
+
+            var totalCount = availableUsers.Count;
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            var pagedUsers = availableUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var userDtos = new List<UserResponseDto>();
+            foreach (var user in pagedUsers)
+            {
+                var totalAvailability = _availabilityService.CalculateTotalAvailability(user.EmploymentType);
+                var remainingAvailability = await _availabilityService.CalculateRemainingAvailabilityAsync(user.Id);
+
+                userDtos.Add(new UserResponseDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    JobTitleId = user.JobTitleId,
+                    JobTitleName = user.Title?.Name,
+                    DepartmentId = user.DepartmentId,
+                    DepartmentName = user.Department?.Name,
+                    EmploymentType = user.EmploymentType,
+                    TotalAvailability = totalAvailability,
+                    RemainingAvailability = remainingAvailability,
+                    DateOfEmployment = user.DateOfEmployment
+                });
+            }
+
+            return new PagedResponseDto<UserResponseDto>
+            {
+                Data = userDtos,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages
+            };
         }
     }
 }

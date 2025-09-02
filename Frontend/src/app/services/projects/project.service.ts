@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { IProject, IProjectWithUsers, IUserProject } from '../../models/entities/iproject';
+import { IUser } from '../../models/entities/iuser';
 import { IFilteredProjectsRequest } from '../../models/requests/ifiltered-projects-request';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
@@ -279,5 +280,63 @@ export class ProjectService {
   updateUserAssignment(projectId: number, userId: number, assignedPercentage: number): Observable<IApiResponse<void>> {
     const payload = { assignedPercentage };
     return this.http.put<IApiResponse<void>>(`${this.apiUrl}/${projectId}/users/${userId}`, payload);
+  }
+
+  getAvailableUsersForProject(projectId: number, page: number = 1, pageSize: number = 10, search: string = ''): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+    
+    if (search) {
+      params = params.set('search', search);
+    }
+    
+    return this.http.get<any>(`${this.apiUrl}/${projectId}/available-users`, { params }).pipe(
+      map(response => {
+        if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+          return response as IApiResponse<IFilteredApiResponse<IUser>>;
+        }
+        if (response && typeof response === 'object' && 'data' in response) {
+          return {
+            data: response as IFilteredApiResponse<IUser>,
+            success: true,
+            message: 'Available users loaded successfully',
+            timestamp: new Date()
+          } as IApiResponse<IFilteredApiResponse<IUser>>;
+        }
+        return {
+          data: {
+            data: [],
+            page: 1,
+            pageSize: pageSize,
+            totalPages: 0,
+            totalCount: 0,
+            hasNextPage: false,
+            hasPreviousPage: false
+          } as IFilteredApiResponse<IUser>,
+          success: false,
+          message: 'Invalid response format',
+          timestamp: new Date()
+        } as IApiResponse<IFilteredApiResponse<IUser>>;
+      }),
+      catchError(err => {
+        console.error('getAvailableUsersForProject error', err);
+        const empty: IFilteredApiResponse<IUser> = {
+          data: [],
+          page: 1,
+          pageSize: pageSize,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        };
+        return of({
+          data: empty,
+          success: false,
+          message: err?.message || 'Error loading available users',
+          timestamp: new Date()
+        } as IApiResponse<IFilteredApiResponse<IUser>>);
+      })
+    );
   }
 }
