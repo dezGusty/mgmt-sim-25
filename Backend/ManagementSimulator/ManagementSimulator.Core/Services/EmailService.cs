@@ -59,76 +59,76 @@ namespace ManagementSimulator.Core.Services
             var subject = "Your account has been created";
 
             var body = $@"
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <title>Welcome - Account Created</title>
-    </head>
-    <body style='margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;'>
-        <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f4f4;'>
-            <tr>
-                <td align='center' style='padding:20px 0;'>
-                    <table width='600' cellpadding='0' cellspacing='0' style='background-color:#ffffff; border-radius:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
-                        <tr>
-                            <td style='background-color:#20B486; padding:30px; text-align:center; border-radius: 8px 8px 0 0;'>
-                                <h1 style='color:#ffffff; margin:0; font-size:24px; font-weight:bold;'>Welcome to FTD Management System</h1>
-                                <p style='color:#ffffff; margin:10px 0 0 0; font-size:16px; opacity:0.9;'>Your account has been created</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style='padding:30px;'>
-                                <p style='font-size:16px; color:#333333; margin:0 0 20px 0;'>Hello <strong>{firstName}</strong>,</p>
-                                <p style='font-size:16px; color:#666666; margin:0 0 25px 0; line-height:1.5;'>We're excited to let you know that your account has been successfully created in the <strong>FTD Management System</strong>.</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Welcome - Account Created</title>
+        </head>
+        <body style='margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;'>
+            <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f4f4;'>
+                <tr>
+                    <td align='center' style='padding:20px 0;'>
+                        <table width='600' cellpadding='0' cellspacing='0' style='background-color:#ffffff; border-radius:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
+                            <tr>
+                                <td style='background-color:#111827; padding:30px; text-align:center; border-radius: 8px 8px 0 0;'>
+                                    <h1 style='color:#ffffff; margin:0; font-size:24px; font-weight:bold;'>Welcome to FTD Management System</h1>
+                                    <p style='color:#9ca3af; margin:10px 0 0 0; font-size:16px;'>Your account has been created</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='padding:30px;'>
+                                    <p style='font-size:16px; color:#333333; margin:0 0 20px 0;'>Hello <strong>{firstName}</strong>,</p>
+                                    <p style='font-size:16px; color:#666666; margin:0 0 25px 0; line-height:1.5;'>We're excited to let you know that your account has been successfully created in the <strong>FTD Management System</strong>.</p>
 
-                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f8f9fa; border:1px solid #e9ecef; border-radius:6px; margin-bottom:25px;'>
-                                    <tr>
-                                        <td style='padding:20px;'>
-                                            <h3 style='color:#333333; margin:0 0 15px 0; font-size:18px;'>Account Details</h3>
-                                            <table width='100%' cellpadding='0' cellspacing='0'>
-                                                <tr>
-                                                    <td style='padding:6px 0; width:35%; font-size:12px; color:#666666; text-transform:uppercase; font-weight:bold;'>Email</td>
-                                                    <td style='padding:6px 0; font-size:14px; color:#333333; font-weight:500;'>{email}</td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </table>
+                                    <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:6px; margin-bottom:25px;'>
+                                        <tr>
+                                            <td style='padding:20px;'>
+                                                <h3 style='color:#333333; margin:0 0 15px 0; font-size:18px;'>Account Details</h3>
+                                                <table width='100%' cellpadding='0' cellspacing='0'>
+                                                    <tr>
+                                                        <td style='padding:6px 0; width:35%; font-size:12px; color:#666666; text-transform:uppercase; font-weight:bold;'>Email</td>
+                                                        <td style='padding:6px 0; font-size:14px; color:#333333; font-weight:500;'>{email}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
 
-                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#e3f2fd; border:1px solid #2196f3; border-radius:6px; margin-bottom:25px;'>
-                                    <tr>
-                                        <td style='padding:20px;'>
-                                            <h3 style='color:#1976d2; margin:0 0 10px 0; font-size:18px;'>Next Steps</h3>
-                                            <ol style='margin:0 0 0 20px; color:#333333; font-size:14px; line-height:1.8;'>
-                                                <li>Open the application and click <strong>Reset password</strong>.</li>
-                                                <li>Enter the email address where you received this message.</li>
-                                                <li>Click <strong>Send Reset Code</strong> and check your email.</li>
-                                                <li>Enter the received code along with your new password.</li>
-                                                <li>Log in with your email and new password.</li>
-                                            </ol>
-                                        </td>
-                                    </tr>
-                                </table>
+                                    <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f3f4f6; border:1px solid #e5e7eb; border-radius:6px; margin-bottom:25px;'>
+                                        <tr>
+                                            <td style='padding:20px;'>
+                                                <h3 style='color:#374151; margin:0 0 10px 0; font-size:18px;'>Next Steps</h3>
+                                                <ol style='margin:0 0 0 20px; color:#333333; font-size:14px; line-height:1.8;'>
+                                                    <li>Open the application and click <strong>Reset password</strong>.</li>
+                                                    <li>Enter the email address where you received this message.</li>
+                                                    <li>Click <strong>Send Reset Code</strong> and check your email.</li>
+                                                    <li>Enter the received code along with your new password.</li>
+                                                    <li>Log in with your email and new password.</li>
+                                                </ol>
+                                            </td>
+                                        </tr>
+                                    </table>
 
-                                <p style='font-size:14px; color:#666666; margin:0 0 10px 0;'>If you have any questions or issues, please contact the system administrator.</p>
-                                <p style='font-size:14px; color:#333333; margin:0;'>Best regards,<br><strong>FTD Management System</strong> Team</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style='background-color:#f8f9fa; padding:20px; text-align:center; border-radius:0 0 8px 8px; border-top:1px solid #e9ecef;'>
-                                <p style='font-size:12px; color:#666666; margin:0; line-height:1.4;'>
-                                    This is an automated notification from the <span style='color:#20B486; font-weight:bold;'><a href='http://localhost:4200/' style='color:#20B486;'>FTD Management System</a></span>.
-                                    Please do not reply to this email.
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>";
+                                    <p style='font-size:14px; color:#666666; margin:0 0 10px 0;'>If you have any questions or issues, please contact the system administrator.</p>
+                                    <p style='font-size:14px; color:#333333; margin:0;'>Best regards,<br><strong>FTD Management System</strong> Team</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='background-color:#f8f9fa; padding:20px; text-align:center; border-radius:0 0 8px 8px; border-top:1px solid #e9ecef;'>
+                                    <p style='font-size:12px; color:#6b7280; margin:0; line-height:1.4;'>
+                                        This is an automated notification from the <span style='color:#111827; font-weight:bold;'><a href='http://localhost:4200/' style='color:#111827;'>FTD Management System</a></span>.
+                                        Please do not reply to this email.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>";
 
             await SendEmailAsync(email, subject, body);
         }
@@ -151,9 +151,9 @@ namespace ManagementSimulator.Core.Services
                 <td align='center' style='padding:20px 0;'>
                     <table width='600' cellpadding='0' cellspacing='0' style='background-color:#ffffff; border-radius:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
                         <tr>
-                            <td style='background-color:#2196f3; padding:30px; text-align:center; border-radius: 8px 8px 0 0;'>
+                            <td style='background-color:#111827; padding:30px; text-align:center; border-radius: 8px 8px 0 0;'>
                                 <h1 style='color:#ffffff; margin:0; font-size:24px; font-weight:bold;'>Password Reset</h1>
-                                <p style='color:#ffffff; margin:10px 0 0 0; font-size:16px; opacity:0.9;'>Use the code below to reset your password</p>
+                                <p style='color:#9ca3af; margin:10px 0 0 0; font-size:16px;'>Use the code below to reset your password</p>
                             </td>
                         </tr>
                         <tr>
@@ -161,21 +161,21 @@ namespace ManagementSimulator.Core.Services
                                 <p style='font-size:16px; color:#333333; margin:0 0 20px 0;'>Hello <strong>{firstName}</strong>,</p>
                                 <p style='font-size:16px; color:#666666; margin:0 0 20px 0; line-height:1.5;'>You have requested to reset your password. Please use the verification code below:</p>
 
-                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f8f9fa; border:1px solid #e9ecef; border-radius:6px; margin-bottom:20px;'>
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#111827; border:1px solid #1f2937; border-radius:6px; margin-bottom:20px;'>
                                     <tr>
                                         <td style='padding:20px; text-align:center;'>
-                                            <div style='font-family: monospace; font-size: 22px; letter-spacing: 3px; color:#111827; background:#eef2ff; border:1px dashed #a5b4fc; display:inline-block; padding:12px 18px; border-radius:6px;'>
+                                            <div style='font-family: monospace; font-size: 22px; letter-spacing: 3px; color:#f9fafb; background:#1f2937; border:1px dashed #374151; display:inline-block; padding:12px 18px; border-radius:6px;'>
                                                 {resetCode}
                                             </div>
                                         </td>
                                     </tr>
                                 </table>
 
-                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; margin-bottom:25px;'>
+                                <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f3f4f6; border:1px solid #e5e7eb; border-radius:6px; margin-bottom:25px;'>
                                     <tr>
                                         <td style='padding:20px;'>
-                                            <strong style='color:#92400e;'>Important:</strong>
-                                            <span style='color:#92400e;'> This code is valid for 15 minutes.</span>
+                                            <strong style='color:#374151;'>Important:</strong>
+                                            <span style='color:#4b5563;'> This code is valid for 15 minutes.</span>
                                         </td>
                                     </tr>
                                 </table>
@@ -186,8 +186,8 @@ namespace ManagementSimulator.Core.Services
                         </tr>
                         <tr>
                             <td style='background-color:#f8f9fa; padding:20px; text-align:center; border-radius:0 0 8px 8px; border-top:1px solid #e9ecef;'>
-                                <p style='font-size:12px; color:#666666; margin:0; line-height:1.4;'>
-                                    This is an automated notification from the <span style='color:#20B486; font-weight:bold;'><a href='http://localhost:4200/' style='color:#20B486;'>FTD Management System</a></span>.
+                                <p style='font-size:12px; color:#6b7280; margin:0; line-height:1.4;'>
+                                    This is an automated notification from the <span style='color:#111827; font-weight:bold;'><a href='http://localhost:4200/' style='color:#111827;'>FTD Management System</a></span>.
                                     Please do not reply to this email.
                                 </p>
                             </td>
@@ -397,7 +397,7 @@ namespace ManagementSimulator.Core.Services
                                                     </td>
                                                     <td width='50%' style='padding: 8px 0;'>
                                                         <span style='font-size: 12px; color: #166534; text-transform: uppercase; font-weight: bold;'>Status</span><br>
-                                                        <span style='font-size: 14px; color: #10b981; font-weight: 600;'>✅ Approved</span>
+                                                        <span style='font-size: 14px; color: #10b981; font-weight: 600;'><a href='http://localhost:4200/user' style='color: #20B486;'>✅ Approved</a></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -529,7 +529,7 @@ namespace ManagementSimulator.Core.Services
                                                     </td>
                                                     <td width='50%' style='padding: 8px 0;'>
                                                         <span style='font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold;'>Status</span><br>
-                                                        <span style='font-size: 14px; color: #ef4444; font-weight: 600;'>❌ Rejected</span>
+                                                        <span style='font-size: 14px; color: #ef4444; font-weight: 600;'><a href='http://localhost:4200/user' style='color: #fd0000ff;'>❌ Rejected</a></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
