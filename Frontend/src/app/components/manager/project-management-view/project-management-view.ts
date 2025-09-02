@@ -335,14 +335,46 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   saveProjectEdit() {
-    if (!this.editingProjectId) return;
+    console.log('saveProjectEdit called', { editingProjectId: this.editingProjectId, newProject: this.newProject });
+    
+    if (!this.editingProjectId) {
+      console.log('No editingProjectId, returning');
+      return;
+    }
     
     this.errorMessage = null;
+    
+    // Add validation similar to createProject
+    if (!this.newProject.name) {
+      this.errorMessage = 'Project name is required';
+      console.log('Validation error: Project name is required');
+      return;
+    }
+    if (this.newProject.startDate! >= this.newProject.endDate!) {
+      this.errorMessage = 'End date must be after start date';
+      console.log('Validation error: End date must be after start date');
+      return;
+    }
+    
+    // Check if start date is in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    const startDate = new Date(this.newProject.startDate!);
+    startDate.setHours(0, 0, 0, 0);
+    
+    if (startDate < today) {
+      this.errorMessage = 'Start date cannot be in the past';
+      console.log('Validation error: Start date cannot be in the past');
+      return;
+    }
+    
+    console.log('Validation passed, calling update service');
     this.isSubmitting = true;
     
     const payload: Partial<IProject> = { ...this.newProject };
     this.projectService.updateProject(this.editingProjectId, payload).subscribe({
       next: (res) => {
+        console.log('Update response:', res);
         this.isSubmitting = false;
         if (res.success) {
           this.errorMessage = null;
@@ -366,6 +398,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
+        console.log('Update error:', err);
         this.isSubmitting = false;
         console.error('Update project error', err);
         this.errorMessage = 'Failed to update project';

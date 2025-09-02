@@ -99,7 +99,8 @@
                 ? 'border-green-500 text-green-600 bg-green-50' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
-              [disabled]="!canModify"
+              [disabled]="!canAssign"
+              [title]="!canAssign ? 'Cannot assign employees to inactive projects' : ''"
             >
               Assign Employees
             </button>
@@ -337,6 +338,27 @@
                   </div>
                 </div>
 
+                <!-- Project Status -->
+                <div class="grid grid-cols-1">
+                  <div class="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      [(ngModel)]="editIsActive"
+                      name="isActive"
+                      [disabled]="!canModify"
+                      (change)="onProjectActiveStatusChange()"
+                      class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                    <label for="isActive" class="text-sm font-medium text-gray-700">
+                      Project is Active
+                    </label>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1 ml-7">
+                    Inactive projects will not appear in assignment lists and cannot have new employees assigned.
+                  </p>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200" *ngIf="canModify">
                   <button
@@ -376,8 +398,8 @@
                 <!-- Save Changes Button -->
                 <button
                   (click)="saveAssignmentChanges()"
-                  [disabled]="!canModify || !hasPendingChanges()"
-                  [class]="canModify && hasPendingChanges() 
+                  [disabled]="!canAssign || !hasPendingChanges()"
+                  [class]="canAssign && hasPendingChanges() 
                     ? 'bg-green-600 text-white hover:bg-green-700' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                   class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
@@ -387,14 +409,29 @@
                 <!-- Cancel Changes Button -->
                 <button
                   (click)="cancelAssignmentChanges()"
-                  [disabled]="!canModify || !hasPendingChanges()"
-                  [class]="canModify && hasPendingChanges() 
+                  [disabled]="!canAssign || !hasPendingChanges()"
+                  [class]="canAssign && hasPendingChanges() 
                     ? 'bg-red-600 text-white hover:bg-red-700' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                   class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Cancel Changes
                 </button>
+              </div>
+            </div>
+
+            <!-- Inactive Project Warning -->
+            <div *ngIf="!canAssign && canModify" class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-amber-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                  <h4 class="text-amber-800 font-medium">Project is Inactive</h4>
+                  <p class="text-amber-700 text-sm mt-1">
+                    Employee assignments are disabled for inactive projects. To make assignments, please activate the project in the "Edit Project" tab first.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -508,7 +545,7 @@
                           <!-- Allocation Selector -->
                           <select
                             [(ngModel)]="selectedAllocation[user.id]"
-                            [disabled]="getAvailablePercentagesForUser(user).length === 0"
+                            [disabled]="!canAssign || getAvailablePercentagesForUser(user).length === 0"
                             class="text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                           >
                             <option *ngFor="let percentage of getAvailablePercentagesForUser(user)" [value]="percentage">
@@ -523,8 +560,8 @@
                           <!-- Assign Button -->
                           <button
                             (click)="addToPendingAssignments(user, selectedAllocation[user.id])"
-                            [disabled]="!canModify || !selectedAllocation[user.id] || wouldExceedCapacity(user, selectedAllocation[user.id]) || isPendingAssignment(user.id)"
-                            [class]="canModify && selectedAllocation[user.id] && !wouldExceedCapacity(user, selectedAllocation[user.id]) && !isPendingAssignment(user.id)
+                            [disabled]="!canAssign || !selectedAllocation[user.id] || wouldExceedCapacity(user, selectedAllocation[user.id]) || isPendingAssignment(user.id)"
+                            [class]="canAssign && selectedAllocation[user.id] && !wouldExceedCapacity(user, selectedAllocation[user.id]) && !isPendingAssignment(user.id)
                               ? 'bg-green-600 text-white hover:bg-green-700' 
                               : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                             class="px-3 py-1 rounded text-xs font-medium transition-colors duration-200"
@@ -596,8 +633,8 @@
                           </div>
                           <button
                             (click)="addToPendingRemovals(projectUser)"
-                            [disabled]="!canModify || isPendingRemoval(projectUser.userId)"
-                            [class]="canModify && !isPendingRemoval(projectUser.userId)
+                            [disabled]="!canAssign || isPendingRemoval(projectUser.userId)"
+                            [class]="canAssign && !isPendingRemoval(projectUser.userId)
                               ? 'text-red-600 hover:text-red-800' 
                               : 'text-gray-400 cursor-not-allowed'"
                             class="text-xs font-medium transition-colors duration-200"
@@ -625,7 +662,7 @@
                           </div>
                           <button
                             (click)="removeFromPendingAssignments(assignment.user.id)"
-                            [disabled]="!canModify"
+                            [disabled]="!canAssign"
                             class="text-red-600 hover:text-red-800 text-xs font-medium transition-colors duration-200"
                           >
                             Remove
@@ -651,7 +688,7 @@
                           </div>
                           <button
                             (click)="removeFromPendingRemovals(removal.userId)"
-                            [disabled]="!canModify"
+                            [disabled]="!canAssign"
                             class="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors duration-200"
                           >
                             Restore

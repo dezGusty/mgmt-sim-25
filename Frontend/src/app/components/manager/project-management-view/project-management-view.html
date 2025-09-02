@@ -409,6 +409,12 @@
   <div *ngIf="showAddProjectForm" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay" style="background-color: rgba(0,0,0,0.5);" (click)="onCancelAddProject()">
     <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4" (click)="$event.stopPropagation()">
       <h2 class="text-xl font-semibold mb-4">{{ editingProjectId ? 'Edit Project' : 'Add New Project' }}</h2>
+      
+      <!-- Error Message Display -->
+      <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+        <p class="text-sm text-red-800">{{ errorMessage }}</p>
+      </div>
+      
       <div class="space-y-3">
         <div>
           <label class="block text-sm text-gray-700">Name</label>

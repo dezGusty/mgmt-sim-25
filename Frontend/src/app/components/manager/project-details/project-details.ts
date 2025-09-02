@@ -101,6 +101,13 @@ export class ProjectDetails implements OnInit, OnDestroy {
     return !this.isViewOnly;
   }
 
+  get canAssign(): boolean {
+    // Can assign if user can modify AND project is active
+    // Use the current edit state if in edit mode, otherwise use the original project state
+    const isProjectActive = this.activeTab === 'edit' ? this.editIsActive : (this.project?.isActive ?? true);
+    return this.canModify && isProjectActive;
+  }
+
   get filteredProjectUsers(): IProjectUser[] {
     if (!this.searchTerm) {
       return this.projectUsers;
@@ -312,6 +319,11 @@ export class ProjectDetails implements OnInit, OnDestroy {
   }
 
   setActiveTab(tab: 'view' | 'edit' | 'assign') {
+    // Prevent switching to assign tab if project would be inactive
+    if (tab === 'assign' && !this.canAssign) {
+      return;
+    }
+    
     this.activeTab = tab;
     
     if (tab !== 'edit') {
@@ -570,6 +582,14 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.initializeProjectEditForm();
   }
 
+  onProjectActiveStatusChange() {
+    // If project becomes inactive and user is currently on assign tab,
+    // switch them to view tab to avoid confusion
+    if (!this.editIsActive && this.activeTab === 'assign') {
+      this.setActiveTab('view');
+    }
+  }
+
   isProjectFormValid(): boolean {
     if (!(this.editProjectName.trim() && 
           this.editStartDate && 
@@ -579,13 +599,18 @@ export class ProjectDetails implements OnInit, OnDestroy {
       return false;
     }
     
-    // Check if start date is in the past
+    // For existing projects, allow editing even if they started in the past
+    // Only validate that start date is not unreasonably far in the past (e.g., more than 10 years)
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    today.setHours(0, 0, 0, 0);
     const startDate = new Date(this.editStartDate);
     startDate.setHours(0, 0, 0, 0);
     
-    return startDate >= today;
+    // Allow start dates up to 10 years in the past
+    const tenYearsAgo = new Date(today);
+    tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
+    
+    return startDate >= tenYearsAgo;
   }
 
   saveProjectDetails() {
