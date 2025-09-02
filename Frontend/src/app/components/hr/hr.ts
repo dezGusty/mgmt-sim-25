@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
-import { HrService, IHrUserDto } from '../../services/hr/hr.service';
+import { HrService, IHrUserDto, PublicHoliday } from '../../services/hr/hr.service';
 
 interface HrRecord {
   id: number;
@@ -29,11 +29,17 @@ export class Hr {
   editingIndex: number | null = null;
   editModel: Partial<HrRecord> | null = null;
 
+  publicHolidays: PublicHoliday[] = [];
+  editingHolidayIndex: number | null = null;
+  editHolidayModel: Partial<PublicHoliday> | null = null;
+  isAddingNewHoliday = false;
+
   constructor(private hrService: HrService) {}
 
   ngOnInit() {
     const year = new Date().getFullYear();
     this.loadPage(year, this.currentPage, this.pageSize);
+    this.loadPublicHolidays(year);
   }
 
   loadPage(year: number, page: number, pageSize: number) {
@@ -166,6 +172,150 @@ export class Hr {
     } catch (err) {
       console.warn('showOpenFilePicker failed or was cancelled, falling back to input element', err);
     }
+  }
+
+  loadPublicHolidays(year: number) {
+    this.hrService.getPublicHolidays(year).subscribe({
+      next: (holidays: PublicHoliday[]) => {
+        this.publicHolidays = holidays || [];
+      },
+      error: (err: any) => {
+        console.error('Failed to load public holidays', err);
+        this.publicHolidays = [];
+      }
+    });
+  }
+
+  startEditHoliday(index: number) {
+    this.editingHolidayIndex = index;
+    const holiday = this.publicHolidays[index];
+    this.editHolidayModel = {
+      id: holiday.id,
+      name: holiday.name,
+      date: holiday.date,
+      isRecurring: holiday.isRecurring
+    };
+    this.isAddingNewHoliday = false;
+  }
+
+  saveHoliday(index: number) {
+    if (!this.editHolidayModel) return;
+
+    if (!this.validateHoliday(this.editHolidayModel)) {
+      return;
+    }
+
+    const holiday: PublicHoliday = {
+      id: this.editHolidayModel.id,
+      name: this.editHolidayModel.name!.trim(),
+      date: this.editHolidayModel.date!,
+      isRecurring: this.editHolidayModel.isRecurring || false
+    };
+
+    if (holiday.id) {
+      this.hrService.updatePublicHoliday(holiday).subscribe({
+        next: (updatedHoliday: PublicHoliday) => {
+          this.publicHolidays[index] = updatedHoliday;
+          this.cancelHolidayEdit();
+        },
+        error: (err: any) => {
+          console.error('Failed to update public holiday', err);
+          alert('Failed to update public holiday. Please try again.');
+        }
+      });
+    } else {
+      this.hrService.createPublicHoliday(holiday).subscribe({
+        next: (newHoliday: PublicHoliday) => {
+          if (this.isAddingNewHoliday) {
+            this.publicHolidays.splice(index, 1);
+            this.publicHolidays.push(newHoliday);
+          } else {
+            this.publicHolidays[index] = newHoliday;
+          }
+          this.cancelHolidayEdit();
+        },
+        error: (err: any) => {
+          console.error('Failed to create public holiday', err);
+          alert('Failed to create public holiday. Please try again.');
+        }
+      });
+    }
+  }
+
+  validateHoliday(holiday: Partial<PublicHoliday>): boolean {
+    if (!holiday.name || holiday.name.trim().length === 0) {
+      alert('Holiday name is required.');
+      return false;
+    }
+
+    if (!holiday.date || holiday.date.trim().length === 0) {
+      alert('Holiday date is required.');
+      return false;
+    }
+
+    const date = new Date(holiday.date);
+    if (isNaN(date.getTime())) {
+      alert('Please enter a valid date.');
+      return false;
+    }
+
+    const isDuplicate = this.publicHolidays.some((h, idx) => {
+      if (this.editingHolidayIndex === idx) return false;
+      return h.name.toLowerCase() === holiday.name!.toLowerCase().trim() && 
+             h.date === holiday.date;
+    });
+
+    if (isDuplicate) {
+      alert('A holiday with this name and date already exists.');
+      return false;
+    }
+
+    return true;
+  }
+
+  cancelHolidayEdit() {
+    if (this.isAddingNewHoliday && this.editingHolidayIndex !== null) {
+      this.publicHolidays.splice(this.editingHolidayIndex, 1);
+    }
+    this.editingHolidayIndex = null;
+    this.editHolidayModel = null;
+    this.isAddingNewHoliday = false;
+  }
+
+  addNewHoliday() {
+    const newHoliday: Partial<PublicHoliday> = {
+      name: '',
+      date: '',
+      isRecurring: false
+    };
+    
+    this.publicHolidays.push(newHoliday as PublicHoliday);
+    this.editingHolidayIndex = this.publicHolidays.length - 1;
+    this.editHolidayModel = { ...newHoliday };
+    this.isAddingNewHoliday = true;
+  }
+
+  deleteHoliday(index: number) {
+    const holiday = this.publicHolidays[index];
+    if (!holiday.id) {
+      this.publicHolidays.splice(index, 1);
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete "${holiday.name}"?`)) {
+      this.hrService.deletePublicHoliday(holiday.id).subscribe({
+        next: () => {
+          this.publicHolidays.splice(index, 1);
+        },
+        error: (err: any) => {
+          console.error('Failed to delete public holiday', err);
+        }
+      });
+    }
+  }
+
+  trackByHolidayIndex(index: number, item: PublicHoliday) {
+    return item.id || index;
   }
 
 }

@@ -31,6 +31,13 @@ export interface IPagedResponse<T> {
   totalPages: number;
 }
 
+export interface PublicHoliday {
+  id?: number;
+  name: string;
+  date: string;
+  isRecurring: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class HrService {
   private baseUrl = `${environment.apiUrl}/hr`;
@@ -54,5 +61,22 @@ export class HrService {
 
   adjustVacation(userId: number, days: number): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/users/${userId}/vacation`, { id: userId, days });
+  }
+
+  getPublicHolidays(year: number): Observable<PublicHoliday[]> {
+    const params = new HttpParams().set('year', year.toString());
+    return this.http.get<PublicHoliday[]>(`${this.baseUrl}/public-holidays`, { params });
+  }
+
+  createPublicHoliday(holiday: Omit<PublicHoliday, 'id'>): Observable<PublicHoliday> {
+    return this.http.post<PublicHoliday>(`${this.baseUrl}/public-holidays`, holiday);
+  }
+
+  updatePublicHoliday(holiday: PublicHoliday): Observable<PublicHoliday> {
+    return this.http.put<PublicHoliday>(`${this.baseUrl}/public-holidays/${holiday.id}`, holiday);
+  }
+
+  deletePublicHoliday(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/public-holidays/${id}`);
   }
 }

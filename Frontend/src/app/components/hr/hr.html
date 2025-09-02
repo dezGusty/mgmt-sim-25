@@ -104,3 +104,121 @@
       </div>
     </div>
 
+    <!-- Public Holidays Section -->
+    <div class="max-w-7xl mx-auto p-6 mt-4">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">Public Holidays Management</h3>
+            <button 
+              class="inline-flex items-center px-4 py-2 rounded bg-green-600 text-white text-sm hover:bg-green-700"
+              (click)="addNewHoliday()"
+            >
+              Add Holiday
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recurring</th>
+                  <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let holiday of publicHolidays; let i = index; trackBy: trackByHolidayIndex">
+                  <!-- Name Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">{{ holiday.name }}</div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="text"
+                        [(ngModel)]="editHolidayModel!.name"
+                        placeholder="Holiday name"
+                        class="w-full px-2 py-1 border rounded text-sm"
+                        [class.border-red-500]="editHolidayModel!.name !== undefined && editHolidayModel!.name.trim().length === 0"
+                        [class.border-gray-300]="!editHolidayModel!.name || editHolidayModel!.name.trim().length > 0"
+                        required
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Date Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">{{ holiday.date | date:'mediumDate' }}</div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="date"
+                        [(ngModel)]="editHolidayModel!.date"
+                        class="px-2 py-1 border rounded text-sm"
+                        [class.border-red-500]="editHolidayModel!.date !== undefined && editHolidayModel!.date.trim().length === 0"
+                        [class.border-gray-300]="!editHolidayModel!.date || editHolidayModel!.date.trim().length > 0"
+                        required
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Recurring Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="holiday.isRecurring ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                        {{ holiday.isRecurring ? 'Yes' : 'No' }}
+                      </span>
+                    </div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="editHolidayModel!.isRecurring"
+                        class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Actions Column -->
+                  <td class="px-4 py-3 text-sm text-right space-x-2">
+                    <div *ngIf="editingHolidayIndex !== i">
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700 mr-2" 
+                        (click)="startEditHoliday(i)"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-red-600 text-white text-sm hover:bg-red-700" 
+                        (click)="deleteHoliday(i)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div *ngIf="editingHolidayIndex === i">
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 mr-2" 
+                        (click)="saveHoliday(i)"
+                      >
+                        Save
+                      </button>
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-gray-100 text-sm hover:bg-gray-200" 
+                        (click)="cancelHolidayEdit()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div *ngIf="publicHolidays.length === 0" class="text-center py-8 text-gray-500">
+              No public holidays defined. Click "Add Holiday" to get started.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
