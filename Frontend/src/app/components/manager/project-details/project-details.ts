@@ -571,11 +571,21 @@ export class ProjectDetails implements OnInit, OnDestroy {
   }
 
   isProjectFormValid(): boolean {
-    return !!(this.editProjectName.trim() && 
-              this.editStartDate && 
-              this.editEndDate && 
-              this.editBudgetedFTEs >= 0 &&
-              new Date(this.editStartDate) <= new Date(this.editEndDate));
+    if (!(this.editProjectName.trim() && 
+          this.editStartDate && 
+          this.editEndDate && 
+          this.editBudgetedFTEs >= 0 &&
+          new Date(this.editStartDate) <= new Date(this.editEndDate))) {
+      return false;
+    }
+    
+    // Check if start date is in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+    const startDate = new Date(this.editStartDate);
+    startDate.setHours(0, 0, 0, 0);
+    
+    return startDate >= today;
   }
 
   saveProjectDetails() {
@@ -609,6 +619,29 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/manager/projects']);
+  }
+
+  onStartDateChange() {
+    // If end date is before new start date, update it
+    if (this.editEndDate && this.editStartDate && new Date(this.editEndDate) < new Date(this.editStartDate)) {
+      const startDate = new Date(this.editStartDate);
+      this.editEndDate = this.formatDateForInput(startDate);
+    }
+  }
+
+  getTodayDateString(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  getMinEndDate(): string {
+    if (this.editStartDate) {
+      return this.editStartDate;
+    }
+    return this.getTodayDateString();
   }
 
   // Reset assignment state

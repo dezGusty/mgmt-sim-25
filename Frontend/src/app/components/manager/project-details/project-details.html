@@ -293,6 +293,8 @@
                       [(ngModel)]="editStartDate"
                       name="startDate"
                       [disabled]="!canModify"
+                      [min]="getTodayDateString()"
+                      (change)="onStartDateChange()"
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
@@ -308,13 +310,14 @@
                       [(ngModel)]="editEndDate"
                       name="endDate"
                       [disabled]="!canModify"
+                      [min]="getMinEndDate()"
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
 
-                <!-- Budget and Status - Two Column Layout -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Budget FTE - Single Column Layout -->
+                <div class="grid grid-cols-1">
                   <!-- Budgeted FTEs -->
                   <div>
                     <label for="budgetedFTEs" class="block text-sm font-medium text-gray-700 mb-2">
@@ -331,23 +334,6 @@
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="Enter budgeted FTEs"
                     />
-                  </div>
-
-                  <!-- Status -->
-                  <div>
-                    <label for="isActive" class="block text-sm font-medium text-gray-700 mb-2">
-                      Project Status
-                    </label>
-                    <select
-                      id="isActive"
-                      [(ngModel)]="editIsActive"
-                      name="isActive"
-                      [disabled]="!canModify"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    >
-                      <option [value]="true">Active</option>
-                      <option [value]="false">Inactive</option>
-                    </select>
                   </div>
                 </div>
 

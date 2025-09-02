@@ -417,19 +417,26 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-sm text-gray-700">Start Date</label>
-            <input type="date" [value]="formatDateForInput(newProject.startDate)" (change)="onStartDateChange($event)" class="w-full border px-3 py-2 rounded" />
+            <input 
+              type="date" 
+              [value]="formatDateForInput(newProject.startDate)" 
+              (change)="onStartDateChange($event)" 
+              [min]="getTodayDateString()"
+              class="w-full border px-3 py-2 rounded" />
           </div>
           <div>
             <label class="block text-sm text-gray-700">End Date</label>
-            <input type="date" [value]="formatDateForInput(newProject.endDate)" (change)="onEndDateChange($event)" class="w-full border px-3 py-2 rounded" />
+            <input 
+              type="date" 
+              [value]="formatDateForInput(newProject.endDate)" 
+              (change)="onEndDateChange($event)" 
+              [min]="getMinEndDate()"
+              class="w-full border px-3 py-2 rounded" />
           </div>
         </div>
         <div>
           <label class="block text-sm text-gray-700">Budgeted FTEs</label>
           <input type="number" [(ngModel)]="newProject.budgetedFTEs" class="w-full border px-3 py-2 rounded" />
-        </div>
-        <div class="flex items-center gap-3">
-          <label class="flex items-center gap-2"><input type="checkbox" [(ngModel)]="newProject.isActive" /> Active</label>
         </div>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2 rounded border" (click)="onCancelAddProject()" [disabled]="isSubmitting">Cancel</button>

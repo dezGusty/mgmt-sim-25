@@ -247,10 +247,14 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   resetNewProject() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
     this.newProject = {
       name: '',
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: today,
+      endDate: tomorrow,
       budgetedFTEs: 0,
       isActive: true
     };
@@ -271,7 +275,24 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       this.isSubmitting = false;
       return;
     }
-    this.projectService.createProject(this.newProject).subscribe({
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    const startDate = new Date(this.newProject.startDate!);
+    startDate.setHours(0, 0, 0, 0);
+    
+    if (startDate < today) {
+      this.errorMessage = 'Start date cannot be in the past';
+      this.isSubmitting = false;
+      return;
+    }
+    
+    const projectToCreate = {
+      ...this.newProject,
+      isActive: true
+    };
+    
+    this.projectService.createProject(projectToCreate).subscribe({
       next: (res) => {
         if (token !== this.createRequestToken) {
 
@@ -512,11 +533,29 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   onStartDateChange(event: any) {
-    this.newProject.startDate = new Date(event.target.value);
+    this.newProject.startDate = new Date(event.target.value)
+    if (this.newProject.endDate && this.newProject.startDate && this.newProject.endDate < this.newProject.startDate) {
+      this.newProject.endDate = new Date(this.newProject.startDate);
+    }
   }
 
   onEndDateChange(event: any) {
     this.newProject.endDate = new Date(event.target.value);
+  }
+
+  getTodayDateString(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  getMinEndDate(): string {
+    if (this.newProject.startDate) {
+      return this.formatDateForInput(this.newProject.startDate);
+    }
+    return this.getTodayDateString();
   }
 
   formatPercentage(value: number): string {
