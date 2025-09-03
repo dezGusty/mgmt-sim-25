@@ -65,8 +65,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">System Administrators</h4>
-      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getTotalAdminCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showAdminTotal">
+          {{ getAdminCount() }} out of {{ getTotalAdminCount() }}
+        </ng-container>
+        <ng-template #showAdminTotal>
+          {{ getTotalAdminCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isAdminSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -262,8 +268,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Team Managers</h4>
-      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getTotalManagerCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showManagerTotal">
+          {{ getManagerCount() }} out of {{ getTotalManagerCount() }}
+        </ng-container>
+        <ng-template #showManagerTotal>
+          {{ getTotalManagerCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isManagerSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -596,8 +608,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Unassigned Users</h4>
-      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{
-        getTotalUnassignedUsersCount() }} total</span>
+      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showUnassignedTotal">
+          {{ getUnassignedUsersCount() }} out of {{ getTotalUnassignedUsersCount() }}
+        </ng-container>
+        <ng-template #showUnassignedTotal>
+          {{ getTotalUnassignedUsersCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isUnassignedUsersSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">

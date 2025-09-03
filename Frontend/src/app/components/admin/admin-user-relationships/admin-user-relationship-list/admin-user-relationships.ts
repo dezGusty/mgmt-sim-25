@@ -747,8 +747,12 @@ export class AdminUserRelationships implements OnInit {
     return this.totalUnassignedUsersCount;
   }
 
+  isSearchActive(): boolean {
+    return this.currentSearchTerm.trim().length > 0;
+  }
+
   getUnassignedUsersCount(): number {
-    return this.getTotalUnassignedUsersCount();
+    return this.unassignedUsers.length;
   }
 
   getSubordinateCount(manager: any): number {
@@ -764,8 +768,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getManagerCount(): number {
-    return this.managers.filter((user) => user.roles?.includes('Manager'))
-      .length;
+    return this.managers.length;
   }
 
   getTotalManagerCount(): number {
