@@ -867,7 +867,17 @@ export class AdminUserRelationships implements OnInit {
       next: (response) => {
         this.isLoadingSecondManagers = false;
         console.log('Active second managers API response:', response);
-        this.activeSecondManagers = response.map(sm => this.mapSecondManagerToViewModel(sm));
+        
+        if (Array.isArray(response)) {
+          this.activeSecondManagers = response.map(sm => {
+            console.log('Processing second manager:', sm);
+            return this.mapSecondManagerToViewModel(sm);
+          });
+        } else {
+          console.error('Unexpected response format - not an array:', response);
+          this.activeSecondManagers = [];
+        }
+        
         this.secondManagersErrorMessage = '';
         this.checkIfInitialDataLoaded();
       },
@@ -881,17 +891,17 @@ export class AdminUserRelationships implements OnInit {
     });
   }
 
-  mapSecondManagerToViewModel(secondManager: ISecondManagerResponse): ISecondManagerViewModel {
+  mapSecondManagerToViewModel(secondManager: any): ISecondManagerViewModel {
     return {
       id: secondManager.secondManagerEmployeeId,
-      name: `${secondManager.secondManagerEmployee.firstName} ${secondManager.secondManagerEmployee.lastName}`,
-      email: secondManager.secondManagerEmployee.email,
-      jobTitle: secondManager.secondManagerEmployee.jobTitleName,
-      department: secondManager.secondManagerEmployee.departmentName,
+      name: secondManager.secondManagerEmployeeName || 'Unknown Employee',
+      email: secondManager.secondManagerEmployeeEmail || 'No email',
+      jobTitle: undefined, 
+      department: undefined, 
       replacedManagerId: secondManager.replacedManagerId,
-      replacedManagerName: `${secondManager.replacedManager.firstName} ${secondManager.replacedManager.lastName}`,
-      startDate: secondManager.startDate,
-      endDate: secondManager.endDate,
+      replacedManagerName: secondManager.replacedManagerName || 'Unknown Manager',
+      startDate: new Date(secondManager.startDate),
+      endDate: new Date(secondManager.endDate),
       isActive: secondManager.isActive
     };
   }
