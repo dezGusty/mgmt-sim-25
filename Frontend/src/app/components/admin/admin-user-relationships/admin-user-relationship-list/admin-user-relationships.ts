@@ -43,6 +43,15 @@ export class AdminUserRelationships implements OnInit {
     endDate: ''
   };
 
+  // Edit second manager modal data
+  showEditSecondManagerModal: boolean = false;
+  selectedSecondManagerForEdit: ISecondManagerViewModel | null = null;
+  isSubmittingEditSecondManager: boolean = false;
+  editSecondManagerErrorMessage: string = '';
+  editSecondManagerForm = {
+    endDate: ''
+  };
+
   searchTerm: string = '';
   searchBy: UserSearchType = UserSearchType.Global;
   sortDescending: boolean = false;
@@ -1039,6 +1048,97 @@ export class AdminUserRelationships implements OnInit {
         }
 
         alert(errorMessage);
+      }
+    });
+  }
+
+  openEditSecondManagerModal(secondManager: ISecondManagerViewModel): void {
+    this.selectedSecondManagerForEdit = secondManager;
+    this.showEditSecondManagerModal = true;
+    this.editSecondManagerErrorMessage = '';
+
+    // Set the current end date as the default value
+    const endDate = new Date(secondManager.endDate);
+    this.editSecondManagerForm = {
+      endDate: endDate.toISOString().split('T')[0]
+    };
+  }
+
+  closeEditSecondManagerModal(): void {
+    this.showEditSecondManagerModal = false;
+    this.selectedSecondManagerForEdit = null;
+    this.editSecondManagerErrorMessage = '';
+    this.isSubmittingEditSecondManager = false;
+    this.editSecondManagerForm = {
+      endDate: ''
+    };
+  }
+
+  isEditSecondManagerFormValid(): boolean {
+    if (!this.editSecondManagerForm.endDate || !this.selectedSecondManagerForEdit) {
+      return false;
+    }
+
+    const newEndDate = new Date(this.editSecondManagerForm.endDate);
+    const startDate = new Date(this.selectedSecondManagerForEdit.startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // New end date must be after start date
+    if (newEndDate <= startDate) {
+      return false;
+    }
+
+    // New end date must be different from current end date
+    const currentEndDate = new Date(this.selectedSecondManagerForEdit.endDate);
+    if (newEndDate.getTime() === currentEndDate.getTime()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  onSubmitEditSecondManager(): void {
+    if (!this.isEditSecondManagerFormValid() || !this.selectedSecondManagerForEdit) {
+      return;
+    }
+
+    this.isSubmittingEditSecondManager = true;
+    this.editSecondManagerErrorMessage = '';
+
+    const currentTime = new Date();
+    const timeString = currentTime.toISOString().split('T')[1];
+    const endDateTime = `${this.editSecondManagerForm.endDate}T${timeString}`;
+
+    const updateRequest = {
+      newEndDate: endDateTime
+    };
+
+    this.secondManagerService.updateSecondManager(
+      this.selectedSecondManagerForEdit.id,
+      this.selectedSecondManagerForEdit.replacedManagerId,
+      this.selectedSecondManagerForEdit.startDate,
+      updateRequest
+    ).subscribe({
+      next: (response) => {
+        this.isSubmittingEditSecondManager = false;
+        console.log('Second manager updated successfully:', response);
+
+        this.loadActiveSecondManagers();
+
+        this.closeEditSecondManagerModal();
+
+        alert('Second manager end date updated successfully!');
+      },
+      error: (err) => {
+        this.isSubmittingEditSecondManager = false;
+        console.error('Failed to update second manager:', err);
+
+        if (err.error && err.error.message) {
+          this.editSecondManagerErrorMessage = err.error.message;
+        } else {
+          this.editSecondManagerErrorMessage = 'Failed to update second manager. Please try again.';
+        }
       }
     });
   }

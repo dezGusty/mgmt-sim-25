@@ -32,7 +32,15 @@ export class SecondManagerService {
     return this.http.post<any>(`${this.apiUrl}`, request, { withCredentials: true });
   }
 
-    deleteSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string): Observable<void> {
+  updateSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string, request: { newEndDate: string }): Observable<any> {
+    const dateObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
+    const formattedDate = encodeURIComponent(this.formatDateForUrl(dateObj));
+    
+    console.log('Updating second manager with URL:', `${this.apiUrl}/${secondManagerEmployeeId}/${replacedManagerId}/${formattedDate}`);
+    return this.http.put<any>(`${this.apiUrl}/${secondManagerEmployeeId}/${replacedManagerId}/${formattedDate}`, request, { withCredentials: true });
+  }
+
+  deleteSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string): Observable<void> {
     const dateObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
     
     const formattedDate = encodeURIComponent(this.formatDateForUrl(dateObj));
