@@ -176,8 +176,17 @@ export class Hr {
 
   loadPublicHolidays(year: number) {
     this.hrService.getPublicHolidays(year).subscribe({
-      next: (holidays: PublicHoliday[]) => {
-        this.publicHolidays = holidays || [];
+      next: (response: any) => {
+        // Handle different response formats
+        if (Array.isArray(response)) {
+          this.publicHolidays = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.publicHolidays = response.data;
+        } else if (response?.Data && Array.isArray(response.Data)) {
+          this.publicHolidays = response.Data;
+        } else {
+          this.publicHolidays = [];
+        }
       },
       error: (err: any) => {
         console.error('Failed to load public holidays', err);
@@ -214,7 +223,17 @@ export class Hr {
 
     if (holiday.id) {
       this.hrService.updatePublicHoliday(holiday).subscribe({
-        next: (updatedHoliday: PublicHoliday) => {
+        next: (response: any) => {
+          // Handle different response formats
+          let updatedHoliday: PublicHoliday;
+          if (response?.data) {
+            updatedHoliday = response.data;
+          } else if (response?.Data) {
+            updatedHoliday = response.Data;
+          } else {
+            updatedHoliday = response;
+          }
+          
           this.publicHolidays[index] = updatedHoliday;
           this.cancelHolidayEdit();
         },
@@ -225,7 +244,17 @@ export class Hr {
       });
     } else {
       this.hrService.createPublicHoliday(holiday).subscribe({
-        next: (newHoliday: PublicHoliday) => {
+        next: (response: any) => {
+          // Handle different response formats
+          let newHoliday: PublicHoliday;
+          if (response?.data) {
+            newHoliday = response.data;
+          } else if (response?.Data) {
+            newHoliday = response.Data;
+          } else {
+            newHoliday = response;
+          }
+          
           if (this.isAddingNewHoliday) {
             this.publicHolidays.splice(index, 1);
             this.publicHolidays.push(newHoliday);
@@ -283,16 +312,40 @@ export class Hr {
   }
 
   addNewHoliday() {
-    const newHoliday: Partial<PublicHoliday> = {
+    console.log('Adding new holiday...'); // Debug log
+    console.log('Current publicHolidays:', this.publicHolidays); // Debug log
+
+    // Ensure publicHolidays is an array
+    if (!Array.isArray(this.publicHolidays)) {
+      this.publicHolidays = [];
+    }
+
+    // Cancel any existing editing
+    if (this.editingHolidayIndex !== null) {
+      this.cancelHolidayEdit();
+    }
+
+    // Remove any existing unsaved holidays (those without IDs)
+    this.publicHolidays = this.publicHolidays.filter(h => h.id);
+
+    const newHoliday: PublicHoliday = {
+      name: '',
+      date: '',
+      isRecurring: false
+    } as PublicHoliday;
+    
+    this.publicHolidays.push(newHoliday);
+    const newIndex = this.publicHolidays.length - 1;
+    this.editingHolidayIndex = newIndex;
+    this.editHolidayModel = {
       name: '',
       date: '',
       isRecurring: false
     };
-    
-    this.publicHolidays.push(newHoliday as PublicHoliday);
-    this.editingHolidayIndex = this.publicHolidays.length - 1;
-    this.editHolidayModel = { ...newHoliday };
     this.isAddingNewHoliday = true;
+
+    console.log('New holiday added at index:', newIndex); // Debug log
+    console.log('Updated publicHolidays:', this.publicHolidays); // Debug log
   }
 
   deleteHoliday(index: number) {
