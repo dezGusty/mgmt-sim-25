@@ -803,12 +803,22 @@ export class ProjectDetails implements OnInit, OnDestroy {
   addToPendingAssignments(user: IUser, percentage: number) {
     if (!percentage || this.isPendingAssignment(user.id)) return;
     
+    // Check if user is already assigned to the project
+    const isCurrentlyAssigned = this.projectUsers.some(pu => pu.userId === user.id);
+    if (isCurrentlyAssigned) {
+      alert(`${user.firstName} ${user.lastName} is already assigned to this project. Remove them first if you want to change their assignment.`);
+      return;
+    }
+    
     // Check if this assignment would exceed the project capacity
     if (this.wouldExceedCapacity(user, percentage)) {
       const remainingFTEs = this.getPreviewRemainingFTEs();
       alert(`Cannot assign ${user.firstName} ${user.lastName} at ${percentage}%. This would exceed the project capacity by ${Math.abs(remainingFTEs).toFixed(2)} FTEs. Available capacity: ${Math.max(0, remainingFTEs).toFixed(2)} FTEs.`);
       return;
     }
+    
+    // Remove any existing pending assignment for this user to prevent duplicates
+    this.pendingAssignments = this.pendingAssignments.filter(assignment => assignment.user.id !== user.id);
     
     this.pendingAssignments.push({
       user: user,
@@ -820,6 +830,9 @@ export class ProjectDetails implements OnInit, OnDestroy {
     
     // Reload available users to update the list
     this.loadAvailableUsers();
+    
+    // Auto-scroll to the newest assignment
+    this.scrollToNewestUpdate('new-assignment');
   }
 
   removeFromPendingAssignments(userId: number) {
@@ -831,15 +844,26 @@ export class ProjectDetails implements OnInit, OnDestroy {
   addToPendingRemovals(projectUser: IProjectUser) {
     if (!projectUser.user || this.isPendingRemoval(projectUser.userId)) return;
     
+    // Remove any existing pending removal for this user to prevent duplicates
+    this.pendingRemovals = this.pendingRemovals.filter(removal => removal.userId !== projectUser.userId);
+    
+    // Also remove from pending assignments if they exist (in case user was added and then removed)
+    this.pendingAssignments = this.pendingAssignments.filter(assignment => assignment.user.id !== projectUser.userId);
+    
     this.pendingRemovals.push({
       userId: projectUser.userId,
       user: projectUser.user,
       originalPercentage: projectUser.timePercentagePerProject || 0
     });
+    
+    // Auto-scroll to the newest removal
+    this.scrollToNewestUpdate('pending-removal');
   }
 
   removeFromPendingRemovals(userId: number) {
     this.pendingRemovals = this.pendingRemovals.filter(removal => removal.userId !== userId);
+    // Reload available users to update the list after restoring an employee
+    this.loadAvailableUsers();
   }
 
   // Save and cancel operations
@@ -875,6 +899,51 @@ export class ProjectDetails implements OnInit, OnDestroy {
   cancelAssignmentChanges() {
     this.resetAssignmentState();
     this.loadAvailableUsers();
+  }
+
+  // Auto-scroll to newest updates in the preview list
+  private scrollToNewestUpdate(updateType: 'new-assignment' | 'pending-removal') {
+    // Use setTimeout to ensure the DOM has been updated
+    setTimeout(() => {
+      let targetElement: HTMLElement | null = null;
+      
+      if (updateType === 'new-assignment' && this.pendingAssignments.length > 0) {
+        // Scroll to the last new assignment
+        const newAssignments = document.querySelectorAll('.new-assignment-item');
+        targetElement = newAssignments[newAssignments.length - 1] as HTMLElement;
+      } else if (updateType === 'pending-removal' && this.pendingRemovals.length > 0) {
+        // Scroll to the last pending removal
+        const pendingRemovals = document.querySelectorAll('.pending-removal-item');
+        targetElement = pendingRemovals[pendingRemovals.length - 1] as HTMLElement;
+      }
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest',
+          inline: 'start'
+        });
+        // Add a subtle highlight effect to draw attention
+        targetElement.classList.add('highlight-new-update');
+        setTimeout(() => {
+          targetElement?.classList.remove('highlight-new-update');
+        }, 2000);
+      }
+    }, 100);
+  }
+
+  // Get current assignments excluding those pending removal
+  getCurrentAssignmentsForDisplay(): IProjectUser[] {
+    return this.projectUsers.filter(projectUser => 
+      !this.isPendingRemoval(projectUser.userId)
+    );
+  }
+
+  // Check if there are any assignments to display in the preview
+  hasAssignmentsToDisplay(): boolean {
+    return this.getCurrentAssignmentsForDisplay().length > 0 || 
+           this.pendingAssignments.length > 0 || 
+           this.pendingRemovals.length > 0;
   }
 
   getEditOccupationPercentage(): number {

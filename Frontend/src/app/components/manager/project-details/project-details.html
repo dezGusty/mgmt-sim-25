@@ -480,30 +480,6 @@
             <!-- Header -->
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-lg font-medium text-gray-900">Employee Assignment Management</h3>
-              <div class="flex items-center space-x-3">
-                <!-- Save Changes Button -->
-                <button
-                  (click)="saveAssignmentChanges()"
-                  [disabled]="!canAssign || !hasPendingChanges()"
-                  [class]="canAssign && hasPendingChanges() 
-                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                  class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                >
-                  Save Changes
-                </button>
-                <!-- Cancel Changes Button -->
-                <button
-                  (click)="cancelAssignmentChanges()"
-                  [disabled]="!canAssign || !hasPendingChanges()"
-                  [class]="canAssign && hasPendingChanges() 
-                    ? 'bg-red-600 text-white hover:bg-red-700' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                  class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                >
-                  Cancel Changes
-                </button>
-              </div>
             </div>
 
             <!-- Inactive Project Warning -->
@@ -692,7 +668,7 @@
                 </div>
 
                 <div class="p-4 max-h-96 overflow-y-auto">
-                  <div *ngIf="getAssignmentPreviewCount() === 0" class="text-center py-8">
+                  <div *ngIf="!hasAssignmentsToDisplay()" class="text-center py-8">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
@@ -700,13 +676,13 @@
                     <p class="mt-1 text-sm text-gray-500">Start assigning employees to see them here.</p>
                   </div>
 
-                  <div *ngIf="getAssignmentPreviewCount() > 0" class="space-y-3">
+                  <div *ngIf="hasAssignmentsToDisplay()" class="space-y-3">
                     
                     <!-- Current Assignments -->
-                    <div *ngIf="projectUsers.length > 0">
+                    <div *ngIf="getCurrentAssignmentsForDisplay().length > 0">
                       <h5 class="text-sm font-medium text-gray-700 mb-2">Current Assignments</h5>
                       <div 
-                        *ngFor="let projectUser of projectUsers" 
+                        *ngFor="let projectUser of getCurrentAssignmentsForDisplay()" 
                         class="border border-gray-200 rounded-lg p-3 bg-blue-50"
                       >
                         <div class="flex justify-between items-start">
@@ -719,13 +695,13 @@
                           </div>
                           <button
                             (click)="addToPendingRemovals(projectUser)"
-                            [disabled]="!canAssign || isPendingRemoval(projectUser.userId)"
-                            [class]="canAssign && !isPendingRemoval(projectUser.userId)
+                            [disabled]="!canAssign"
+                            [class]="canAssign
                               ? 'text-red-600 hover:text-red-800' 
                               : 'text-gray-400 cursor-not-allowed'"
                             class="text-xs font-medium transition-colors duration-200"
                           >
-                            {{ isPendingRemoval(projectUser.userId) ? 'Removing...' : 'Remove' }}
+                            Remove
                           </button>
                         </div>
                       </div>
@@ -735,8 +711,8 @@
                     <div *ngIf="pendingAssignments.length > 0">
                       <h5 class="text-sm font-medium text-gray-700 mb-2 mt-4">New Assignments</h5>
                       <div 
-                        *ngFor="let assignment of pendingAssignments" 
-                        class="border border-green-200 rounded-lg p-3 bg-green-50"
+                        *ngFor="let assignment of pendingAssignments; let i = index" 
+                        class="border border-green-200 rounded-lg p-3 bg-green-50 new-assignment-item"
                       >
                         <div class="flex justify-between items-start">
                           <div class="flex-1">
@@ -761,8 +737,8 @@
                     <div *ngIf="pendingRemovals.length > 0">
                       <h5 class="text-sm font-medium text-gray-700 mb-2 mt-4">Pending Removals</h5>
                       <div 
-                        *ngFor="let removal of pendingRemovals" 
-                        class="border border-red-200 rounded-lg p-3 bg-red-50"
+                        *ngFor="let removal of pendingRemovals; let i = index" 
+                        class="border border-red-200 rounded-lg p-3 bg-red-50 pending-removal-item"
                       >
                         <div class="flex justify-between items-start">
                           <div class="flex-1">
@@ -785,6 +761,32 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end items-center space-x-3 mt-6">
+              <!-- Save Changes Button -->
+              <button
+                (click)="saveAssignmentChanges()"
+                [disabled]="!canAssign || !hasPendingChanges()"
+                [class]="canAssign && hasPendingChanges() 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Save Changes
+              </button>
+              <!-- Cancel Changes Button -->
+              <button
+                (click)="cancelAssignmentChanges()"
+                [disabled]="!canAssign || !hasPendingChanges()"
+                [class]="canAssign && hasPendingChanges() 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Cancel Changes
+              </button>
             </div>
           </div>
         </div>
