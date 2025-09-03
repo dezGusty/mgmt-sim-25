@@ -1278,6 +1278,26 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             dbContext.SaveChanges();
 
+            // Ensure EmploymentType and Availability are set if missing or zero
+            var usersNeedingAvailabilityUpdate = dbContext.Users
+                .Where(u => u.TotalAvailability == 0f || u.RemainingAvailability == 0f)
+                .ToList();
+
+            foreach (var u in usersNeedingAvailabilityUpdate)
+            {
+                if (u.EmploymentType != EmploymentType.FullTime && u.EmploymentType != EmploymentType.PartTime)
+                {
+                    u.EmploymentType = EmploymentType.FullTime;
+                }
+
+                SetAvailabilityForEmploymentType(u);
+            }
+
+            if (usersNeedingAvailabilityUpdate.Count > 0)
+            {
+                dbContext.SaveChanges();
+            }
+
             var rnd = new Random();
             for (int i = 1; i <= 500; i++)
             {
