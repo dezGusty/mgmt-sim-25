@@ -63,6 +63,7 @@ export class AdminUserRelationships implements OnInit {
   UserSearchType = UserSearchType;
 
   allAdmins: IUserViewModel[] = [];   // full dataset   // current page slice
+  originalAdmins: IUserViewModel[] = []; 
   totalAdminsCount: number = 0;
   totalPagesAdmins: number = 0;
   currentPageAdmins: number = 1;
@@ -120,6 +121,10 @@ export class AdminUserRelationships implements OnInit {
   }
 
   private loadInitialData(): void {
+    this.managersIds.clear();
+    this.adminsIds.clear();
+    this.managerEmployeesCollapsed.clear();
+    
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
@@ -182,12 +187,15 @@ export class AdminUserRelationships implements OnInit {
           this.allAdmins = [];
           this.totalPagesAdmins = 0;
         } else {
-          this.allAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-
-          this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-
-          this.currentPageAdmins = 1;
-          this.sliceAdmins();
+          this.originalAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
+          this.allAdmins = [...this.originalAdmins];
+          
+          if (this.currentSearchBy === UserSearchType.Admins && this.currentSearchTerm.trim()) {
+            this.filterAdmins();
+          } else {
+            this.currentPageAdmins = 1;
+            this.sliceAdmins();
+          }
         }
 
         this.checkIfInitialDataLoaded();
@@ -220,30 +228,16 @@ export class AdminUserRelationships implements OnInit {
 
     let searchParams: any = {};
 
-    if (this.currentSearchTerm.trim()) {
-      switch (this.currentSearchBy) {
-        case UserSearchType.Global:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerName:
-          searchParams.managerName = this.currentSearchTerm;
-          break;
-        case UserSearchType.EmployeeName:
-          searchParams.employeeName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerEmail:
-          searchParams.managerEmail = this.currentSearchTerm;
-          break;
-        case UserSearchType.EmployeeEmail:
-          searchParams.employeeEmail = this.currentSearchTerm;
-          break;
-        case UserSearchType.JobTitle:
-          searchParams.jobTitle = this.currentSearchTerm;
-          break;
-        default:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Managers) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
       }
+    } else {
+      this.isLoadingManagers = false;
+      this.managers = [];
+      this.totalPagesManagers = 0;
+      this.checkIfInitialDataLoaded();
+      return;
     }
 
     const params: IFilteredUsersRequest = {
@@ -273,6 +267,7 @@ export class AdminUserRelationships implements OnInit {
         }
 
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
       error: (err) => {
         this.isLoadingManagers = false;
@@ -281,6 +276,7 @@ export class AdminUserRelationships implements OnInit {
         this.totalPagesManagers = 0;
         console.error('Failed to fetch managers with relationships:', err);
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
     });
   }
@@ -291,29 +287,16 @@ export class AdminUserRelationships implements OnInit {
 
     let searchParams: any = {};
 
-    if (this.currentSearchTerm.trim()) {
-      switch (this.currentSearchBy) {
-        case UserSearchType.Global:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.UnassignedName:
-          searchParams.unassignedName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerName:
-        case UserSearchType.EmployeeName:
-          searchParams.unassignedName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerEmail:
-        case UserSearchType.EmployeeEmail:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.JobTitle:
-          searchParams.jobTitle = this.currentSearchTerm;
-          break;
-        default:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Unassigned) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
       }
+    } else {
+      this.isLoadingUnassignedUsers = false;
+      this.unassignedUsers = [];
+      this.totalPagesUnassignedUsers = 0;
+      this.checkIfInitialDataLoaded();
+      return;
     }
 
     const params: IFilteredUsersRequest = {
@@ -345,6 +328,7 @@ export class AdminUserRelationships implements OnInit {
         }
 
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
       error: (err) => {
         this.isLoadingUnassignedUsers = false;
@@ -353,6 +337,7 @@ export class AdminUserRelationships implements OnInit {
         this.totalPagesUnassignedUsers = 0;
         console.error('Failed to fetch unassigned users:', err);
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
     });
   }
@@ -362,16 +347,8 @@ export class AdminUserRelationships implements OnInit {
       switch (this.currentSearchBy) {
         case UserSearchType.Global:
           return 'No managers found for the global search term.';
-        case UserSearchType.ManagerName:
-          return `No managers found with the name "${this.currentSearchTerm}".`;
-        case UserSearchType.EmployeeName:
-          return `No employees found with the name "${this.currentSearchTerm}".`;
-        case UserSearchType.ManagerEmail:
-          return `No managers found with the email "${this.currentSearchTerm}".`;
-        case UserSearchType.EmployeeEmail:
-          return `No employees found with the email "${this.currentSearchTerm}".`;
-        case UserSearchType.JobTitle:
-          return `No managers found with the job title "${this.currentSearchTerm}".`;
+        case UserSearchType.Managers:
+          return `No managers found for "${this.currentSearchTerm}".`;
         default:
           return `No managers found for "${this.currentSearchTerm}".`;
       }
@@ -381,7 +358,7 @@ export class AdminUserRelationships implements OnInit {
 
   getUnassignedUsersEmptyMessage(): string {
     if (this.currentSearchTerm.trim()) {
-      return `No unassigned users found with the name "${this.currentSearchTerm}".`;
+      return `No unassigned users found for "${this.currentSearchTerm}".`;
     }
     return 'No unassigned users found.';
   }
@@ -393,12 +370,44 @@ export class AdminUserRelationships implements OnInit {
   }
 
   mapToUserViewModel(user: IUser): IUserViewModel {
-    user.managersIds?.forEach(element => {
-      this.managersIds.add(element);
-    });
+    if (user.roles.includes('Manager')) {
+      this.managersIds.add(user.id);
+    }
 
     if (user.roles.includes('Admin')) {
       this.adminsIds.add(user.id);
+    }
+
+    let filteredSubordinatesIds = user.subordinatesIds || [];
+    let filteredSubordinatesNames = user.subordinatesNames || [];
+    let filteredSubordinatesEmails = user.subordinatesEmails || [];
+    let filteredSubordinatesJobTitleIds = user.subordinatesJobTitleIds || [];
+    let filteredSubordinatesJobTitleNames = user.subordinatesJobTitles || [];
+
+    if ((this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Managers) && this.currentSearchTerm.trim()) {
+      const searchTerm = this.currentSearchTerm.toLowerCase();
+      const filteredIndices: number[] = [];
+
+      filteredSubordinatesNames.forEach((name, index) => {
+        const email = filteredSubordinatesEmails[index] || '';
+        const jobTitle = filteredSubordinatesJobTitleNames[index] || '';
+        
+        if (name.toLowerCase().includes(searchTerm) ||
+            email.toLowerCase().includes(searchTerm) ||
+            jobTitle.toLowerCase().includes(searchTerm)) {
+          filteredIndices.push(index);
+        }
+      });
+
+      if (filteredIndices.length > 0) {
+        this.managerEmployeesCollapsed.set(user.id, false);
+      }
+
+      filteredSubordinatesIds = filteredIndices.map(i => filteredSubordinatesIds[i]);
+      filteredSubordinatesNames = filteredIndices.map(i => filteredSubordinatesNames[i]);
+      filteredSubordinatesEmails = filteredIndices.map(i => filteredSubordinatesEmails[i]);
+      filteredSubordinatesJobTitleIds = filteredIndices.map(i => filteredSubordinatesJobTitleIds[i]);
+      filteredSubordinatesJobTitleNames = filteredIndices.map(i => filteredSubordinatesJobTitleNames[i]);
     }
 
     return {
@@ -415,13 +424,13 @@ export class AdminUserRelationships implements OnInit {
         id: user.departmentId || 0,
         name: user.departmentName || 'Unknown',
       },
-      subordinatesIds: user.subordinatesIds || [],
-      subordinatesNames: user.subordinatesNames || [],
+      subordinatesIds: filteredSubordinatesIds,
+      subordinatesNames: filteredSubordinatesNames,
       roles: user.roles || [],
-      subordinatesJobTitleIds: user.subordinatesJobTitleIds || [],
-      subordinatesJobTitleNames: user.subordinatesJobTitles || [],
+      subordinatesJobTitleIds: filteredSubordinatesJobTitleIds,
+      subordinatesJobTitleNames: filteredSubordinatesJobTitleNames,
       managersIds: user.managersIds || [],
-      subordinatesEmails: user.subordinatesEmails || [],
+      subordinatesEmails: filteredSubordinatesEmails,
     };
   }
 
@@ -595,21 +604,40 @@ export class AdminUserRelationships implements OnInit {
     switch (this.searchBy) {
       case UserSearchType.Global:
         return 'Search by name, email, job title, department...';
-      case UserSearchType.ManagerName:
-        return 'Search managers by name...';
-      case UserSearchType.EmployeeName:
-        return 'Search by employee name...';
-      case UserSearchType.ManagerEmail:
-        return 'Search managers by email...';
-      case UserSearchType.EmployeeEmail:
-        return 'Search employees by email...';
-      case UserSearchType.JobTitle:
-        return 'Search by job title...';
-      case UserSearchType.UnassignedName:
-        return 'Search unassigned users by name...';
+      case UserSearchType.Admins:
+        return 'Search admins by name, email, job title, department...';
+      case UserSearchType.Managers:
+        return 'Search managers by name, email, job title, department...';
+      case UserSearchType.Unassigned:
+        return 'Search unassigned users by name, email, job title, department...';
       default:
         return 'Search...';
     }
+  }
+
+  filterAdmins(): void {
+    if (!this.currentSearchTerm.trim()) {
+      this.allAdmins = [...this.originalAdmins];
+      this.currentPageAdmins = 1;
+      this.sliceAdmins();
+      return;
+    }
+
+    const searchTerm = this.currentSearchTerm.toLowerCase();
+    this.allAdmins = this.originalAdmins.filter(admin => 
+      admin.name.toLowerCase().includes(searchTerm) ||
+      admin.email.toLowerCase().includes(searchTerm) ||
+      (admin.jobTitle?.name || '').toLowerCase().includes(searchTerm) ||
+      (admin.department?.name || '').toLowerCase().includes(searchTerm)
+    );
+
+    this.currentPageAdmins = 1;
+    this.sliceAdmins();
+    this.autoExpandSectionsWithResults();
+  }
+
+  onSearchCategoryChange(): void {
+    this.onSearch();
   }
 
   onSearch(): void {
@@ -619,18 +647,53 @@ export class AdminUserRelationships implements OnInit {
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
 
-    if (this.currentSearchBy !== UserSearchType.UnassignedName) {
-      this.loadManagersWithRelationships();
+    this.managersIds.clear();
+    this.adminsIds.clear();
+
+    this.managerEmployeesCollapsed.clear();
+
+    if (this.currentSearchBy !== UserSearchType.Admins) {
+      this.allAdmins = [...this.originalAdmins];
+      this.currentPageAdmins = 1;
+      this.sliceAdmins();
+    }
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Admins:
+          this.isAdminSectionCollapsed = false;
+          break;
+        case UserSearchType.Managers:
+          this.isManagerSectionCollapsed = false;
+          break;
+        case UserSearchType.Unassigned:
+          this.isUnassignedUsersSectionCollapsed = false;
+          break;
+        case UserSearchType.Global:
+          break;
+      }
     }
 
-    if (this.currentSearchBy === UserSearchType.Global ||
-      this.currentSearchBy === UserSearchType.UnassignedName ||
-      this.currentSearchBy === UserSearchType.ManagerEmail ||
-      this.currentSearchBy === UserSearchType.EmployeeEmail ||
-      this.currentSearchBy === UserSearchType.ManagerName ||
-      this.currentSearchBy === UserSearchType.EmployeeName ||
-      this.currentSearchBy === UserSearchType.JobTitle) {
-      this.loadUnassignedUsers();
+    switch (this.currentSearchBy) {
+      case UserSearchType.Global:
+        if (this.currentSearchTerm.trim()) {
+          this.filterAdmins();
+        } else {
+          this.allAdmins = [...this.originalAdmins];
+          this.currentPageAdmins = 1;
+          this.sliceAdmins();
+        }
+        this.loadManagersWithRelationships();
+        this.loadUnassignedUsers();
+        break;
+      case UserSearchType.Managers:
+        this.loadManagersWithRelationships();
+        break;
+      case UserSearchType.Admins:
+        this.filterAdmins();
+        break;
+      case UserSearchType.Unassigned:
+        this.loadUnassignedUsers();
+        break;
     }
   }
 
@@ -648,6 +711,22 @@ export class AdminUserRelationships implements OnInit {
     this.currentHighlightTerm = '';
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
+    
+    this.managersIds.clear();
+    this.adminsIds.clear();
+    
+    this.managerEmployeesCollapsed.clear();
+    
+
+    this.isAdminSectionCollapsed = true;
+    this.isManagerSectionCollapsed = true;
+    this.isUnassignedUsersSectionCollapsed = true;
+    
+
+    this.allAdmins = [...this.originalAdmins];
+    this.currentPageAdmins = 1;
+    this.sliceAdmins();
+    
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
   }
@@ -740,16 +819,10 @@ export class AdminUserRelationships implements OnInit {
 
     switch (this.currentSearchBy) {
       case UserSearchType.Global:
+      case UserSearchType.Admins:
+      case UserSearchType.Managers:
+      case UserSearchType.Unassigned:
         return this.currentHighlightTerm;
-      case UserSearchType.ManagerName:
-      case UserSearchType.EmployeeName:
-      case UserSearchType.UnassignedName:
-        return fieldType === 'name' ? this.currentHighlightTerm : '';
-      case UserSearchType.ManagerEmail:
-      case UserSearchType.EmployeeEmail:
-        return fieldType === 'email' ? this.currentHighlightTerm : '';
-      case UserSearchType.JobTitle:
-        return fieldType === 'jobTitle' ? this.currentHighlightTerm : '';
       default:
         return '';
     }
@@ -866,6 +939,58 @@ export class AdminUserRelationships implements OnInit {
 
   isManagerEmployeesCollapsed(managerId: number): boolean {
     return this.managerEmployeesCollapsed.get(managerId) ?? true;
+  }
+
+  shouldShowAdminSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Admins;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.admins.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  shouldShowManagerSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Managers;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.managers.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  shouldShowUnassignedSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Unassigned;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.unassignedUsers.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  private autoExpandSectionsWithResults(): void {
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      if (this.admins.length > 0) {
+        this.isAdminSectionCollapsed = false;
+      }
+      
+      if (this.managers.length > 0) {
+        this.isManagerSectionCollapsed = false;
+      }
+      
+      if (this.unassignedUsers.length > 0) {
+        this.isUnassignedUsersSectionCollapsed = false;
+      }
+    }
   }
 
   loadActiveSecondManagers(): void {
