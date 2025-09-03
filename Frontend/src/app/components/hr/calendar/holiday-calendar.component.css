@@ -1,0 +1,69 @@
+/* Calendar specific styles */
+.calendar-day {
+  transition: all 0.2s ease-in-out;
+}
+
+.calendar-day:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.holiday-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.holiday-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.holiday-badge:hover::before {
+  left: 100%;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .calendar-grid {
+    gap: 1px;
+  }
+  
+  .calendar-day {
+    min-height: 60px;
+    padding: 4px;
+  }
+  
+  .holiday-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}
+
+/* Animation for month transitions */
+.month-transition-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.month-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.month-transition-leave {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.month-transition-leave-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}

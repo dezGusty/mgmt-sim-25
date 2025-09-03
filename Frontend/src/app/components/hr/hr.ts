@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
-import { HrService, IHrUserDto, PublicHoliday } from '../../services/hr/hr.service';
+import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday } from '../../services/hr/hr.service';
+import { HolidayCalendarComponent } from './calendar/holiday-calendar.component';
+import * as Papa from 'papaparse';
 
 interface HrRecord {
   id: number;
@@ -17,7 +19,7 @@ interface HrRecord {
   selector: 'app-hr',
   templateUrl: './hr.html',
   styleUrl: './hr.css',
-  imports: [CommonModule, FormsModule, CustomNavbar]
+  imports: [CommonModule, FormsModule, CustomNavbar, HolidayCalendarComponent]
 })
 export class Hr {
   records: HrRecord[] = [];
@@ -33,6 +35,15 @@ export class Hr {
   editingHolidayIndex: number | null = null;
   editHolidayModel: Partial<PublicHoliday> | null = null;
   isAddingNewHoliday = false;
+  
+  importedHolidays: ImportedPublicHoliday[] = [];
+  showImportPreview = false;
+  
+  currentView: 'table' | 'calendar' = 'table';
+
+  get validImportedHolidaysCount(): number {
+    return this.importedHolidays.filter(h => h.isValid).length;
+  }
 
   constructor(private hrService: HrService) {}
 
@@ -121,58 +132,6 @@ export class Hr {
     this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
   }
 
-  onUploadCalendarSeparate(event: any) {
-    const files: FileList = event?.target?.files || event;
-    if (!files || (files instanceof FileList && files.length === 0)) return;
-
-    const fileArray: File[] = files instanceof FileList ? Array.from(files) : Array.isArray(files) ? files : [files];
-    const allowed = ['.xml', '.csv'];
-    const valid = fileArray.filter(f => {
-      const name = (f.name || '').toLowerCase();
-      return allowed.some(ext => name.endsWith(ext));
-    });
-
-    if (valid.length === 0) {
-      console.warn('No valid calendar files selected. Only .xml and .csv are allowed.');
-      return;
-    }
-
-    console.log('Calendar files (separate):', valid.map(f => f.name));
-  }
-
-  triggerFileInput(fileInput: HTMLInputElement) {
-    if ((window as any).showOpenFilePicker) {
-      this.openCalendarPicker();
-      return;
-    }
-
-    fileInput.click();
-  }
-
-  async openCalendarPicker() {
-    try {
-      const handles = await (window as any).showOpenFilePicker({
-        multiple: false,
-        types: [
-          {
-            description: 'Calendar files',
-            accept: {
-              'text/xml': ['.xml'],
-              'text/csv': ['.csv']
-            }
-          }
-        ],
-        startIn: 'desktop'
-      });
-
-      if (!handles || handles.length === 0) return;
-
-      const file = await handles[0].getFile();
-      this.onUploadCalendarSeparate(file);
-    } catch (err) {
-      console.warn('showOpenFilePicker failed or was cancelled, falling back to input element', err);
-    }
-  }
 
   loadPublicHolidays(year: number) {
     this.hrService.getPublicHolidays(year).subscribe({
@@ -369,6 +328,180 @@ export class Hr {
 
   trackByHolidayIndex(index: number, item: PublicHoliday) {
     return item.id || index;
+  }
+
+  downloadTemplate() {
+    const templateData = [
+      { Name: 'New Year\'s Day', Date: '2024-01-01', Recurring: 'true' },
+      { Name: 'Independence Day', Date: '2024-07-04', Recurring: 'true' },
+      { Name: 'Christmas', Date: '2024-12-25', Recurring: 'true' }
+    ];
+
+    const csv = Papa.unparse(templateData, {
+      header: true,
+      delimiter: ','
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'public-holidays-template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  triggerImportFile() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.csv,.xlsx';
+    fileInput.style.display = 'none';
+    
+    fileInput.addEventListener('change', (event: any) => {
+      this.onImportFile(event);
+    });
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
+  }
+
+  onImportFile(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.csv') && !fileName.endsWith('.xlsx')) {
+      alert('Please select a CSV or Excel file.');
+      return;
+    }
+
+    if (fileName.endsWith('.csv')) {
+      this.parseCSV(file);
+    } else {
+      alert('Excel files (.xlsx) are not yet supported. Please convert to CSV format.');
+    }
+  }
+
+  parseCSV(file: File) {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results: any) => {
+        const importedData: ImportedPublicHoliday[] = results.data.map((row: any, index: number) => {
+          const holiday: ImportedPublicHoliday = {
+            name: row.Name || row.name || '',
+            date: row.Date || row.date || '',
+            recurring: row.Recurring || row.recurring || false
+          };
+
+          const validation = this.hrService.validateImportedHoliday(holiday);
+          holiday.isValid = validation.isValid;
+          holiday.errors = validation.errors;
+
+          return holiday;
+        });
+
+        this.importedHolidays = importedData;
+        this.showImportPreview = true;
+      },
+      error: (error: any) => {
+        console.error('Error parsing CSV:', error);
+        alert('Error parsing CSV file. Please check the file format.');
+      }
+    });
+  }
+
+  importValidHolidays() {
+    const validHolidays = this.importedHolidays
+      .filter(imported => imported.isValid)
+      .map(imported => this.hrService.convertImportedToPublicHoliday(imported));
+
+    const existingHolidays = this.publicHolidays.filter(h => h.id);
+    
+    validHolidays.forEach(holiday => {
+      const isDuplicate = existingHolidays.some(existing => 
+        existing.name.toLowerCase() === holiday.name.toLowerCase() && 
+        existing.date === holiday.date
+      );
+
+      if (!isDuplicate) {
+        this.publicHolidays.push({
+          ...holiday,
+          id: undefined
+        } as PublicHoliday);
+      }
+    });
+
+    this.showImportPreview = false;
+    this.importedHolidays = [];
+  }
+
+  cancelImport() {
+    this.showImportPreview = false;
+    this.importedHolidays = [];
+  }
+
+  switchToTableView() {
+    this.currentView = 'table';
+  }
+
+  switchToCalendarView() {
+    this.currentView = 'calendar';
+  }
+
+  onCalendarDateClick(date: Date) {
+    // Cancel any existing editing first
+    if (this.editingHolidayIndex !== null) {
+      this.cancelHolidayEdit();
+    }
+
+    // Add new holiday for the clicked date
+    const newHoliday: PublicHoliday = {
+      name: '',
+      date: this.formatDateForInput(date),
+      isRecurring: false
+    } as PublicHoliday;
+    
+    this.publicHolidays.push(newHoliday);
+    const newIndex = this.publicHolidays.length - 1;
+    this.editingHolidayIndex = newIndex;
+    this.editHolidayModel = {
+      name: '',
+      date: this.formatDateForInput(date),
+      isRecurring: false
+    };
+    this.isAddingNewHoliday = true;
+
+    // Switch to table view to show the editing interface
+    this.currentView = 'table';
+  }
+
+  onCalendarHolidayClick(holiday: PublicHoliday) {
+    // Find the holiday in the array and start editing it
+    const index = this.publicHolidays.findIndex(h => 
+      h.id === holiday.id || 
+      (h.name === holiday.name && h.date === holiday.date)
+    );
+    
+    if (index !== -1) {
+      this.startEditHoliday(index);
+      // Switch to table view to show the editing interface
+      this.currentView = 'table';
+    }
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  trackByDate(index: number, day: any): string {
+    return day.date.toISOString();
   }
 
 }

@@ -38,6 +38,14 @@ export interface PublicHoliday {
   isRecurring: boolean;
 }
 
+export interface ImportedPublicHoliday {
+  name: string;
+  date: string;
+  recurring: boolean | string | number;
+  isValid?: boolean;
+  errors?: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class HrService {
   private baseUrl = `${environment.apiUrl}/hr`;
@@ -78,5 +86,53 @@ export class HrService {
 
   deletePublicHoliday(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/public-holidays/${id}`);
+  }
+
+  validateImportedHoliday(holiday: ImportedPublicHoliday): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!holiday.name || typeof holiday.name !== 'string' || holiday.name.trim().length === 0) {
+      errors.push('Name is required');
+    }
+
+    if (!holiday.date || typeof holiday.date !== 'string' || holiday.date.trim().length === 0) {
+      errors.push('Date is required');
+    } else {
+      const date = new Date(holiday.date);
+      if (isNaN(date.getTime())) {
+        errors.push('Invalid date format. Use YYYY-MM-DD');
+      }
+    }
+
+    const recurringValue = holiday.recurring;
+    if (recurringValue !== undefined && 
+        recurringValue !== null && 
+        recurringValue !== true && 
+        recurringValue !== false && 
+        recurringValue !== 'true' && 
+        recurringValue !== 'false' && 
+        recurringValue !== '1' && 
+        recurringValue !== '0' && 
+        recurringValue !== 1 && 
+        recurringValue !== 0) {
+      errors.push('Recurring must be true/false, 1/0, or yes/no');
+    }
+
+    return { isValid: errors.length === 0, errors };
+  }
+
+  convertImportedToPublicHoliday(imported: ImportedPublicHoliday): PublicHoliday {
+    let isRecurring = false;
+    const recurringValue = imported.recurring;
+    
+    if (recurringValue === true || recurringValue === 'true' || recurringValue === '1' || String(recurringValue) === '1') {
+      isRecurring = true;
+    }
+
+    return {
+      name: imported.name.trim(),
+      date: imported.date,
+      isRecurring
+    };
   }
 }
