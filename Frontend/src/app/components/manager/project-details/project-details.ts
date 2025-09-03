@@ -641,7 +641,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
       next: (response) => {
         if (response.success) {
           this.loadProjectDetails();
-          this.setActiveTab('view');
         } else {
           this.errorMessage = response.message || 'Failed to update project details';
         }
@@ -876,5 +875,11 @@ export class ProjectDetails implements OnInit, OnDestroy {
   cancelAssignmentChanges() {
     this.resetAssignmentState();
     this.loadAvailableUsers();
+  }
+
+  getEditOccupationPercentage(): number {
+    if (!this.project || this.editBudgetedFTEs === 0) return 0;
+    const currentAssignedFTEs = this.getCurrentAssignedFTEs();
+    return Math.min(100, parseFloat(((currentAssignedFTEs / this.editBudgetedFTEs) * 100).toFixed(1)));
   }
 }
