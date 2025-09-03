@@ -22,8 +22,16 @@ export class Login {
 
   onLogin() {
     this.errorMessage = '';
+    const url = new URL(window.location.href);
+    const returnUrl = url.searchParams.get('returnUrl') || undefined;
+
     this.auth.login(this.email, this.password).subscribe({
       next: (_) => {
+        if (returnUrl) {
+          this.router.navigateByUrl(returnUrl);
+          return;
+        }
+
         this.auth.me().subscribe({
           next: (user: any) => {
             console.log('User data:', user);
@@ -63,9 +71,14 @@ export class Login {
     });
   }
 
-  private redirectToRoleSpecificPage(role: string): void {
+  private redirectToRoleSpecificPage(role: string, returnUrl?: string): void {
     console.log('Redirecting for single role:', role); 
     
+    if (returnUrl) {
+      this.router.navigateByUrl(returnUrl);
+      return;
+    }
+
     switch (role.toLowerCase()) {
       case 'admin':
         this.router.navigate(['/admin']);
