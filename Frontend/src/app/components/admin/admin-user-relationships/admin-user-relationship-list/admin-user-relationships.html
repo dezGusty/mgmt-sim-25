@@ -22,49 +22,21 @@
 
       <!-- Search/Sort By Dropdown -->
       <div class="w-48">
-        <select [(ngModel)]="searchBy"
+        <select [(ngModel)]="searchBy" (ngModelChange)="onSearchCategoryChange()"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]">
           <option [value]="UserSearchType.Global" [selected]="searchBy === UserSearchType.Global">
             Global Search
           </option>
-          <option [value]="UserSearchType.ManagerName" [selected]="searchBy === UserSearchType.ManagerName">
-            By Manager Name
+          <option [value]="UserSearchType.Admins" [selected]="searchBy === UserSearchType.Admins">
+            Search in Admins
           </option>
-          <option [value]="UserSearchType.EmployeeName" [selected]="searchBy === UserSearchType.EmployeeName">
-            By Employee Name
+          <option [value]="UserSearchType.Managers" [selected]="searchBy === UserSearchType.Managers">
+            Search in Managers
           </option>
-          <option [value]="UserSearchType.ManagerEmail" [selected]="searchBy === UserSearchType.ManagerEmail">
-            By Manager Email
-          </option>
-          <option [value]="UserSearchType.EmployeeEmail" [selected]="searchBy === UserSearchType.EmployeeEmail">
-            By Employee Email
-          </option>
-          <option [value]="UserSearchType.JobTitle" [selected]="searchBy === UserSearchType.JobTitle">
-            By Job Title
-          </option>
-          <option [value]="UserSearchType.UnassignedName" [selected]="searchBy === UserSearchType.UnassignedName">
-            Unassigned
+          <option [value]="UserSearchType.Unassigned" [selected]="searchBy === UserSearchType.Unassigned">
+            Search in Unassigned
           </option>
         </select>
-      </div>
-
-      <!-- Sort Order Toggle -->
-      <div class="flex items-center">
-        <button (click)="toggleSortOrder()"
-          class="flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] transition-colors"
-          [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'">
-          <svg *ngIf="!sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
-          </svg>
-          <svg *ngIf="sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-          </svg>
-          <span class="ml-1 text-xs text-gray-600">{{
-            sortDescending ? "Z-A" : "A-Z"
-            }}</span>
-        </button>
       </div>
 
       <!-- Search Button -->
@@ -89,7 +61,7 @@
   </div>
 
   <!-- Admin Level -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowAdminSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleAdminSection()" (keydown.enter)="toggleAdminSection()"
@@ -103,8 +75,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">System Administrators</h4>
-      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getTotalAdminCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showAdminTotal">
+          {{ getAdminCount() }} out of {{ getTotalAdminCount() }}
+        </ng-container>
+        <ng-template #showAdminTotal>
+          {{ getTotalAdminCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isAdminSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -286,7 +264,7 @@
   </div>
 
   <!-- Manager Level -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowManagerSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleManagerSection()" (keydown.enter)="toggleManagerSection()"
@@ -300,8 +278,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Team Managers</h4>
-      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getTotalManagerCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showManagerTotal">
+          {{ getManagerCount() }} out of {{ getTotalManagerCount() }}
+        </ng-container>
+        <ng-template #showManagerTotal>
+          {{ getTotalManagerCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isManagerSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -644,7 +628,7 @@
   </div>
 
   <!-- Unassigned Users -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowUnassignedSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleUnassignedUsersSection()" (keydown.enter)="toggleUnassignedUsersSection()"
@@ -658,8 +642,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Unassigned Users</h4>
-      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{
-        getTotalUnassignedUsersCount() }} total</span>
+      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showUnassignedTotal">
+          {{ getUnassignedUsersCount() }} out of {{ getTotalUnassignedUsersCount() }}
+        </ng-container>
+        <ng-template #showUnassignedTotal>
+          {{ getTotalUnassignedUsersCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isUnassignedUsersSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
