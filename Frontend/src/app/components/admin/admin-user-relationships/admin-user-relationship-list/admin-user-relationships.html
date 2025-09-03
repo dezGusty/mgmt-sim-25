@@ -390,6 +390,11 @@
                     <div class="flex items-center space-x-1 mt-1">
                       <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Manager Secund</span>
                       <button
+                        class="text-blue-500 hover:text-blue-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-blue-50 transition-colors"
+                        (click)="openEditSecondManagerModal(secondManager)" title="Edit second manager">
+                        Edit
+                      </button>
+                      <button
                         class="text-red-500 hover:text-red-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
                         (click)="removeSecondManager(secondManager)" title="Remove second manager">
                         Remove
@@ -901,6 +906,84 @@
               [disabled]="!isSecondManagerFormValid() || isSubmittingSecondManager">
               <span *ngIf="isSubmittingSecondManager">Creating...</span>
               <span *ngIf="!isSubmittingSecondManager">Create Second Manager</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Second Manager Modal -->
+  <div *ngIf="showEditSecondManagerModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity" (click)="closeEditSecondManagerModal()">
+    </div>
+
+    <!-- Modal dialog -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">
+            Edit Second Manager
+          </h3>
+          <button (click)="closeEditSecondManagerModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal content -->
+        <form (ngSubmit)="onSubmitEditSecondManager()" class="p-4">
+          <div class="space-y-4">
+            <!-- Selected Second Manager Info -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900">{{ selectedSecondManagerForEdit?.name }}</div>
+              <div class="text-xs text-gray-500">{{ selectedSecondManagerForEdit?.email }}</div>
+              <div class="text-xs text-amber-600 mt-1">Temporarily replacing: {{ selectedSecondManagerForEdit?.replacedManagerName }}</div>
+            </div>
+
+            <!-- Current Period Info -->
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900 mb-1">Current Assignment Period</div>
+              <div class="text-xs text-gray-600">
+                Start: {{ selectedSecondManagerForEdit?.startDate | date:'dd/MM/yyyy' }}
+              </div>
+              <div class="text-xs text-gray-600">
+                Current End: {{ selectedSecondManagerForEdit?.endDate | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+
+            <!-- New End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">New End Date *</label>
+              <input type="date" [(ngModel)]="editSecondManagerForm.endDate" name="endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required />
+              <div class="text-xs text-gray-500 mt-1">
+                Must be after start date ({{ selectedSecondManagerForEdit?.startDate | date:'dd/MM/yyyy' }})
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="editSecondManagerErrorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ editSecondManagerErrorMessage }}
+          </div>
+
+          <!-- Modal footer -->
+          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button type="button" (click)="closeEditSecondManagerModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              [disabled]="isSubmittingEditSecondManager">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!isEditSecondManagerFormValid() || isSubmittingEditSecondManager">
+              <span *ngIf="isSubmittingEditSecondManager">Updating...</span>
+              <span *ngIf="!isSubmittingEditSecondManager">Update End Date</span>
             </button>
           </div>
         </form>

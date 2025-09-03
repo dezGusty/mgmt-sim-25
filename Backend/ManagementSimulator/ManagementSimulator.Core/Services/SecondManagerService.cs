@@ -113,21 +113,11 @@ namespace ManagementSimulator.Core.Services
             return new SecondManagerResponseDto
             {
                 SecondManagerEmployeeId = secondManager.SecondManagerEmployeeId,
-                SecondManagerEmployee = new UserResponseDto
-                {
-                    Id = secondManager.SecondManagerEmployee.Id,
-                    FirstName = secondManager.SecondManagerEmployee.FirstName,
-                    LastName = secondManager.SecondManagerEmployee.LastName,
-                    Email = secondManager.SecondManagerEmployee.Email
-                },
+                SecondManagerEmployeeName = $"{secondManager.SecondManagerEmployee.FirstName} {secondManager.SecondManagerEmployee.LastName}",
+                SecondManagerEmployeeEmail = secondManager.SecondManagerEmployee.Email,
                 ReplacedManagerId = secondManager.ReplacedManagerId,
-                ReplacedManager = new UserResponseDto
-                {
-                    Id = secondManager.ReplacedManager.Id,
-                    FirstName = secondManager.ReplacedManager.FirstName,
-                    LastName = secondManager.ReplacedManager.LastName,
-                    Email = secondManager.ReplacedManager.Email
-                },
+                ReplacedManagerName = $"{secondManager.ReplacedManager.FirstName} {secondManager.ReplacedManager.LastName}",
+                ReplacedManagerEmail = secondManager.ReplacedManager.Email,
                 StartDate = secondManager.StartDate,
                 EndDate = secondManager.EndDate,
                 IsActive = secondManager.IsActive
