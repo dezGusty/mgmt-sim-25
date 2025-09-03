@@ -1,0 +1,723 @@
+<main class="min-h-screen bg-gray-50">
+  <custom-navbar></custom-navbar>
+
+  <div class="p-6 container mx-auto">
+    <!-- Header with Back Button -->
+    <div class="flex items-center mb-6">
+      <button
+        (click)="goBack()"
+        class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Project Management
+      </button>
+      <h1 class="text-2xl font-bold text-gray-900 ml-4">
+        {{ project?.name || 'Project Details' }}
+      </h1>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Loading project details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm text-red-800">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoading && project" class="space-y-6">
+      <!-- Project Information Card -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Project Information</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div>
+            <label class="text-sm font-medium text-gray-500">Start Date</label>
+            <p class="text-gray-900">{{ formatDate(project.startDate) }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">End Date</label>
+            <p class="text-gray-900">{{ formatDate(project.endDate) }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Budgeted FTEs</label>
+            <p class="text-gray-900">{{ project.budgetedFTEs }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Remaining FTEs</label>
+            <p class="text-gray-900 font-semibold" [ngClass]="calculateRemainingFTEs() <= 0 ? 'text-red-600' : 'text-green-600'">
+              {{ calculateRemainingFTEs().toFixed(2) }}
+            </p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500 block mb-1">Status</label>
+            <span [ngClass]="project.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+              {{ project.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex">
+            <button
+              (click)="setActiveTab('view')"
+              [class]="activeTab === 'view' 
+                ? 'border-blue-500 text-blue-600 bg-blue-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+            >
+              View Employees
+            </button>
+            <button
+              (click)="setActiveTab('edit')"
+              [class]="activeTab === 'edit' 
+                ? 'border-indigo-500 text-indigo-600 bg-indigo-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [disabled]="!canModify"
+            >
+              Edit Project
+            </button>
+            <button
+              (click)="setActiveTab('assign')"
+              [class]="activeTab === 'assign' 
+                ? 'border-green-500 text-green-600 bg-green-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [disabled]="!canAssign"
+              [title]="!canAssign ? 'Cannot assign employees to inactive projects' : ''"
+            >
+              Assign Employees
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+          <!-- View Tab -->
+          <div *ngIf="activeTab === 'view'">
+            <!-- View Mode Toggle -->
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex gap-2">
+                <button
+                  (click)="setViewMode('table')"
+                  [class]="viewMode === 'table' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
+                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
+                >
+                  Table View
+                </button>
+                <button
+                  (click)="setViewMode('cards')"
+                  [class]="viewMode === 'cards' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
+                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
+                >
+                  Cards View
+                </button>
+              </div>
+
+              <!-- Search -->
+              <div class="relative max-w-md">
+                <svg
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+                <input
+                  type="text"
+                  [value]="searchTerm"
+                  (input)="onSearchTermChange($any($event.target).value || '')"
+                  placeholder="Search by name or job title..."
+                  class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                />
+              </div>
+            </div>
+
+            <!-- Table View -->
+            <div *ngIf="viewMode === 'table'" class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Employee Name
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job Title
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Employment Type
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Allocation %
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hours/Week
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr *ngFor="let projectUser of filteredProjectUsers" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ getUserFullName(projectUser.user) }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ projectUser.user?.jobTitleName || 'N/A' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ getEmploymentTypeDisplay(projectUser.user?.employmentType) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ (projectUser.timePercentagePerProject || projectUser.assignedPercentage || 0) }}%
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ calculateHoursPerWeek(projectUser.timePercentagePerProject || projectUser.assignedPercentage, projectUser.user?.employmentType) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cards View -->
+            <div *ngIf="viewMode === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                *ngFor="let projectUser of filteredProjectUsers"
+                class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6"
+              >
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span class="text-blue-600 font-medium text-sm">
+                        {{ getUserInitials(projectUser.user) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      {{ getUserFullName(projectUser.user) }}
+                    </p>
+                    <p class="text-sm text-gray-500 truncate">
+                      {{ projectUser.user?.jobTitleName || 'N/A' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-between items-center">
+                  <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-900">
+                      {{ (projectUser.timePercentagePerProject || projectUser.assignedPercentage || 0) }}%
+                    </p>
+                    <p class="text-xs text-gray-500">Allocation</p>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-900">
+                      {{ calculateHoursPerWeek(projectUser.timePercentagePerProject || projectUser.assignedPercentage, projectUser.user?.employmentType) }}
+                    </p>
+                    <p class="text-xs text-gray-500">Hours/Week</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="filteredProjectUsers.length === 0" class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No people assigned</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                {{ searchTerm ? 'No people match your search criteria.' : 'This project has no people assigned yet.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Edit Tab -->
+          <div *ngIf="activeTab === 'edit'">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Edit Project Details</h3>
+            
+            <div class="max-w-4xl">
+              <form class="space-y-6">
+                <!-- Project Name - Full Width -->
+                <div class="grid grid-cols-1">
+                  <div>
+                    <label for="projectName" class="block text-sm font-medium text-gray-700 mb-2">
+                      Project Name
+                    </label>
+                    <input
+                      type="text"
+                      id="projectName"
+                      [(ngModel)]="editProjectName"
+                      name="projectName"
+                      [disabled]="!canModify"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter project name"
+                    />
+                  </div>
+                </div>
+
+                <!-- Dates and FTEs - Two Column Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Start Date -->
+                  <div>
+                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-2">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      id="startDate"
+                      [(ngModel)]="editStartDate"
+                      name="startDate"
+                      [disabled]="!canModify"
+                      [min]="getTodayDateString()"
+                      (change)="onStartDateChange()"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <!-- End Date -->
+                  <div>
+                    <label for="endDate" class="block text-sm font-medium text-gray-700 mb-2">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      id="endDate"
+                      [(ngModel)]="editEndDate"
+                      name="endDate"
+                      [disabled]="!canModify"
+                      [min]="getMinEndDate()"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <!-- Budget FTE - Single Column Layout -->
+                <div class="grid grid-cols-1">
+                  <!-- Budgeted FTEs -->
+                  <div>
+                    <label for="budgetedFTEs" class="block text-sm font-medium text-gray-700 mb-2">
+                      Budgeted FTEs
+                    </label>
+                    <input
+                      type="number"
+                      id="budgetedFTEs"
+                      [(ngModel)]="editBudgetedFTEs"
+                      name="budgetedFTEs"
+                      [disabled]="!canModify"
+                      [min]="getCurrentAssignedFTEs()"
+                      step="0.25"
+                      [class]="'w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ' + (isBudgetedFTEsBelowAssigned() ? 'border-red-300 bg-red-50' : 'border-gray-300')"
+                      placeholder="Enter budgeted FTEs"
+                    />
+                    <!-- Warning message for budgeted FTEs below assigned -->
+                    <div *ngIf="isBudgetedFTEsBelowAssigned()" class="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <div class="flex">
+                        <svg class="w-5 h-5 text-yellow-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                          <p class="text-sm text-yellow-800 font-medium">Warning: Budgeted FTEs cannot be decreased below current assigned FTEs</p>
+                          <p class="text-xs text-yellow-700 mt-1">
+                            Current assigned FTEs: {{ getCurrentAssignedFTEs().toFixed(2) }}. 
+                            Please ensure budgeted FTEs is at least {{ getCurrentAssignedFTEs().toFixed(2) }} or remove some employee assignments first.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Project Status -->
+                <div class="grid grid-cols-1">
+                  <div class="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      [(ngModel)]="editIsActive"
+                      name="isActive"
+                      [disabled]="!canModify"
+                      (change)="onProjectActiveStatusChange()"
+                      class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                    <label for="isActive" class="text-sm font-medium text-gray-700">
+                      Project is Active
+                    </label>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1 ml-7">
+                    Inactive projects will not appear in assignment lists and cannot have new employees assigned.
+                  </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200" *ngIf="canModify">
+                  <button
+                    type="button"
+                    (click)="resetProjectEditForm()"
+                    class="px-6 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    (click)="saveProjectDetails()"
+                    [disabled]="!isProjectFormValid()"
+                    class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+
+                <!-- Read-only message -->
+                <div *ngIf="!canModify" class="text-sm text-gray-500 text-center py-8 bg-gray-50 rounded-md border border-gray-200">
+                  <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-7V8m0 0V6m0 2h2m-2 0H10"></path>
+                  </svg>
+                  You are in view-only mode. Project details cannot be modified.
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Assign Tab -->
+          <div *ngIf="activeTab === 'assign'">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium text-gray-900">Employee Assignment Management</h3>
+              <div class="flex items-center space-x-3">
+                <!-- Save Changes Button -->
+                <button
+                  (click)="saveAssignmentChanges()"
+                  [disabled]="!canAssign || !hasPendingChanges()"
+                  [class]="canAssign && hasPendingChanges() 
+                    ? 'bg-green-600 text-white hover:bg-green-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                  class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  Save Changes
+                </button>
+                <!-- Cancel Changes Button -->
+                <button
+                  (click)="cancelAssignmentChanges()"
+                  [disabled]="!canAssign || !hasPendingChanges()"
+                  [class]="canAssign && hasPendingChanges() 
+                    ? 'bg-red-600 text-white hover:bg-red-700' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                  class="px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  Cancel Changes
+                </button>
+              </div>
+            </div>
+
+            <!-- Inactive Project Warning -->
+            <div *ngIf="!canAssign && canModify" class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-amber-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                  <h4 class="text-amber-800 font-medium">Project is Inactive</h4>
+                  <p class="text-amber-700 text-sm mt-1">
+                    Employee assignments are disabled for inactive projects. To make assignments, please activate the project in the "Edit Project" tab first.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project Capacity Overview -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 border border-blue-200">
+              <h4 class="font-semibold text-blue-900 mb-3 text-lg">Project Capacity Overview</h4>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                  <p class="text-2xl font-bold text-blue-600">{{ project?.budgetedFTEs || 0 }}</p>
+                  <p class="text-sm text-blue-800">Budgeted FTEs</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-bold text-green-600">{{ getCurrentAssignedFTEs() }}</p>
+                  <p class="text-sm text-green-800">Current Assigned</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-bold text-orange-600">{{ getPreviewAssignedFTEs() }}</p>
+                  <p class="text-sm text-orange-800">Preview Assigned</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-2xl font-bold" [ngClass]="getPreviewRemainingFTEs() >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ getPreviewRemainingFTEs() }}
+                  </p>
+                  <p class="text-sm text-gray-600">Preview Remaining</p>
+                </div>
+              </div>
+              
+              <!-- Capacity Progress Bar -->
+              <div class="mt-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                  <span>Capacity Usage</span>
+                  <span>{{ getCapacityUsagePercentage() }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    class="h-3 rounded-full transition-all duration-300"
+                    [ngClass]="getCapacityUsagePercentage() > 100 ? 'bg-red-500' : 
+                               getCapacityUsagePercentage() > 90 ? 'bg-yellow-500' : 'bg-green-500'"
+                    [style.width.%]="Math.min(getCapacityUsagePercentage(), 100)">
+                  </div>
+                </div>
+                <div *ngIf="getCapacityUsagePercentage() > 100" class="text-red-600 text-sm mt-1">
+                  ⚠️ Capacity exceeded! Reduce assignments before saving.
+                </div>
+              </div>
+            </div>
+
+            <!-- Two-Panel Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              <!-- Left Panel: Available Employees -->
+              <div class="bg-white rounded-lg shadow-md">
+                <div class="p-4 border-b border-gray-200">
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-semibold text-gray-900">Available Employees</h4>
+                    <span class="text-sm text-gray-500">{{ availableUsersData?.totalCount || 0 }} total</span>
+                  </div>
+                  
+                  <!-- Search and Filters -->
+                  <div class="space-y-3">
+                    <div class="relative">
+                      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                      <input
+                        type="text"
+                        [(ngModel)]="availableUsersSearch"
+                        (input)="onAvailableUsersSearchChange()"
+                        placeholder="Search by name or job title..."
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Available Users List -->
+                <div class="p-4 max-h-96 overflow-y-auto">
+                  <div *ngIf="isLoadingAvailableUsers" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p class="text-gray-600 text-sm">Loading available employees...</p>
+                  </div>
+
+                  <div *ngIf="!isLoadingAvailableUsers && availableUsersData?.data?.length === 0" class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No available employees</h3>
+                    <p class="mt-1 text-sm text-gray-500">All employees are either assigned or unavailable.</p>
+                  </div>
+
+                  <div *ngIf="!isLoadingAvailableUsers && availableUsersData && availableUsersData.data && availableUsersData.data.length > 0" class="space-y-3">
+                    <div 
+                      *ngFor="let user of availableUsersData.data" 
+                      class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <p class="font-medium text-gray-900">{{ getUserFullName(user) }}</p>
+                          <p class="text-sm text-gray-500">{{ user.jobTitleName || 'N/A' }}</p>
+                          <p class="text-xs text-gray-400">{{ user.departmentName || 'N/A' }}</p>
+                          <div class="mt-2 flex items-center space-x-4 text-xs">
+                            <span class="text-blue-600">
+                              Available: {{ (user.remainingAvailability || 0) * 100 }}%
+                            </span>
+                            <span class="text-gray-500">
+                              {{ getEmploymentTypeDisplay(user.employmentType) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="ml-4 flex flex-col space-y-2">
+                          <!-- Allocation Selector -->
+                          <select
+                            [(ngModel)]="selectedAllocation[user.id]"
+                            [disabled]="!canAssign || getAvailablePercentagesForUser(user).length === 0"
+                            class="text-xs px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          >
+                            <option *ngFor="let percentage of getAvailablePercentagesForUser(user)" [value]="percentage">
+                              {{ percentage }}%
+                            </option>
+                          </select>
+                          
+                          <!-- Capacity warning -->
+                          <div *ngIf="getAvailablePercentagesForUser(user).length === 0" class="text-xs text-red-500 text-center">
+                            No capacity available
+                          </div>
+                          <!-- Assign Button -->
+                          <button
+                            (click)="addToPendingAssignments(user, selectedAllocation[user.id])"
+                            [disabled]="!canAssign || !selectedAllocation[user.id] || wouldExceedCapacity(user, selectedAllocation[user.id]) || isPendingAssignment(user.id)"
+                            [class]="canAssign && selectedAllocation[user.id] && !wouldExceedCapacity(user, selectedAllocation[user.id]) && !isPendingAssignment(user.id)
+                              ? 'bg-green-600 text-white hover:bg-green-700' 
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                            class="px-3 py-1 rounded text-xs font-medium transition-colors duration-200"
+                          >
+                            {{ isPendingAssignment(user.id) ? 'Pending' : 'Assign' }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Pagination -->
+                  <div *ngIf="!isLoadingAvailableUsers && availableUsersData && availableUsersData.totalPages > 1" class="mt-4 flex justify-between items-center">
+                    <button
+                      (click)="previousAvailablePage()"
+                      [disabled]="availableUsersCurrentPage <= 1"
+                      class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <span class="text-sm text-gray-600">
+                      Page {{ availableUsersCurrentPage }} of {{ availableUsersData.totalPages }}
+                    </span>
+                    <button
+                      (click)="nextAvailablePage()"
+                      [disabled]="availableUsersCurrentPage >= (availableUsersData.totalPages || 1)"
+                      class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Panel: Assigned Employees Preview -->
+              <div class="bg-white rounded-lg shadow-md">
+                <div class="p-4 border-b border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-semibold text-gray-900">Assignment Preview</h4>
+                    <span class="text-sm text-gray-500">{{ getAssignmentPreviewCount() }} assigned</span>
+                  </div>
+                </div>
+
+                <div class="p-4 max-h-96 overflow-y-auto">
+                  <div *ngIf="getAssignmentPreviewCount() === 0" class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No assignments</h3>
+                    <p class="mt-1 text-sm text-gray-500">Start assigning employees to see them here.</p>
+                  </div>
+
+                  <div *ngIf="getAssignmentPreviewCount() > 0" class="space-y-3">
+                    
+                    <!-- Current Assignments -->
+                    <div *ngIf="projectUsers.length > 0">
+                      <h5 class="text-sm font-medium text-gray-700 mb-2">Current Assignments</h5>
+                      <div 
+                        *ngFor="let projectUser of projectUsers" 
+                        class="border border-gray-200 rounded-lg p-3 bg-blue-50"
+                      >
+                        <div class="flex justify-between items-start">
+                          <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ getUserFullName(projectUser.user) }}</p>
+                            <p class="text-sm text-gray-500">{{ projectUser.user?.jobTitleName || 'N/A' }}</p>
+                            <p class="text-xs text-blue-600 mt-1">
+                              Current: {{ projectUser.timePercentagePerProject || 0 }}%
+                            </p>
+                          </div>
+                          <button
+                            (click)="addToPendingRemovals(projectUser)"
+                            [disabled]="!canAssign || isPendingRemoval(projectUser.userId)"
+                            [class]="canAssign && !isPendingRemoval(projectUser.userId)
+                              ? 'text-red-600 hover:text-red-800' 
+                              : 'text-gray-400 cursor-not-allowed'"
+                            class="text-xs font-medium transition-colors duration-200"
+                          >
+                            {{ isPendingRemoval(projectUser.userId) ? 'Removing...' : 'Remove' }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pending New Assignments -->
+                    <div *ngIf="pendingAssignments.length > 0">
+                      <h5 class="text-sm font-medium text-gray-700 mb-2 mt-4">New Assignments</h5>
+                      <div 
+                        *ngFor="let assignment of pendingAssignments" 
+                        class="border border-green-200 rounded-lg p-3 bg-green-50"
+                      >
+                        <div class="flex justify-between items-start">
+                          <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ getUserFullName(assignment.user) }}</p>
+                            <p class="text-sm text-gray-500">{{ assignment.user?.jobTitleName || 'N/A' }}</p>
+                            <p class="text-xs text-green-600 mt-1">
+                              New: {{ assignment.percentage }}%
+                            </p>
+                          </div>
+                          <button
+                            (click)="removeFromPendingAssignments(assignment.user.id)"
+                            [disabled]="!canAssign"
+                            class="text-red-600 hover:text-red-800 text-xs font-medium transition-colors duration-200"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Pending Removals -->
+                    <div *ngIf="pendingRemovals.length > 0">
+                      <h5 class="text-sm font-medium text-gray-700 mb-2 mt-4">Pending Removals</h5>
+                      <div 
+                        *ngFor="let removal of pendingRemovals" 
+                        class="border border-red-200 rounded-lg p-3 bg-red-50"
+                      >
+                        <div class="flex justify-between items-start">
+                          <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ getUserFullName(removal.user) }}</p>
+                            <p class="text-sm text-gray-500">{{ removal.user?.jobTitleName || 'N/A' }}</p>
+                            <p class="text-xs text-red-600 mt-1">
+                              Removing: {{ removal.originalPercentage }}%
+                            </p>
+                          </div>
+                          <button
+                            (click)="removeFromPendingRemovals(removal.userId)"
+                            [disabled]="!canAssign"
+                            class="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors duration-200"
+                          >
+                            Restore
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

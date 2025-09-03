@@ -30,5 +30,8 @@ namespace ManagementSimulator.Core.Dtos.Responses.User
         public int? LeaveDaysLeftCurrentYear { get; set; }
         public DateTime? DateOfEmployment { get; set; }
         public int? Vacation { get; set; }
+        public EmploymentType EmploymentType { get; set; }
+        public float TotalAvailability { get; set; }
+        public float RemainingAvailability { get; set; }
     }
 }

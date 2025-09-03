@@ -1,0 +1,107 @@
+
+.project-details-container {
+  min-height: calc(100vh - 64px);
+}
+
+.tab-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.tab-button:hover {
+  transform: translateY(-1px);
+}
+
+.project-user-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.project-user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.project-user-row {
+  transition: background-color 0.2s ease-in-out;
+}
+
+
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+
+.search-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+
+.btn-loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.status-badge {
+  transition: all 0.2s ease-in-out;
+}
+
+
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+
+@media (max-width: 768px) {
+  .project-details-container {
+    padding: 1rem;
+  }
+  
+  .tab-button {
+    font-size: 0.875rem;
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+
+.modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #a0aec0;
+}

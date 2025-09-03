@@ -1,10 +1,30 @@
 ﻿using ManagementSimulator.Database.Context;
 using ManagementSimulator.Database.Entities;
+using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Infrastructure.Seeding
 {
     public static class PopulateSeed
     {
+        private static void SetAvailabilityForEmploymentType(User user)
+        {
+            switch (user.EmploymentType)
+            {
+                case EmploymentType.FullTime:
+                    user.TotalAvailability = 1.0f;
+                    user.RemainingAvailability = 1.0f;
+                    break;
+                case EmploymentType.PartTime:
+                    user.TotalAvailability = 0.5f;
+                    user.RemainingAvailability = 0.5f;
+                    break;
+                default:
+                    user.TotalAvailability = 1.0f;
+                    user.RemainingAvailability = 1.0f;
+                    break;
+            }
+        }
+
         public static void Seed(MGMTSimulatorDbContext dbContext)
         {
             var departments = new List<Department>
@@ -221,7 +241,8 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     JobTitleId = jobTitlesList.First(jt => jt.Name == "CEO").Id,
                     DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
                     MustChangePassword = false,
-                    DateOfEmployment = new DateTime(2005, 3, 1)
+                    DateOfEmployment = new DateTime(2005, 3, 1),
+                    EmploymentType = EmploymentType.FullTime
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
 
                 (new User {
@@ -232,7 +253,8 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     JobTitleId = jobTitlesList.First(jt => jt.Name == "COO").Id,
                     DepartmentId = departmentsList.First(d => d.Name == "Executive").Id,
                     MustChangePassword = false,
-                    DateOfEmployment = new DateTime(2008, 6, 15)
+                    DateOfEmployment = new DateTime(2008, 6, 15),
+                    EmploymentType = EmploymentType.PartTime
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
 
                 (new User {
@@ -243,7 +265,8 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     JobTitleId = jobTitlesList.First(jt => jt.Name == "CFO").Id,
                     DepartmentId = departmentsList.First(d => d.Name == "Finance").Id,
                     MustChangePassword = false,
-                    DateOfEmployment = new DateTime(2007, 2, 10)
+                    DateOfEmployment = new DateTime(2007, 2, 10),
+                    EmploymentType = EmploymentType.FullTime
                 }, new List<int> { adminRoleId, managerRoleId, employeeRoleId }),
 
                 (new User {
@@ -1233,13 +1256,16 @@ namespace ManagementSimulator.Infrastructure.Seeding
             {
                 if (!dbContext.Users.Any(u => u.Email == user.Email))
                 {
+                    // Set availability based on employment type
+                    SetAvailabilityForEmploymentType(user);
+
                     dbContext.Users.Add(user);
-                    dbContext.SaveChanges(); 
-                    
+                    dbContext.SaveChanges();
+
                     foreach (var roleId in roleIds)
                     {
                         if (roleId == 0) continue;
-                        
+
                         dbContext.EmployeeRolesUsers.Add(new EmployeeRoleUser
                         {
                             UsersId = user.Id,
@@ -1249,7 +1275,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     }
                 }
             }
-            
+
             dbContext.SaveChanges();
 
             var rnd = new Random();
@@ -1269,11 +1295,14 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     Email = email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("pass123"),
                     JobTitleId = job.Id,
-                    DepartmentId = department.Id
+                    DepartmentId = department.Id,
+                    EmploymentType = EmploymentType.FullTime
                 };
 
-                dbContext.Users.Add(user); // departamente deasupra
-                dbContext.SaveChanges();  
+                SetAvailabilityForEmploymentType(user);
+
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
 
                 dbContext.EmployeeRolesUsers.Add(new EmployeeRoleUser
                 {
@@ -1305,11 +1334,11 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (itManager != null)
             {
                 var itEmployees = allUsers.Where(u => new[] {
-                    "jennifer.martinez@simulator.com", "james.rodriguez@simulator.com", 
-                    "lisa.hernandez@simulator.com", "christopher.lopez@simulator.com", 
+                    "jennifer.martinez@simulator.com", "james.rodriguez@simulator.com",
+                    "lisa.hernandez@simulator.com", "christopher.lopez@simulator.com",
                     "brandon.allen@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in itEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, itManager.Id));
@@ -1320,10 +1349,10 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (engManager != null)
             {
                 var engEmployees = allUsers.Where(u => new[] {
-                    "alexis.carter@simulator.com", "blake.roberts@simulator.com", 
+                    "alexis.carter@simulator.com", "blake.roberts@simulator.com",
                     "morgan.gomez@simulator.com", "cameron.phillips@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in engEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, engManager.Id));
@@ -1334,10 +1363,10 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (salesManager != null)
             {
                 var salesEmployees = allUsers.Where(u => new[] {
-                    "victoria.watson@simulator.com", "adam.brooks@simulator.com", 
+                    "victoria.watson@simulator.com", "adam.brooks@simulator.com",
                     "emma.price@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in salesEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, salesManager.Id));
@@ -1348,10 +1377,10 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (marketingManager != null)
             {
                 var marketingEmployees = allUsers.Where(u => new[] {
-                    "henry.powell@simulator.com", "amelia.long@simulator.com", 
+                    "henry.powell@simulator.com", "amelia.long@simulator.com",
                     "ethan.flores@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in marketingEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, marketingManager.Id));
@@ -1362,10 +1391,10 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (hrManager != null)
             {
                 var hrEmployees = allUsers.Where(u => new[] {
-                    "abigail.simmons@simulator.com", "gabriel.foster@simulator.com", 
+                    "abigail.simmons@simulator.com", "gabriel.foster@simulator.com",
                     "scarlett.alexander@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in hrEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, hrManager.Id));
@@ -1376,10 +1405,10 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (financeManager != null)
             {
                 var financeEmployees = allUsers.Where(u => new[] {
-                    "grace.griffin@simulator.com", "sebastian.diaz@simulator.com", 
+                    "grace.griffin@simulator.com", "sebastian.diaz@simulator.com",
                     "jack.myers@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in financeEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, financeManager.Id));
@@ -1392,7 +1421,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var csEmployees = allUsers.Where(u => new[] {
                     "luke.sullivan@simulator.com", "layla.wallace@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in csEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, csManager.Id));
@@ -1405,7 +1434,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var opsEmployees = allUsers.Where(u => new[] {
                     "nora.tucker@simulator.com", "leo.parker@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in opsEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, opsManager.Id));
@@ -1418,7 +1447,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var dataEmployees = allUsers.Where(u => new[] {
                     "vanessa.reed@simulator.com", "carlos.bailey@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in dataEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, dataManager.Id));
@@ -1431,7 +1460,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var qaEmployees = allUsers.Where(u => new[] {
                     "aurora.white@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in qaEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, qaManager.Id));
@@ -1444,7 +1473,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var devopsEmployees = allUsers.Where(u => new[] {
                     "penelope.anderson@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in devopsEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, devopsManager.Id));
@@ -1457,7 +1486,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var productEmployees = allUsers.Where(u => new[] {
                     "addison.martin@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in productEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, productManager.Id));
@@ -1470,7 +1499,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var legalEmployees = allUsers.Where(u => new[] {
                     "elena.rodriguez@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in legalEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, legalManager.Id));
@@ -1483,7 +1512,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 var rdEmployees = allUsers.Where(u => new[] {
                     "genesis.green@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var emp in rdEmployees)
                 {
                     employeeManagerRelationships.Add((emp.Id, rdManager.Id));
@@ -1494,7 +1523,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
             if (ceo != null)
             {
                 var departmentManagers = allUsers.Where(u => new[] {
-                    "david.garcia@simulator.com", "connor.mitchell@simulator.com", 
+                    "david.garcia@simulator.com", "connor.mitchell@simulator.com",
                     "gregory.james@simulator.com", "charlotte.perry@simulator.com",
                     "lucas.butler@simulator.com", "owen.russell@simulator.com",
                     "zoey.graham@simulator.com", "wyatt.west@simulator.com",
@@ -1502,7 +1531,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     "grayson.martinez@simulator.com", "adrian.moore@simulator.com",
                     "lincoln.garcia@simulator.com", "mateo.flores@simulator.com"
                 }.Contains(u.Email)).ToList();
-                
+
                 foreach (var manager in departmentManagers)
                 {
                     employeeManagerRelationships.Add((manager.Id, ceo.Id));
@@ -1540,7 +1569,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 if (random.Next(1, 101) <= 70 && allManagers.Any())
                 {
                     var randomManager = allManagers[random.Next(allManagers.Count)];
-                    
+
                     if (!existingRelationships.Contains(new { EmployeeId = testUser.Id, ManagerId = randomManager.Id }) &&
                         !newRelationships.Any(nr => nr.EmployeeId == testUser.Id && nr.ManagerId == randomManager.Id))
                     {
@@ -1558,7 +1587,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 .Any(eru => eru.UsersId == u.Id && eru.RolesId == managerRoleId && eru.DeletedAt == null))
                 .ToList();
 
-            var testEmployeesWithoutManagers = testUsers.Where(u => 
+            var testEmployeesWithoutManagers = testUsers.Where(u =>
                 !existingRelationships.Any(er => er.EmployeeId == u.Id) &&
                 !newRelationships.Any(nr => nr.EmployeeId == u.Id))
                 .ToList();
@@ -1567,7 +1596,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
             {
                 var teamSize = random.Next(3, 9);
                 var availableEmployees = testEmployeesWithoutManagers.Take(teamSize).ToList();
-                
+
                 foreach (var employee in availableEmployees)
                 {
                     if (!existingRelationships.Contains(new { EmployeeId = employee.Id, ManagerId = testManager.Id }) &&
@@ -1579,7 +1608,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                             ManagerId = testManager.Id,
                             CreatedAt = DateTime.UtcNow
                         });
-                        
+
                         testEmployeesWithoutManagers.Remove(employee);
                     }
                 }
@@ -1590,7 +1619,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                 if (allManagers.Any())
                 {
                     var randomManager = allManagers[random.Next(allManagers.Count)];
-                    
+
                     dbContext.EmployeeManagers.Add(new EmployeeManager
                     {
                         EmployeeId = employee.Id,

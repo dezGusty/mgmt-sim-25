@@ -25,7 +25,10 @@ namespace ManagementSimulator.Core.Mapping
                     .ToList(),
                 JobTitleId = user.JobTitleId,
                 JobTitleName = user.Title.Name,
-                Vacation = user.Vacation
+                Vacation = user.Vacation,
+                EmploymentType = user.EmploymentType,
+                TotalAvailability = user.TotalAvailability,
+                RemainingAvailability = user.RemainingAvailability
             };
         }
     }
