@@ -929,6 +929,46 @@ export class AdminUserRelationships implements OnInit {
     return this.activeSecondManagers.find(sm => sm.replacedManagerId === managerId) || null;
   }
 
+  getSecondManagerDaysRemaining(secondManager: ISecondManagerViewModel): number {
+    const today = new Date();
+    const end = new Date(secondManager.endDate);
+    const diffMs = end.getTime() - today.getTime();
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(0, days);
+  }
+
+  getSecondManagerTotalDays(secondManager: ISecondManagerViewModel): number {
+    const start = new Date(secondManager.startDate);
+    const end = new Date(secondManager.endDate);
+    const diffMs = end.getTime() - start.getTime();
+    const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    return days;
+  }
+
+  getSecondManagerProgressPercent(secondManager: ISecondManagerViewModel): number {
+    const start = new Date(secondManager.startDate).getTime();
+    const end = new Date(secondManager.endDate).getTime();
+    const now = Date.now();
+    if (now <= start) return 0;
+    if (now >= end) return 100;
+    const pct = ((now - start) / (end - start)) * 100;
+    return Math.max(0, Math.min(100, Math.round(pct)));
+  }
+
+  getSecondManagerStatusColor(secondManager: ISecondManagerViewModel): string {
+    const days = this.getSecondManagerDaysRemaining(secondManager);
+    if (days <= 1) return 'text-red-600 bg-red-50 border-red-200';
+    if (days <= 3) return 'text-amber-700 bg-amber-50 border-amber-200';
+    return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+  }
+
+  getSecondManagerDotClass(secondManager: ISecondManagerViewModel): string {
+    const days = this.getSecondManagerDaysRemaining(secondManager);
+    if (days <= 1) return 'bg-red-500';
+    if (days <= 3) return 'bg-amber-500';
+    return 'bg-emerald-500';
+  }
+
   openSecondManagerModal(employee: { id: number; name: string; email: string }, managerId: number): void {
     const existingSecondManager = this.getActiveSecondManagerForManager(managerId);
     if (existingSecondManager) {
