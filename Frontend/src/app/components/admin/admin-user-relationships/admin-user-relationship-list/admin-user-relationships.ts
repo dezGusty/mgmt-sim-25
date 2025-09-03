@@ -52,6 +52,16 @@ export class AdminUserRelationships implements OnInit {
     endDate: ''
   };
 
+  // Toast success messaging
+  showSuccessMessage: boolean = false;
+  successMessage: string = '';
+  private toastTimeoutRef: any = null;
+
+  // Confirm Remove Second Manager modal state
+  showConfirmRemoveSecondManager: boolean = false;
+  pendingRemoveSecondManager: ISecondManagerViewModel | null = null;
+  removeSecondManagerErrorMessage: string = '';
+
   searchTerm: string = '';
   searchBy: UserSearchType = UserSearchType.Global;
   sortDescending: boolean = false;
@@ -1005,7 +1015,7 @@ export class AdminUserRelationships implements OnInit {
 
         this.closeSecondManagerModal();
 
-        alert('Second manager created successfully!');
+        this.showToast('Second manager created successfully!');
       },
       error: (err) => {
         this.isSubmittingSecondManager = false;
@@ -1021,11 +1031,18 @@ export class AdminUserRelationships implements OnInit {
   }
 
   removeSecondManager(secondManager: ISecondManagerViewModel): void {
-    const confirmMessage = `Are you sure you want to remove ${secondManager.name} as second manager? This action cannot be undone.`;
+    this.pendingRemoveSecondManager = secondManager;
+    this.removeSecondManagerErrorMessage = '';
+    this.showConfirmRemoveSecondManager = true;
+  }
 
-    if (!confirm(confirmMessage)) {
+  confirmRemoveSecondManager(): void {
+    if (!this.pendingRemoveSecondManager) {
+      this.cancelRemoveSecondManager();
       return;
     }
+
+    const secondManager = this.pendingRemoveSecondManager;
 
     this.secondManagerService.deleteSecondManager(
       secondManager.id,
@@ -1037,7 +1054,9 @@ export class AdminUserRelationships implements OnInit {
 
         this.loadActiveSecondManagers();
 
-        alert(`${secondManager.name} has been removed as second manager successfully!`);
+        this.showToast(`${secondManager.name} has been removed as second manager successfully!`);
+        this.showConfirmRemoveSecondManager = false;
+        this.pendingRemoveSecondManager = null;
       },
       error: (err: any) => {
         console.error('Failed to remove second manager:', err);
@@ -1047,9 +1066,37 @@ export class AdminUserRelationships implements OnInit {
           errorMessage = err.error.message;
         }
 
-        alert(errorMessage);
+        this.removeSecondManagerErrorMessage = errorMessage;
       }
     });
+  }
+
+  cancelRemoveSecondManager(): void {
+    this.showConfirmRemoveSecondManager = false;
+    this.pendingRemoveSecondManager = null;
+    this.removeSecondManagerErrorMessage = '';
+  }
+
+  private showToast(message: string): void {
+    this.successMessage = message;
+    this.showSuccessMessage = true;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+    }
+    this.toastTimeoutRef = setTimeout(() => {
+      this.showSuccessMessage = false;
+      this.successMessage = '';
+      this.toastTimeoutRef = null;
+    }, 2000);
+  }
+
+  closeSuccessMessage(): void {
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+      this.toastTimeoutRef = null;
+    }
+    this.showSuccessMessage = false;
+    this.successMessage = '';
   }
 
   openEditSecondManagerModal(secondManager: ISecondManagerViewModel): void {
@@ -1128,7 +1175,7 @@ export class AdminUserRelationships implements OnInit {
 
         this.closeEditSecondManagerModal();
 
-        alert('Second manager end date updated successfully!');
+        this.showToast('Second manager end date updated successfully!');
       },
       error: (err) => {
         this.isSubmittingEditSecondManager = false;

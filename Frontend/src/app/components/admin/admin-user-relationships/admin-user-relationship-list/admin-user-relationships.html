@@ -1,5 +1,15 @@
 <!-- User Relationships Component -->
 <div class="space-y-6">
+  <!-- Success Toast (top-right) -->
+  <div *ngIf="showSuccessMessage"
+    class="fixed top-20 right-4 z-70 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in flex items-center gap-3">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="closeSuccessMessage()"
+      class="ml-4 text-white hover:text-gray-200 font-bold text-lg leading-none">×</button>
+  </div>
   <!-- Search Bar Section -->
   <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
     <div class="flex flex-wrap items-center gap-3">
@@ -360,13 +370,13 @@
                       - {{ manager.department?.name }}
                     </div>
                     <div class="flex items-center space-x-2 mt-1">
-                      <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager Principal</span>
+                      <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Main Manager</span>
                       <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Manager Secund (dacă există) - în stânga, după manager principal -->
+                <!-- Second Manager - in left, next to the main one -->
                 <div *ngIf="getActiveSecondManagerForManager(manager.id) as secondManager"
                   class="flex items-center space-x-2 flex-shrink-0">
                   <img class="h-8 w-8 rounded-full object-cover border border-gray-300" [src]="
@@ -388,7 +398,7 @@
                       "></span>
                     </div>
                     <div class="flex items-center space-x-1 mt-1">
-                      <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Manager Secund</span>
+                      <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Second Manager</span>
                       <button
                         class="text-blue-500 hover:text-blue-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-blue-50 transition-colors"
                         (click)="openEditSecondManagerModal(secondManager)" title="Edit second manager">
@@ -916,7 +926,8 @@
   <!-- Edit Second Manager Modal -->
   <div *ngIf="showEditSecondManagerModal" class="fixed inset-0 z-50 overflow-y-auto">
     <!-- Background overlay -->
-    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity" (click)="closeEditSecondManagerModal()">
+    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity"
+      (click)="closeEditSecondManagerModal()">
     </div>
 
     <!-- Modal dialog -->
@@ -941,7 +952,8 @@
             <div class="bg-gray-50 p-3 rounded-lg">
               <div class="text-sm font-medium text-gray-900">{{ selectedSecondManagerForEdit?.name }}</div>
               <div class="text-xs text-gray-500">{{ selectedSecondManagerForEdit?.email }}</div>
-              <div class="text-xs text-amber-600 mt-1">Temporarily replacing: {{ selectedSecondManagerForEdit?.replacedManagerName }}</div>
+              <div class="text-xs text-amber-600 mt-1">Temporarily replacing: {{
+                selectedSecondManagerForEdit?.replacedManagerName }}</div>
             </div>
 
             <!-- Current Period Info -->
@@ -968,7 +980,8 @@
           </div>
 
           <!-- Error Message -->
-          <div *ngIf="editSecondManagerErrorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div *ngIf="editSecondManagerErrorMessage"
+            class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {{ editSecondManagerErrorMessage }}
           </div>
 
@@ -990,4 +1003,41 @@
       </div>
     </div>
   </div>
+
+  <!-- Confirm Remove Second Manager Modal -->
+  <div *ngIf="showConfirmRemoveSecondManager"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div
+      class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-fade-in transform transition-all duration-300">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Confirm remove</h3>
+            <p class="text-sm text-gray-500">Are you sure you want to remove {{ pendingRemoveSecondManager?.name }} as
+              second manager?</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-gray-600">This action cannot be undone.</p>
+        <div *ngIf="removeSecondManagerErrorMessage"
+          class="mt-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{{ removeSecondManagerErrorMessage }}
+        </div>
+      </div>
+      <div class="p-4 border-t bg-gray-50 flex justify-end gap-3">
+        <button (click)="cancelRemoveSecondManager()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">Cancel</button>
+        <button (click)="confirmRemoveSecondManager()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">OK</button>
+      </div>
+    </div>
+  </div>
+
 </div>
