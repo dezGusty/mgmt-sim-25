@@ -599,6 +599,11 @@ export class ProjectDetails implements OnInit, OnDestroy {
       return false;
     }
     
+    // Check if budgeted FTEs is below current assigned FTEs
+    if (this.isBudgetedFTEsBelowAssigned()) {
+      return false;
+    }
+    
     // For existing projects, allow editing even if they started in the past
     // Only validate that start date is not unreasonably far in the past (e.g., more than 10 years)
     const today = new Date();
@@ -611,6 +616,12 @@ export class ProjectDetails implements OnInit, OnDestroy {
     tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
     
     return startDate >= tenYearsAgo;
+  }
+
+  isBudgetedFTEsBelowAssigned(): boolean {
+    if (!this.project) return false;
+    const currentAssignedFTEs = this.getCurrentAssignedFTEs();
+    return this.editBudgetedFTEs < currentAssignedFTEs;
   }
 
   saveProjectDetails() {
