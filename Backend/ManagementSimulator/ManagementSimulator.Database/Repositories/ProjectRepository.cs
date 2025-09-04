@@ -55,7 +55,8 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<Project> query = _dbContext.Projects
                 .Include(p => p.UserProjects)
-                .ThenInclude(up => up.User);
+                .ThenInclude(up => up.User)
+                .ThenInclude(u => u.Title);
 
             if (!tracking)
                 query = query.AsNoTracking();
@@ -172,6 +173,15 @@ namespace ManagementSimulator.Database.Repositories
             return await _dbContext.UserProjects
                 .Include(up => up.User)
                 .Where(up => up.ProjectId == projectId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<List<UserProject>> GetUserProjectsByUserIdAsync(int userId)
+        {
+            return await _dbContext.UserProjects
+                .Include(up => up.Project)
+                .Where(up => up.UserId == userId)
                 .AsNoTracking()
                 .ToListAsync();
         }

@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Projects;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
+using ManagementSimulator.Core.Dtos.Responses.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,6 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<bool> RemoveUserFromProjectAsync(int projectId, int userId);
         Task<UserProjectResponseDto?> UpdateUserProjectAssignmentAsync(int projectId, int userId, AssignUserToProjectRequestDto request);
         Task<List<UserProjectResponseDto>> GetProjectUsersAsync(int projectId);
+        Task<PagedResponseDto<UserResponseDto>> GetAvailableUsersForProjectAsync(int projectId, int page, int pageSize, string search);
     }
 }

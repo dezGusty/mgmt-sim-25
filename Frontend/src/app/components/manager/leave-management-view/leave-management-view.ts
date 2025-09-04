@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddRequests } from '../components/add-requests/add-requests';
@@ -9,6 +9,7 @@ import { ILeaveRequest } from '../../../models/leave-request';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-leave-management-view',
@@ -22,7 +23,7 @@ import { Auth } from '../../../services/authService/auth';
   templateUrl: './leave-management-view.html',
   styleUrl: './leave-management-view.css',
 })
-export class LeaveManagementView implements OnDestroy {
+export class LeaveManagementView implements OnDestroy, AfterViewInit {
   @ViewChild('addRequestsRef') addRequestsComponent!: AddRequests;
   showAddRequestForm = false;
   currentFilter: 'All' | 'Pending' | 'Approved' | 'Rejected' = 'Pending';
@@ -35,7 +36,13 @@ export class LeaveManagementView implements OnDestroy {
     distinctUntilChanged()
   );
 
-  constructor(private router: Router, private authService: Auth) {}
+  constructor(private router: Router, private authService: Auth, private route: ActivatedRoute) {
+    const employeeName = this.route.snapshot.queryParamMap.get('employeeName');
+    if (employeeName && employeeName.trim().length > 0) {
+      this.searchCriteria = 'employee';
+      this.searchTerm = employeeName;
+    }
+  }
 
   get isViewOnly(): boolean {
     return this.authService.isTemporarilyReplaced();
@@ -88,5 +95,11 @@ export class LeaveManagementView implements OnDestroy {
 
   ngOnDestroy() {
     this.searchTermSubject.complete();
+  }
+
+  ngAfterViewInit() {
+    if (this.searchTerm && this.searchTerm.trim().length > 0) {
+      setTimeout(() => this.searchTermSubject.next(this.searchTerm), 0);
+    }
   }
 }

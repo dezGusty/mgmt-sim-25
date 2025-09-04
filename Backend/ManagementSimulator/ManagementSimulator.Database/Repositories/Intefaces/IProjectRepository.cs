@@ -27,6 +27,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
             bool tracking = false);
         Task<UserProject?> GetUserProjectAsync(int userId, int projectId);
         Task<List<UserProject>> GetProjectUsersAsync(int projectId);
+        Task<List<UserProject>> GetUserProjectsByUserIdAsync(int userId);
         Task<UserProject> AddUserToProjectAsync(UserProject userProject);
         Task<bool> RemoveUserFromProjectAsync(int userId, int projectId);
         Task<bool> UpdateUserProjectAssignmentAsync(UserProject userProject);

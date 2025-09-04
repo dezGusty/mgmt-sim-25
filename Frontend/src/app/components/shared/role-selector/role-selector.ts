@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/authService/auth';
 import { CustomNavbar } from '../custom-navbar/custom-navbar';
+import { AnimatedBackground } from '../animated-background/animated-background';
 
 
 interface UserRole {
@@ -18,7 +19,7 @@ interface UserRole {
 
 @Component({
   selector: 'app-role-selector',
-  imports: [CommonModule, CustomNavbar],
+  imports: [CommonModule, CustomNavbar, AnimatedBackground],
   templateUrl: './role-selector.html',
   styleUrls: ['./role-selector.css'],
 })

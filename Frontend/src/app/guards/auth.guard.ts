@@ -4,6 +4,7 @@ import {
   Router,
   UrlTree,
   ActivatedRouteSnapshot,
+  RouterStateSnapshot,
 } from '@angular/router';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -12,14 +13,14 @@ import { environment } from '../../environments/environment';
 export class AuthGuard implements CanActivate {
   constructor(private router: Router) { }
 
-  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean | UrlTree> {
     try {
       const response = await fetch(`${environment.apiUrl}/Auth/me`, {
         credentials: 'include',
       });
 
       if (!response.ok) {
-        return this.router.parseUrl('/login');
+        return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
       }
 
       const data = await response.json();
@@ -51,7 +52,7 @@ export class AuthGuard implements CanActivate {
 
       return this.router.parseUrl('/role-selector');
     } catch {
-      return this.router.parseUrl('/login');
+      return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
     }
   }
 }

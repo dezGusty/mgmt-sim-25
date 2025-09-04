@@ -16,23 +16,31 @@ export class SecondManagerService {
     return this.http.get<any>(`${this.apiUrl}/me`, { withCredentials: true });
   }
 
-  getActiveSecondManagers(): Observable<ISecondManagerResponse[]> {
-    return this.http.get<ISecondManagerResponse[]>(`${this.apiUrl}/active`, { withCredentials: true });
+  getActiveSecondManagers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/active`, { withCredentials: true });
   }
 
-  getAllSecondManagers(): Observable<ISecondManagerResponse[]> {
-    return this.http.get<ISecondManagerResponse[]>(`${this.apiUrl}`, { withCredentials: true });
+  getAllSecondManagers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`, { withCredentials: true });
   }
 
-  getSecondManagersByReplacedManagerId(replacedManagerId: number): Observable<ISecondManagerResponse[]> {
-    return this.http.get<ISecondManagerResponse[]>(`${this.apiUrl}/by-replaced-manager/${replacedManagerId}`, { withCredentials: true });
+  getSecondManagersByReplacedManagerId(replacedManagerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/by-replaced-manager/${replacedManagerId}`, { withCredentials: true });
   }
 
-  createSecondManager(request: { secondManagerEmployeeId: number; replacedManagerId: number; startDate: string; endDate: string }): Observable<ISecondManagerResponse> {
-    return this.http.post<ISecondManagerResponse>(`${this.apiUrl}`, request, { withCredentials: true });
+  createSecondManager(request: { secondManagerEmployeeId: number; replacedManagerId: number; startDate: string; endDate: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}`, request, { withCredentials: true });
   }
 
-    deleteSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string): Observable<void> {
+  updateSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string, request: { newEndDate: string }): Observable<any> {
+    const dateObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
+    const formattedDate = encodeURIComponent(this.formatDateForUrl(dateObj));
+    
+    console.log('Updating second manager with URL:', `${this.apiUrl}/${secondManagerEmployeeId}/${replacedManagerId}/${formattedDate}`);
+    return this.http.put<any>(`${this.apiUrl}/${secondManagerEmployeeId}/${replacedManagerId}/${formattedDate}`, request, { withCredentials: true });
+  }
+
+  deleteSecondManager(secondManagerEmployeeId: number, replacedManagerId: number, startDate: Date | string): Observable<void> {
     const dateObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
     
     const formattedDate = encodeURIComponent(this.formatDateForUrl(dateObj));

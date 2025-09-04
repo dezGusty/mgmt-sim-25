@@ -65,8 +65,13 @@ namespace ManagementSimulator.API.Controllers
         public async Task<ActionResult<SecondManagerResponseDto>> CreateSecondManager([FromBody] CreateSecondManagerRequestDto request)
         {
             var secondManager = await _secondManagerService.CreateSecondManagerAsync(request);
-            return CreatedAtAction(nameof(GetSecondManagersByReplacedManagerId), 
-                new { replacedManagerId = secondManager.ReplacedManagerId }, secondManager);
+            return Ok(new
+            {
+                Message = "Second manager created successfully",
+                Data = secondManager,
+                Success = true,
+                Timestamp = DateTime.Now
+            });
         }
 
         [HttpPut("{secondManagerEmployeeId}/{replacedManagerId}/{startDate:datetime}")]
@@ -79,7 +84,13 @@ namespace ManagementSimulator.API.Controllers
         {
             var updatedSecondManager = await _secondManagerService.UpdateSecondManagerAsync(
                 secondManagerEmployeeId, replacedManagerId, startDate, request);
-            return Ok(updatedSecondManager);
+            return Ok(new
+            {
+                Message = "Second manager updated successfully",
+                Data = updatedSecondManager,
+                Success = true,
+                Timestamp = DateTime.Now
+            });
         }
 
         [HttpDelete("{secondManagerEmployeeId}/{replacedManagerId}/{startDate:datetime}")]
@@ -90,7 +101,12 @@ namespace ManagementSimulator.API.Controllers
             DateTime startDate)
         {
             await _secondManagerService.DeleteSecondManagerAsync(secondManagerEmployeeId, replacedManagerId, startDate);
-            return NoContent();
+            return Ok(new
+            {
+                Message = "Second manager deleted successfully",
+                Success = true,
+                Timestamp = DateTime.Now
+            });
         }
 
         [HttpGet("is-acting-as-second-manager/{userId}")]

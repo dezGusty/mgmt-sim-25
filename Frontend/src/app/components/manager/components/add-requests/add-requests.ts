@@ -129,7 +129,8 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   }
 
   private loadRequestsWithSearch() {
-    this.leaveRequests.fetchByManager().subscribe({
+    const nameParam = this.searchCriteria === 'employee' && this.searchTerm?.trim() ? this.searchTerm : undefined;
+    this.leaveRequests.fetchByManager(nameParam).subscribe({
       next: (apiData) => {
         if (apiData.success && Array.isArray(apiData.data)) {
           const requestsRaw = apiData.data;

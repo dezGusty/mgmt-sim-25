@@ -43,6 +43,25 @@ export class AdminUserRelationships implements OnInit {
     endDate: ''
   };
 
+  // Edit second manager modal data
+  showEditSecondManagerModal: boolean = false;
+  selectedSecondManagerForEdit: ISecondManagerViewModel | null = null;
+  isSubmittingEditSecondManager: boolean = false;
+  editSecondManagerErrorMessage: string = '';
+  editSecondManagerForm = {
+    endDate: ''
+  };
+
+  // Toast success messaging
+  showSuccessMessage: boolean = false;
+  successMessage: string = '';
+  private toastTimeoutRef: any = null;
+
+  // Confirm Remove Second Manager modal state
+  showConfirmRemoveSecondManager: boolean = false;
+  pendingRemoveSecondManager: ISecondManagerViewModel | null = null;
+  removeSecondManagerErrorMessage: string = '';
+
   searchTerm: string = '';
   searchBy: UserSearchType = UserSearchType.Global;
   sortDescending: boolean = false;
@@ -54,6 +73,7 @@ export class AdminUserRelationships implements OnInit {
   UserSearchType = UserSearchType;
 
   allAdmins: IUserViewModel[] = [];   // full dataset   // current page slice
+  originalAdmins: IUserViewModel[] = []; 
   totalAdminsCount: number = 0;
   totalPagesAdmins: number = 0;
   currentPageAdmins: number = 1;
@@ -111,6 +131,10 @@ export class AdminUserRelationships implements OnInit {
   }
 
   private loadInitialData(): void {
+    this.managersIds.clear();
+    this.adminsIds.clear();
+    this.managerEmployeesCollapsed.clear();
+    
     this.loadManagersWithRelationships();
     this.loadAdmins();
     this.loadUnassignedUsers();
@@ -173,12 +197,15 @@ export class AdminUserRelationships implements OnInit {
           this.allAdmins = [];
           this.totalPagesAdmins = 0;
         } else {
-          this.allAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-
-          this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-
-          this.currentPageAdmins = 1;
-          this.sliceAdmins();
+          this.originalAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
+          this.allAdmins = [...this.originalAdmins];
+          
+          if (this.currentSearchBy === UserSearchType.Admins && this.currentSearchTerm.trim()) {
+            this.filterAdmins();
+          } else {
+            this.currentPageAdmins = 1;
+            this.sliceAdmins();
+          }
         }
 
         this.checkIfInitialDataLoaded();
@@ -211,30 +238,16 @@ export class AdminUserRelationships implements OnInit {
 
     let searchParams: any = {};
 
-    if (this.currentSearchTerm.trim()) {
-      switch (this.currentSearchBy) {
-        case UserSearchType.Global:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerName:
-          searchParams.managerName = this.currentSearchTerm;
-          break;
-        case UserSearchType.EmployeeName:
-          searchParams.employeeName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerEmail:
-          searchParams.managerEmail = this.currentSearchTerm;
-          break;
-        case UserSearchType.EmployeeEmail:
-          searchParams.employeeEmail = this.currentSearchTerm;
-          break;
-        case UserSearchType.JobTitle:
-          searchParams.jobTitle = this.currentSearchTerm;
-          break;
-        default:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Managers) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
       }
+    } else {
+      this.isLoadingManagers = false;
+      this.managers = [];
+      this.totalPagesManagers = 0;
+      this.checkIfInitialDataLoaded();
+      return;
     }
 
     const params: IFilteredUsersRequest = {
@@ -264,6 +277,7 @@ export class AdminUserRelationships implements OnInit {
         }
 
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
       error: (err) => {
         this.isLoadingManagers = false;
@@ -272,6 +286,7 @@ export class AdminUserRelationships implements OnInit {
         this.totalPagesManagers = 0;
         console.error('Failed to fetch managers with relationships:', err);
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
     });
   }
@@ -282,29 +297,16 @@ export class AdminUserRelationships implements OnInit {
 
     let searchParams: any = {};
 
-    if (this.currentSearchTerm.trim()) {
-      switch (this.currentSearchBy) {
-        case UserSearchType.Global:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.UnassignedName:
-          searchParams.unassignedName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerName:
-        case UserSearchType.EmployeeName:
-          searchParams.unassignedName = this.currentSearchTerm;
-          break;
-        case UserSearchType.ManagerEmail:
-        case UserSearchType.EmployeeEmail:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
-        case UserSearchType.JobTitle:
-          searchParams.jobTitle = this.currentSearchTerm;
-          break;
-        default:
-          searchParams.globalSearch = this.currentSearchTerm;
-          break;
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Unassigned) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
       }
+    } else {
+      this.isLoadingUnassignedUsers = false;
+      this.unassignedUsers = [];
+      this.totalPagesUnassignedUsers = 0;
+      this.checkIfInitialDataLoaded();
+      return;
     }
 
     const params: IFilteredUsersRequest = {
@@ -336,6 +338,7 @@ export class AdminUserRelationships implements OnInit {
         }
 
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
       error: (err) => {
         this.isLoadingUnassignedUsers = false;
@@ -344,6 +347,7 @@ export class AdminUserRelationships implements OnInit {
         this.totalPagesUnassignedUsers = 0;
         console.error('Failed to fetch unassigned users:', err);
         this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
       },
     });
   }
@@ -353,16 +357,8 @@ export class AdminUserRelationships implements OnInit {
       switch (this.currentSearchBy) {
         case UserSearchType.Global:
           return 'No managers found for the global search term.';
-        case UserSearchType.ManagerName:
-          return `No managers found with the name "${this.currentSearchTerm}".`;
-        case UserSearchType.EmployeeName:
-          return `No employees found with the name "${this.currentSearchTerm}".`;
-        case UserSearchType.ManagerEmail:
-          return `No managers found with the email "${this.currentSearchTerm}".`;
-        case UserSearchType.EmployeeEmail:
-          return `No employees found with the email "${this.currentSearchTerm}".`;
-        case UserSearchType.JobTitle:
-          return `No managers found with the job title "${this.currentSearchTerm}".`;
+        case UserSearchType.Managers:
+          return `No managers found for "${this.currentSearchTerm}".`;
         default:
           return `No managers found for "${this.currentSearchTerm}".`;
       }
@@ -372,7 +368,7 @@ export class AdminUserRelationships implements OnInit {
 
   getUnassignedUsersEmptyMessage(): string {
     if (this.currentSearchTerm.trim()) {
-      return `No unassigned users found with the name "${this.currentSearchTerm}".`;
+      return `No unassigned users found for "${this.currentSearchTerm}".`;
     }
     return 'No unassigned users found.';
   }
@@ -384,12 +380,44 @@ export class AdminUserRelationships implements OnInit {
   }
 
   mapToUserViewModel(user: IUser): IUserViewModel {
-    user.managersIds?.forEach(element => {
-      this.managersIds.add(element);
-    });
+    if (user.roles.includes('Manager')) {
+      this.managersIds.add(user.id);
+    }
 
     if (user.roles.includes('Admin')) {
       this.adminsIds.add(user.id);
+    }
+
+    let filteredSubordinatesIds = user.subordinatesIds || [];
+    let filteredSubordinatesNames = user.subordinatesNames || [];
+    let filteredSubordinatesEmails = user.subordinatesEmails || [];
+    let filteredSubordinatesJobTitleIds = user.subordinatesJobTitleIds || [];
+    let filteredSubordinatesJobTitleNames = user.subordinatesJobTitles || [];
+
+    if ((this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Managers) && this.currentSearchTerm.trim()) {
+      const searchTerm = this.currentSearchTerm.toLowerCase();
+      const filteredIndices: number[] = [];
+
+      filteredSubordinatesNames.forEach((name, index) => {
+        const email = filteredSubordinatesEmails[index] || '';
+        const jobTitle = filteredSubordinatesJobTitleNames[index] || '';
+        
+        if (name.toLowerCase().includes(searchTerm) ||
+            email.toLowerCase().includes(searchTerm) ||
+            jobTitle.toLowerCase().includes(searchTerm)) {
+          filteredIndices.push(index);
+        }
+      });
+
+      if (filteredIndices.length > 0) {
+        this.managerEmployeesCollapsed.set(user.id, false);
+      }
+
+      filteredSubordinatesIds = filteredIndices.map(i => filteredSubordinatesIds[i]);
+      filteredSubordinatesNames = filteredIndices.map(i => filteredSubordinatesNames[i]);
+      filteredSubordinatesEmails = filteredIndices.map(i => filteredSubordinatesEmails[i]);
+      filteredSubordinatesJobTitleIds = filteredIndices.map(i => filteredSubordinatesJobTitleIds[i]);
+      filteredSubordinatesJobTitleNames = filteredIndices.map(i => filteredSubordinatesJobTitleNames[i]);
     }
 
     return {
@@ -406,13 +434,13 @@ export class AdminUserRelationships implements OnInit {
         id: user.departmentId || 0,
         name: user.departmentName || 'Unknown',
       },
-      subordinatesIds: user.subordinatesIds || [],
-      subordinatesNames: user.subordinatesNames || [],
+      subordinatesIds: filteredSubordinatesIds,
+      subordinatesNames: filteredSubordinatesNames,
       roles: user.roles || [],
-      subordinatesJobTitleIds: user.subordinatesJobTitleIds || [],
-      subordinatesJobTitleNames: user.subordinatesJobTitles || [],
+      subordinatesJobTitleIds: filteredSubordinatesJobTitleIds,
+      subordinatesJobTitleNames: filteredSubordinatesJobTitleNames,
       managersIds: user.managersIds || [],
-      subordinatesEmails: user.subordinatesEmails || [],
+      subordinatesEmails: filteredSubordinatesEmails,
     };
   }
 
@@ -586,21 +614,40 @@ export class AdminUserRelationships implements OnInit {
     switch (this.searchBy) {
       case UserSearchType.Global:
         return 'Search by name, email, job title, department...';
-      case UserSearchType.ManagerName:
-        return 'Search managers by name...';
-      case UserSearchType.EmployeeName:
-        return 'Search by employee name...';
-      case UserSearchType.ManagerEmail:
-        return 'Search managers by email...';
-      case UserSearchType.EmployeeEmail:
-        return 'Search employees by email...';
-      case UserSearchType.JobTitle:
-        return 'Search by job title...';
-      case UserSearchType.UnassignedName:
-        return 'Search unassigned users by name...';
+      case UserSearchType.Admins:
+        return 'Search admins by name, email, job title, department...';
+      case UserSearchType.Managers:
+        return 'Search managers by name, email, job title, department...';
+      case UserSearchType.Unassigned:
+        return 'Search unassigned users by name, email, job title, department...';
       default:
         return 'Search...';
     }
+  }
+
+  filterAdmins(): void {
+    if (!this.currentSearchTerm.trim()) {
+      this.allAdmins = [...this.originalAdmins];
+      this.currentPageAdmins = 1;
+      this.sliceAdmins();
+      return;
+    }
+
+    const searchTerm = this.currentSearchTerm.toLowerCase();
+    this.allAdmins = this.originalAdmins.filter(admin => 
+      admin.name.toLowerCase().includes(searchTerm) ||
+      admin.email.toLowerCase().includes(searchTerm) ||
+      (admin.jobTitle?.name || '').toLowerCase().includes(searchTerm) ||
+      (admin.department?.name || '').toLowerCase().includes(searchTerm)
+    );
+
+    this.currentPageAdmins = 1;
+    this.sliceAdmins();
+    this.autoExpandSectionsWithResults();
+  }
+
+  onSearchCategoryChange(): void {
+    this.onSearch();
   }
 
   onSearch(): void {
@@ -610,18 +657,53 @@ export class AdminUserRelationships implements OnInit {
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
 
-    if (this.currentSearchBy !== UserSearchType.UnassignedName) {
-      this.loadManagersWithRelationships();
+    this.managersIds.clear();
+    this.adminsIds.clear();
+
+    this.managerEmployeesCollapsed.clear();
+
+    if (this.currentSearchBy !== UserSearchType.Admins) {
+      this.allAdmins = [...this.originalAdmins];
+      this.currentPageAdmins = 1;
+      this.sliceAdmins();
+    }
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Admins:
+          this.isAdminSectionCollapsed = false;
+          break;
+        case UserSearchType.Managers:
+          this.isManagerSectionCollapsed = false;
+          break;
+        case UserSearchType.Unassigned:
+          this.isUnassignedUsersSectionCollapsed = false;
+          break;
+        case UserSearchType.Global:
+          break;
+      }
     }
 
-    if (this.currentSearchBy === UserSearchType.Global ||
-      this.currentSearchBy === UserSearchType.UnassignedName ||
-      this.currentSearchBy === UserSearchType.ManagerEmail ||
-      this.currentSearchBy === UserSearchType.EmployeeEmail ||
-      this.currentSearchBy === UserSearchType.ManagerName ||
-      this.currentSearchBy === UserSearchType.EmployeeName ||
-      this.currentSearchBy === UserSearchType.JobTitle) {
-      this.loadUnassignedUsers();
+    switch (this.currentSearchBy) {
+      case UserSearchType.Global:
+        if (this.currentSearchTerm.trim()) {
+          this.filterAdmins();
+        } else {
+          this.allAdmins = [...this.originalAdmins];
+          this.currentPageAdmins = 1;
+          this.sliceAdmins();
+        }
+        this.loadManagersWithRelationships();
+        this.loadUnassignedUsers();
+        break;
+      case UserSearchType.Managers:
+        this.loadManagersWithRelationships();
+        break;
+      case UserSearchType.Admins:
+        this.filterAdmins();
+        break;
+      case UserSearchType.Unassigned:
+        this.loadUnassignedUsers();
+        break;
     }
   }
 
@@ -639,6 +721,22 @@ export class AdminUserRelationships implements OnInit {
     this.currentHighlightTerm = '';
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
+    
+    this.managersIds.clear();
+    this.adminsIds.clear();
+    
+    this.managerEmployeesCollapsed.clear();
+    
+
+    this.isAdminSectionCollapsed = true;
+    this.isManagerSectionCollapsed = true;
+    this.isUnassignedUsersSectionCollapsed = true;
+    
+
+    this.allAdmins = [...this.originalAdmins];
+    this.currentPageAdmins = 1;
+    this.sliceAdmins();
+    
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
   }
@@ -659,8 +757,12 @@ export class AdminUserRelationships implements OnInit {
     return this.totalUnassignedUsersCount;
   }
 
+  isSearchActive(): boolean {
+    return this.currentSearchTerm.trim().length > 0;
+  }
+
   getUnassignedUsersCount(): number {
-    return this.getTotalUnassignedUsersCount();
+    return this.unassignedUsers.length;
   }
 
   getSubordinateCount(manager: any): number {
@@ -676,8 +778,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getManagerCount(): number {
-    return this.managers.filter((user) => user.roles?.includes('Manager'))
-      .length;
+    return this.managers.length;
   }
 
   getTotalManagerCount(): number {
@@ -731,16 +832,10 @@ export class AdminUserRelationships implements OnInit {
 
     switch (this.currentSearchBy) {
       case UserSearchType.Global:
+      case UserSearchType.Admins:
+      case UserSearchType.Managers:
+      case UserSearchType.Unassigned:
         return this.currentHighlightTerm;
-      case UserSearchType.ManagerName:
-      case UserSearchType.EmployeeName:
-      case UserSearchType.UnassignedName:
-        return fieldType === 'name' ? this.currentHighlightTerm : '';
-      case UserSearchType.ManagerEmail:
-      case UserSearchType.EmployeeEmail:
-        return fieldType === 'email' ? this.currentHighlightTerm : '';
-      case UserSearchType.JobTitle:
-        return fieldType === 'jobTitle' ? this.currentHighlightTerm : '';
       default:
         return '';
     }
@@ -859,6 +954,58 @@ export class AdminUserRelationships implements OnInit {
     return this.managerEmployeesCollapsed.get(managerId) ?? true;
   }
 
+  shouldShowAdminSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Admins;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.admins.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  shouldShowManagerSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Managers;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.managers.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  shouldShowUnassignedSection(): boolean {
+    const shouldShowByCategory = !this.currentSearchTerm.trim() || 
+           this.currentSearchBy === UserSearchType.Global || 
+           this.currentSearchBy === UserSearchType.Unassigned;
+    
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      return shouldShowByCategory && this.unassignedUsers.length > 0;
+    }
+    
+    return shouldShowByCategory;
+  }
+
+  private autoExpandSectionsWithResults(): void {
+    if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
+      if (this.admins.length > 0) {
+        this.isAdminSectionCollapsed = false;
+      }
+      
+      if (this.managers.length > 0) {
+        this.isManagerSectionCollapsed = false;
+      }
+      
+      if (this.unassignedUsers.length > 0) {
+        this.isUnassignedUsersSectionCollapsed = false;
+      }
+    }
+  }
+
   loadActiveSecondManagers(): void {
     this.isLoadingSecondManagers = true;
     this.secondManagersErrorMessage = '';
@@ -867,7 +1014,17 @@ export class AdminUserRelationships implements OnInit {
       next: (response) => {
         this.isLoadingSecondManagers = false;
         console.log('Active second managers API response:', response);
-        this.activeSecondManagers = response.map(sm => this.mapSecondManagerToViewModel(sm));
+        
+        if (Array.isArray(response)) {
+          this.activeSecondManagers = response.map(sm => {
+            console.log('Processing second manager:', sm);
+            return this.mapSecondManagerToViewModel(sm);
+          });
+        } else {
+          console.error('Unexpected response format - not an array:', response);
+          this.activeSecondManagers = [];
+        }
+        
         this.secondManagersErrorMessage = '';
         this.checkIfInitialDataLoaded();
       },
@@ -881,23 +1038,63 @@ export class AdminUserRelationships implements OnInit {
     });
   }
 
-  mapSecondManagerToViewModel(secondManager: ISecondManagerResponse): ISecondManagerViewModel {
+  mapSecondManagerToViewModel(secondManager: any): ISecondManagerViewModel {
     return {
       id: secondManager.secondManagerEmployeeId,
-      name: `${secondManager.secondManagerEmployee.firstName} ${secondManager.secondManagerEmployee.lastName}`,
-      email: secondManager.secondManagerEmployee.email,
-      jobTitle: secondManager.secondManagerEmployee.jobTitleName,
-      department: secondManager.secondManagerEmployee.departmentName,
+      name: secondManager.secondManagerEmployeeName || 'Unknown Employee',
+      email: secondManager.secondManagerEmployeeEmail || 'No email',
+      jobTitle: undefined, 
+      department: undefined, 
       replacedManagerId: secondManager.replacedManagerId,
-      replacedManagerName: `${secondManager.replacedManager.firstName} ${secondManager.replacedManager.lastName}`,
-      startDate: secondManager.startDate,
-      endDate: secondManager.endDate,
+      replacedManagerName: secondManager.replacedManagerName || 'Unknown Manager',
+      startDate: new Date(secondManager.startDate),
+      endDate: new Date(secondManager.endDate),
       isActive: secondManager.isActive
     };
   }
 
   getActiveSecondManagerForManager(managerId: number): ISecondManagerViewModel | null {
     return this.activeSecondManagers.find(sm => sm.replacedManagerId === managerId) || null;
+  }
+
+  getSecondManagerDaysRemaining(secondManager: ISecondManagerViewModel): number {
+    const today = new Date();
+    const end = new Date(secondManager.endDate);
+    const diffMs = end.getTime() - today.getTime();
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(0, days);
+  }
+
+  getSecondManagerTotalDays(secondManager: ISecondManagerViewModel): number {
+    const start = new Date(secondManager.startDate);
+    const end = new Date(secondManager.endDate);
+    const diffMs = end.getTime() - start.getTime();
+    const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    return days;
+  }
+
+  getSecondManagerProgressPercent(secondManager: ISecondManagerViewModel): number {
+    const start = new Date(secondManager.startDate).getTime();
+    const end = new Date(secondManager.endDate).getTime();
+    const now = Date.now();
+    if (now <= start) return 0;
+    if (now >= end) return 100;
+    const pct = ((now - start) / (end - start)) * 100;
+    return Math.max(0, Math.min(100, Math.round(pct)));
+  }
+
+  getSecondManagerStatusColor(secondManager: ISecondManagerViewModel): string {
+    const days = this.getSecondManagerDaysRemaining(secondManager);
+    if (days <= 1) return 'text-red-600 bg-red-50 border-red-200';
+    if (days <= 3) return 'text-amber-700 bg-amber-50 border-amber-200';
+    return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+  }
+
+  getSecondManagerDotClass(secondManager: ISecondManagerViewModel): string {
+    const days = this.getSecondManagerDaysRemaining(secondManager);
+    if (days <= 1) return 'bg-red-500';
+    if (days <= 3) return 'bg-amber-500';
+    return 'bg-emerald-500';
   }
 
   openSecondManagerModal(employee: { id: number; name: string; email: string }, managerId: number): void {
@@ -986,7 +1183,7 @@ export class AdminUserRelationships implements OnInit {
 
         this.closeSecondManagerModal();
 
-        alert('Second manager created successfully!');
+        this.showToast('Second manager created successfully!');
       },
       error: (err) => {
         this.isSubmittingSecondManager = false;
@@ -1002,11 +1199,18 @@ export class AdminUserRelationships implements OnInit {
   }
 
   removeSecondManager(secondManager: ISecondManagerViewModel): void {
-    const confirmMessage = `Are you sure you want to remove ${secondManager.name} as second manager? This action cannot be undone.`;
+    this.pendingRemoveSecondManager = secondManager;
+    this.removeSecondManagerErrorMessage = '';
+    this.showConfirmRemoveSecondManager = true;
+  }
 
-    if (!confirm(confirmMessage)) {
+  confirmRemoveSecondManager(): void {
+    if (!this.pendingRemoveSecondManager) {
+      this.cancelRemoveSecondManager();
       return;
     }
+
+    const secondManager = this.pendingRemoveSecondManager;
 
     this.secondManagerService.deleteSecondManager(
       secondManager.id,
@@ -1018,7 +1222,9 @@ export class AdminUserRelationships implements OnInit {
 
         this.loadActiveSecondManagers();
 
-        alert(`${secondManager.name} has been removed as second manager successfully!`);
+        this.showToast(`${secondManager.name} has been removed as second manager successfully!`);
+        this.showConfirmRemoveSecondManager = false;
+        this.pendingRemoveSecondManager = null;
       },
       error: (err: any) => {
         console.error('Failed to remove second manager:', err);
@@ -1028,7 +1234,126 @@ export class AdminUserRelationships implements OnInit {
           errorMessage = err.error.message;
         }
 
-        alert(errorMessage);
+        this.removeSecondManagerErrorMessage = errorMessage;
+      }
+    });
+  }
+
+  cancelRemoveSecondManager(): void {
+    this.showConfirmRemoveSecondManager = false;
+    this.pendingRemoveSecondManager = null;
+    this.removeSecondManagerErrorMessage = '';
+  }
+
+  private showToast(message: string): void {
+    this.successMessage = message;
+    this.showSuccessMessage = true;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+    }
+    this.toastTimeoutRef = setTimeout(() => {
+      this.showSuccessMessage = false;
+      this.successMessage = '';
+      this.toastTimeoutRef = null;
+    }, 2000);
+  }
+
+  closeSuccessMessage(): void {
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+      this.toastTimeoutRef = null;
+    }
+    this.showSuccessMessage = false;
+    this.successMessage = '';
+  }
+
+  openEditSecondManagerModal(secondManager: ISecondManagerViewModel): void {
+    this.selectedSecondManagerForEdit = secondManager;
+    this.showEditSecondManagerModal = true;
+    this.editSecondManagerErrorMessage = '';
+
+    // Set the current end date as the default value
+    const endDate = new Date(secondManager.endDate);
+    this.editSecondManagerForm = {
+      endDate: endDate.toISOString().split('T')[0]
+    };
+  }
+
+  closeEditSecondManagerModal(): void {
+    this.showEditSecondManagerModal = false;
+    this.selectedSecondManagerForEdit = null;
+    this.editSecondManagerErrorMessage = '';
+    this.isSubmittingEditSecondManager = false;
+    this.editSecondManagerForm = {
+      endDate: ''
+    };
+  }
+
+  isEditSecondManagerFormValid(): boolean {
+    if (!this.editSecondManagerForm.endDate || !this.selectedSecondManagerForEdit) {
+      return false;
+    }
+
+    const newEndDate = new Date(this.editSecondManagerForm.endDate);
+    const startDate = new Date(this.selectedSecondManagerForEdit.startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // New end date must be after start date
+    if (newEndDate <= startDate) {
+      return false;
+    }
+
+    // New end date must be different from current end date
+    const currentEndDate = new Date(this.selectedSecondManagerForEdit.endDate);
+    if (newEndDate.getTime() === currentEndDate.getTime()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  onSubmitEditSecondManager(): void {
+    if (!this.isEditSecondManagerFormValid() || !this.selectedSecondManagerForEdit) {
+      return;
+    }
+
+    this.isSubmittingEditSecondManager = true;
+    this.editSecondManagerErrorMessage = '';
+
+    const currentTime = new Date();
+    const timeString = currentTime.toISOString().split('T')[1];
+    const endDateTime = `${this.editSecondManagerForm.endDate}T${timeString}`;
+
+    const updateRequest = {
+      newEndDate: endDateTime
+    };
+
+    this.secondManagerService.updateSecondManager(
+      this.selectedSecondManagerForEdit.id,
+      this.selectedSecondManagerForEdit.replacedManagerId,
+      this.selectedSecondManagerForEdit.startDate,
+      updateRequest
+    ).subscribe({
+      next: (response) => {
+        this.isSubmittingEditSecondManager = false;
+        console.log('Second manager updated successfully:', response);
+
+        this.loadActiveSecondManagers();
+
+        this.closeEditSecondManagerModal();
+
+        this.showToast('Second manager end date updated successfully!');
+      },
+      error: (err) => {
+        this.isSubmittingEditSecondManager = false;
+        console.error('Failed to update second manager:', err);
+
+        if (err.error && err.error.message) {
+          this.editSecondManagerErrorMessage = err.error.message;
+        } else {
+          this.editSecondManagerErrorMessage = 'Failed to update second manager. Please try again.';
+        }
       }
     });
   }

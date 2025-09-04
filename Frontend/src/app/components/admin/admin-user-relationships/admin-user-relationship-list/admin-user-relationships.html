@@ -1,5 +1,15 @@
 <!-- User Relationships Component -->
 <div class="space-y-6">
+  <!-- Success Toast (top-right) -->
+  <div *ngIf="showSuccessMessage"
+    class="fixed top-20 right-4 z-70 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in flex items-center gap-3">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="closeSuccessMessage()"
+      class="ml-4 text-white hover:text-gray-200 font-bold text-lg leading-none">×</button>
+  </div>
   <!-- Search Bar Section -->
   <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
     <div class="flex flex-wrap items-center gap-3">
@@ -12,49 +22,21 @@
 
       <!-- Search/Sort By Dropdown -->
       <div class="w-48">
-        <select [(ngModel)]="searchBy"
+        <select [(ngModel)]="searchBy" (ngModelChange)="onSearchCategoryChange()"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]">
           <option [value]="UserSearchType.Global" [selected]="searchBy === UserSearchType.Global">
             Global Search
           </option>
-          <option [value]="UserSearchType.ManagerName" [selected]="searchBy === UserSearchType.ManagerName">
-            By Manager Name
+          <option [value]="UserSearchType.Admins" [selected]="searchBy === UserSearchType.Admins">
+            Search in Admins
           </option>
-          <option [value]="UserSearchType.EmployeeName" [selected]="searchBy === UserSearchType.EmployeeName">
-            By Employee Name
+          <option [value]="UserSearchType.Managers" [selected]="searchBy === UserSearchType.Managers">
+            Search in Managers
           </option>
-          <option [value]="UserSearchType.ManagerEmail" [selected]="searchBy === UserSearchType.ManagerEmail">
-            By Manager Email
-          </option>
-          <option [value]="UserSearchType.EmployeeEmail" [selected]="searchBy === UserSearchType.EmployeeEmail">
-            By Employee Email
-          </option>
-          <option [value]="UserSearchType.JobTitle" [selected]="searchBy === UserSearchType.JobTitle">
-            By Job Title
-          </option>
-          <option [value]="UserSearchType.UnassignedName" [selected]="searchBy === UserSearchType.UnassignedName">
-            Unassigned
+          <option [value]="UserSearchType.Unassigned" [selected]="searchBy === UserSearchType.Unassigned">
+            Search in Unassigned
           </option>
         </select>
-      </div>
-
-      <!-- Sort Order Toggle -->
-      <div class="flex items-center">
-        <button (click)="toggleSortOrder()"
-          class="flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] transition-colors"
-          [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'">
-          <svg *ngIf="!sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
-          </svg>
-          <svg *ngIf="sortDescending" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-          </svg>
-          <span class="ml-1 text-xs text-gray-600">{{
-            sortDescending ? "Z-A" : "A-Z"
-            }}</span>
-        </button>
       </div>
 
       <!-- Search Button -->
@@ -79,7 +61,7 @@
   </div>
 
   <!-- Admin Level -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowAdminSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleAdminSection()" (keydown.enter)="toggleAdminSection()"
@@ -93,8 +75,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">System Administrators</h4>
-      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">{{ getTotalAdminCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showAdminTotal">
+          {{ getAdminCount() }} out of {{ getTotalAdminCount() }}
+        </ng-container>
+        <ng-template #showAdminTotal>
+          {{ getTotalAdminCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isAdminSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -276,7 +264,7 @@
   </div>
 
   <!-- Manager Level -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowManagerSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleManagerSection()" (keydown.enter)="toggleManagerSection()"
@@ -290,8 +278,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Team Managers</h4>
-      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ getTotalManagerCount() }}
-        total</span>
+      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showManagerTotal">
+          {{ getManagerCount() }} out of {{ getTotalManagerCount() }}
+        </ng-container>
+        <ng-template #showManagerTotal>
+          {{ getTotalManagerCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isManagerSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,22 +323,28 @@
       <div *ngIf="!hasManagersError() && !isLoadingManagers && managers.length > 0">
         <div *ngFor="let manager of managers" class="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
           <!-- Header-ul managerului cu manager secund -->
-          <div class="bg-white border-b border-gray-200 p-4">
+          <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4">
             <div class="flex items-start justify-between">
-              <div class="flex items-start space-x-4 flex-1">
+              <div class="flex items-start gap-5 flex-1">
                 <!-- Manager Principal -->
-                <div class="flex items-center space-x-3">
-                  <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486]" [src]="
+                <div class="flex items-center gap-3">
+                  <img class="h-12 w-12 rounded-full object-cover border-2 border-[#20B486] shadow-sm" [src]="
                 manager.avatar ||
                 'https://ui-avatars.com/api/?name=' +
                   manager.name +
                   '&background=20B486&color=fff'
                   " [alt]="manager.name" />
-                  <div>
-                    <div class="text-lg font-semibold text-gray-900">
+                  <div class="min-w-[220px]">
+                    <div class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                       <span [innerHTML]="
                     manager.name | highlight : getHighlightTerm('name') : 'name'
                       "></span>
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path d="M10 3a1 1 0 01.894.553l1.382 2.763 3.05.443a1 1 0 01.554 1.705l-2.206 2.15.521 3.036a1 1 0 01-1.451 1.054L10 13.347l-2.74 1.44a1 1 0 01-1.451-1.054l.521-3.036L4.124 8.464a1 1 0 01.554-1.705l3.05-.443L9.106 3.553A1 1 0 0110 3z" />
+                        </svg>
+                        Main
+                      </span>
                     </div>
                     <div class="text-xs text-gray-500">
                       <span [innerHTML]="
@@ -352,34 +352,46 @@
                       | highlight : getHighlightTerm('email') : 'email'
                       "></span>
                     </div>
-                    <div class="text-sm text-gray-600">
+                    <div class="text-sm text-gray-600 flex items-center gap-2">
                       <span [innerHTML]="
                     manager.jobTitle?.name || ''
                       | highlight : getHighlightTerm('jobTitle') : 'jobTitle'
                       "></span>
-                      - {{ manager.department?.name }}
+                      <span class="text-gray-300">•</span>
+                      <span class="text-gray-600">{{ manager.department?.name }}</span>
                     </div>
-                    <div class="flex items-center space-x-2 mt-1">
-                      <span class="px-2 py-1 bg-[#20B486] text-white text-xs rounded-full">Manager Principal</span>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-[#20B486] text-white">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Manager
+                      </span>
                       <span class="text-xs text-gray-500">{{ getSubordinateCount(manager) }} direct reports</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Manager Secund (dacă există) - în stânga, după manager principal -->
+                <!-- Second Manager - in left, next to the main one -->
                 <div *ngIf="getActiveSecondManagerForManager(manager.id) as secondManager"
-                  class="flex items-center space-x-2 flex-shrink-0">
-                  <img class="h-8 w-8 rounded-full object-cover border border-gray-300" [src]="
+                  class="flex items-center gap-3 flex-shrink-0 bg-white/60 backdrop-blur px-3 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <img class="h-8 w-8 rounded-full object-cover ring-1 ring-black/5" [src]="
                     secondManager.avatar ||
                     'https://ui-avatars.com/api/?name=' +
                       secondManager.name +
                       '&background=20B486&color=fff'
                   " [alt]="secondManager.name" />
                   <div class="max-w-xs">
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="text-sm font-medium text-gray-900 flex items-center gap-2">
                       <span [innerHTML]="
                         secondManager.name | highlight : getHighlightTerm('name') : 'name'
                       "></span>
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-amber-500/90 text-white">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Second
+                      </span>
                     </div>
                     <div class="text-xs text-gray-500">
                       <span [innerHTML]="
@@ -387,16 +399,27 @@
                           | highlight : getHighlightTerm('email') : 'email'
                       "></span>
                     </div>
-                    <div class="flex items-center space-x-1 mt-1">
-                      <span class="px-1.5 py-0.5 bg-amber-500 text-white text-xs rounded-full">Manager Secund</span>
+                    <div class="flex items-center gap-2 mt-1">
                       <button
-                        class="text-red-500 hover:text-red-700 text-xs font-medium px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                        class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded hover:bg-blue-50 border border-blue-200 transition-colors"
+                        (click)="openEditSecondManagerModal(secondManager)" title="Edit second manager">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.242l-3.3 1.1a1 1 0 01-1.265-1.265l1.1-3.3a1 1 0 01.242-.39l9.9-9.9a2 2 0 012.828 0z"/></svg>
+                        Edit
+                      </button>
+                      <button
+                        class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 border border-red-200 transition-colors"
                         (click)="removeSecondManager(secondManager)" title="Remove second manager">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 100 2h.293l.853 10.243A2 2 0 007.141 18h5.718a2 2 0 001.995-1.757L15.707 6H16a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zm-1 6a1 1 0 012 0v7a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v7a1 1 0 11-2 0V8z" clip-rule="evenodd"/></svg>
                         Remove
                       </button>
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-white/70 border border-slate-200 text-slate-600"
+                            [title]="getSecondManagerDaysRemaining(secondManager) + ' days remaining'">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full" [ngClass]="getSecondManagerDotClass(secondManager)"></span>
+                        {{ getSecondManagerDaysRemaining(secondManager) }}d left
+                      </span>
                     </div>
-                    <div class="text-xs text-gray-400 mt-0.5">
-                      Până la {{ secondManager.endDate | date:'dd/MM' }}
+                                         <div class="text-[11px] text-gray-500 mt-1">
+                      End: {{ secondManager.endDate | date:'dd/MM' }}
                     </div>
                   </div>
                 </div>
@@ -605,7 +628,7 @@
   </div>
 
   <!-- Unassigned Users -->
-  <div class="mb-8">
+  <div class="mb-8" *ngIf="shouldShowUnassignedSection()">
     <div
       class="flex items-center space-x-3 mb-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200"
       (click)="toggleUnassignedUsersSection()" (keydown.enter)="toggleUnassignedUsersSection()"
@@ -619,8 +642,14 @@
         </svg>
       </div>
       <h4 class="text-md font-medium text-gray-900 flex-1">Unassigned Users</h4>
-      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">{{
-        getTotalUnassignedUsersCount() }} total</span>
+      <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">
+        <ng-container *ngIf="isSearchActive(); else showUnassignedTotal">
+          {{ getUnassignedUsersCount() }} out of {{ getTotalUnassignedUsersCount() }}
+        </ng-container>
+        <ng-template #showUnassignedTotal>
+          {{ getTotalUnassignedUsersCount() }} total
+        </ng-template>
+      </span>
       <!-- Chevron Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
         [class.rotate-180]="!isUnassignedUsersSectionCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -907,4 +936,122 @@
       </div>
     </div>
   </div>
+
+  <!-- Edit Second Manager Modal -->
+  <div *ngIf="showEditSecondManagerModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500/30 backdrop-blur-sm transition-opacity"
+      (click)="closeEditSecondManagerModal()">
+    </div>
+
+    <!-- Modal dialog -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">
+            Edit Second Manager
+          </h3>
+          <button (click)="closeEditSecondManagerModal()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal content -->
+        <form (ngSubmit)="onSubmitEditSecondManager()" class="p-4">
+          <div class="space-y-4">
+            <!-- Selected Second Manager Info -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900">{{ selectedSecondManagerForEdit?.name }}</div>
+              <div class="text-xs text-gray-500">{{ selectedSecondManagerForEdit?.email }}</div>
+              <div class="text-xs text-amber-600 mt-1">Temporarily replacing: {{
+                selectedSecondManagerForEdit?.replacedManagerName }}</div>
+            </div>
+
+            <!-- Current Period Info -->
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <div class="text-sm font-medium text-gray-900 mb-1">Current Assignment Period</div>
+              <div class="text-xs text-gray-600">
+                Start: {{ selectedSecondManagerForEdit?.startDate | date:'dd/MM/yyyy' }}
+              </div>
+              <div class="text-xs text-gray-600">
+                Current End: {{ selectedSecondManagerForEdit?.endDate | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+
+            <!-- New End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">New End Date *</label>
+              <input type="date" [(ngModel)]="editSecondManagerForm.endDate" name="endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required />
+              <div class="text-xs text-gray-500 mt-1">
+                Must be after start date ({{ selectedSecondManagerForEdit?.startDate | date:'dd/MM/yyyy' }})
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="editSecondManagerErrorMessage"
+            class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ editSecondManagerErrorMessage }}
+          </div>
+
+          <!-- Modal footer -->
+          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button type="button" (click)="closeEditSecondManagerModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              [disabled]="isSubmittingEditSecondManager">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!isEditSecondManagerFormValid() || isSubmittingEditSecondManager">
+              <span *ngIf="isSubmittingEditSecondManager">Updating...</span>
+              <span *ngIf="!isSubmittingEditSecondManager">Update End Date</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Remove Second Manager Modal -->
+  <div *ngIf="showConfirmRemoveSecondManager"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div
+      class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-fade-in transform transition-all duration-300">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Confirm remove</h3>
+            <p class="text-sm text-gray-500">Are you sure you want to remove {{ pendingRemoveSecondManager?.name }} as
+              second manager?</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-sm text-gray-600">This action cannot be undone.</p>
+        <div *ngIf="removeSecondManagerErrorMessage"
+          class="mt-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{{ removeSecondManagerErrorMessage }}
+        </div>
+      </div>
+      <div class="p-4 border-t bg-gray-50 flex justify-end gap-3">
+        <button (click)="cancelRemoveSecondManager()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">Cancel</button>
+        <button (click)="confirmRemoveSecondManager()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">OK</button>
+      </div>
+    </div>
+  </div>
+
 </div>

@@ -16,6 +16,8 @@ namespace ManagementSimulator.Core.Dtos.Responses
         public bool IsActive { get; set; }
         public int AssignedUsersCount { get; set; }
         public float TotalAssignedPercentage { get; set; }
+        public float TotalAssignedFTEs { get; set; }
+        public float RemainingFTEs { get; set; }
         
         public DateTime? CreatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
