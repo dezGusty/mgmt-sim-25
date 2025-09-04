@@ -5,10 +5,11 @@ import { Auth } from '../../services/authService/auth';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AnimatedBackground } from '../shared/animated-background/animated-background';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterModule, CommonModule, FormsModule],
+  imports: [RouterModule, CommonModule, FormsModule, AnimatedBackground],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })

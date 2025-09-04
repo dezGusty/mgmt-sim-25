@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../../shared/custom-navbar/custom-navbar';
 import { Auth } from '../../../services/authService/auth';
+import { AnimatedBackground } from '../../shared/animated-background/animated-background';
 
 interface ManagerView {
   name: string;
@@ -16,7 +17,7 @@ interface ManagerView {
 
 @Component({
   selector: 'app-manager-view-selector',
-  imports: [CommonModule, CustomNavbar],
+  imports: [CommonModule, CustomNavbar, AnimatedBackground],
   templateUrl: './manager-view-selector.html',
   styleUrls: ['./manager-view-selector.css'],
 })
