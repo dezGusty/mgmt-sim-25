@@ -79,7 +79,7 @@
               [class]="activeTab === 'view' 
                 ? 'border-blue-500 text-blue-600 bg-blue-50' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
             >
               View Employees
             </button>
@@ -88,7 +88,7 @@
               [class]="activeTab === 'edit' 
                 ? 'border-indigo-500 text-indigo-600 bg-indigo-50' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
               [disabled]="!canModify"
             >
               Edit Project
@@ -98,11 +98,20 @@
               [class]="activeTab === 'assign' 
                 ? 'border-green-500 text-green-600 bg-green-50' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/3 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
               [disabled]="!canAssign"
               [title]="!canAssign ? 'Cannot assign employees to inactive projects' : ''"
             >
               Assign Employees
+            </button>
+            <button
+              (click)="setActiveTab('statistics')"
+              [class]="activeTab === 'statistics' 
+                ? 'border-purple-500 text-purple-600 bg-purple-50' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+            >
+              Statistics
             </button>
           </nav>
         </div>
@@ -787,6 +796,420 @@
               >
                 Cancel Changes
               </button>
+            </div>
+          </div>
+
+          <!-- Statistics Tab -->
+          <div *ngIf="activeTab === 'statistics'">
+            <div class="flex h-screen">
+              <!-- Vertical Navigation Menu -->
+              <div class="w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0">
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistics Dashboard</h3>
+                  <nav class="space-y-2">
+                    <button
+                      (click)="setActiveStatisticsSubTab('overview')"
+                      [class]="activeStatisticsSubTab === 'overview' 
+                        ? 'bg-blue-50 border-blue-500 text-blue-700' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                      class="w-full flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200"
+                    >
+                      <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                      </svg>
+                      Overview
+                    </button>
+                    
+                    <button
+                      (click)="setActiveStatisticsSubTab('kanban')"
+                      [class]="activeStatisticsSubTab === 'kanban' 
+                        ? 'bg-blue-50 border-blue-500 text-blue-700' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                      class="w-full flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200"
+                    >
+                      <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                      </svg>
+                      Task Board
+                    </button>
+                    
+                    <button
+                      (click)="setActiveStatisticsSubTab('bugs')"
+                      [class]="activeStatisticsSubTab === 'bugs' 
+                        ? 'bg-red-50 border-red-500 text-red-700' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                      class="w-full flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200"
+                    >
+                      <svg class="w-5 h-5 mr-3 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                      </svg>
+                      Issues & Bugs
+                    </button>
+                    
+                    <button
+                      (click)="setActiveStatisticsSubTab('activity')"
+                      [class]="activeStatisticsSubTab === 'activity' 
+                        ? 'bg-green-50 border-green-500 text-green-700' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+                      class="w-full flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200"
+                    >
+                      <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Employee Activity
+                    </button>
+                  </nav>
+                </div>
+              </div>
+
+              <!-- Main Content Area -->
+              <div class="flex-1 overflow-auto">
+                <div class="p-6">
+                  <!-- Header with Date -->
+                  <div class="flex items-center justify-between mb-6">
+                    <h4 class="text-xl font-semibold text-gray-900">
+                      <span *ngIf="activeStatisticsSubTab === 'overview'">Project Overview</span>
+                      <span *ngIf="activeStatisticsSubTab === 'kanban'">Task Board</span>
+                      <span *ngIf="activeStatisticsSubTab === 'bugs'">Issues & Bug Reports</span>
+                      <span *ngIf="activeStatisticsSubTab === 'activity'">Employee Activity & Performance</span>
+                    </h4>
+                    <div class="text-sm text-gray-500">
+                      Last updated: {{ getCurrentDateString() }}
+                    </div>
+                  </div>
+
+                  <!-- Overview Content -->
+                  <div *ngIf="activeStatisticsSubTab === 'overview'">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <div class="flex items-center">
+                          <div class="p-3 bg-blue-100 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-3xl font-bold text-gray-900">{{ mockStatistics.tasks.todo.length + mockStatistics.tasks.inProgress.length + mockStatistics.tasks.done.length }}</p>
+                            <p class="text-sm text-gray-600">Total Tasks</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <div class="flex items-center">
+                          <div class="p-3 bg-red-100 rounded-lg">
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-3xl font-bold text-gray-900">{{ mockStatistics.bugs.length }}</p>
+                            <p class="text-sm text-gray-600">Open Issues</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <div class="flex items-center">
+                          <div class="p-3 bg-green-100 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-3xl font-bold text-gray-900">{{ (mockStatistics.tasks.done.length / (mockStatistics.tasks.todo.length + mockStatistics.tasks.inProgress.length + mockStatistics.tasks.done.length) * 100).toFixed(0) }}%</p>
+                            <p class="text-sm text-gray-600">Completion Rate</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <div class="flex items-center">
+                          <div class="p-3 bg-purple-100 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                          </div>
+                          <div class="ml-4">
+                            <p class="text-3xl font-bold text-gray-900">{{ mockStatistics.employeeActivity.length }}</p>
+                            <p class="text-sm text-gray-600">Active Members</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Progress Charts -->
+                    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4">Task Progress</h5>
+                        <div class="space-y-4">
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">To Do</span>
+                            <span class="text-sm text-gray-500">{{ mockStatistics.tasks.todo.length }} tasks</span>
+                          </div>
+                          <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gray-400 h-2 rounded-full" [style.width.%]="(mockStatistics.tasks.todo.length / (mockStatistics.tasks.todo.length + mockStatistics.tasks.inProgress.length + mockStatistics.tasks.done.length) * 100)"></div>
+                          </div>
+
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">In Progress</span>
+                            <span class="text-sm text-gray-500">{{ mockStatistics.tasks.inProgress.length }} tasks</span>
+                          </div>
+                          <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-400 h-2 rounded-full" [style.width.%]="(mockStatistics.tasks.inProgress.length / (mockStatistics.tasks.todo.length + mockStatistics.tasks.inProgress.length + mockStatistics.tasks.done.length) * 100)"></div>
+                          </div>
+
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Done</span>
+                            <span class="text-sm text-gray-500">{{ mockStatistics.tasks.done.length }} tasks</span>
+                          </div>
+                          <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-400 h-2 rounded-full" [style.width.%]="(mockStatistics.tasks.done.length / (mockStatistics.tasks.todo.length + mockStatistics.tasks.inProgress.length + mockStatistics.tasks.done.length) * 100)"></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4">Team Performance</h5>
+                        <div class="space-y-3">
+                          <div *ngFor="let employee of mockStatistics.employeeActivity.slice(0, 5)" class="flex items-center justify-between">
+                            <div class="flex items-center">
+                              <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                <span class="text-xs font-medium text-gray-700">{{ getEmployeeInitials(employee.name) }}</span>
+                              </div>
+                              <span class="text-sm font-medium text-gray-900">{{ employee.name }}</span>
+                            </div>
+                            <div class="flex items-center">
+                              <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                <div class="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 h-2 rounded-full" 
+                                     [style.width.%]="employee.efficiency"></div>
+                              </div>
+                              <span class="text-xs font-medium text-gray-600 w-8">{{ employee.efficiency }}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Kanban Board Content -->
+                  <div *ngIf="activeStatisticsSubTab === 'kanban'">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <!-- To Do Column -->
+                      <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                          <h4 class="font-semibold text-gray-700 flex items-center">
+                            <span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>
+                            To Do
+                          </h4>
+                          <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                            {{ mockStatistics.tasks.todo.length }}
+                          </span>
+                        </div>
+                        <div class="space-y-3">
+                          <div *ngFor="let task of mockStatistics.tasks.todo" 
+                               class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+                            <div class="flex items-start justify-between mb-2">
+                              <h5 class="text-sm font-medium text-gray-900">{{ task.title }}</h5>
+                              <span [ngClass]="{
+                                'bg-red-100 text-red-800': task.priority === 'High',
+                                'bg-yellow-100 text-yellow-800': task.priority === 'Medium',
+                                'bg-green-100 text-green-800': task.priority === 'Low'
+                              }" class="px-2 py-1 rounded-full text-xs font-medium">
+                                {{ task.priority }}
+                              </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">{{ task.assignee }}</p>
+                            <div class="flex items-center justify-between">
+                              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ task.type }}</span>
+                              <span class="text-xs text-gray-500">{{ task.estimatedHours }}h</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- In Progress Column -->
+                      <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                          <h4 class="font-semibold text-blue-700 flex items-center">
+                            <span class="w-3 h-3 bg-blue-400 rounded-full mr-2"></span>
+                            In Progress
+                          </h4>
+                          <span class="bg-blue-200 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                            {{ mockStatistics.tasks.inProgress.length }}
+                          </span>
+                        </div>
+                        <div class="space-y-3">
+                          <div *ngFor="let task of mockStatistics.tasks.inProgress" 
+                               class="bg-white p-3 rounded-lg shadow-sm border border-blue-200 hover:shadow-md transition-shadow cursor-pointer">
+                            <div class="flex items-start justify-between mb-2">
+                              <h5 class="text-sm font-medium text-gray-900">{{ task.title }}</h5>
+                              <span [ngClass]="{
+                                'bg-red-100 text-red-800': task.priority === 'High',
+                                'bg-yellow-100 text-yellow-800': task.priority === 'Medium',
+                                'bg-green-100 text-green-800': task.priority === 'Low'
+                              }" class="px-2 py-1 rounded-full text-xs font-medium">
+                                {{ task.priority }}
+                              </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">{{ task.assignee }}</p>
+                            <div class="flex items-center justify-between">
+                              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ task.type }}</span>
+                              <span class="text-xs text-gray-500">{{ task.estimatedHours }}h</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Done Column -->
+                      <div class="bg-green-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                          <h4 class="font-semibold text-green-700 flex items-center">
+                            <span class="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+                            Done
+                          </h4>
+                          <span class="bg-green-200 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                            {{ mockStatistics.tasks.done.length }}
+                          </span>
+                        </div>
+                        <div class="space-y-3">
+                          <div *ngFor="let task of mockStatistics.tasks.done" 
+                               class="bg-white p-3 rounded-lg shadow-sm border border-green-200 hover:shadow-md transition-shadow cursor-pointer">
+                            <div class="flex items-start justify-between mb-2">
+                              <h5 class="text-sm font-medium text-gray-900">{{ task.title }}</h5>
+                              <span [ngClass]="{
+                                'bg-red-100 text-red-800': task.priority === 'High',
+                                'bg-yellow-100 text-yellow-800': task.priority === 'Medium',
+                                'bg-green-100 text-green-800': task.priority === 'Low'
+                              }" class="px-2 py-1 rounded-full text-xs font-medium">
+                                {{ task.priority }}
+                              </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">{{ task.assignee }}</p>
+                            <div class="flex items-center justify-between">
+                              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ task.type }}</span>
+                              <span class="text-xs text-gray-500">{{ task.estimatedHours }}h</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Bugs Content -->
+                  <div *ngIf="activeStatisticsSubTab === 'bugs'">
+                    <div class="space-y-4">
+                      <div *ngFor="let bug of mockStatistics.bugs" 
+                           class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                          <div class="flex items-start">
+                            <div class="p-2 bg-red-100 rounded-lg mr-3">
+                              <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                              </svg>
+                            </div>
+                            <div>
+                              <h5 class="text-lg font-medium text-gray-900 mb-1">{{ bug.title }}</h5>
+                              <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                <span>ID: #{{ bug.id }}</span>
+                                <span>Reporter: {{ bug.reporter }}</span>
+                                <span>Assignee: {{ bug.assignee }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="flex items-center space-x-2">
+                            <span [ngClass]="{
+                              'bg-red-100 text-red-800': bug.severity === 'Critical',
+                              'bg-orange-100 text-orange-800': bug.severity === 'High',
+                              'bg-yellow-100 text-yellow-800': bug.severity === 'Medium',
+                              'bg-green-100 text-green-800': bug.severity === 'Low'
+                            }" class="px-3 py-1 rounded-full text-sm font-medium">
+                              {{ bug.severity }}
+                            </span>
+                            <span [ngClass]="{
+                              'bg-gray-100 text-gray-800': bug.status === 'Open',
+                              'bg-blue-100 text-blue-800': bug.status === 'In Progress',
+                              'bg-green-100 text-green-800': bug.status === 'Fixed'
+                            }" class="px-3 py-1 rounded-full text-sm font-medium">
+                              {{ bug.status }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Activity Content -->
+                  <div *ngIf="activeStatisticsSubTab === 'activity'">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                          <thead class="bg-gray-50">
+                            <tr>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed Tasks</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">In Progress</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours This Week</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency</th>
+                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody class="bg-white divide-y divide-gray-200">
+                            <tr *ngFor="let employee of mockStatistics.employeeActivity" class="hover:bg-gray-50">
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                  <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-sm font-medium text-gray-700">{{ getEmployeeInitials(employee.name) }}</span>
+                                  </div>
+                                  <div class="text-sm font-medium text-gray-900">{{ employee.name }}</div>
+                                </div>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  {{ employee.tasksCompleted }}
+                                </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {{ employee.tasksInProgress }}
+                                </span>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                  <svg class="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                  </svg>
+                                  {{ employee.hoursThisWeek }}h
+                                </div>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 h-2 rounded-full" 
+                                         [style.width.%]="employee.efficiency"></div>
+                                  </div>
+                                  <span class="text-sm font-medium" 
+                                        [ngClass]="{
+                                          'text-green-600': employee.efficiency >= 90,
+                                          'text-yellow-600': employee.efficiency >= 80 && employee.efficiency < 90,
+                                          'text-red-600': employee.efficiency < 80
+                                        }">
+                                    {{ employee.efficiency }}%
+                                  </span>
+                                </div>
+                              </td>
+                              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">View Details</button>
+                                <button class="text-gray-600 hover:text-gray-900">Send Message</button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
