@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +23,7 @@ import { ISecondManagerResponse, ISecondManagerViewModel } from '../../../../mod
   styleUrl: './admin-user-relationships.css',
 })
 export class AdminUserRelationships implements OnInit {
+  private searchTermSubject = new Subject<string>();
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
   managers: IUserViewModel[] = [];
@@ -128,6 +131,13 @@ export class AdminUserRelationships implements OnInit {
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.searchTermSubject.pipe(debounceTime(400)).subscribe(term => {
+      this.searchTerm = term;
+      this.onSearch();
+    });
+  }
+  onSearchTermChange(term: string): void {
+    this.searchTermSubject.next(term);
   }
 
   private loadInitialData(): void {
