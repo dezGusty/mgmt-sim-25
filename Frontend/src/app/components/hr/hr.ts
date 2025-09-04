@@ -444,6 +444,27 @@ export class Hr {
     this.importedHolidays = [];
   }
 
+  importFromAPI() {
+    const currentYear = new Date().getFullYear();
+    
+    this.hrService.fetchRomanianHolidays(currentYear).subscribe({
+      next: (apiHolidays) => {
+        console.log('Raw API response:', apiHolidays);
+        if (apiHolidays && apiHolidays.length > 0) {
+          console.log('First holiday structure:', apiHolidays[0]);
+          console.log('First holiday name:', apiHolidays[0].name);
+        }
+        const convertedHolidays = this.hrService.convertAPIResponseToImported(apiHolidays);
+        this.importedHolidays = convertedHolidays;
+        this.showImportPreview = true;
+      },
+      error: (err) => {
+        console.error('Failed to fetch Romanian holidays from API:', err);
+        alert('Failed to fetch holidays from API. Please check your internet connection and try again.');
+      }
+    });
+  }
+
   switchToTableView() {
     this.currentView = 'table';
   }
