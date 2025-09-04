@@ -151,6 +151,13 @@ namespace ManagementSimulator.Database.Context
                 .HasIndex(p => p.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<PublicHoliday>()
+                .Property(ph => ph.Name)
+                .HasMaxLength(100);
+            modelBuilder.Entity<PublicHoliday>()
+                .HasIndex(ph => new { ph.Name, ph.Date })
+                .IsUnique();
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -165,5 +172,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<SecondManager> SecondManagers { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
+        public DbSet<PublicHoliday> PublicHolidays { get; set; }
     }
 }

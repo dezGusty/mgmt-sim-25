@@ -94,12 +94,241 @@
 	</div>
 </main>
 
+    <!-- Public Holidays Section -->
     <div class="max-w-7xl mx-auto p-6 mt-4">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h4 class="text-lg font-medium text-gray-900 mb-2">Upload calendar</h4>
-        <div class="flex items-center gap-3">
-		  <input type="file" #fileInputSeparate class="hidden" aria-label="Upload calendar file" accept=".xml,.csv" (change)="onUploadCalendarSeparate($event)" />
-          <button class="px-4 py-2 rounded bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm" (click)="triggerFileInput(fileInputSeparate)">Upload calendar</button>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <h3 class="text-xl font-semibold text-gray-900">Public Holidays Management</h3>
+              
+              <!-- View Toggle -->
+              <div class="flex rounded-lg border border-gray-200 overflow-hidden">
+                <button 
+                  class="px-4 py-2 text-sm font-medium transition-colors"
+                  [class.bg-blue-600]="currentView === 'table'"
+                  [class.text-white]="currentView === 'table'"
+                  [class.bg-white]="currentView !== 'table'"
+                  [class.text-gray-700]="currentView !== 'table'"
+                  [class.hover:bg-gray-50]="currentView !== 'table'"
+                  (click)="switchToTableView()"
+                >
+                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18m-9 8h9" />
+                  </svg>
+                  Table View
+                </button>
+                <button 
+                  class="px-4 py-2 text-sm font-medium transition-colors border-l border-gray-200"
+                  [class.bg-blue-600]="currentView === 'calendar'"
+                  [class.text-white]="currentView === 'calendar'"
+                  [class.bg-white]="currentView !== 'calendar'"
+                  [class.text-gray-700]="currentView !== 'calendar'"
+                  [class.hover:bg-gray-50]="currentView !== 'calendar'"
+                  (click)="switchToCalendarView()"
+                >
+                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Calendar View
+                </button>
+              </div>
+            </div>
+            
+            <div class="flex gap-2">
+              <button 
+                class="inline-flex items-center px-4 py-2 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
+                (click)="downloadTemplate()"
+              >
+                Download Template
+              </button>
+              <button 
+                class="inline-flex items-center px-4 py-2 rounded bg-orange-600 text-white text-sm hover:bg-orange-700"
+                (click)="triggerImportFile()"
+              >
+                Import from CSV
+              </button>
+              <button 
+                class="inline-flex items-center px-4 py-2 rounded bg-purple-600 text-white text-sm hover:bg-purple-700"
+                (click)="importFromAPI()"
+              >
+                Import from API
+              </button>
+              <button 
+                class="inline-flex items-center px-4 py-2 rounded bg-green-600 text-white text-sm hover:bg-green-700"
+                (click)="addNewHoliday()"
+              >
+                Add Holiday
+              </button>
+            </div>
+          </div>
+
+          <!-- Table View -->
+          <div *ngIf="currentView === 'table'" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recurring</th>
+                  <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let holiday of publicHolidays; let i = index; trackBy: trackByHolidayIndex">
+                  <!-- Name Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">{{ holiday.name }}</div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="text"
+                        [(ngModel)]="editHolidayModel!.name"
+                        placeholder="Holiday name"
+                        class="w-full px-2 py-1 border rounded text-sm"
+                        [class.border-red-500]="editHolidayModel!.name !== undefined && editHolidayModel!.name.trim().length === 0"
+                        [class.border-gray-300]="!editHolidayModel!.name || editHolidayModel!.name.trim().length > 0"
+                        required
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Date Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">{{ holiday.date | date:'mediumDate' }}</div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="date"
+                        [(ngModel)]="editHolidayModel!.date"
+                        class="px-2 py-1 border rounded text-sm"
+                        [class.border-red-500]="editHolidayModel!.date !== undefined && editHolidayModel!.date.trim().length === 0"
+                        [class.border-gray-300]="!editHolidayModel!.date || editHolidayModel!.date.trim().length > 0"
+                        required
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Recurring Column -->
+                  <td class="px-4 py-3 text-sm text-gray-700">
+                    <div *ngIf="editingHolidayIndex !== i">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="holiday.isRecurring ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                        {{ holiday.isRecurring ? 'Yes' : 'No' }}
+                      </span>
+                    </div>
+                    <div *ngIf="editingHolidayIndex === i">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="editHolidayModel!.isRecurring"
+                        class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </div>
+                  </td>
+
+                  <!-- Actions Column -->
+                  <td class="px-4 py-3 text-sm text-right space-x-2">
+                    <div *ngIf="editingHolidayIndex !== i">
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700 mr-2" 
+                        (click)="startEditHoliday(i)"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-red-600 text-white text-sm hover:bg-red-700" 
+                        (click)="deleteHoliday(i)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div *ngIf="editingHolidayIndex === i">
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 mr-2" 
+                        (click)="saveHoliday(i)"
+                      >
+                        Save
+                      </button>
+                      <button 
+                        class="inline-flex items-center px-3 py-1 rounded bg-gray-100 text-sm hover:bg-gray-200" 
+                        (click)="cancelHolidayEdit()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div *ngIf="publicHolidays.length === 0 && !showImportPreview" class="text-center py-8 text-gray-500">
+              No public holidays defined. Click "Add Holiday" to get started.
+            </div>
+          </div>
+
+          <!-- Calendar View -->
+          <div *ngIf="currentView === 'calendar'">
+            <app-holiday-calendar 
+              [holidays]="publicHolidays"
+              (dateClick)="onCalendarDateClick($event)"
+              (holidayClick)="onCalendarHolidayClick($event)"
+            ></app-holiday-calendar>
+          </div>
+
+          <!-- Import Preview Section -->
+          <div *ngIf="showImportPreview" class="mt-6 border-t pt-6">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-lg font-semibold text-gray-900">Import Preview</h4>
+              <div class="flex gap-2">
+                <button 
+                  class="inline-flex items-center px-4 py-2 rounded bg-green-600 text-white text-sm hover:bg-green-700"
+                  (click)="importValidHolidays()"
+                  [disabled]="validImportedHolidaysCount === 0"
+                >
+                  Import Valid ({{ validImportedHolidaysCount }})
+                </button>
+                <button 
+                  class="inline-flex items-center px-4 py-2 rounded bg-gray-100 text-sm hover:bg-gray-200"
+                  (click)="cancelImport()"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recurring</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Errors</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr *ngFor="let holiday of importedHolidays; let i = index">
+                    <td class="px-4 py-3 text-sm">
+                      <span *ngIf="holiday.isValid" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Valid
+                      </span>
+                      <span *ngIf="!holiday.isValid" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Invalid
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700">{{ holiday.name || '(empty)' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700">{{ holiday.date || '(empty)' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700">{{ holiday.recurring }}</td>
+                    <td class="px-4 py-3 text-sm text-red-600">
+                      <div *ngIf="holiday.errors && holiday.errors.length > 0">
+                        <div *ngFor="let error of holiday.errors" class="text-xs">{{ error }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
