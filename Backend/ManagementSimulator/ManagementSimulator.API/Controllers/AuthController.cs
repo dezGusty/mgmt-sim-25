@@ -2,6 +2,7 @@
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Core.Dtos.Requests.ResetPassword;
+using ManagementSimulator.Core.Dtos.Requests.Impersonation;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -133,6 +134,25 @@ public class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error resetting password");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("impersonate")]
+    public async Task<IActionResult> Impersonate([FromBody] ImpersonateUserRequestDto request)
+    {
+        try
+        {
+            var success = await _authService.ImpersonateUserAsync(HttpContext, request.UserId);
+            if (!success)
+                return BadRequest(new { error = "Unable to impersonate user. User may not exist or requires password change." });
+
+            return Ok(new { message = "Successfully impersonating user." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error impersonating user {UserId}", request.UserId);
             return StatusCode(500, new { error = "Internal server error" });
         }
     }

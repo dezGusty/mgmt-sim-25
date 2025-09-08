@@ -43,6 +43,30 @@ namespace ManagementSimulator.Core.Services
             return true;
         }
 
+        public async Task<bool> ImpersonateUserAsync(HttpContext httpContext, int targetUserId)
+        {
+            var user = await _userRepository.GetFirstOrDefaultAsync(targetUserId);
+            if (user == null || user.MustChangePassword)
+                return false;
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+            };
+
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.Role.Rolename));
+            }
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await httpContext.SignInAsync("Cookies", principal);
+            return true;
+        }
+
 
         public async Task LogoutAsync(HttpContext httpContext)
         {
