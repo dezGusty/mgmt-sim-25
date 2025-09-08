@@ -63,6 +63,11 @@ export class AdminUsersList implements OnInit {
 
   employeeRoleInfo: string = 'All the users are automatically set to employees.';
 
+  // Toast success messaging
+  showSuccessMessage: boolean = false;
+  successMessage: string = '';
+  private toastTimeoutRef: any = null;
+
   constructor(private usersService: UsersService,
     private jobTitlesService: JobTitlesService,
     private employeeRoleService: EmployeeRolesService,
@@ -508,8 +513,29 @@ export class AdminUsersList implements OnInit {
     this.editForm.dateOfEmployment = new Date(dateString);
   }
 
+  private showToast(message: string, duration: number = 3000): void {
+    this.successMessage = message;
+    this.showSuccessMessage = true;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+    }
+    this.toastTimeoutRef = setTimeout(() => {
+      this.showSuccessMessage = false;
+      this.toastTimeoutRef = null;
+    }, duration);
+  }
+
+  closeSuccessMessage(): void {
+    this.showSuccessMessage = false;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+      this.toastTimeoutRef = null;
+    }
+  }
+
   impersonateUser(user: IUserViewModel): void {
     console.log('Impersonate clicked for user:', user);
-    alert(`Impersonate: ${user.name} (id: ${user.id})`);
+
+    this.showToast(`Impersonating ${user.name}`);
   }
 }

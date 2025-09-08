@@ -1,4 +1,14 @@
 <div class="space-y-6">
+  <!-- Success Toast (top-right) -->
+  <div *ngIf="showSuccessMessage"
+    class="fixed top-20 right-4 z-70 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg animate-fade-in flex items-center gap-3">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span class="font-medium">{{ successMessage }}</span>
+    <button (click)="closeSuccessMessage()"
+      class="ml-4 text-white hover:text-gray-200 font-bold text-lg leading-none">×</button>
+  </div>
   <!-- Search Bar Section - Single Row -->
   <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
     <div class="flex flex-wrap items-center gap-3">
