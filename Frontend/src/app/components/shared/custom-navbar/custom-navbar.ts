@@ -24,11 +24,15 @@ export class CustomNavbar implements OnInit {
   availableRoles: UserRole[] = [];
   isActingAsSecondManager = false;
   isTemporarilyReplaced = false;
+  impersonatedUserName: string = '';
 
   constructor(private router: Router, private authService: Auth) { }
 
   ngOnInit(): void {
     this.loadUserData();
+    this.authService.impersonation$.subscribe(name => {
+      this.impersonatedUserName = name || '';
+    });
   }
 
   @HostListener('document:click', ['$event'])

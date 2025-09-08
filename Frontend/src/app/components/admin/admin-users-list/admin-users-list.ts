@@ -16,6 +16,7 @@ import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { UserActivityStatus } from '../../../models/enums/user-activity-status';
+import { Auth } from '../../../services/authService/auth';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -71,7 +72,8 @@ export class AdminUsersList implements OnInit {
   constructor(private usersService: UsersService,
     private jobTitlesService: JobTitlesService,
     private employeeRoleService: EmployeeRolesService,
-    private departmentService: DepartmentService) {
+    private departmentService: DepartmentService,
+    private authService: Auth) {
 
   }
 
@@ -535,7 +537,7 @@ export class AdminUsersList implements OnInit {
 
   impersonateUser(user: IUserViewModel): void {
     console.log('Impersonate clicked for user:', user);
-
+    this.authService.setImpersonation(user.name);
     this.showToast(`Impersonating ${user.name}`);
   }
 }

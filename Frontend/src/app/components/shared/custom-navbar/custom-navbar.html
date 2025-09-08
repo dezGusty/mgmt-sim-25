@@ -42,9 +42,14 @@
               </svg>
             </div>
             <div class="h-3 w-px bg-[#7EE3DB]/40"></div>
-            <span class="text-white/90 group-hover:text-white transition-colors duration-300 text-sm font-medium">
-              {{ userEmail }}
-            </span>
+            <div class="flex flex-col">
+              <span class="text-white/90 group-hover:text-white transition-colors duration-300 text-sm font-medium">
+                {{ userEmail }}
+              </span>
+              <span *ngIf="impersonatedUserName" class="text-xs text-[#22e6bb]">
+                Impersonating: {{ impersonatedUserName }}
+              </span>
+            </div>
           </div>
 
           <!-- Role Dropdown -->
