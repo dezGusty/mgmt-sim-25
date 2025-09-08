@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/authService/auth';
 
@@ -19,6 +19,9 @@ export class Login {
   password = '';
   errorMessage = '';
 
+  welcomeAnimate = false;
+  welcomeName = '';
+
   constructor(private auth: Auth, private router: Router) { }
 
   onLogin() {
@@ -28,16 +31,19 @@ export class Login {
 
     this.auth.login(this.email, this.password).subscribe({
       next: (_) => {
-        if (returnUrl) {
-          this.router.navigateByUrl(returnUrl);
-          return;
-        }
-
         this.auth.me().subscribe({
           next: (user: any) => {
-            console.log('User data:', user);
             this.auth.updateCurrentUser(user);
+            const firstName = user.firstName || user.FirstName || '';
+            const lastName = user.lastName || user.LastName || '';
+            this.welcomeName = `${firstName} ${lastName}`.trim() || user.email || user.Email || '';
+            this.welcomeAnimate = true;
             
+            const continueNav = () => {
+              if (returnUrl) {
+                this.router.navigateByUrl(returnUrl);
+                return;
+              }
             if (user && user.roles && user.roles.length === 1) {
               const singleRole = user.roles[0];
               this.redirectToRoleSpecificPage(singleRole);
@@ -46,6 +52,9 @@ export class Login {
             } else {
               this.router.navigate(['/role-selector']);
             }
+            };
+
+            setTimeout(continueNav, 1200);
           },
           error: (err) => {
             console.error('Error getting user info:', err);
