@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
   import { environment } from '../../../environments/environment';
+  import { BehaviorSubject } from 'rxjs';
 
 export interface UserInfo {
   userId: string;
@@ -11,12 +12,20 @@ export interface UserInfo {
   isTemporarilyReplaced: boolean;
 }
 
+export interface ImpersonationInfo {
+  name: string;
+  roles: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUser: UserInfo | null = null;
+
+  private impersonationSubject = new BehaviorSubject<ImpersonationInfo | null>(null);
+  impersonation$ = this.impersonationSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -56,6 +65,18 @@ export class Auth {
 
   hasEffectiveRole(role: string): boolean {
     return this.currentUser?.roles.includes(role) || false;
+  }
+
+  setImpersonation(info: ImpersonationInfo): void {
+    this.impersonationSubject.next(info);
+  }
+
+  clearImpersonation(): void {
+    this.impersonationSubject.next(null);
+  }
+
+  getImpersonation(): ImpersonationInfo | null {
+    return this.impersonationSubject.value;
   }
 
   sendResetCode(email: string) {
