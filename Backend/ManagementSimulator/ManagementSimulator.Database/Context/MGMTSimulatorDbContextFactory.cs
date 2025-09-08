@@ -36,7 +36,7 @@ namespace ManagementSimulator.Database.Context
             AppConfig.Init(configuration);
 
             var optionsBuilder = new DbContextOptionsBuilder<MGMTSimulatorDbContext>();
-            optionsBuilder.UseSqlServer(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
+            optionsBuilder.UseSqlite(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
 
             if (AppConfig.ConsoleLogQueries)
             {

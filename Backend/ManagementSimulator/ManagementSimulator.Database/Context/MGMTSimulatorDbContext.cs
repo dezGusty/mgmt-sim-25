@@ -19,7 +19,7 @@ namespace ManagementSimulator.Database.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
+            optionsBuilder.UseSqlite(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
 
             if (AppConfig.ConsoleLogQueries)
             {
