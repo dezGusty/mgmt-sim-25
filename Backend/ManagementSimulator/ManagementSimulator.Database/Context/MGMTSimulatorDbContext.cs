@@ -19,11 +19,14 @@ namespace ManagementSimulator.Database.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
-
-            if (AppConfig.ConsoleLogQueries)
+            if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.LogTo(Console.WriteLine);
+                optionsBuilder.UseSqlite(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
+
+                if (AppConfig.ConsoleLogQueries)
+                {
+                    optionsBuilder.LogTo(Console.WriteLine);
+                }
             }
         }
 
