@@ -537,7 +537,7 @@ export class AdminUsersList implements OnInit {
 
   impersonateUser(user: IUserViewModel): void {
     console.log('Impersonate clicked for user:', user);
-    this.authService.setImpersonation(user.name);
+    this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
     this.showToast(`Impersonating ${user.name}`);
   }
 }

@@ -12,6 +12,11 @@ export interface UserInfo {
   isTemporarilyReplaced: boolean;
 }
 
+export interface ImpersonationInfo {
+  name: string;
+  roles: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -19,7 +24,7 @@ export class Auth {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUser: UserInfo | null = null;
 
-  private impersonationSubject = new BehaviorSubject<string | null>(null);
+  private impersonationSubject = new BehaviorSubject<ImpersonationInfo | null>(null);
   impersonation$ = this.impersonationSubject.asObservable();
 
   constructor(private http: HttpClient) { }
@@ -62,15 +67,15 @@ export class Auth {
     return this.currentUser?.roles.includes(role) || false;
   }
 
-  setImpersonation(name: string): void {
-    this.impersonationSubject.next(name);
+  setImpersonation(info: ImpersonationInfo): void {
+    this.impersonationSubject.next(info);
   }
 
   clearImpersonation(): void {
     this.impersonationSubject.next(null);
   }
 
-  getImpersonatedUserName(): string | null {
+  getImpersonation(): ImpersonationInfo | null {
     return this.impersonationSubject.value;
   }
 
