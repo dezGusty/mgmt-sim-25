@@ -16,6 +16,7 @@ import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { UserActivityStatus } from '../../../models/enums/user-activity-status';
+import { Auth } from '../../../services/authService/auth';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -63,10 +64,16 @@ export class AdminUsersList implements OnInit {
 
   employeeRoleInfo: string = 'All the users are automatically set to employees.';
 
+  // Toast success messaging
+  showSuccessMessage: boolean = false;
+  successMessage: string = '';
+  private toastTimeoutRef: any = null;
+
   constructor(private usersService: UsersService,
     private jobTitlesService: JobTitlesService,
     private employeeRoleService: EmployeeRolesService,
-    private departmentService: DepartmentService) {
+    private departmentService: DepartmentService,
+    private authService: Auth) {
 
   }
 
@@ -506,5 +513,31 @@ export class AdminUsersList implements OnInit {
 
   setDateFromInput(dateString: string): void {
     this.editForm.dateOfEmployment = new Date(dateString);
+  }
+
+  private showToast(message: string, duration: number = 3000): void {
+    this.successMessage = message;
+    this.showSuccessMessage = true;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+    }
+    this.toastTimeoutRef = setTimeout(() => {
+      this.showSuccessMessage = false;
+      this.toastTimeoutRef = null;
+    }, duration);
+  }
+
+  closeSuccessMessage(): void {
+    this.showSuccessMessage = false;
+    if (this.toastTimeoutRef) {
+      clearTimeout(this.toastTimeoutRef);
+      this.toastTimeoutRef = null;
+    }
+  }
+
+  impersonateUser(user: IUserViewModel): void {
+    console.log('Impersonate clicked for user:', user);
+    this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
+    this.showToast(`Impersonating ${user.name}`);
   }
 }

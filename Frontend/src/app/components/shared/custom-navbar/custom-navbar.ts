@@ -24,11 +24,21 @@ export class CustomNavbar implements OnInit {
   availableRoles: UserRole[] = [];
   isActingAsSecondManager = false;
   isTemporarilyReplaced = false;
+  impersonatedUserName: string = '';
+  impersonatedRoles: string[] = [];
+  impersonatedRolesDetailed: UserRole[] = [];
 
   constructor(private router: Router, private authService: Auth) { }
 
   ngOnInit(): void {
     this.loadUserData();
+    this.authService.impersonation$.subscribe(info => {
+      this.impersonatedUserName = info?.name || '';
+      this.impersonatedRoles = info?.roles || [];
+      this.impersonatedRolesDetailed = this.impersonatedRoles
+        .map(r => this.mapRoleToInterface(r))
+        .filter((r): r is UserRole => r !== null);
+    });
   }
 
   @HostListener('document:click', ['$event'])
