@@ -243,6 +243,22 @@
               </button>
 
               <button
+                class="text-gray-600 hover:text-gray-800 transition-colors"
+                (click)="impersonateUser(user)"
+                title="Impersonate"
+                aria-label="Impersonate"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path fill-rule="evenodd" d="M12 2a5 5 0 110 10 5 5 0 010-10zm-8 17a8 8 0 1116 0v1H4v-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+
+              <button
                 class="text-red-600 hover:text-red-800 transition-colors"
                 (click)="deleteUser(user)"
               >

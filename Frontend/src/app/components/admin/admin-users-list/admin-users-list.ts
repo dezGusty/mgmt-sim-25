@@ -507,4 +507,9 @@ export class AdminUsersList implements OnInit {
   setDateFromInput(dateString: string): void {
     this.editForm.dateOfEmployment = new Date(dateString);
   }
+
+  impersonateUser(user: IUserViewModel): void {
+    console.log('Impersonate clicked for user:', user);
+    alert(`Impersonate: ${user.name} (id: ${user.id})`);
+  }
 }
