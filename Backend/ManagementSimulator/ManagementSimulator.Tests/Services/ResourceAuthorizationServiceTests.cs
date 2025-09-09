@@ -38,8 +38,8 @@ namespace ManagementSimulator.Tests.Services
 		[Fact]
 		public async Task CanManagerAccessLeaveRequestAsync_Should_Check_Ownership()
 		{
-			_leaveRepo.GetFirstOrDefaultAsync(7, Arg.Any<bool>()).Returns(new LeaveRequest { Id = 7, UserId = 300 });
 			_userRepo.GetUsersByManagerIdAsync(150, Arg.Any<bool>()).Returns(new List<User> { new User { Id = 300 } });
+			_leaveRepo.GetFirstOrDefaultAsync(7, Arg.Any<bool>()).Returns(new LeaveRequest { Id = 7, UserId = 300 });
 
 			var serv = CreateServ();
 			var canAccess = await serv.CanManagerAccessLeaveRequestAsync(150, 7);
