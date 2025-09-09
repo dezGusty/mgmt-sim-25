@@ -187,29 +187,39 @@ export class CustomNavbar implements OnInit {
 
   async loadUserData(): Promise<void> {
     try {
-      const response = await fetch('https://localhost:7275/api/Auth/me', {
-        credentials: 'include',
-      });
+      // Use Auth service for consistency with guards
+      this.authService.me().subscribe({
+        next: (data) => {
+          if (data) {
+            this.userEmail = data.email || '';
+            this.isActingAsSecondManager = data.isActingAsSecondManager || false;
+            this.isTemporarilyReplaced = data.isTemporarilyReplaced || false;
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data) {
-          this.userEmail = data.email || '';
-          this.isActingAsSecondManager = data.isActingAsSecondManager || false;
-          this.isTemporarilyReplaced = data.isTemporarilyReplaced || false;
+            this.authService.updateCurrentUser(data);
 
-          this.authService.updateCurrentUser(data);
+            if (data.roles) {
+              this.userRoles = data.roles;
+              this.showHomeButton = this.userRoles.length > 1;
 
-          if (data.roles) {
-            this.userRoles = data.roles;
-            this.showHomeButton = this.userRoles.length > 1;
+              this.availableRoles = this.userRoles
+                .map(role => this.mapRoleToInterface(role))
+                .filter(role => role !== null) as UserRole[];
+            }
 
-            this.availableRoles = this.userRoles
-              .map(role => this.mapRoleToInterface(role))
-              .filter(role => role !== null) as UserRole[];
+            console.log('[CustomNavbar] Loaded user data:', {
+              email: this.userEmail,
+              roles: this.userRoles,
+              isImpersonating: data.isImpersonating,
+              originalUserId: data.originalUserId
+            });
           }
+        },
+        error: (error) => {
+          console.error('Error loading user data:', error);
+          this.showHomeButton = false;
+          this.userEmail = '';
         }
-      }
+      });
     } catch (error) {
       console.error('Error loading user data:', error);
       this.showHomeButton = false;
@@ -235,5 +245,25 @@ export class CustomNavbar implements OnInit {
 
   goHome() {
     this.router.navigate(['/role-selector']);
+  }
+
+  stopImpersonation(): void {
+    if (confirm('Are you sure you want to stop impersonating this user? You will return to your admin account.')) {
+      this.authService.stopImpersonation().subscribe({
+        next: () => {
+          this.authService.clearImpersonation();
+          // Reload user data to get back to original user's session
+          this.loadUserData();
+          this.router.navigate(['/role-selector']);
+        },
+        error: (err) => {
+          console.error('Error stopping impersonation:', err);
+          // Still clear local state even if backend call fails
+          this.authService.clearImpersonation();
+          this.loadUserData();
+          this.router.navigate(['/role-selector']);
+        }
+      });
+    }
   }
 }

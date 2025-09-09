@@ -17,6 +17,7 @@ import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { UserActivityStatus } from '../../../models/enums/user-activity-status';
 import { Auth } from '../../../services/authService/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -73,7 +74,8 @@ export class AdminUsersList implements OnInit {
     private jobTitlesService: JobTitlesService,
     private employeeRoleService: EmployeeRolesService,
     private departmentService: DepartmentService,
-    private authService: Auth) {
+    private authService: Auth,
+    private router: Router) {
 
   }
 
@@ -536,8 +538,38 @@ export class AdminUsersList implements OnInit {
   }
 
   impersonateUser(user: IUserViewModel): void {
-    console.log('Impersonate clicked for user:', user);
-    this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
-    this.showToast(`Impersonating ${user.name}`);
+    if (confirm(`Are you sure you want to impersonate ${user.name}? This will switch your session to act on behalf of this user.`)) {
+      console.log('Impersonate clicked for user:', user);
+      
+      this.authService.impersonate(user.id).subscribe({
+        next: (response: any) => {
+          this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
+          this.showToast(`Now impersonating ${user.name}. You can switch to their available roles.`);
+          console.log('Impersonation successful:', response);
+          
+          // Force navigation to role selector to trigger auth guard refresh
+          setTimeout(() => {
+            console.log('Navigating to role selector to refresh session...');
+            this.router.navigate(['/role-selector']);
+          }, 1000);
+        },
+        error: (err) => {
+          console.error('Failed to impersonate user:', err);
+          let errorMessage = 'Failed to impersonate user. ';
+          
+          if (err.status === 400) {
+            errorMessage += 'User may not exist or requires password change.';
+          } else if (err.status === 403) {
+            errorMessage += 'You do not have permission to impersonate users.';
+          } else if (err.status === 500) {
+            errorMessage += 'Server error occurred. Please try again later.';
+          } else {
+            errorMessage += 'Please try again.';
+          }
+          
+          alert(errorMessage);
+        }
+      });
+    }
   }
 }

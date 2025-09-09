@@ -268,4 +268,9 @@ export class UsersService {
   getTotalUnassignedUsersCount(): Observable<IApiResponse<number>> {
     return this.http.get<IApiResponse<number>>(`${this.baseUrl}/unassignedUsers/count`);
   }
+
+  getSubordinatesCount(managerId?: number): Observable<IApiResponse<number>> {
+    const url = managerId ? `${this.baseUrl}/subordinates/count/${managerId}` : `${this.baseUrl}/subordinates/count`;
+    return this.http.get<IApiResponse<number>>(url);
+  }
 }

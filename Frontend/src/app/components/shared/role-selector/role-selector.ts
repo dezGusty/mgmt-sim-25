@@ -25,7 +25,11 @@ interface UserRole {
 })
 export class RoleSelector implements OnInit {
   userRoles: UserRole[] = [];
+  impersonatedRoles: UserRole[] = [];
+  adminOriginalRoles: UserRole[] = [];
   userName = '';
+  impersonatedUserName = '';
+  isImpersonating = false;
   isLoading = true;
   errorMessage = '';
 
@@ -36,6 +40,16 @@ export class RoleSelector implements OnInit {
 
   ngOnInit() {
     this.loadUserRoles();
+    this.auth.impersonation$.subscribe(info => {
+      this.impersonatedUserName = info?.name || '';
+      this.isImpersonating = !!info;
+      if (info?.roles) {
+        this.impersonatedRoles = info.roles.map(role => this.mapRoleToInterface(role))
+          .filter((role): role is UserRole => role !== null);
+      } else {
+        this.impersonatedRoles = [];
+      }
+    });
   }
 
   loadUserRoles() {
@@ -49,16 +63,35 @@ export class RoleSelector implements OnInit {
         this.userName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim()
           || user.email || user.Email || 'User';
 
+        // Extract roles - handle both normal user and impersonated user scenarios
         const userRoles = user.Roles || user.roles || [];
-
-        this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
-          .filter((role: UserRole | null) => role !== null);
+        const originalRoles = user.OriginalRoles || user.originalRoles || [];
+        const isImpersonating = user.IsImpersonating || user.isImpersonating;
+        
+        if (isImpersonating) {
+          // When impersonating, userRoles should only contain the impersonated user's roles
+          this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
+            .filter((role: UserRole | null) => role !== null);
+            
+          // Admin's original roles are shown separately and require stopping impersonation
+          this.adminOriginalRoles = originalRoles.map((role: string) => this.mapRoleToInterface(role))
+            .filter((role: UserRole | null) => role !== null);
+        } else {
+          // When not impersonating, show the user's normal roles
+          this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
+            .filter((role: UserRole | null) => role !== null);
+          this.adminOriginalRoles = [];
+        }
 
         this.isLoading = false;
 
-        if (this.userRoles.length === 0) {
+        // Handle cases where there are no roles
+        if (this.userRoles.length === 0 && !isImpersonating) {
           this.errorMessage = 'No accessible roles found for your account. Please contact your administrator.';
+        } else if (this.userRoles.length === 0 && isImpersonating && this.adminOriginalRoles.length === 0) {
+          this.errorMessage = 'The impersonated user has no roles and admin roles could not be loaded. Please contact your administrator.';
         }
+        // If impersonating user has no roles but admin has roles, that's fine - admin roles will be shown
       },
       error: (err) => {
         console.error('Failed to get user info:', err);
@@ -117,8 +150,36 @@ export class RoleSelector implements OnInit {
 
   selectRole(role: UserRole) {
     console.log(`User selected role: ${role.name}, navigating to: ${role.route}`);
-
     this.router.navigate([role.route]);
+  }
+
+  selectAdminRole(role: UserRole) {
+    console.log(`Admin selected original role while impersonating: ${role.name}`);
+    
+    // First stop impersonation, then navigate to admin role
+    this.auth.stopImpersonation().subscribe({
+      next: () => {
+        this.auth.clearImpersonation();
+        this.isImpersonating = false;
+        this.impersonatedUserName = '';
+        this.impersonatedRoles = [];
+        this.adminOriginalRoles = [];
+        
+        // Navigate to the admin role
+        console.log(`Impersonation stopped, navigating to admin role: ${role.route}`);
+        this.router.navigate([role.route]);
+      },
+      error: (err) => {
+        console.error('Error stopping impersonation for admin role switch:', err);
+        // Still try to navigate and clear local state
+        this.auth.clearImpersonation();
+        this.isImpersonating = false;
+        this.impersonatedUserName = '';
+        this.impersonatedRoles = [];
+        this.adminOriginalRoles = [];
+        this.router.navigate([role.route]);
+      }
+    });
   }
 
   goToLogin() {
@@ -135,5 +196,29 @@ export class RoleSelector implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  stopImpersonation(): void {
+    if (confirm('Are you sure you want to stop impersonating this user? You will return to your admin account.')) {
+      this.auth.stopImpersonation().subscribe({
+        next: () => {
+          this.auth.clearImpersonation();
+          this.isImpersonating = false;
+          this.impersonatedUserName = '';
+          this.impersonatedRoles = [];
+          // Reload the user roles to get back the admin's roles
+          this.loadUserRoles();
+        },
+        error: (err) => {
+          console.error('Error stopping impersonation:', err);
+          // Still clear local state even if backend call fails
+          this.auth.clearImpersonation();
+          this.isImpersonating = false;
+          this.impersonatedUserName = '';
+          this.impersonatedRoles = [];
+          this.loadUserRoles();
+        }
+      });
+    }
   }
 }

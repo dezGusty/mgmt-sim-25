@@ -85,6 +85,10 @@
               </div>
             </div>
             <div class="p-3 border-t border-gray-100">
+              <button *ngIf="impersonatedUserName" (click)="stopImpersonation()"
+                class="w-full mb-2 px-3 py-2 text-center text-sm bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 font-medium rounded-lg border border-red-200 hover:border-red-300 transition-all duration-150">
+                Stop Impersonating
+              </button>
               <button (click)="goToRoleSelector()"
                 class="w-full text-center text-sm text-[#7EE3DB] hover:text-[#88F8BF] font-medium transition-colors duration-150">
                 View All Roles
