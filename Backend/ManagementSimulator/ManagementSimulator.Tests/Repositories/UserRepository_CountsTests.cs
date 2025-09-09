@@ -22,9 +22,9 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.AddRange(dept, title, adminRole, userRole);
 			await ctx.SaveChangesAsync();
 
-			var a1 = new User { Email = "a1@x.com", FirstName = "A1", LastName = "A", PasswordHash = "x", Department = dept, Title = title };
-			var a2 = new User { Email = "a2@x.com", FirstName = "A2", LastName = "B", PasswordHash = "x", Department = dept, Title = title };
-			var u1 = new User { Email = "u1@x.com", FirstName = "U1", LastName = "C", PasswordHash = "x", Department = dept, Title = title };
+			var a1 = new User { Email = "Arhire@simulator.com", FirstName = "Arhire", LastName = "Alpaca", PasswordHash = "x", Department = dept, Title = title };
+			var a2 = new User { Email = "Andrusca@simulator.com", FirstName = "Andrusca", LastName = "Bondar", PasswordHash = "x", Department = dept, Title = title };
+			var u1 = new User { Email = "Ulea@simulator.com", FirstName = "Ulea", LastName = "Corvett", PasswordHash = "x", Department = dept, Title = title };
 			ctx.Users.AddRange(a1, a2, u1);
 			await ctx.SaveChangesAsync();
 
@@ -47,9 +47,9 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.AddRange(dept, title);
 			await ctx.SaveChangesAsync();
 
-			var m1 = new User { Email = "m1@x.com", FirstName = "M1", LastName = "Boss", PasswordHash = "x", Department = dept, Title = title };
-			var m2 = new User { Email = "m2@x.com", FirstName = "M2", LastName = "Lead", PasswordHash = "x", Department = dept, Title = title };
-			var e1 = new User { Email = "e1@x.com", FirstName = "E1", LastName = "A", PasswordHash = "x", Department = dept, Title = title };
+			var m1 = new User { Email = "Mitica@simulator.com", FirstName = "Mitica", LastName = "Botez", PasswordHash = "x", Department = dept, Title = title };
+			var m2 = new User { Email = "Marean@simulator.com", FirstName = "Marean", LastName = "Londonezu", PasswordHash = "x", Department = dept, Title = title };
+			var e1 = new User { Email = "Eugustin@simulator.com", FirstName = "Eugustin", LastName = "Amigo", PasswordHash = "x", Department = dept, Title = title };
 			ctx.Users.AddRange(m1, m2, e1);
 			await ctx.SaveChangesAsync();
 

@@ -23,9 +23,9 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.JobTitles.Add(title);
 			await ctx.SaveChangesAsync();
 
-			var manager = new User { Email = "m@x.com", FirstName = "M", LastName = "Boss", PasswordHash = "x", Department = dept, Title = title };
-			var e1 = new User { Email = "e1@x.com", FirstName = "E1", LastName = "A", PasswordHash = "x", Department = dept, Title = title };
-			var e2 = new User { Email = "e2@x.com", FirstName = "E2", LastName = "B", PasswordHash = "x", Department = dept, Title = title };
+			var manager = new User { Email = "Marian@simulator.com", FirstName = "Marian", LastName = "Bogdan", PasswordHash = "x", Department = dept, Title = title };
+			var e1 = new User { Email = "Elian@simulator.com", FirstName = "Elian", LastName = "AAnderson", PasswordHash = "x", Department = dept, Title = title };
+			var e2 = new User { Email = "Emilia@simulator.com", FirstName = "Emilia", LastName = "Coacaza", PasswordHash = "x", Department = dept, Title = title };
 			ctx.Users.AddRange(manager, e1, e2);
 			await ctx.SaveChangesAsync();
 
@@ -37,7 +37,7 @@ namespace ManagementSimulator.Tests.Repositories
 			var subs = await repo.GetUsersByManagerIdAsync(manager.Id);
 
 			subs.Should().HaveCount(2);
-			subs.Select(s => s.Email).Should().BeEquivalentTo(new[] { "e1@x.com", "e2@x.com" });
+			subs.Select(s => s.Email).Should().BeEquivalentTo(new[] { "Elian@simulator.com", "Emilia@simulator.com" });
 		}
 
 		[Fact]
@@ -50,9 +50,9 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.JobTitles.Add(title);
 			await ctx.SaveChangesAsync();
 
-			var m1 = new User { Email = "m1@x.com", FirstName = "M1", LastName = "Boss", PasswordHash = "x", Department = dept, Title = title };
-			var m2 = new User { Email = "m2@x.com", FirstName = "M2", LastName = "Lead", PasswordHash = "x", Department = dept, Title = title };
-			var e1 = new User { Email = "e1@x.com", FirstName = "E1", LastName = "A", PasswordHash = "x", Department = dept, Title = title };
+			var m1 = new User { Email = "Maria@simulator.com", FirstName = "Maria", LastName = "Bonaparte", PasswordHash = "x", Department = dept, Title = title };
+			var m2 = new User { Email = "Marean@simulator.com", FirstName = "Marean", LastName = "Leopard", PasswordHash = "x", Department = dept, Title = title };
+			var e1 = new User { Email = "Eugustin@simulator.com", FirstName = "Eugustin", LastName = "Ariciu", PasswordHash = "x", Department = dept, Title = title };
 			ctx.Users.AddRange(m1, m2, e1);
 			await ctx.SaveChangesAsync();
 
@@ -66,7 +66,7 @@ namespace ManagementSimulator.Tests.Repositories
 			employees.Should().HaveCount(1);
 			var loaded = employees[0];
 			loaded.Managers.Should().HaveCount(2);
-			loaded.Managers.Select(em => em.Manager.Email).Should().BeEquivalentTo(new[] { "m1@x.com", "m2@x.com" });
+			loaded.Managers.Select(em => em.Manager.Email).Should().BeEquivalentTo(new[] { "Maria@simulator.com", "Marean@simulator.com" });
 		}
 	}
 }
