@@ -407,5 +407,46 @@ namespace ManagementSimulator.API.Controllers
                 });
             }
         }
+
+        [HttpDelete("public-holidays/{id}/hard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> HardDeletePublicHolidayAsync(int id)
+        {
+            try
+            {
+                var result = await _publicHolidayService.HardDeleteHolidayAsync(id);
+
+                return Ok(new
+                {
+                    Message = "Public holiday permanently deleted successfully.",
+                    Data = new { Id = id, Deleted = result },
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"Public holiday with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while hard deleting public holiday {HolidayId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while permanently deleting the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
     }
 }

@@ -88,5 +88,17 @@ namespace ManagementSimulator.Database.Repositories
             await SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> HardDeleteAsync(int primaryKey)
+        {
+            var entity = await GetFirstOrDefaultAsync(primaryKey, true); // Include deleted entities for hard delete
+            if (entity is null)
+            {
+                return false;
+            }
+            DbSet.Remove(entity);
+            await SaveChangesAsync();
+            return true;
+        }
     }
 }

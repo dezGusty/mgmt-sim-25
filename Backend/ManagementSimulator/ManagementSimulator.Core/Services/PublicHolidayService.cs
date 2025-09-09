@@ -20,7 +20,7 @@ namespace ManagementSimulator.Core.Services
         public async Task<List<PublicHolidayResponseDto>> GetHolidaysByYearAsync(int year)
         {
             var holidays = await _repository.GetHolidaysByYearAsync(year);
-            
+
             return holidays.Select(h => new PublicHolidayResponseDto
             {
                 Id = h.Id,
@@ -55,8 +55,8 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PublicHolidayResponseDto> CreateHolidayAsync(CreatePublicHolidayRequestDto request)
         {
-            // Check for duplicates
-            var existingHoliday = await _repository.GetHolidayByNameAndDateAsync(request.Name, request.Date, includeDeleted: true);
+            // Check for duplicates (only active records since we use hard delete)
+            var existingHoliday = await _repository.GetHolidayByNameAndDateAsync(request.Name, request.Date, includeDeleted: false);
             if (existingHoliday != null)
             {
                 throw new UniqueConstraintViolationException(nameof(PublicHoliday), $"{nameof(PublicHoliday.Name)} and {nameof(PublicHoliday.Date)}");
@@ -91,8 +91,8 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(PublicHoliday), id);
             }
 
-            // Check for duplicates (excluding current record)
-            var duplicateCheck = await _repository.GetHolidayByNameAndDateAsync(request.Name, request.Date, includeDeleted: true);
+            // Check for duplicates (excluding current record, only active records since we use hard delete)
+            var duplicateCheck = await _repository.GetHolidayByNameAndDateAsync(request.Name, request.Date, includeDeleted: false);
             if (duplicateCheck != null && duplicateCheck.Id != id)
             {
                 throw new UniqueConstraintViolationException(nameof(PublicHoliday), $"{nameof(PublicHoliday.Name)} and {nameof(PublicHoliday.Date)}");
@@ -125,7 +125,18 @@ namespace ManagementSimulator.Core.Services
                 throw new EntryNotFoundException(nameof(PublicHoliday), id);
             }
 
-            return await _repository.DeleteAsync(id);
+            return await _repository.HardDeleteAsync(id);
+        }
+
+        public async Task<bool> HardDeleteHolidayAsync(int id)
+        {
+            var existing = await _repository.GetFirstOrDefaultAsync(id, true); // Include deleted entities
+            if (existing == null)
+            {
+                throw new EntryNotFoundException(nameof(PublicHoliday), id);
+            }
+
+            return await _repository.HardDeleteAsync(id);
         }
 
         public async Task<PagedResponseDto<PublicHolidayResponseDto>> GetAllHolidaysFilteredAsync(QueriedPublicHolidayRequestDto request)

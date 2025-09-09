@@ -415,28 +415,42 @@ export class Hr {
   }
 
   importValidHolidays() {
-    const validHolidays = this.importedHolidays
-      .filter(imported => imported.isValid)
-      .map(imported => this.hrService.convertImportedToPublicHoliday(imported));
+    if (this.importedHolidays.length === 0) {
+      return;
+    }
 
-    const existingHolidays = this.publicHolidays.filter(h => h.id);
+    const currentYear = new Date().getFullYear();
     
-    validHolidays.forEach(holiday => {
-      const isDuplicate = existingHolidays.some(existing => 
-        existing.name.toLowerCase() === holiday.name.toLowerCase() && 
-        existing.date === holiday.date
-      );
-
-      if (!isDuplicate) {
-        this.publicHolidays.push({
-          ...holiday,
-          id: undefined
-        } as PublicHoliday);
+    this.hrService.importValidHolidays(this.importedHolidays, currentYear).subscribe({
+      next: (result) => {
+        let message = '';
+        
+        if (result.successful.length > 0) {
+          message += `Successfully imported ${result.successful.length} holiday(s). `;
+          this.publicHolidays.push(...result.successful);
+        }
+        
+        if (result.duplicates.length > 0) {
+          message += `Warning: ${result.duplicates.length} holiday(s) already exist and were skipped: ${result.duplicates.join(', ')}. `;
+        }
+        
+        if (result.errors.length > 0) {
+          message += `Failed to import ${result.errors.length} holiday(s) due to errors. `;
+          console.error('Import errors:', result.errors);
+        }
+        
+        if (message) {
+          alert(message.trim());
+        }
+        
+        this.showImportPreview = false;
+        this.importedHolidays = [];
+      },
+      error: (error) => {
+        console.error('Error during import:', error);
+        alert('An error occurred during import. Please try again.');
       }
     });
-
-    this.showImportPreview = false;
-    this.importedHolidays = [];
   }
 
   cancelImport() {
