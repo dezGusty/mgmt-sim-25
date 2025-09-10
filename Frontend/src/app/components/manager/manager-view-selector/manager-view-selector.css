@@ -39,3 +39,14 @@
 .manager-card:active {
   transform: scale(0.98);
 }
+
+.view-card {
+  min-height: 320px;
+  width: 320px;
+}
+
+.view-card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

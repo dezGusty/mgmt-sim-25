@@ -26,10 +26,10 @@
         <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
           <div *ngFor="let view of managerViews" 
                (click)="selectView(view)"
-               class="group cursor-pointer transform transition-all duration-300 hover:scale-105">
+               class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-80">
             
             <!-- View Card -->
-            <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300">
+            <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
               
               <!-- Card Header with Gradient -->
               <div class="bg-gradient-to-r {{ view.bgGradient }} p-6 text-white relative overflow-hidden">
@@ -45,11 +45,11 @@
               </div>
 
               <!-- Card Body -->
-              <div class="p-6">
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">{{ view.description }}</p>
+              <div class="p-6 flex flex-col flex-grow">
+                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">{{ view.description }}</p>
                 
                 <!-- Action Button -->
-                <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105">
+                <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105 mt-auto">
                   Enter {{ view.displayName }}
                   <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
