@@ -40,9 +40,15 @@ export class Hr {
   showImportPreview = false;
   
   currentView: 'table' | 'calendar' = 'table';
+  
+  activeTab: 'vacation' | 'holidays' = 'vacation';
 
   get validImportedHolidaysCount(): number {
     return this.importedHolidays.filter(h => h.isValid).length;
+  }
+
+  setActiveTab(tab: 'vacation' | 'holidays') {
+    this.activeTab = tab;
   }
 
   constructor(private hrService: HrService) {}

@@ -2,10 +2,42 @@
 	<custom-navbar></custom-navbar>
 
 	<div class="max-w-7xl mx-auto p-6">
+		<!-- Page Header -->
+		<div class="mb-6">
+			<h1 class="text-2xl font-bold text-gray-900">HR Dashboard</h1>
+			<p class="text-gray-600">Manage employee vacation balances and public holidays</p>
+		</div>
+
+		<!-- Navigation Tabs -->
+		<div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
+			<button
+				class="flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium text-sm transition-all duration-200 transform hover:scale-105"
+				[class]="activeTab === 'vacation' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+				(click)="setActiveTab('vacation')">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+					<path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+				</svg>
+				Employee Vacation Overview
+			</button>
+
+			<button
+				class="flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium text-sm transition-all duration-200 transform hover:scale-105"
+				[class]="activeTab === 'holidays' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+				(click)="setActiveTab('holidays')">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+					<path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd" />
+				</svg>
+				Public Holidays Management
+			</button>
+		</div>
+
+		<!-- Content based on active tab -->
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-			<div class="p-6">
+			
+			<!-- Employee Vacation Overview Tab -->
+			<div *ngIf="activeTab === 'vacation'" class="p-6">
 				<div class="flex items-center justify-between mb-4">
-					<h3 class="text-xl font-semibold text-gray-900">HR - Employee Vacation Overview</h3>
+					<h3 class="text-lg font-semibold text-gray-900">Employee Vacation Overview</h3>
 					<p class="text-sm text-gray-600">Manage employee leave balances</p>
 				</div>
 
@@ -90,34 +122,29 @@
 				</div>
 
 			</div>
-		</div>
-	</div>
-</main>
 
-    <!-- Public Holidays Section -->
-    <div class="max-w-7xl mx-auto p-6 mt-4">
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-4">
-              <h3 class="text-xl font-semibold text-gray-900">Public Holidays Management</h3>
-              
-              <!-- View Toggle -->
-              <div class="flex rounded-lg border border-gray-200 overflow-hidden">
-                <button 
-                  class="px-4 py-2 text-sm font-medium transition-colors"
-                  [class.bg-blue-600]="currentView === 'table'"
-                  [class.text-white]="currentView === 'table'"
-                  [class.bg-white]="currentView !== 'table'"
-                  [class.text-gray-700]="currentView !== 'table'"
-                  [class.hover:bg-gray-50]="currentView !== 'table'"
-                  (click)="switchToTableView()"
-                >
-                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18m-9 8h9" />
-                  </svg>
-                  Table View
-                </button>
+			<!-- Public Holidays Management Tab -->
+			<div *ngIf="activeTab === 'holidays'" class="p-6">
+				<div class="flex items-center justify-between mb-4">
+					<div class="flex items-center gap-4">
+						<h3 class="text-lg font-semibold text-gray-900">Public Holidays Management</h3>
+						
+						<!-- View Toggle -->
+						<div class="flex rounded-lg border border-gray-200 overflow-hidden">
+							<button 
+								class="px-4 py-2 text-sm font-medium transition-colors"
+								[class.bg-blue-600]="currentView === 'table'"
+								[class.text-white]="currentView === 'table'"
+								[class.bg-white]="currentView !== 'table'"
+								[class.text-gray-700]="currentView !== 'table'"
+								[class.hover:bg-gray-50]="currentView !== 'table'"
+								(click)="switchToTableView()"
+							>
+								<svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18m-9 8h9" />
+								</svg>
+								Table View
+							</button>
                 <button 
                   class="px-4 py-2 text-sm font-medium transition-colors border-l border-gray-200"
                   [class.bg-blue-600]="currentView === 'calendar'"
@@ -329,7 +356,8 @@
               </table>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+			</div>
+		</div>
+	</div>
+</main>
 
