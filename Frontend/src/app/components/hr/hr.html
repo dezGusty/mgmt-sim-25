@@ -41,8 +41,17 @@
 					<p class="text-sm text-gray-600">Manage employee leave balances</p>
 				</div>
 
-				<div class="overflow-x-auto">
-					<table class="min-w-full divide-y divide-gray-200">
+				<div class="overflow-x-auto relative">
+					<!-- Loading overlay -->
+					<div *ngIf="isLoading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+						<div class="text-center">
+							<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+							<p class="text-sm text-gray-600">Loading...</p>
+						</div>
+					</div>
+					
+					<table class="min-w-full divide-y divide-gray-200"
+						   [class.opacity-50]="isLoading">
 						<thead class="bg-gray-50">
 							<tr>
 								<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
@@ -55,17 +64,28 @@
 							</tr>
 						</thead>
 						<tbody class="bg-white divide-y divide-gray-200">
-							  <tr *ngFor="let r of records; let i = index; trackBy: trackByIndex">
-								<td class="px-4 py-3 text-sm text-gray-700">{{ getDisplayId(i) }}</td>
-
-								<td class="px-4 py-3 text-sm text-gray-700">{{ r.name }}</td>
-
-								<td class="px-4 py-3 text-sm text-gray-700">{{ r.department }}</td>
+							  <tr *ngFor="let r of records; let i = index; trackBy: trackByIndex"
+								  [class.animate-pulse]="r.id === -1">
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<span *ngIf="r.id !== -1">{{ getDisplayId(i) }}</span>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-6"></div>
+								</td>
 
 								<td class="px-4 py-3 text-sm text-gray-700">
-									<div *ngIf="editingIndex !== i">{{ r.totalVacationDays }}</div>
+									<span *ngIf="r.id !== -1">{{ r.name }}</span>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-24"></div>
+								</td>
 
-									<div *ngIf="editingIndex === i" class="flex items-center gap-2">
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<span *ngIf="r.id !== -1">{{ r.department }}</span>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-20"></div>
+								</td>
+
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<div *ngIf="r.id !== -1 && editingIndex !== i">{{ r.totalVacationDays }}</div>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-8"></div>
+
+									<div *ngIf="r.id !== -1 && editingIndex === i" class="flex items-center gap-2">
 										<input
 											type="number"
 											[(ngModel)]="editModel!.totalVacationDays"
@@ -75,22 +95,28 @@
 									</div>
 								</td>
 
-								<td class="px-4 py-3 text-sm text-gray-700">{{ r.usedVacationDays }}</td>
+								<td class="px-4 py-3 text-sm text-gray-700">
+									<span *ngIf="r.id !== -1">{{ r.usedVacationDays }}</span>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-8"></div>
+								</td>
 
 								<td class="px-4 py-3 text-sm text-gray-700">
-									<div *ngIf="editingIndex !== i">{{ r.remainingVacationDays }}</div>
-									<div *ngIf="editingIndex === i">{{ (editModel!.totalVacationDays ?? r.totalVacationDays) - r.usedVacationDays }}</div>
+									<div *ngIf="r.id !== -1 && editingIndex !== i">{{ r.remainingVacationDays }}</div>
+									<div *ngIf="r.id !== -1 && editingIndex === i">{{ (editModel!.totalVacationDays ?? r.totalVacationDays) - r.usedVacationDays }}</div>
+									<div *ngIf="r.id === -1" class="h-4 bg-gray-200 rounded w-8"></div>
 								</td>
 
 								<td class="px-4 py-3 text-sm text-right space-x-2">
-									<div *ngIf="editingIndex !== i">
+									<div *ngIf="r.id !== -1 && editingIndex !== i">
 										<button class="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700" (click)="startEdit(i)">Edit</button>
 									</div>
 
-									<div *ngIf="editingIndex === i">
+									<div *ngIf="r.id !== -1 && editingIndex === i">
 										<button class="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 mr-2" (click)="saveEdit(i)">Save</button>
 										<button class="inline-flex items-center px-3 py-1 rounded bg-gray-100 text-sm hover:bg-gray-200" (click)="cancelEdit()">Cancel</button>
 									</div>
+
+									<div *ngIf="r.id === -1" class="h-8 bg-gray-200 rounded w-16"></div>
 								</td>
 							</tr>
 						</tbody>
@@ -103,18 +129,27 @@
 					<div class="flex items-center gap-3">
 						<div class="flex items-center gap-2 bg-white rounded-md p-1 shadow-sm">
 							<button
-								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105"
+								[class]="isLoading || currentPage <= 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200'"
+								[disabled]="isLoading || currentPage <= 1"
 								(click)="prevPage()"
 							>
+								<span *ngIf="isLoading && currentPage > 1" class="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></span>
 								Previous
 							</button>
 
-							<div class="text-sm px-2">Page {{ currentPage }}</div>
+							<div class="text-sm px-2 flex items-center gap-2">
+								<span *ngIf="isLoading" class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></span>
+								Page {{ currentPage }}
+							</div>
 
 							<button
-								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105 bg-gray-100 hover:bg-gray-200"
+								class="flex items-center gap-1 px-3 py-1 rounded font-medium text-sm transition-all duration-200 transform hover:scale-105"
+								[class]="isLoading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200'"
+								[disabled]="isLoading"
 								(click)="nextPage()"
 							>
+								<span *ngIf="isLoading" class="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></span>
 								Next
 							</button>
 						</div>

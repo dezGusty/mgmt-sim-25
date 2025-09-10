@@ -27,6 +27,7 @@ export class Hr {
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
+  isLoading = false;
 
   editingIndex: number | null = null;
   editModel: Partial<HrRecord> | null = null;
@@ -65,6 +66,7 @@ export class Hr {
   }
 
   loadPage(year: number, page: number, pageSize: number) {
+    this.isLoading = true;
     this.hrService.getUsers(year, page, pageSize).subscribe({
       next: (res: any) => {
         const paged = res?.data || res; 
@@ -79,11 +81,24 @@ export class Hr {
         }));
 
         this.totalCount = paged?.totalCount || paged?.TotalCount || this.records.length;
+        this.isLoading = false;
       },
       error: (err: any) => {
         console.error('Failed to load HR users', err);
+        this.isLoading = false;
       }
     });
+  }
+
+  createEmptyRecords() {
+    this.records = Array(this.pageSize).fill(null).map((_, index) => ({
+      id: -1,
+      name: '...',
+      department: '...',
+      totalVacationDays: 0,
+      usedVacationDays: 0,
+      remainingVacationDays: 0
+    }));
   }
 
   getDisplayId(index: number): number {
@@ -132,15 +147,19 @@ export class Hr {
   }
 
   prevPage() {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 1 && !this.isLoading) {
       this.currentPage--;
+      this.createEmptyRecords();
       this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
     }
   }
 
   nextPage() {
-    this.currentPage++;
-    this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
+    if (!this.isLoading) {
+      this.currentPage++;
+      this.createEmptyRecords(); // Show empty rows while loading new page
+      this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
+    }
   }
 
 
