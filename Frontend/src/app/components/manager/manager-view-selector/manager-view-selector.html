@@ -23,10 +23,12 @@
         </div>
 
         <!-- View Cards Grid -->
-        <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+        <div class="flex flex-wrap justify-center gap-4 max-w-7xl mx-auto">
           <div *ngFor="let view of managerViews" 
                (click)="selectView(view)"
-               class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-80">
+               class="group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0"
+               [class.w-72]="managerViews.length <= 4"
+               [class.w-64]="managerViews.length > 4">
             
             <!-- View Card -->
             <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">

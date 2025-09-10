@@ -40,13 +40,24 @@
   transform: scale(0.98);
 }
 
-.view-card {
+/* Responsive card sizing for optimal layout */
+.view-card-small {
   min-height: 320px;
-  width: 320px;
+  width: 256px; /* w-64 */
+}
+
+.view-card-large {
+  min-height: 320px;
+  width: 288px; /* w-72 */
 }
 
 .view-card-content {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+/* Ensure cards fit nicely on a single row when there are 4 or fewer */
+.view-cards-container {
+  max-width: 1200px; /* Accommodate 4 cards with gaps */
 }

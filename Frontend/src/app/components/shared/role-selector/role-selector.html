@@ -39,40 +39,146 @@
           <p class="text-[#020126] text-lg font-medium">Choose your workspace to continue</p>
         </div>
 
-        <!-- Role Cards Grid -->
-        <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
-          <div *ngFor="let role of userRoles" 
-               (click)="selectRole(role)"
-               class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-80">
-            
-            <!-- Role Card -->
-            <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
-              
-              <!-- Card Header with Gradient -->
-              <div class="bg-gradient-to-r {{ role.bgGradient }} p-6 text-white relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 transform translate-x-16 -translate-y-16"></div>
-                <div class="relative z-10">
-                  <div class="w-16 h-16 mx-auto mb-4">
-                    <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="role.icon"></path>
-                    </svg>
+        <!-- Role Cards Container -->
+        <div class="relative max-w-7xl mx-auto">
+          
+          <!-- Single Card Layout -->
+          <div *ngIf="userRoles.length === 1" class="flex justify-center">
+            <div (click)="selectRole(userRoles[0])"
+                 class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-72">
+              <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+                <!-- Card Header with Gradient -->
+                <div class="bg-gradient-to-r {{ userRoles[0].bgGradient }} p-6 text-white relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 transform translate-x-16 -translate-y-16"></div>
+                  <div class="relative z-10">
+                    <div class="w-16 h-16 mx-auto mb-4">
+                      <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="userRoles[0].icon"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold">{{ userRoles[0].displayName }}</h3>
                   </div>
-                  <h3 class="text-2xl font-bold">{{ role.displayName }}</h3>
+                </div>
+                <!-- Card Body -->
+                <div class="p-6 flex flex-col flex-grow">
+                  <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">{{ userRoles[0].description }}</p>
+                  <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105 mt-auto">
+                    Enter {{ userRoles[0].displayName }} Dashboard
+                    <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- Card Body -->
-              <div class="p-6 flex flex-col flex-grow">
-                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">{{ role.description }}</p>
-                
-                <!-- Action Button -->
-                <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105 mt-auto">
-                  Enter {{ role.displayName }} Dashboard
-                  <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                  </svg>
-                </button>
+          <!-- Two Cards Layout -->
+          <div *ngIf="userRoles.length === 2" class="flex justify-center gap-6">
+            <div *ngFor="let role of userRoles" 
+                 (click)="selectRole(role)"
+                 class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-72">
+              <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+                <!-- Card Header with Gradient -->
+                <div class="bg-gradient-to-r {{ role.bgGradient }} p-6 text-white relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 transform translate-x-16 -translate-y-16"></div>
+                  <div class="relative z-10">
+                    <div class="w-16 h-16 mx-auto mb-4">
+                      <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="role.icon"></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold">{{ role.displayName }}</h3>
+                  </div>
+                </div>
+                <!-- Card Body -->
+                <div class="p-6 flex flex-col flex-grow">
+                  <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">{{ role.description }}</p>
+                  <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105 mt-auto">
+                    Enter {{ role.displayName }} Dashboard
+                    <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Carousel Layout (3+ cards) -->
+          <div *ngIf="userRoles.length >= 3" class="carousel-container relative">
+            <!-- Left Navigation Button -->
+            <button *ngIf="showCarouselControls" 
+                    (click)="previousSlide()"
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
+                    [class.opacity-50]="currentSlide === 0"
+                    [disabled]="currentSlide === 0">
+              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+
+            <!-- Carousel Cards Container -->
+            <div class="relative flex justify-center items-center h-96 perspective-1000">
+              <div *ngFor="let role of userRoles; let i = index" 
+                   class="absolute carousel-card transition-all duration-500 ease-out"
+                   [class.active]="i === currentSlide"
+                   [class.prev]="i === currentSlide - 1"
+                   [class.next]="i === currentSlide + 1"
+                   [class.hidden]="!isCardVisible(i)"
+                   [style.z-index]="getCardZIndex(i)"
+                   (click)="onCardClick(role, i)"
+                   (touchstart)="onTouchStart($event)"
+                   (touchmove)="onTouchMove($event)"
+                   (touchend)="onTouchEnd($event)">
+                <div class="group cursor-pointer transform transition-all duration-300 hover:scale-105 w-80">
+                  <div class="bg-white/50 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-white/60 hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+                    <!-- Card Header with Gradient -->
+                    <div class="bg-gradient-to-r {{ role.bgGradient }} p-6 text-white relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-white opacity-10 transform translate-x-16 -translate-y-16"></div>
+                      <div class="relative z-10">
+                        <div class="w-16 h-16 mx-auto mb-4">
+                          <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="role.icon"></path>
+                          </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold">{{ role.displayName }}</h3>
+                      </div>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="p-6 flex flex-col flex-grow">
+                      <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">{{ role.description }}</p>
+                      <button class="w-full bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] hover:bg-gradient-to-t border border-slate-500 text-slate-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform group-hover:scale-105 mt-auto">
+                        Enter {{ role.displayName }} Dashboard
+                        <svg class="w-5 h-5 inline-block ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Navigation Button -->
+            <button *ngIf="showCarouselControls" 
+                    (click)="nextSlide()"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
+                    [class.opacity-50]="currentSlide >= maxSlide"
+                    [disabled]="currentSlide >= maxSlide">
+              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+
+            <!-- Carousel Indicators -->
+            <div *ngIf="showCarouselControls" class="flex justify-center mt-6 space-x-2">
+              <button *ngFor="let slide of slides; let i = index"
+                      (click)="goToSlide(i)"
+                      class="w-3 h-3 rounded-full transition-all duration-200"
+                      [class.bg-[#020126]]="i === currentSlide"
+                      [class.bg-gray-300]="i !== currentSlide">
+              </button>
             </div>
           </div>
         </div>
