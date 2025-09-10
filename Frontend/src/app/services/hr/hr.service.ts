@@ -98,6 +98,59 @@ export class HrService {
     );
   }
 
+  getPublicHolidaysPaginated(year: number, page: number, pageSize: number): Observable<IPagedResponse<PublicHoliday>> {
+    let params = new HttpParams()
+      .set('year', year.toString())
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<any>(`${this.baseUrl}/public-holidays`, { params }).pipe(
+      map((response: any) => {
+        let holidays: PublicHoliday[] = [];
+        let totalCount = 0;
+        
+        // Extract holidays from different response formats
+        if (Array.isArray(response)) {
+          holidays = response;
+          totalCount = response.length;
+        } else if (response?.data && Array.isArray(response.data)) {
+          holidays = response.data;
+          totalCount = response.totalCount || response.TotalCount || response.data.length;
+        } else if (response?.Data && Array.isArray(response.Data)) {
+          holidays = response.Data;
+          totalCount = response.TotalCount || response.totalCount || response.Data.length;
+        }
+
+        // Check if backend provided pagination info
+        const hasServerPagination = response?.totalCount !== undefined || response?.TotalCount !== undefined;
+        
+        if (hasServerPagination) {
+          // Backend supports pagination, use server-side data
+          return {
+            data: holidays,
+            totalCount: totalCount,
+            page: response.page || response.Page || page,
+            pageSize: response.pageSize || response.PageSize || pageSize,
+            totalPages: response.totalPages || response.TotalPages || Math.ceil(totalCount / pageSize)
+          };
+        } else {
+          // Backend doesn't support pagination, implement client-side pagination
+          const startIndex = (page - 1) * pageSize;
+          const endIndex = startIndex + pageSize;
+          const paginatedData = holidays.slice(startIndex, endIndex);
+          
+          return {
+            data: paginatedData,
+            totalCount: holidays.length,
+            page: page,
+            pageSize: pageSize,
+            totalPages: Math.ceil(holidays.length / pageSize)
+          };
+        }
+      })
+    );
+  }
+
   createPublicHoliday(holiday: Omit<PublicHoliday, 'id'>): Observable<PublicHoliday> {
     return this.http.post<PublicHoliday>(`${this.baseUrl}/public-holidays`, holiday);
   }
