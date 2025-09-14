@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { ILeaveRequestTypeViewModel } from '../../../view-models/leave-request-type-view-model';
@@ -16,7 +18,8 @@ import { max } from 'rxjs';
   templateUrl: './admin-leave-request-types-list.html',
   styleUrl: './admin-leave-request-types-list.css'
 })
-export class AdminLeaveTypesList implements OnInit {
+export class AdminLeaveTypesList implements OnInit, OnDestroy {
+  private searchTermSubject = new Subject<string>();
   leaveRequestTypes: ILeaveRequestTypeViewModel[] = [];
   searchTerm: string = '';
 
@@ -41,16 +44,30 @@ export class AdminLeaveTypesList implements OnInit {
 
   ngOnInit(): void {
     this.loadLeaveTypes();
+    this.searchTermSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.loadLeaveTypesWithTerm(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchTermSubject.complete();
   }
 
   isLoading: boolean = false;
 
   loadLeaveTypes(): void {
+    this.loadLeaveTypesWithTerm(this.searchTerm);
+  }
+
+  private loadLeaveTypesWithTerm(searchTerm: string): void {
     this.isLoading = true;
     this.errorMessage = '';
     
     let params: IFilteredLeaveRequestTypeRequest = {
-      name: this.searchTerm,
+      name: searchTerm,
       params: {
         page: 1,
         pageSize: 100,
@@ -178,9 +195,13 @@ export class AdminLeaveTypesList implements OnInit {
     this.loadLeaveTypes();
   }
 
+  onSearchTermChange(): void {
+    this.searchTermSubject.next(this.searchTerm);
+  }
+
   clearSearch() {
     this.searchTerm = '';
-    this.loadLeaveTypes();
+    this.searchTermSubject.next('');
   }
 
   closeEditModal(): void {

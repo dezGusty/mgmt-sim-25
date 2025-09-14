@@ -2,6 +2,7 @@
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
+using ManagementSimulator.Core.Dtos.Responses.Users;
 using ManagementSimulator.Core.Mapping;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Core.Utils;
@@ -741,47 +742,6 @@ namespace ManagementSimulator.Core.Services
             return await _userRepository.GetAllAdminsAsync(lastName, email);
         }
 
-        /*public async Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload)
-        {
-            var (admins, totalCount) = await _userRepository.GetAllAdminsFilteredAsync(
-                payload.Name,
-                payload.Email,
-                payload.Department,
-                payload.JobTitle,
-                payload.GlobalSearch,
-                payload.PagedQueryParams.ToQueryParams());
-
-            if (admins == null || !admins.Any())
-                return new PagedResponseDto<UserResponseDto>
-                {
-                    Data = new List<UserResponseDto>(),
-                    Page = payload.PagedQueryParams.Page ?? 1,
-                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
-                    TotalPages = 0
-                };
-
-            return new PagedResponseDto<UserResponseDto>
-            {
-                Data = admins.Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    FirstName = u.FirstName ?? string.Empty,
-                    LastName = u.LastName ?? string.Empty,
-                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
-                    JobTitleId = u.JobTitleId,
-                    JobTitleName = u.Title?.Name ?? string.Empty,
-                    DepartmentId = u.DepartmentId,
-                    DepartmentName = u.Department?.Name ?? string.Empty,
-                    IsActive = u.DeletedAt == null,
-                    Vacation = u.Vacation,
-                }),
-                Page = payload.PagedQueryParams.Page ?? 1,
-                PageSize = payload.PagedQueryParams.PageSize ?? 1,
-                TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
-            };
-        }*/
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload)
         {
@@ -913,5 +873,63 @@ namespace ManagementSimulator.Core.Services
         {
             return await _userRepository.GetTotalUnassignedUsersCountAsync(includeDeleted: false);
         }
+
+        public async Task<GlobalSearchResponseDto> GlobalSearchAsync(GlobalSearchRequestDto request)
+        {
+                var response = new GlobalSearchResponseDto();
+                
+                var shouldFetchManagers = string.IsNullOrEmpty(request.SearchCategory) || 
+                                         request.SearchCategory == "Global" || 
+                                         request.SearchCategory == "Managers";
+                                         
+                var shouldFetchAdmins = string.IsNullOrEmpty(request.SearchCategory) || 
+                                       request.SearchCategory == "Global" || 
+                                       request.SearchCategory == "Admins";
+                                       
+                var shouldFetchUnassigned = string.IsNullOrEmpty(request.SearchCategory) || 
+                                           request.SearchCategory == "Global" || 
+                                           request.SearchCategory == "Unassigned";
+
+                if (shouldFetchManagers)
+                {
+                    var managersRequest = new QueriedUserRequestDto
+                    {
+                        GlobalSearch = request.GlobalSearch,
+                        PagedQueryParams = request.ManagersPagedParams
+                    };
+                    
+                    response.Managers = await GetAllUsersIncludeRelationshipsFilteredAsync(managersRequest);
+                }
+
+                if (shouldFetchAdmins)
+                {
+                    response.Admins = await GetAllAdminsAsync(null, null);
+                }
+
+                if (shouldFetchUnassigned)
+                {
+                    var unassignedRequest = new QueriedUserRequestDto
+                    {
+                        GlobalSearch = request.GlobalSearch,
+                        PagedQueryParams = request.UnassignedUsersPagedParams
+                    };
+                    
+                    response.UnassignedUsers = await GetAllUnassignedUsersFilteredAsync(unassignedRequest);
+                }
+
+                if (request.IncludeTotalCounts)
+                {
+                    var totalCounts = new GlobalSearchCountsDto
+                    {
+                        TotalAdmins = await GetTotalAdminsCountAsync(),
+                        TotalManagers = await GetTotalManagersCountAsync(),
+                        TotalUnassignedUsers = await GetTotalUnassignedUsersCountAsync()
+                    };
+                    
+                    response.TotalCounts = totalCounts;
+                }
+
+                return response;
+            }
+        }
     }
-}

@@ -18,7 +18,6 @@ namespace ManagementSimulator.API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Only debounce search endpoints
             if (context.Request.Path.Value != null && context.Request.Path.Value.Contains("search", StringComparison.OrdinalIgnoreCase))
             {
                 var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";

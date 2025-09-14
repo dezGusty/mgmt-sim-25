@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { OnInit } from '@angular/core';
+import { OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { IJobTitle } from '../../../models/entities/ijob-title';
 import { JobTitlesService } from '../../../services/job-titles/job-titles-service';
 import { IJobTitleViewModel } from '../../../view-models/job-title-view-model';
@@ -19,11 +21,11 @@ import { JobTitleActivityStatus } from '../../../models/enums/job-title-activity
   templateUrl: './admin-job-titles-list.html',
   styleUrl: './admin-job-titles-list.css'
 })
-export class AdminJobTitlesList implements OnInit {
+export class AdminJobTitlesList implements OnInit, OnDestroy {
+  private searchTermSubject = new Subject<string>();
   jobTitles: IJobTitleViewModel[] = [];
   searchTerm: string = '';
   searchBy: 'global' | 'inactiveStatus' | 'activeStatus' = 'global';
-  sortDescending: boolean = false;
   
   currentPage: number = 1;
   itemsPerPage: number = 8;
@@ -51,6 +53,15 @@ export class AdminJobTitlesList implements OnInit {
 
   ngOnInit(): void {
     this.loadJobTitles();
+    this.searchTermSubject.pipe(debounceTime(400)).subscribe(term => {
+      this.searchTerm = term;
+      this.currentPage = 1;
+      this.loadJobTitles();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchTermSubject.complete();
   }
 
  loadJobTitles(): void {
@@ -63,7 +74,6 @@ export class AdminJobTitlesList implements OnInit {
       : this.searchBy === 'inactiveStatus' ? JobTitleActivityStatus.INACTIVE : JobTitleActivityStatus.ALL,
     params: {
       sortBy: 'name',
-      sortDescending: this.sortDescending,
       page: this.currentPage,
       pageSize: this.itemsPerPage
     }
@@ -119,16 +129,13 @@ export class AdminJobTitlesList implements OnInit {
     this.loadJobTitles();
   }
 
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.currentPage = 1;
-    this.loadJobTitles();
+  onSearchTermChange(term: string): void {
+    this.searchTermSubject.next(term);
   }
 
-  toggleSortOrder(): void {
-    this.sortDescending = !this.sortDescending;
-    this.currentPage = 1;
-    this.loadJobTitles();
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchTermSubject.next('');
   }
 
   goToPage(page: number): void {
@@ -256,12 +263,6 @@ export class AdminJobTitlesList implements OnInit {
         console.error('Error updating job title:', error);
       }
     });
-  }
-  
-  onSearchKeypress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSearch();
-    }
   }
 
   isFormValid(): boolean {

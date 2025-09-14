@@ -3,6 +3,7 @@ using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Responses;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
+using ManagementSimulator.Core.Dtos.Responses.Users;
 using ManagementSimulator.Database.Dtos.QueryParams;
 using ManagementSimulator.Database.Entities;
 using System;
@@ -16,7 +17,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
     public interface IUserService
     {
         Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload);
-        Task<List<User>> GetAllAdminsAsync(string? lastName, string? email);
+        Task<List<Database.Entities.User>> GetAllAdminsAsync(string? lastName, string? email);
         //Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsFilteredAsync(QueriedUserRequestDto payload);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload);
@@ -36,5 +37,6 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<int> GetTotalAdminsCountAsync();
         Task<int> GetTotalManagersCountAsync();
         Task<int> GetTotalUnassignedUsersCountAsync();
+        Task<GlobalSearchResponseDto> GlobalSearchAsync(GlobalSearchRequestDto request);
     }
 }

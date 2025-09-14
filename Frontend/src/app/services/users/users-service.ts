@@ -268,4 +268,56 @@ export class UsersService {
   getTotalUnassignedUsersCount(): Observable<IApiResponse<number>> {
     return this.http.get<IApiResponse<number>>(`${this.baseUrl}/unassignedUsers/count`);
   }
+
+  globalSearchOptimized(
+    globalSearch?: string,
+    searchCategory?: string,
+    managersPage?: number,
+    managersPageSize?: number,
+    unassignedPage?: number,
+    unassignedPageSize?: number,
+    sortBy?: string,
+    sortDescending?: boolean
+  ): Observable<IApiResponse<any>> {
+    let paramsToSend = new HttpParams();
+    
+    if (globalSearch) {
+      paramsToSend = paramsToSend.set('GlobalSearch', globalSearch);
+    }
+    
+    if (searchCategory) {
+      paramsToSend = paramsToSend.set('SearchCategory', searchCategory);
+    }
+    
+    if (sortBy) {
+      paramsToSend = paramsToSend.set('ManagersPagedParams.SortBy', sortBy);
+    }
+    
+    if (sortDescending !== undefined) {
+      paramsToSend = paramsToSend.set('ManagersPagedParams.SortDescending', sortDescending.toString());
+    }
+    
+    if (managersPage) {
+      paramsToSend = paramsToSend.set('ManagersPagedParams.Page', managersPage.toString());
+    }
+    
+    if (managersPageSize) {
+      paramsToSend = paramsToSend.set('ManagersPagedParams.PageSize', managersPageSize.toString());
+    }
+
+    if (unassignedPage) {
+      paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.Page', unassignedPage.toString());
+    }
+    
+    if (unassignedPageSize) {
+      paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.PageSize', unassignedPageSize.toString());
+    }
+
+    paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.SortBy', 'lastName');
+    paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.SortDescending', 'false');
+
+    paramsToSend = paramsToSend.set('IncludeTotalCounts', 'true');
+    
+    return this.http.get<IApiResponse<any>>(`${this.baseUrl}/globalSearch`, { params: paramsToSend });
+  }
 }
