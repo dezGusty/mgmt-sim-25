@@ -136,7 +136,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        /*[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("admins/queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,7 +162,7 @@ namespace ManagementSimulator.API.Controllers
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });
-        }*/
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("queried")]
@@ -426,7 +426,7 @@ namespace ManagementSimulator.API.Controllers
             var result = await _userService.GlobalSearchAsync(request);
 
             var hasData = (result.Managers?.Data?.Any() == true) ||
-                         (result.Admins?.Any() == true) ||
+                         (result.Admins?.Data?.Any() == true) ||
                              (result.UnassignedUsers?.Data?.Any() == true);
 
                 if (!hasData && !string.IsNullOrEmpty(request.GlobalSearch))

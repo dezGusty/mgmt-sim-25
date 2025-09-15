@@ -196,26 +196,48 @@ export class AdminUserRelationships implements OnInit {
     this.isLoadingAdmins = true;
     this.adminsErrorMessage = '';
 
-    this.userService.getAllAdmins().subscribe({
+    let searchParams: any = {};
+
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Admins) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
+      }
+    } else {
+      this.isLoadingAdmins = false;
+      this.admins = [];
+      this.allAdmins = [];
+      this.totalPagesAdmins = 0;
+      this.checkIfInitialDataLoaded();
+      return;
+    }
+
+    const params: IFilteredUsersRequest = {
+      ...searchParams,
+      params: {
+        sortBy: 'lastName',
+        sortDescending: this.sortDescending,
+        page: this.currentPageAdmins,
+        pageSize: this.pageSizeAdmins,
+      },
+    };
+
+    this.userService.getAllAdminsFiltered(params).subscribe({
       next: (response) => {
         this.isLoadingAdmins = false;
-        const rawAdmins: IUser[] = response.data;
+        console.log('Admins API response:', response);
+        const rawAdmins: IUser[] = response.data.data;
 
         if (!rawAdmins || rawAdmins.length === 0) {
-          this.adminsErrorMessage = 'No admins were found.';
+          this.adminsErrorMessage = this.getAdminsEmptyMessage();
           this.admins = [];
           this.allAdmins = [];
           this.totalPagesAdmins = 0;
         } else {
-          this.originalAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-          this.allAdmins = [...this.originalAdmins];
-          
-          if (this.currentSearchBy === UserSearchType.Admins && this.currentSearchTerm.trim()) {
-            this.filterAdmins();
-          } else {
-            this.currentPageAdmins = 1;
-            this.sliceAdmins();
-          }
+          this.admins = rawAdmins.map(a => this.mapToUserViewModel(a));
+          this.allAdmins = [...this.admins]; // For compatibility with existing code
+          this.originalAdmins = [...this.admins]; // For compatibility with existing code
+          this.totalPagesAdmins = response.data.totalPages;
+          this.adminsErrorMessage = '';
         }
 
         this.checkIfInitialDataLoaded();
@@ -374,6 +396,20 @@ export class AdminUserRelationships implements OnInit {
       }
     }
     return 'No managers found.';
+  }
+
+  getAdminsEmptyMessage(): string {
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Global:
+          return 'No admins found for the global search term.';
+        case UserSearchType.Admins:
+          return `No admins found for "${this.currentSearchTerm}".`;
+        default:
+          return `No admins found for "${this.currentSearchTerm}".`;
+      }
+    }
+    return 'No admins found.';
   }
 
   getUnassignedUsersEmptyMessage(): string {
@@ -676,24 +712,14 @@ export class AdminUserRelationships implements OnInit {
   }
 
   filterAdmins(): void {
-    if (!this.currentSearchTerm.trim()) {
-      this.allAdmins = [...this.originalAdmins];
-      this.currentPageAdmins = 1;
-      this.sliceAdmins();
-      return;
+    // This method is now deprecated since we're using backend filtering
+    // But keeping it for backward compatibility - it will trigger a backend search instead
+    if (this.currentSearchBy === UserSearchType.Admins) {
+      this.loadAdmins();
+    } else {
+      // For non-admin specific searches, use global search
+      this.performGlobalSearch();
     }
-
-    const searchTerm = this.currentSearchTerm.toLowerCase();
-    this.allAdmins = this.originalAdmins.filter(admin => 
-      admin.name.toLowerCase().includes(searchTerm) ||
-      admin.email.toLowerCase().includes(searchTerm) ||
-      (admin.jobTitle?.name || '').toLowerCase().includes(searchTerm) ||
-      (admin.department?.name || '').toLowerCase().includes(searchTerm)
-    );
-
-    this.currentPageAdmins = 1;
-    this.sliceAdmins();
-    this.autoExpandSectionsWithResults();
   }
 
   onSearchCategoryChange(): void {
@@ -751,7 +777,9 @@ export class AdminUserRelationships implements OnInit {
       this.currentPageUnassignedUsers,
       this.pageSizeUnassignedUsers,
       'lastName',
-      this.sortDescending
+      this.sortDescending,
+      this.currentPageAdmins,
+      this.pageSizeAdmins
     ).subscribe({
       next: (response) => {
         this.handleGlobalSearchResponse(response);
@@ -785,25 +813,20 @@ export class AdminUserRelationships implements OnInit {
 
     if (data.admins && (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Admins)) {
       this.isLoadingAdmins = false;
-      const rawAdmins: IUser[] = data.admins || [];
+      
+      // data.admins is now a paginated response like managers and unassigned users
+      const rawAdmins: IUser[] = data.admins.data || [];
       
       if (rawAdmins.length === 0) {
-        this.adminsErrorMessage = 'No admins found.';
+        this.adminsErrorMessage = this.getAdminsEmptyMessage();
         this.admins = [];
         this.allAdmins = [];
         this.totalPagesAdmins = 0;
       } else {
-        this.originalAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-        this.allAdmins = [...this.originalAdmins];
-        
-        if (this.currentSearchBy === UserSearchType.Admins && this.currentSearchTerm.trim()) {
-          this.filterAdmins();
-        } else if (this.currentSearchBy === UserSearchType.Global && this.currentSearchTerm.trim()) {
-          this.filterAdmins();
-        } else {
-          this.currentPageAdmins = 1;
-          this.sliceAdmins();
-        }
+        this.admins = rawAdmins.map(a => this.mapToUserViewModel(a));
+        this.allAdmins = [...this.admins]; // For compatibility
+        this.originalAdmins = [...this.admins]; // For compatibility
+        this.totalPagesAdmins = data.admins.totalPages || 0;
         this.adminsErrorMessage = '';
       }
     }
@@ -890,9 +913,8 @@ export class AdminUserRelationships implements OnInit {
     this.isUnassignedUsersSectionCollapsed = true;
     
 
-    this.allAdmins = [...this.originalAdmins];
     this.currentPageAdmins = 1;
-    this.sliceAdmins();
+    this.loadAdmins();
     
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
@@ -1031,35 +1053,55 @@ export class AdminUserRelationships implements OnInit {
   goToPageAdmins(page: number): void {
     if (page >= 1 && page <= this.totalPagesAdmins && page !== this.currentPageAdmins) {
       this.currentPageAdmins = page;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToNextPageAdmins(): void {
     if (this.currentPageAdmins < this.totalPagesAdmins) {
       this.currentPageAdmins++;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToPreviousPageAdmins(): void {
     if (this.currentPageAdmins > 1) {
       this.currentPageAdmins--;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToFirstPageAdmins(): void {
     if (this.currentPageAdmins !== 1) {
       this.currentPageAdmins = 1;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToLastPageAdmins(): void {
     if (this.currentPageAdmins !== this.totalPagesAdmins) {
       this.currentPageAdmins = this.totalPagesAdmins;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
@@ -1092,8 +1134,11 @@ export class AdminUserRelationships implements OnInit {
 
   onItemsPerPageChangeAdmins(): void {
     this.currentPageAdmins = 1;
-    this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-    this.sliceAdmins();
+    if (this.currentSearchTerm.trim()) {
+      this.performGlobalSearch();
+    } else {
+      this.loadAdmins();
+    }
   }
 
   Math = Math;

@@ -742,6 +742,48 @@ namespace ManagementSimulator.Core.Services
             return await _userRepository.GetAllAdminsAsync(lastName, email);
         }
 
+        public async Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload)
+        {
+            (List<User>? admins, int totalCount) = await _userRepository.GetAllAdminsFilteredAsync(
+                payload.GlobalSearch,
+                payload.Name,
+                payload.Email,
+                payload.JobTitle,
+                payload.Department,
+                payload.PagedQueryParams.ToQueryParams(),
+                includeDeleted: false);
+
+            if (admins == null || !admins.Any())
+                return new PagedResponseDto<UserResponseDto>
+                {
+                    Data = new List<UserResponseDto>(),
+                    Page = payload.PagedQueryParams.Page ?? 1,
+                    PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalPages = 0
+                };
+
+            return new PagedResponseDto<UserResponseDto>
+            {
+                Data = admins.Select(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    Roles = u.Roles?.Select(r => r.Role.Rolename).ToList() ?? new List<string>(),
+                    JobTitleId = u.JobTitleId,
+                    JobTitleName = u.Title?.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name ?? string.Empty,
+                    IsActive = u.DeletedAt == null,
+                    Vacation = u.Vacation,
+                }),
+                Page = payload.PagedQueryParams.Page ?? 1,
+                PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalPages = payload.PagedQueryParams.PageSize != null ?
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
+            };
+        }
 
         public async Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload)
         {
@@ -903,7 +945,13 @@ namespace ManagementSimulator.Core.Services
 
                 if (shouldFetchAdmins)
                 {
-                    response.Admins = await GetAllAdminsAsync(null, null);
+                    var adminsRequest = new QueriedUserRequestDto
+                    {
+                        GlobalSearch = request.GlobalSearch,
+                        PagedQueryParams = request.AdminsPagedParams
+                    };
+                    
+                    response.Admins = await GetAllAdminsFilteredAsync(adminsRequest);
                 }
 
                 if (shouldFetchUnassigned)

@@ -183,6 +183,82 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<(List<User> Data, int TotalCount)> GetAllAdminsFilteredAsync(string? globalSearch, string? name, string? email, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)
+                                     .Include(u => u.Roles.Where(r => r.DeletedAt == null))
+                                        .ThenInclude(u => u.Role)
+                                     .Include(u => u.Title)
+                                     .Include(u => u.Department)
+                                     .Where(u => u.Roles.Any(r => r.Role.Rolename == "Admin"));
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(globalSearch))
+            {
+                query = query.Where(u =>
+                    u.FirstName.Contains(globalSearch) ||
+                    u.LastName.Contains(globalSearch) ||
+                    u.Email.Contains(globalSearch) ||
+                    (u.Title != null && u.Title.Name.Contains(globalSearch)) ||
+                    (u.Department != null && u.Department.Name.Contains(globalSearch))
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(u =>
+                    u.FirstName.Contains(name) ||
+                    u.LastName.Contains(name)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                query = query.Where(u => u.Email.Contains(email));
+            }
+
+            if (!string.IsNullOrWhiteSpace(jobTitle))
+            {
+                query = query.Where(u =>
+                    u.Title != null && u.Title.Name.Contains(jobTitle)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(department))
+            {
+                query = query.Where(u =>
+                    u.Department != null && u.Department.Name.Contains(department)
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            if (parameters == null)
+                return (await query.ToListAsync(), totalCount);
+
+            // sorting
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+                query = query.ApplySorting<User>(parameters.SortBy, parameters.SortDescending ?? false);
+            else
+                query = query.OrderBy(u => u.Id);
+
+            // paging 
+            if (parameters.Page == null || parameters.Page <= 0 || parameters.PageSize == null || parameters.PageSize <= 0)
+            {
+                return (await query.ToListAsync(), totalCount);
+            }
+            else
+            {
+                var pagedData = await query.Skip(((int)parameters.Page - 1) * (int)parameters.PageSize)
+                               .Take((int)parameters.PageSize)
+                                .ToListAsync();
+                return (pagedData, totalCount);
+            }
+        }
+
         public async Task<(List<User> Data, int TotalCount)> GetAllManagersFilteredAsync(string? globalSearch, string? managerName, string? employeeName, string? managerEmail, string? employeeEmail, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<User> query = GetRecords(includeDeletedEntities: includeDeleted)

@@ -12,7 +12,7 @@ namespace ManagementSimulator.Core.Dtos.Responses.Users
     public class GlobalSearchResponseDto
     {
         public PagedResponseDto<UserResponseDto>? Managers { get; set; }
-        public List<Database.Entities.User>? Admins { get; set; }
+        public PagedResponseDto<UserResponseDto>? Admins { get; set; }
         public PagedResponseDto<UserResponseDto>? UnassignedUsers { get; set; }
         public GlobalSearchCountsDto? TotalCounts { get; set; }
     }

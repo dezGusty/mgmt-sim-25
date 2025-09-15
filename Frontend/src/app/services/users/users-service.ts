@@ -70,11 +70,7 @@ export class UsersService {
     return this.http.get<IApiResponse<IUser[]>>(`${this.baseUrl}/admins`);
   }
 
-  getUserById(id: number): Observable<IApiResponse<IUser>> {
-    return this.http.get<IApiResponse<IUser>>(`${this.baseUrl}/${id}`);
-  }
-
-  /*getAllAdminsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
+  getAllAdminsFiltered(params: IFilteredUsersRequest): Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
 
     if (params?.name) {
@@ -83,6 +79,14 @@ export class UsersService {
 
     if (params?.email) {
       paramsToSend = paramsToSend.set('email', params.email);
+    }
+
+    if (params?.jobTitle) {
+      paramsToSend = paramsToSend.set('jobTitle', params.jobTitle);
+    }
+
+    if (params?.department) {
+      paramsToSend = paramsToSend.set('department', params.department);
     }
 
     if (params?.globalSearch) {
@@ -106,7 +110,11 @@ export class UsersService {
     }
 
     return this.http.get<IApiResponse<IFilteredApiResponse<IUser>>>(`${this.baseUrl}/admins/queried`, { params: paramsToSend });
-  }*/
+  }
+
+  getUserById(id: number): Observable<IApiResponse<IUser>> {
+    return this.http.get<IApiResponse<IUser>>(`${this.baseUrl}/${id}`);
+  }
 
   getUnassignedUsers(params: IFilteredUsersRequest) : Observable<IApiResponse<IFilteredApiResponse<IUser>>> {
     let paramsToSend = new HttpParams();
@@ -277,7 +285,9 @@ export class UsersService {
     unassignedPage?: number,
     unassignedPageSize?: number,
     sortBy?: string,
-    sortDescending?: boolean
+    sortDescending?: boolean,
+    adminsPage?: number,
+    adminsPageSize?: number
   ): Observable<IApiResponse<any>> {
     let paramsToSend = new HttpParams();
     
@@ -313,8 +323,19 @@ export class UsersService {
       paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.PageSize', unassignedPageSize.toString());
     }
 
+    if (adminsPage) {
+      paramsToSend = paramsToSend.set('AdminsPagedParams.Page', adminsPage.toString());
+    }
+    
+    if (adminsPageSize) {
+      paramsToSend = paramsToSend.set('AdminsPagedParams.PageSize', adminsPageSize.toString());
+    }
+
     paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.SortBy', 'lastName');
     paramsToSend = paramsToSend.set('UnassignedUsersPagedParams.SortDescending', 'false');
+
+    paramsToSend = paramsToSend.set('AdminsPagedParams.SortBy', sortBy || 'lastName');
+    paramsToSend = paramsToSend.set('AdminsPagedParams.SortDescending', sortDescending?.toString() || 'false');
 
     paramsToSend = paramsToSend.set('IncludeTotalCounts', 'true');
     

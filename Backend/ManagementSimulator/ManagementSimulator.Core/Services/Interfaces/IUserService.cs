@@ -18,7 +18,7 @@ namespace ManagementSimulator.Core.Services.Interfaces
     {
         Task<PagedResponseDto<UserResponseDto>> GetAllUnassignedUsersFilteredAsync(QueriedUserRequestDto payload);
         Task<List<Database.Entities.User>> GetAllAdminsAsync(string? lastName, string? email);
-        //Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload);
+        Task<PagedResponseDto<UserResponseDto>> GetAllAdminsFilteredAsync(QueriedUserRequestDto payload);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersIncludeRelationshipsFilteredAsync(QueriedUserRequestDto payload);
         Task<PagedResponseDto<UserResponseDto>> GetAllUsersFilteredAsync(QueriedUserRequestDto payload);
         Task<List<UserResponseDto>> GetAllUsersIncludeRelationshipsAsync();
