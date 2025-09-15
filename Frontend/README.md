@@ -1,59 +1,234 @@
-# Frontend
+# Frontend - Management Simulator 2025
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+Management Simulator frontend application developed with Angular 20.1.0.
 
-## Development server
+## 🛠️ Technologies Used
 
-To start a local development server, run:
+- **Framework**: Angular 20.1.0
+- **Styling**: TailwindCSS 4.1.11 
+- **Real-time Communication**: Microsoft SignalR 8.0.7
+- **CSV File Processing**: PapaParse 5.5.3
+- **Testing**: Jasmine + Karma
+- **Language**: TypeScript 5.8.2
+
+## 🚀 Development Commands
+
+### Starting Development Server
+
+To start the local development server:
 
 ```bash
+npm start
+# or
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The application will be available at `http://localhost:4200/`. The application will automatically reload when you modify source files.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Installing Dependencies
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Production Build
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+To compile the project for production:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The compiled files will be stored in the `dist/` directory. The production build optimizes the application for performance and speed.
 
-## Running unit tests
+## 🧪 Testing
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Unit Tests
+
+To run unit tests with [Karma](https://karma-runner.github.io):
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+### End-to-End Tests
 
-For end-to-end (e2e) testing, run:
+For end-to-end testing:
 
 ```bash
 ng e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+*Note: Angular CLI does not come with an e2e testing framework by default. You can choose one that fits your needs.*
 
-## Additional Resources
+## 📁 Project Structure
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```
+src/app/
+├── components/           # UI components organized by roles
+│   ├── admin/           # Administration panel
+│   │   ├── admin-add-form/          # Forms for adding entities
+│   │   ├── admin-departments-list/   # Departments list
+│   │   ├── admin-job-titles-list/    # Job titles list
+│   │   ├── admin-users-list/         # Users list
+│   │   └── admin-user-relationships/ # Manager-employee relationship management
+│   ├── manager/         # Manager panel
+│   │   ├── leave-management-view/    # Leave request management
+│   │   ├── project-management-view/  # Project management
+│   │   └── project-details/          # Project details
+│   ├── hr/              # HR panel
+│   │   ├── calendar/                 # Calendar with leaves
+│   │   └── leave-days-overview/      # Leave overview
+│   ├── user/            # User panel
+│   ├── shared/          # Reusable components
+│   ├── login/           # Login page
+│   ├── forgot-password/ # Password reset
+│   └── reset-password/  # Password reset confirmation
+├── services/            # Angular services for API
+│   ├── authService/     # Authentication service
+│   ├── departments/     # Departments service
+│   ├── users/           # Users service
+│   ├── leave-requests/  # Leave requests service
+│   └── projects/        # Projects service
+├── models/              # TypeScript interfaces
+│   ├── entities/        # Entity models
+│   ├── requests/        # API request models
+│   └── responses/       # API response models
+├── guards/              # Route guards for authentication
+├── interceptors/        # HTTP interceptors
+├── pipes/               # Custom pipes
+└── utils/               # Utility functions
+```
+
+## 🔐 Authentication System
+
+### Authentication Components
+
+#### Login Component (`/login`)
+- Authentication with email and password
+- Frontend and backend validation
+- Automatic redirection based on user roles
+- "Remember Me" functionality
+- Integration with password reset flow
+
+#### Reset Password Component (`/reset-password`)
+- Password reset request via email
+- 6-character verification code
+- Strong password policy validation
+- Code expiration after 15 minutes
+- Rate limiting for security
+
+### Authentication Flows
+
+1. **Standard Login**:
+   - User → Email/Password → Validation → JWT Token → Role-based redirection
+
+2. **Password Reset**:
+   - Email → Verification code → New password → Confirmation → Login
+
+### Roles and Redirections
+
+- **Admin** → `/admin` - Full access to all functionalities
+- **Manager** → `/manager` - Team and project management  
+- **HR** → `/hr` - Leave management and calendar
+- **User** → `/user` - View profile and own requests
+- **Multiple roles** → `/role-selector` - Active role selection
+
+## 🎨 Styling and UI
+
+### TailwindCSS
+The project uses TailwindCSS 4.1.11 for styling:
+- Configuration in `tailwind.config.js`
+- Utility classes for responsive design
+- Custom components for UI consistency
+
+### Shared Components
+- Custom navbar with role-based navigation
+- Reusable forms with validation
+- Tables with pagination, sorting, and filtering
+- Modals for confirmations and details
+
+## 📡 API Integration
+
+### HTTP Services
+All services extend a BaseService and use:
+- Interceptors for automatic authentication
+- Centralized error handling
+- Type-safe API calls with TypeScript interfaces
+
+### SignalR Integration
+- Real-time notifications for:
+  - Leave request approvals/rejections
+  - Project updates
+  - Administrative notifications
+
+## 🔍 Advanced Features
+
+### Filtering and Search
+- Global search in all lists
+- Multi-criteria filtering
+- Column sorting
+- Server-side pagination
+
+### Export/Import
+- Data export to CSV format
+- User import from CSV
+- Data validation on import
+
+### Responsive Design
+- Optimized for desktop, tablet, and mobile
+- Adaptive navigation on small screens
+- Touch-friendly on mobile devices
+
+## 🛠️ Development and Debugging
+
+### Code Scaffolding
+
+To generate new components:
+
+```bash
+# New component
+ng generate component component-name
+
+# New service
+ng generate service service-name
+
+# New guard
+ng generate guard guard-name
+
+# New pipe
+ng generate pipe pipe-name
+```
+
+For complete list of available schematics:
+
+```bash
+ng generate --help
+```
+
+### Environment Configuration
+
+Configure API endpoints in:
+- `src/environments/environment.ts` (development)
+- `src/environments/environment.prod.ts` (production)
+
+### Debugging
+- Use Chrome DevTools for debugging
+- Angular DevTools extension for component inspection
+- Console logs for data flow tracking
+
+## 📚 Additional Resources
+
+- [Angular Documentation](https://angular.dev/)
+- [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [SignalR for JavaScript](https://docs.microsoft.com/en-us/aspnet/core/signalr/javascript-client)
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Port occupied**: Change port with `ng serve --port 4201`
+2. **Corrupted node modules**: Delete `node_modules` and run `npm install`
+3. **TypeScript errors**: Check versions in `package.json`
+4. **API connection failed**: Verify backend is running on correct port
