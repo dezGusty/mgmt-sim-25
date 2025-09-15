@@ -53,18 +53,29 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
 
   Math = Math;
 
+  private hasInitialized = false;
+
   ngOnInit() {
-    this.loadRequests();
-    
     if (this.debouncedSearchTerm$) {
       this.searchSubscription = this.debouncedSearchTerm$.subscribe(searchTerm => {
-        this.searchTerm = searchTerm;
-        this.currentPage = 1;
-        this.totalPages = 0;
-        this.totalCount = 0;
-        this.loadRequests();
+        if (this.hasInitialized && this.searchTerm !== searchTerm) {
+          this.searchTerm = searchTerm;
+          this.currentPage = 1;
+          this.totalPages = 0;
+          this.totalCount = 0;
+          this.loadRequests();
+        } else {
+          this.searchTerm = searchTerm;
+        }
       });
     }
+    
+    setTimeout(() => {
+      if (!this.hasInitialized) {
+        this.loadRequests();
+        this.hasInitialized = true;
+      }
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -74,7 +85,7 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filter'] || changes['searchCriteria']) {
+    if (this.hasInitialized && (changes['filter'] || changes['searchCriteria'])) {
       this.currentPage = 1;
       this.totalPages = 0;
       this.totalCount = 0;
@@ -407,5 +418,9 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
       this.totalCount = 0;
       this.loadRequests();
     }
+  }
+
+  trackByRequestId(index: number, req: ILeaveRequest): string {
+    return req.id;
   }
 }
