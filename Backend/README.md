@@ -2,6 +2,10 @@
 
 ASP.NET Core backend application implementing Clean Architecture/Onion Architecture for the Management Simulator 2025 project.
 
+## 📂 Navigation
+- [🏠 Main Project](../README.md) - Return to main project documentation
+- [🎨 Frontend](../Frontend/README.md) - Frontend Angular application documentation
+
 ## 🛠️ Technologies Used
 
 - ![ASP.NET Core](https://img.shields.io/badge/Framework-ASP.NET%20Core%20(.NET%209.0)-green?logo=dotnet)

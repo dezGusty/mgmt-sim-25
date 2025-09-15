@@ -2,6 +2,10 @@
 
 Human resource management simulation application developed with modern technologies.
 
+## 📂 Quick Navigation
+- [⚙️ Backend Documentation](Backend/README.md) - ASP.NET Core API documentation
+- [🎨 Frontend Documentation](Frontend/README.md) - Angular application documentation
+
 ## 📋 Overview
 
 Management Simulator 2025 is a full-stack web application for simulating and managing human resource processes, including authentication, user management, departments, projects, and leave requests.
@@ -248,50 +252,6 @@ The API is documented using Swagger/OpenAPI:
   - `/api/projects/*` - Projects
   - `/api/leaverequests/*` - Leave requests
 
-## 🔧 Development Configuration
-
-### Backend Configuration
-
-Edit `Backend/ManagementSimulator/ManagementSimulator.API/appsettings.Development.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "MGMTSimulatorDb": "Data Source=MGMTSimulator.db"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  }
-}
-```
-
-**Angular Configuration**
-
-Key configuration files:
-- `angular.json` - Angular CLI configuration
-- `tsconfig.json` - TypeScript compiler options
-- `package.json` - Dependencies and scripts
-- `tailwind.config.js` - TailwindCSS configuration
-
-**Proxy Configuration (Optional)**
-
-Create `Frontend/proxy.conf.json` for API proxying:
-
-```json
-{
-  "/api/*": {
-    "target": "https://localhost:7275",
-    "secure": true,
-    "changeOrigin": true,
-    "logLevel": "debug"
-  }
-}
-```
-
-Then run: `ng serve --proxy-config proxy.conf.json`
 
 ## 📊 Main Features
 
@@ -354,17 +314,6 @@ Then run: `ng serve --proxy-config proxy.conf.json`
 - Request history and status tracking
 - Personal calendar with holidays
 - Profile management
-
-### 🌟 Cross-cutting Features
-**Real-time Communication**:
-- SignalR integration for live updates
-- Instant notifications for approvals/rejections
-- Real-time calendar updates
-- Live project status changes
-
-**Advanced UI/UX**:
-- Advanced filtering and search
-- Accessibility compliance (WCAG 2.1)
 
 ## 🤝 Contributing
 

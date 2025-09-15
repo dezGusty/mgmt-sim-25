@@ -2,6 +2,10 @@
 
 Management Simulator frontend application developed with Angular 20.1.0.
 
+## 📂 Navigation
+- [🏠 Main Project](../README.md) - Return to main project documentation  
+- [⚙️ Backend](../Backend/README.md) - Backend ASP.NET Core API documentation
+
 ## 🛠️ Technologies Used
 
 - ![Angular](https://img.shields.io/badge/Framework-Angular%2020.1.0-red?logo=angular)
@@ -135,11 +139,6 @@ All services extend a BaseService and use:
 - Centralized error handling
 - Type-safe API calls with TypeScript interfaces
 
-### SignalR Integration
-- Real-time notifications for:
-  - Leave request approvals/rejections
-  - Project updates
-  - Administrative notifications
 
 ## 🔍 Advanced Features
 
@@ -155,41 +154,8 @@ All services extend a BaseService and use:
 - Data validation on import
 
 ### Responsive Design
-- Optimized for desktop, tablet, and mobile
+- Optimized for desktop.
 - Adaptive navigation on small screens
-- Touch-friendly on mobile devices
-
-## 🛠️ Development and Debugging
-
-### Code Scaffolding
-
-To generate new components:
-
-```bash
-# New component
-ng generate component component-name
-
-# New service
-ng generate service service-name
-
-# New guard
-ng generate guard guard-name
-
-# New pipe
-ng generate pipe pipe-name
-```
-
-For complete list of available schematics:
-
-```bash
-ng generate --help
-```
-
-### Environment Configuration
-
-Configure API endpoints in:
-- `src/environments/environment.ts` (development)
-- `src/environments/environment.prod.ts` (production)
 
 ### Debugging
 - Use Chrome DevTools for debugging
