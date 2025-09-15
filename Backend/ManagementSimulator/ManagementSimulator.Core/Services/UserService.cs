@@ -598,6 +598,7 @@ namespace ManagementSimulator.Core.Services
                     Data = new List<UserResponseDto>(),
                     Page = payload.PagedQueryParams.Page ?? 1,
                     PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalCount = totalCount,
                     TotalPages = 0
                 };
 
@@ -658,6 +659,7 @@ namespace ManagementSimulator.Core.Services
                 Data = mappedUsers,
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalCount = totalCount,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
@@ -759,6 +761,7 @@ namespace ManagementSimulator.Core.Services
                     Data = new List<UserResponseDto>(),
                     Page = payload.PagedQueryParams.Page ?? 1,
                     PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                    TotalCount = totalCount,
                     TotalPages = 0
                 };
 
@@ -780,6 +783,7 @@ namespace ManagementSimulator.Core.Services
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
+                TotalCount = totalCount,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
                     (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
@@ -806,6 +810,7 @@ namespace ManagementSimulator.Core.Services
                     Data = new List<UserResponseDto>(),
                     Page = payload.PagedQueryParams.Page ?? 1,
                     PageSize = payload.PagedQueryParams.PageSize ?? 10,
+                    TotalCount = totalCount,
                     TotalPages = 0
                 };
 
@@ -827,6 +832,7 @@ namespace ManagementSimulator.Core.Services
                 }),
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = pageSize,
+                TotalCount = totalCount,
                 TotalPages = pageSize > 0 ?
                     (int)Math.Ceiling((double)totalCount / pageSize) : 1
             };
@@ -967,11 +973,16 @@ namespace ManagementSimulator.Core.Services
 
                 if (request.IncludeTotalCounts)
                 {
+                    // Get system-wide totals (not affected by search)
+                    var systemTotalAdmins = await GetTotalAdminsCountAsync();
+                    var systemTotalManagers = await GetTotalManagersCountAsync(); 
+                    var systemTotalUnassigned = await GetTotalUnassignedUsersCountAsync();
+
                     var totalCounts = new GlobalSearchCountsDto
                     {
-                        TotalAdmins = await GetTotalAdminsCountAsync(),
-                        TotalManagers = await GetTotalManagersCountAsync(),
-                        TotalUnassignedUsers = await GetTotalUnassignedUsersCountAsync()
+                        TotalAdmins = systemTotalAdmins,
+                        TotalManagers = systemTotalManagers,
+                        TotalUnassignedUsers = systemTotalUnassigned
                     };
                     
                     response.TotalCounts = totalCounts;

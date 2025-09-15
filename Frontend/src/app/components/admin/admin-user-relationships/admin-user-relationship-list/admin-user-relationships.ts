@@ -75,9 +75,10 @@ export class AdminUserRelationships implements OnInit {
 
   UserSearchType = UserSearchType;
 
-  allAdmins: IUserViewModel[] = [];   // full dataset   // current page slice
+  allAdmins: IUserViewModel[] = [];
   originalAdmins: IUserViewModel[] = []; 
   totalAdminsCount: number = 0;
+  searchResultsAdminsCount: number = 0;
   totalPagesAdmins: number = 0;
   currentPageAdmins: number = 1;
   pageSizeAdmins: number = 3;
@@ -85,11 +86,13 @@ export class AdminUserRelationships implements OnInit {
   currentPageManagers: number = 1;
   totalPagesManagers: number = 0;
   totalManagersCount: number = 0;
+  searchResultsManagersCount: number = 0;
 
   pageSizeUnassignedUsers: number = 3;
   currentPageUnassignedUsers: number = 1;
   totalPagesUnassignedUsers: number = 0;
   totalUnassignedUsersCount: number = 0;
+  searchResultsUnassignedCount: number = 0;
 
   showAssignRelationShipComponent: boolean = false;
   selectedEmployee!: {
@@ -144,6 +147,10 @@ export class AdminUserRelationships implements OnInit {
     this.managersIds.clear();
     this.adminsIds.clear();
     this.managerEmployeesCollapsed.clear();
+    
+    this.searchResultsAdminsCount = 0;
+    this.searchResultsManagersCount = 0;
+    this.searchResultsUnassignedCount = 0;
     
     this.loadManagersWithRelationships();
     this.loadAdmins();
@@ -804,9 +811,11 @@ export class AdminUserRelationships implements OnInit {
         this.managersErrorMessage = this.getManagersEmptyMessage();
         this.managers = [];
         this.totalPagesManagers = 0;
+        this.searchResultsManagersCount = 0;
       } else {
         this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
         this.totalPagesManagers = data.managers.totalPages || 0;
+        this.searchResultsManagersCount = data.managers.totalCount || 0; // Total search results across all pages
         this.managersErrorMessage = '';
       }
     }
@@ -814,7 +823,6 @@ export class AdminUserRelationships implements OnInit {
     if (data.admins && (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Admins)) {
       this.isLoadingAdmins = false;
       
-      // data.admins is now a paginated response like managers and unassigned users
       const rawAdmins: IUser[] = data.admins.data || [];
       
       if (rawAdmins.length === 0) {
@@ -822,11 +830,13 @@ export class AdminUserRelationships implements OnInit {
         this.admins = [];
         this.allAdmins = [];
         this.totalPagesAdmins = 0;
+        this.searchResultsAdminsCount = 0;
       } else {
         this.admins = rawAdmins.map(a => this.mapToUserViewModel(a));
-        this.allAdmins = [...this.admins]; // For compatibility
-        this.originalAdmins = [...this.admins]; // For compatibility
+        this.allAdmins = [...this.admins]; 
+        this.originalAdmins = [...this.admins]; 
         this.totalPagesAdmins = data.admins.totalPages || 0;
+        this.searchResultsAdminsCount = data.admins.totalCount || 0;
         this.adminsErrorMessage = '';
       }
     }
@@ -839,9 +849,11 @@ export class AdminUserRelationships implements OnInit {
         this.unassignedUsersErrorMessage = this.getUnassignedUsersEmptyMessage();
         this.unassignedUsers = [];
         this.totalPagesUnassignedUsers = 0;
+        this.searchResultsUnassignedCount = 0;
       } else {
         this.unassignedUsers = rawUnassignedUsers.map((user) => this.mapToUserViewModel(user));
         this.totalPagesUnassignedUsers = data.unassignedUsers.totalPages || 0;
+        this.searchResultsUnassignedCount = data.unassignedUsers.totalCount || 0;
         this.unassignedUsersErrorMessage = '';
       }
     }
@@ -902,6 +914,10 @@ export class AdminUserRelationships implements OnInit {
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
     
+    this.searchResultsAdminsCount = 0;
+    this.searchResultsManagersCount = 0;
+    this.searchResultsUnassignedCount = 0;
+    
     this.managersIds.clear();
     this.adminsIds.clear();
     
@@ -941,7 +957,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getUnassignedUsersCount(): number {
-    return this.unassignedUsers.length;
+    return this.searchResultsUnassignedCount > 0 ? this.searchResultsUnassignedCount : this.unassignedUsers.length;
   }
 
   getSubordinateCount(manager: any): number {
@@ -949,7 +965,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getAdminCount(): number {
-    return this.admins.length;
+    return this.searchResultsAdminsCount > 0 ? this.searchResultsAdminsCount : this.admins.length;
   }
 
   getTotalAdminCount(): number {
@@ -957,7 +973,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getManagerCount(): number {
-    return this.managers.length;
+    return this.searchResultsManagersCount > 0 ? this.searchResultsManagersCount : this.managers.length;
   }
 
   getTotalManagerCount(): number {
