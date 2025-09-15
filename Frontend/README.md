@@ -4,11 +4,11 @@ Management Simulator frontend application developed with Angular 20.1.0.
 
 ## 🛠️ Technologies Used
 
-- **Framework**: Angular 20.1.0
-- **Styling**: TailwindCSS 4.1.11 
-- **Real-time Communication**: Microsoft SignalR 8.0.7
-- **CSV File Processing**: PapaParse 5.5.3
-- **Language**: TypeScript 5.8.2
+- ![Angular](https://img.shields.io/badge/Framework-Angular%2020.1.0-red?logo=angular)
+- ![TypeScript](https://img.shields.io/badge/Language-TypeScript%205.8.2-blue?logo=typescript)
+- ![TailwindCSS](https://img.shields.io/badge/Styling-TailwindCSS%204.1.11-38B2AC?logo=tailwindcss)
+- ![SignalR](https://img.shields.io/badge/Real--time%20Communication-Microsoft%20SignalR%208.0.7-blue?logo=microsoft)
+- ![PapaParse](https://img.shields.io/badge/CSV%20File%20Processing-PapaParse%205.5.3-lightgrey)
 
 ## 🚀 Development Commands
 

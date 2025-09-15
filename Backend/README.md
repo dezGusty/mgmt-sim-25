@@ -4,15 +4,15 @@ ASP.NET Core backend application implementing Clean Architecture/Onion Architect
 
 ## 🛠️ Technologies Used
 
-- **Framework**: ASP.NET Core (.NET 9.0)
-- **ORM**: Entity Framework Core 9.0.7
-- **Database**: SQLite (Development)
-- **Authentication**: Cookie Authentication + JWT Bearer
-- **Password Security**: BCrypt.Net-Next 4.0.3
-- **Real-time Communication**: SignalR 1.2.0
-- **API Documentation**: Swagger/OpenAPI
-- **Testing**: xUnit with Moq
-- **Caching**: In-Memory Caching
+- ![ASP.NET Core](https://img.shields.io/badge/Framework-ASP.NET%20Core%20(.NET%209.0)-green?logo=dotnet)
+- ![EF Core](https://img.shields.io/badge/ORM-Entity%20Framework%20Core%209.0.7-blueviolet)
+- ![SQLite](https://img.shields.io/badge/Database-SQLite%20(Development)-lightgrey?logo=sqlite)
+- ![Auth](https://img.shields.io/badge/Authentication-Cookie%20Authentication%20+%20JWT%20Bearer-orange)
+- ![BCrypt](https://img.shields.io/badge/Password%20Security-BCrypt.Net--Next%204.0.3-critical)
+- ![SignalR](https://img.shields.io/badge/Real--time%20Communication-SignalR%201.2.0-blue?logo=microsoft)
+- ![Swagger](https://img.shields.io/badge/API%20Documentation-Swagger/OpenAPI-green?logo=swagger)
+- ![Testing](https://img.shields.io/badge/Testing-xUnit%20with%20Moq-success)
+- ![Caching](https://img.shields.io/badge/Caching-In--Memory%20Caching-yellow)
 
 ## 🏗️ Project Architecture
 
