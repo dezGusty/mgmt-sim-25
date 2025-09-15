@@ -14,6 +14,7 @@ import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
 import { Auth } from '../../../../services/authService/auth';
 import { SecondManagerService } from '../../../../services/second-manager/second-manager.service';
+import { PublicHolidaysService, PublicHoliday } from '../../../../services/public-holidays/public-holidays.service';
 
 @Component({
   selector: 'app-add-request-form',
@@ -53,6 +54,10 @@ export class AddRequestForm implements OnInit, OnDestroy {
   filteredEmployees: { id: number; name: string }[] = [];
   showEmployeeDropdown: boolean = false;
   selectedEmployee: { id: number; name: string } | null = null;
+  
+  // Public holidays
+  publicHolidays: PublicHoliday[] = [];
+  holidaysInRange: PublicHoliday[] = [];
   
   private employeeSearchSubject = new BehaviorSubject<string>('');
   private destroy$ = new Subject<void>();
@@ -118,7 +123,8 @@ export class AddRequestForm implements OnInit, OnDestroy {
     private leaveRequests: LeaveRequests,
     private leaveRequestService: LeaveRequestService,
     private authService: Auth,
-    private secondManagerService: SecondManagerService
+    private secondManagerService: SecondManagerService,
+    private publicHolidaysService: PublicHolidaysService
   ) {}
 
   ngOnInit() {
@@ -135,6 +141,9 @@ export class AddRequestForm implements OnInit, OnDestroy {
       this.filteredEmployees = users; // Initialize filtered employees
     });
 
+    // Load public holidays
+    this.loadPublicHolidays();
+
     // Set up debounced employee search
     this.employeeSearchSubject.pipe(
       debounceTime(300),
@@ -150,11 +159,13 @@ export class AddRequestForm implements OnInit, OnDestroy {
       this.endDate = '';
     }
     this.errorMessage = '';
+    this.updateHolidaysInRange();
     this.calculateRemainingDays();
   }
 
   onEndDateChange() {
     this.errorMessage = '';
+    this.updateHolidaysInRange();
     this.calculateRemainingDays();
   }
 
@@ -356,6 +367,59 @@ export class AddRequestForm implements OnInit, OnDestroy {
     if (this.calculationTimeout) {
       clearTimeout(this.calculationTimeout);
     }
+  }
+
+  loadPublicHolidays() {
+    const currentYear = new Date().getFullYear();
+    this.publicHolidaysService.getPublicHolidaysForYears([currentYear, currentYear + 1])
+      .subscribe({
+        next: (holidays) => {
+          this.publicHolidays = holidays;
+          this.updateHolidaysInRange();
+        },
+        error: (error) => {
+          console.error('Error loading public holidays:', error);
+        }
+      });
+  }
+
+  updateHolidaysInRange() {
+    if (this.startDate && this.endDate) {
+      const startDate = new Date(this.startDate);
+      const endDate = new Date(this.endDate);
+      
+      this.holidaysInRange = this.publicHolidays.filter(holiday => {
+        const holidayDate = new Date(holiday.date);
+        if (holiday.isRecurring) {
+          // For recurring holidays, check if they fall within the range for the relevant years
+          const startYear = startDate.getFullYear();
+          const endYear = endDate.getFullYear();
+          for (let year = startYear; year <= endYear; year++) {
+            const recurringDate = new Date(year, holidayDate.getMonth(), holidayDate.getDate());
+            if (recurringDate >= startDate && recurringDate <= endDate) {
+              return true;
+            }
+          }
+          return false;
+        } else {
+          return holidayDate >= startDate && holidayDate <= endDate;
+        }
+      });
+    } else {
+      this.holidaysInRange = [];
+    }
+  }
+
+  isDateAHoliday(dateString: string): boolean {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    return this.publicHolidaysService.isPublicHoliday(date, this.publicHolidays);
+  }
+
+  getHolidayForDate(dateString: string): PublicHoliday | null {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return this.publicHolidaysService.getHolidayForDate(date, this.publicHolidays);
   }
 
   handleClose() {

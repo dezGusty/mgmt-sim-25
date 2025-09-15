@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateLeaveRequestByEmployeeDto, LeaveRequestService, RemainingLeaveDaysResponse } from '../../../services/leaveRequest/leaveRequest.service';
@@ -6,6 +6,7 @@ import { LeaveRequest } from '../../../models/entities/iLeave-request';
 import { ILeaveRequestType } from '../../../models/entities/ileave-request-type';
 import { LeaveRequestTypeService } from '../../../services/leaveRequestType/leave-request-type-service';
 import { RequestStatus } from '../../../models/enums/RequestStatus';
+import { PublicHolidaysService, PublicHoliday } from '../../../services/public-holidays/public-holidays.service';
 
 @Component({
   selector: 'app-user-request-form',
@@ -13,7 +14,7 @@ import { RequestStatus } from '../../../models/enums/RequestStatus';
   styleUrl: './user-request-form.css',
   imports: [CommonModule, FormsModule],
 })
-export class UserRequestForm {
+export class UserRequestForm implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() requestSubmitted = new EventEmitter<LeaveRequest>();
 
@@ -32,6 +33,9 @@ export class UserRequestForm {
   remainingDaysError = '';
   balanceCalculated = false;
 
+  // Public holidays
+  publicHolidays: PublicHoliday[] = [];
+  holidaysInRange: PublicHoliday[] = [];
 
   Math = Math;
 
@@ -45,12 +49,55 @@ export class UserRequestForm {
 
   constructor(
     private leaveRequestService: LeaveRequestService,
-    private leaveRequestTypeService: LeaveRequestTypeService
+    private leaveRequestTypeService: LeaveRequestTypeService,
+    private publicHolidaysService: PublicHolidaysService
   ) { }
 
 
   ngOnInit() {
     this.loadLeaveRequestTypes();
+    this.loadPublicHolidays();
+  }
+
+  loadPublicHolidays() {
+    const currentYear = new Date().getFullYear();
+    this.publicHolidaysService.getPublicHolidaysForYears([currentYear, currentYear + 1])
+      .subscribe({
+        next: (holidays) => {
+          this.publicHolidays = holidays;
+          this.updateHolidaysInRange();
+        },
+        error: (error) => {
+          console.error('Error loading public holidays:', error);
+        }
+      });
+  }
+
+  updateHolidaysInRange() {
+    if (this.startDate && this.endDate) {
+      const startDate = new Date(this.startDate);
+      const endDate = new Date(this.endDate);
+      
+      this.holidaysInRange = this.publicHolidays.filter(holiday => {
+        const holidayDate = new Date(holiday.date);
+        if (holiday.isRecurring) {
+          // For recurring holidays, check if they fall within the range for the relevant years
+          const startYear = startDate.getFullYear();
+          const endYear = endDate.getFullYear();
+          for (let year = startYear; year <= endYear; year++) {
+            const recurringDate = new Date(year, holidayDate.getMonth(), holidayDate.getDate());
+            if (recurringDate >= startDate && recurringDate <= endDate) {
+              return true;
+            }
+          }
+          return false;
+        } else {
+          return holidayDate >= startDate && holidayDate <= endDate;
+        }
+      });
+    } else {
+      this.holidaysInRange = [];
+    }
   }
 
   onStartDateChange() {
@@ -59,11 +106,13 @@ export class UserRequestForm {
     if (this.endDate && this.endDate < this.startDate) {
       this.endDate = '';
     }
+    this.updateHolidaysInRange();
     this.triggerRemainingDaysUpdate();
   }
 
   onEndDateChange() {
     this.resetErrorState();
+    this.updateHolidaysInRange();
     this.triggerRemainingDaysUpdate();
   }
 
@@ -266,5 +315,17 @@ export class UserRequestForm {
         }
       }
     });
+  }
+
+  isDateAHoliday(dateString: string): boolean {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    return this.publicHolidaysService.isPublicHoliday(date, this.publicHolidays);
+  }
+
+  getHolidayForDate(dateString: string): PublicHoliday | null {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return this.publicHolidaysService.getHolidayForDate(date, this.publicHolidays);
   }
 }
