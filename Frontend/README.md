@@ -8,7 +8,6 @@ Management Simulator frontend application developed with Angular 20.1.0.
 - **Styling**: TailwindCSS 4.1.11 
 - **Real-time Communication**: Microsoft SignalR 8.0.7
 - **CSV File Processing**: PapaParse 5.5.3
-- **Testing**: Jasmine + Karma
 - **Language**: TypeScript 5.8.2
 
 ## 🚀 Development Commands
@@ -40,26 +39,6 @@ ng build
 ```
 
 The compiled files will be stored in the `dist/` directory. The production build optimizes the application for performance and speed.
-
-## 🧪 Testing
-
-### Unit Tests
-
-To run unit tests with [Karma](https://karma-runner.github.io):
-
-```bash
-ng test
-```
-
-### End-to-End Tests
-
-For end-to-end testing:
-
-```bash
-ng e2e
-```
-
-*Note: Angular CLI does not come with an e2e testing framework by default. You can choose one that fits your needs.*
 
 ## 📁 Project Structure
 

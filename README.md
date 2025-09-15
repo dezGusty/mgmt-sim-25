@@ -21,7 +21,7 @@ Management Simulator 2025 is a full-stack web application for simulating and man
 - **Database**: SQLite
 - **Authentication**: Cookie Authentication
 - **Password Encryption**: BCrypt.Net-Next 4.0.2
-- **Testing**: xUnit with Moq
+- **Testing**: xUnit with NSubstitute
 
 ## 🏗️ Project Architecture
 
@@ -151,9 +151,6 @@ ng serve
 # For production build
 ng build
 
-# Run tests
-ng test
-
 # Run with specific port
 ng serve --port 4201
 ```
@@ -206,7 +203,7 @@ The database schema includes the following main entities and relationships:
 
 The project includes test data that can be activated in `Program.cs`:
 ```csharp
-// Uncomment to populate database with test data
+Uncomment to populate database with test data
 //SetupSeed.Seed(dbContext);
 //PopulateSeed.Seed(dbContext);
 ```
@@ -273,30 +270,6 @@ Edit `Backend/ManagementSimulator/ManagementSimulator.API/appsettings.Developmen
 }
 ```
 
-### Frontend Configuration
-
-**Environment Configuration**
-
-Edit `Frontend/src/environments/environment.ts` for development:
-
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'https://localhost:7275/api',
-  signalrUrl: 'https://localhost:7275/hub'
-};
-```
-
-Edit `Frontend/src/environments/environment.prod.ts` for production:
-
-```typescript
-export const environment = {
-  production: true,
-  apiUrl: 'https://your-api-domain.com/api',
-  signalrUrl: 'https://your-api-domain.com/hub'
-};
-```
-
 **Angular Configuration**
 
 Key configuration files:
@@ -338,7 +311,6 @@ Then run: `ng serve --proxy-config proxy.conf.json`
 - Manager-employee relationship assignment
 - Leave type management with custom rules
 - System statistics and usage reports
-- CSV import/export for bulk operations
 
 ### 👨‍💼 For Managers
 **Backend Capabilities**:
@@ -369,6 +341,7 @@ Then run: `ng serve --proxy-config proxy.conf.json`
 - Holiday configuration panel
 - Compliance and audit reports
 - Bulk leave adjustments
+- Import free days via API
 
 ### 👤 For Users
 **Backend Capabilities**:
@@ -383,7 +356,6 @@ Then run: `ng serve --proxy-config proxy.conf.json`
 - Request history and status tracking
 - Personal calendar with holidays
 - Profile management
-- Notification center
 
 ### 🌟 Cross-cutting Features
 **Real-time Communication**:
@@ -393,11 +365,7 @@ Then run: `ng serve --proxy-config proxy.conf.json`
 - Live project status changes
 
 **Advanced UI/UX**:
-- Responsive design for all devices
-- Dark/light theme support (configurable)
 - Advanced filtering and search
-- Drag-and-drop interfaces
-- Keyboard shortcuts
 - Accessibility compliance (WCAG 2.1)
 
 ## 🤝 Contributing
