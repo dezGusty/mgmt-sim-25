@@ -25,6 +25,10 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
   @Output() dataRefreshed = new EventEmitter<void>();
 
+  get currentFilter(): 'All' | 'Pending' | 'Approved' | 'Rejected' {
+    return this.filter;
+  }
+
   private searchSubscription?: Subscription;
   searchTerm: string = '';
 
