@@ -11,7 +11,7 @@ ASP.NET Core backend application implementing Clean Architecture/Onion Architect
 - ![BCrypt](https://img.shields.io/badge/Password%20Security-BCrypt.Net--Next%204.0.3-critical)
 - ![SignalR](https://img.shields.io/badge/Real--time%20Communication-SignalR%201.2.0-blue?logo=microsoft)
 - ![Swagger](https://img.shields.io/badge/API%20Documentation-Swagger/OpenAPI-green?logo=swagger)
-- ![Testing](https://img.shields.io/badge/Testing-xUnit%20with%20Moq-success)
+- ![Testing](https://img.shields.io/badge/Testing-xUnit%20with%20NSubstitute-success)
 - ![Caching](https://img.shields.io/badge/Caching-In--Memory%20Caching-yellow)
 
 ## 🏗️ Project Architecture
