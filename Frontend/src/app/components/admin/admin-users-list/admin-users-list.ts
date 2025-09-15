@@ -16,6 +16,8 @@ import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { UserActivityStatus } from '../../../models/enums/user-activity-status';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
 
 @Component({
@@ -29,8 +31,9 @@ export class AdminUsersList implements OnInit {
   searchTerm: string = '';
   searchBy: string = 'globalSearch';
   searchByActivityStatus: 'activeStatus' | 'inactiveStatus' | 'global' = 'global';
-  sortDescending: boolean = false;
   userRoles: Map<string, number> = new Map();
+
+  private searchTermSubject = new Subject<string>();
 
   currentPage: number = 1;
   itemsPerPage: number = 5;
@@ -80,6 +83,14 @@ export class AdminUsersList implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadUserRoles();
+    
+    // Set up debounced search
+    this.searchTermSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe((searchTerm: string) => {
+      this.loadUsersWithTerm(searchTerm);
+    });
   }
 
   loadUsers(): void {
@@ -97,7 +108,7 @@ export class AdminUsersList implements OnInit {
         ? UserActivityStatus.INACTIVE : UserActivityStatus.ALL,
       params: {
         sortBy: this.getSortField(),
-        sortDescending: this.sortDescending,
+        sortDescending: false,
         page: this.currentPage,
         pageSize: this.itemsPerPage
       }
@@ -240,24 +251,27 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  onSearch(): void {
+  onSearchTermChange(): void {
+    this.searchTermSubject.next(this.searchTerm);
+  }
+
+  loadUsersWithTerm(searchTerm: string): void {
+    const originalSearchTerm = this.searchTerm;
+    this.searchTerm = searchTerm;
     this.currentPage = 1;
     this.hasSearched = true;
     this.loadUsers();
+    // Don't restore the original search term to prevent focus issues
   }
 
   clearSearch(): void {
     this.searchTerm = '';
+    this.searchBy = 'globalSearch';
+    this.searchByActivityStatus = 'global';
     this.currentPage = 1;
     this.hasSearched = false;
     this.hasError = false;
     this.errorMessage = '';
-    this.loadUsers();
-  }
-
-  toggleSortOrder(): void {
-    this.sortDescending = !this.sortDescending;
-    this.currentPage = 1;
     this.loadUsers();
   }
 
@@ -494,12 +508,6 @@ export class AdminUsersList implements OnInit {
           alert('Failed to restore user. Please try again.');
         }
       });
-    }
-  }
-
-  onSearchKeypress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSearch();
     }
   }
 

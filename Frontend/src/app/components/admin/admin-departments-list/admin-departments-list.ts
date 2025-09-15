@@ -9,6 +9,8 @@ import { IDepartmentViewModel } from '../../../view-models/department-view-model
 import { IApiResponse } from '../../../models/responses/iapi-response';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SearchType } from '../../../models/enums/search-type';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-departments-list',
@@ -21,6 +23,8 @@ export class AdminDepartmentsList implements OnInit {
   searchTerm: string = '';
   searchBy: SearchType = SearchType.Global;
 
+  private searchTermSubject = new Subject<string>();
+  
   currentSearchTerm: string = '';
   currentSearchBy: SearchType = SearchType.Global;
 
@@ -32,7 +36,6 @@ export class AdminDepartmentsList implements OnInit {
   readonly pageSize = 6;
   currentPage: number = 1;
   totalPages: number = 0;
-  sortDescending: boolean = false;
 
   showEditModal = false;
   departmentToEdit: IDepartmentViewModel | null = null;
@@ -51,6 +54,13 @@ export class AdminDepartmentsList implements OnInit {
 
   ngOnInit(): void {
     this.loadDepartments();
+    
+    this.searchTermSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe((searchTerm: string) => {
+      this.loadDepartmentsWithTerm(searchTerm, this.searchBy);
+    });
   }
 
   loadDepartments(): void {
@@ -70,7 +80,7 @@ export class AdminDepartmentsList implements OnInit {
     activityStatus: this.currentSearchBy,
     params: {
       sortBy: "name", 
-      sortDescending: this.sortDescending,
+      sortDescending: false,
       page: this.currentPage,
       pageSize: this.pageSize
     }
@@ -181,20 +191,6 @@ getEmptyStateSubMessage(): string {
     }
   }
 
-  onSearch(): void {
-    this.currentSearchTerm = this.searchTerm;
-    this.currentSearchBy = this.searchBy;
-    this.currentPage = 1; 
-    this.loadDepartments();
-  }
-
-  onSearchKeypress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSearch();
-    }
-  }
-  
-
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
@@ -246,9 +242,14 @@ getEmptyStateSubMessage(): string {
     return ((this.currentPage - 1) * this.pageSize) + 1;
   }
 
-  toggleSortOrder(): void {
-    this.sortDescending = !this.sortDescending;
-    this.currentPage = 1; 
+  onSearchTermChange(): void {
+    this.searchTermSubject.next(this.searchTerm);
+  }
+
+  loadDepartmentsWithTerm(searchTerm: string, searchBy: SearchType): void {
+    this.currentSearchTerm = searchTerm;
+    this.currentSearchBy = searchBy;
+    this.currentPage = 1;
     this.loadDepartments();
   }
 

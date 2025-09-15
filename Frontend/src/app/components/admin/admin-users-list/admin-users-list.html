@@ -17,7 +17,7 @@
         <input
           type="text"
           [(ngModel)]="searchTerm"
-          (keypress)="onSearchKeypress($event)"
+          (input)="onSearchTermChange()"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
           [placeholder]="getSearchPlaceholder()"
         />
@@ -27,6 +27,7 @@
       <div class="w-36">
         <select
           [(ngModel)]="searchBy"
+          (ngModelChange)="onSearchTermChange()"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
         >
           <option value="name" [selected]="searchBy === 'name'">By Name</option>
@@ -48,6 +49,7 @@
       <div class="w-50">
         <select
           [(ngModel)]="searchByActivityStatus"
+          (ngModelChange)="onSearchTermChange()"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486]"
         >
           <option value="activeStatus" [selected]="searchByActivityStatus === 'activeStatus'">
@@ -62,74 +64,9 @@
         </select>
       </div>
 
-      <!-- Sort Order Toggle -->
-      <div class="flex items-center">
-        <button
-          (click)="toggleSortOrder()"
-          class="flex items-center px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] transition-colors"
-          [title]="sortDescending ? 'Descending (Z-A)' : 'Ascending (A-Z)'"
-        >
-          <svg
-            *ngIf="!sortDescending"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 11l5-5m0 0l5 5m-5-5v12"
-            />
-          </svg>
-          <svg
-            *ngIf="sortDescending"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 13l-5 5m0 0l-5-5m5 5V6"
-            />
-          </svg>
-          <span class="ml-1 text-xs text-gray-600">{{
-            sortDescending ? "Z-A" : "A-Z"
-          }}</span>
-        </button>
-      </div>
-
-      <!-- Search Button -->
-      <button
-        (click)="onSearch()"
-        class="px-4 py-2 bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-        Search
-      </button>
-
       <!-- Clear Button -->
       <button
-        *ngIf="searchTerm"
+        *ngIf="searchTerm || searchBy !== 'globalSearch' || searchByActivityStatus !== 'global'"
         (click)="clearSearch()"
         class="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg text-sm transition-colors"
         title="Clear search"
