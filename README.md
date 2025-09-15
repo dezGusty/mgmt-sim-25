@@ -9,20 +9,18 @@ Management Simulator 2025 is a full-stack web application for simulating and man
 ## 🛠️ Technologies Used
 
 ### Frontend
-- **Framework**: Angular 20.1.0
-- **Styling**: TailwindCSS 4.1.11
-- **Real-time Communication**: SignalR 8.0.7
-- **CSV Processing**: PapaParse 5.5.3
-- **Language**: TypeScript 5.8.2
+- ![Angular](https://img.shields.io/badge/Frontend-Angular%2020.1.0-red?logo=angular)
+- ![TypeScript](https://img.shields.io/badge/Language-TypeScript%205.8.2-blue?logo=typescript)
+- ![TailwindCSS](https://img.shields.io/badge/Styling-TailwindCSS%204.1.11-38B2AC?logo=tailwindcss)
+- ![PapaParse](https://img.shields.io/badge/CSV-PapaParse%205.5.3-lightgrey)
 
 ### Backend
-- **Framework**: ASP.NET Core (.NET 9.0)
-- **ORM**: Entity Framework Core 9.0.7
-- **Database**: SQLite
-- **Authentication**: Cookie Authentication
-- **Password Encryption**: BCrypt.Net-Next 4.0.2
-- **Testing**: xUnit with NSubstitute
-
+- ![ASP.NET Core](https://img.shields.io/badge/Backend-ASP.NET%20Core%20(.NET%209.0)-green?logo=dotnet)
+- ![EF Core](https://img.shields.io/badge/ORM-Entity%20Framework%20Core%209.0.7-blueviolet)
+- ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?logo=sqlite)
+- ![Auth](https://img.shields.io/badge/Authentication-Cookie%20Authentication-orange)
+- ![BCrypt](https://img.shields.io/badge/Password%20Encryption-BCrypt.Net--Next%204.0.2-critical)
+- ![Testing](https://img.shields.io/badge/Testing-xUnit%20with%20NSubstitute-success)
 ## 🏗️ Project Architecture
 
 ### Backend - Onion/Clean Architecture
