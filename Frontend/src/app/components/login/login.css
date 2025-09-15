@@ -57,6 +57,12 @@
   }
 }
 
+@keyframes slideIn {
+  0% { transform: translateX(-105%); opacity: 0; }
+  60% { transform: translateX(10%); opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -178,4 +184,130 @@ button[type="submit"]:disabled {
 
 * {
   transition: all 0.2s ease;
+}
+
+/* Welcome sweep overlay */
+.welcome-sweep {
+  overflow: hidden;
+}
+.welcome-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(2,1,38,0.9), rgba(2,1,38,0.7), rgba(2,1,38,0.4));
+  transform: translateX(-100%);
+  animation: sweepFill 1.1s ease-in-out forwards;
+}
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: contentIn 0.7s ease-out 0.35s forwards;
+}
+.welcome-title {
+  font-weight: 800;
+  font-size: 2rem;
+  color: #ffffff;
+  text-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  margin-bottom: 4px;
+}
+.welcome-name {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #88F8BF;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+@keyframes sweepFill {
+  0% { transform: translateX(-100%); }
+  70% { transform: translateX(0%); }
+  100% { transform: translateX(0%); }
+}
+@keyframes contentIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.left-sweep {
+  z-index: 30;
+  animation: leftPanelSweep 1.1s ease-in-out forwards;
+}
+.welcome-panel-overlay {
+  background: linear-gradient(90deg, rgba(2,1,38,0.92), rgba(2,1,38,0.82), rgba(2,1,38,0.6));
+}
+@keyframes leftPanelSweep {
+  0% {
+    transform: translateX(0);
+    width: 40%;
+  }
+  60% {
+    transform: translateX(0);
+    width: 100%;
+  }
+  100% {
+    transform: translateX(0);
+    width: 100%;
+  }
+}
+
+.login-container.sweeping .right-pane {
+  width: 60%;
+  margin-left: auto;
+  transform-origin: 95% 50%;
+  animation: formScaleOut 1.1s ease-in-out forwards;
+}
+
+@keyframes formScaleOut {
+  0%   { transform: scale(1);   opacity: 1;   filter: none; }
+  60%  { transform: scale(0.9); opacity: 1;   filter: none; }
+  85%  { transform: scale(0.75); opacity: 0.9; filter: blur(2px); }
+  100% { transform: scale(0.6); opacity: 0;   filter: blur(6px); }
+}
+
+.login-container.sweeping { position: relative; }
+.login-container.sweeping .left-sweep {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 40%;
+}
+
+.login-container.sweeping .left-title,
+.login-container.sweeping .left-subtitle {
+  animation: fadeLeftTexts 0.5s ease-out forwards;
+}
+@keyframes fadeLeftTexts {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+.login-container.sweeping .login-title {
+  animation: growLoginTitle 1s ease-in-out forwards;
+}
+@keyframes growLoginTitle {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+.login-container.sweeping .left-sweep img[alt="FTD Logo"] {
+  animation: growFtd 1s ease-in-out forwards;
+}
+@keyframes growFtd {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.12); }
+}
+
+.login-container.sweeping .left-separator {
+  animation: fadeLeftTexts 0.5s ease-out forwards;
+}
+
+.login-container.sweeping .welcome-panel-overlay .welcome-content {
+  transform: translateY(200px);
+  margin-top: 80px;
+}
+
+.welcome-title {
+  margin-bottom: 5px;
 }

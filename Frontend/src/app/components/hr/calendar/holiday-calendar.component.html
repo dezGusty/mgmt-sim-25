@@ -1,0 +1,135 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  <!-- Calendar Header -->
+  <div class="p-4 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button 
+          class="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+          (click)="previousMonth()"
+          aria-label="Previous month"
+        >
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ currentMonthName }} {{ displayYear }}
+        </h2>
+        
+        <button 
+          class="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+          (click)="nextMonth()"
+          aria-label="Next month"
+        >
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+      
+      <button 
+        class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors"
+        (click)="goToToday()"
+      >
+        Today
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="p-4">
+    <!-- Week Days Header -->
+    <div class="grid grid-cols-7 gap-px mb-2">
+      <div 
+        *ngFor="let day of weekDays"
+        class="p-2 text-center text-sm font-medium text-gray-500 bg-gray-50 rounded"
+      >
+        {{ day }}
+      </div>
+    </div>
+
+    <!-- Calendar Days -->
+    <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      <div 
+        *ngFor="let day of calendarDays; trackBy: trackByDate"
+        class="min-h-[80px] bg-white p-2 cursor-pointer transition-colors relative group"
+        [class.bg-gray-50]="!day.isCurrentMonth"
+        [class.bg-blue-50]="day.isToday"
+        [class.hover:bg-gray-100]="day.isCurrentMonth"
+        (click)="onDateClick(day)"
+      >
+        <!-- Date Number -->
+        <div class="flex items-center justify-between">
+          <span 
+            class="text-sm font-medium"
+            [class.text-gray-400]="!day.isCurrentMonth"
+            [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+            [class.text-blue-600]="day.isToday"
+          >
+            {{ day.day }}
+          </span>
+          
+          <!-- Today indicator -->
+          <div 
+            *ngIf="day.isToday"
+            class="w-2 h-2 bg-blue-600 rounded-full"
+          ></div>
+        </div>
+
+        <!-- Holidays -->
+        <div class="mt-1 space-y-1">
+          <div 
+            *ngFor="let holiday of day.holidays; let i = index"
+            class="text-xs px-2 py-1 rounded-full truncate cursor-pointer transition-colors"
+            [class.bg-green-100]="holiday.isRecurring"
+            [class.text-green-800]="holiday.isRecurring"
+            [class.bg-blue-100]="!holiday.isRecurring"
+            [class.text-blue-800]="!holiday.isRecurring"
+            [class.hover:bg-green-200]="holiday.isRecurring"
+            [class.hover:bg-blue-200]="!holiday.isRecurring"
+            [title]="holiday.name + (holiday.isRecurring ? ' (Recurring)' : '')"
+            (click)="onHolidayClick(holiday, $event)"
+          >
+            {{ holiday.name }}
+          </div>
+          
+          <!-- Show "..." if there are more than 2 holidays -->
+          <div 
+            *ngIf="day.holidays.length > 2"
+            class="text-xs text-gray-500 text-center"
+            [title]="getAdditionalHolidaysTitle(day.holidays)"
+          >
+            +{{ day.holidays.length - 2 }} more
+          </div>
+        </div>
+
+        <!-- Add holiday hint on hover for empty dates -->
+        <div 
+          *ngIf="day.holidays.length === 0 && day.isCurrentMonth"
+          class="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <span class="text-xs text-gray-500">Click to add holiday</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="px-4 pb-4">
+    <div class="flex items-center justify-center space-x-6 text-sm">
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-green-100 rounded-full border border-green-300"></div>
+        <span class="text-gray-600">Recurring Holiday</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-blue-100 rounded-full border border-blue-300"></div>
+        <span class="text-gray-600">One-time Holiday</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+        <span class="text-gray-600">Today</span>
+      </div>
+    </div>
+  </div>
+</div>

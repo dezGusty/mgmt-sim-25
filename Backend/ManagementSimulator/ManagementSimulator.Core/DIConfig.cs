@@ -28,6 +28,7 @@ namespace ManagementSimulator.Core
             services.AddScoped<IResourceAuthorizationService, ResourceAuthorizationService>();
             services.AddScoped<ISecondManagerService, SecondManagerService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IPublicHolidayService, PublicHolidayService>();
             services.AddScoped<IAvailabilityService, AvailabilityService>();
 
             return services;

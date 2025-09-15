@@ -1,0 +1,98 @@
+<div class="shared-calendar" [class.compact]="compactMode">
+  <!-- Calendar Header -->
+  <div class="calendar-header">
+    <button class="nav-button" (click)="previousMonth()" type="button">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    
+    <div class="month-year-display">
+      <h3 class="month-year">{{ currentMonthYear }}</h3>
+      <button class="today-button" (click)="goToToday()" type="button">Today</button>
+    </div>
+    
+    <button class="nav-button" (click)="nextMonth()" type="button">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-grid">
+    <!-- Day Headers -->
+    <div class="day-headers" [class.with-week-numbers]="showWeekNumbers">
+      <div *ngIf="showWeekNumbers" class="week-number-header">#</div>
+      <div 
+        *ngFor="let day of weekDays" 
+        class="day-header"
+        [class.weekend-header]="day === 'Sun' || day === 'Sat'"
+      >
+        {{ compactMode ? day.charAt(0) : day }}
+      </div>
+    </div>
+
+    <!-- Calendar Days -->
+    <div class="calendar-body" [class.with-week-numbers]="showWeekNumbers">
+      <ng-container *ngFor="let day of calendarDays; let i = index; trackBy: trackByDate">
+        <!-- Week Number -->
+        <div 
+          *ngIf="showWeekNumbers && day.date.getDay() === 0" 
+          class="week-number"
+        >
+          {{ getWeekNumber(day.date) }}
+        </div>
+
+        <!-- Day Cell -->
+        <div 
+          class="day-cell"
+          [class.current-month]="day.isCurrentMonth"
+          [class.other-month]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.weekend]="day.isWeekend && highlightWeekends"
+          [class.selected]="day.isSelected"
+          [class.disabled]="day.isDisabled"
+          [class.has-holidays]="day.holidays.length > 0"
+          [class.has-events]="day.customData?.events?.length > 0"
+          [class.clickable]="!day.isDisabled"
+          (click)="onDateClick(day)"
+        >
+          <!-- Day Number -->
+          <div class="day-number">
+            {{ day.day }}
+          </div>
+
+          <!-- Holiday Indicators -->
+          <div *ngIf="day.holidays.length > 0" class="holiday-indicators">
+            <div 
+              *ngFor="let holiday of day.holidays" 
+              class="holiday-indicator"
+              [title]="holiday.name"
+              (click)="onHolidayClick(holiday, $event)"
+            >
+              <span class="holiday-icon">🏛️</span>
+              <span *ngIf="showHolidayNames && !compactMode" class="holiday-name">
+                {{ holiday.name }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Event Indicators -->
+          <div *ngIf="day.customData?.events?.length > 0" class="event-indicators">
+            <div 
+              *ngFor="let event of day.customData.events" 
+              class="event-indicator"
+              [style.background-color]="event.color || '#3B82F6'"
+              [title]="event.title"
+              (click)="onEventClick(event, $event)"
+            >
+              <span *ngIf="!compactMode" class="event-title">{{ event.title }}</span>
+              <span *ngIf="compactMode" class="event-dot"></span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

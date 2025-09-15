@@ -19,11 +19,14 @@ namespace ManagementSimulator.Database.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
-
-            if (AppConfig.ConsoleLogQueries)
+            if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.LogTo(Console.WriteLine);
+                optionsBuilder.UseSqlite(AppConfig.ConnectionStrings?.MGMTSimulatorDb);
+
+                if (AppConfig.ConsoleLogQueries)
+                {
+                    optionsBuilder.LogTo(Console.WriteLine);
+                }
             }
         }
 
@@ -151,6 +154,13 @@ namespace ManagementSimulator.Database.Context
                 .HasIndex(p => p.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<PublicHoliday>()
+                .Property(ph => ph.Name)
+                .HasMaxLength(100);
+            modelBuilder.Entity<PublicHoliday>()
+                .HasIndex(ph => new { ph.Name, ph.Date })
+                .IsUnique();
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -165,5 +175,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<SecondManager> SecondManagers { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
+        public DbSet<PublicHoliday> PublicHolidays { get; set; }
     }
 }

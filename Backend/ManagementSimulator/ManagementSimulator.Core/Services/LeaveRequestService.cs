@@ -20,18 +20,21 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
         private readonly IEmployeeManagerService _employeeManagerService;
         private readonly IEmailService _emailService;
+        private readonly IPublicHolidayService _publicHolidayService;
 
         public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository,
                                    IUserRepository userRepository,
                                    ILeaveRequestTypeRepository leaveRequestTypeRepository,
                                    IEmployeeManagerService employeeManagerService,
-                                   IEmailService emailService)
+                                   IEmailService emailService,
+                                   IPublicHolidayService publicHolidayService)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _userRepository = userRepository;
             _leaveRequestTypeRepository = leaveRequestTypeRepository;
             _employeeManagerService = employeeManagerService;
             _emailService = emailService;
+            _publicHolidayService = publicHolidayService;
         }
 
         public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
@@ -62,7 +65,7 @@ namespace ManagementSimulator.Core.Services
 
             if (leaveRequestType.MaxDays.HasValue)
             {
-                var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
+                var requestedDays = await CalculateLeaveDays(dto.StartDate, dto.EndDate);
                 var currentYear = DateTime.Now.Year;
                 var remainingDaysInfo = await GetRemainingLeaveDaysAsync(dto.UserId, dto.LeaveRequestTypeId, currentYear);
 
@@ -121,7 +124,7 @@ namespace ManagementSimulator.Core.Services
 
             if (leaveRequestType.MaxDays.HasValue)
             {
-                var requestedDays = CalculateLeaveDays(dto.StartDate, dto.EndDate);
+                var requestedDays = await CalculateLeaveDays(dto.StartDate, dto.EndDate);
                 var currentYear = DateTime.Now.Year;
                 var remainingDaysInfo = await GetRemainingLeaveDaysAsync(userId, dto.LeaveRequestTypeId, currentYear);
 
@@ -175,9 +178,9 @@ namespace ManagementSimulator.Core.Services
         {
             var employeeIds = new List<int> { userId };
             var (items, totalCount) = await _leaveRequestRepository.GetFilteredLeaveRequestsAsync(status ?? "ALL", pageSize, pageNumber, employeeIds);
-            
+
             var dtos = items.Select(r => r.ToLeaveRequestResponseDto()).ToList();
-            
+
             return (dtos, totalCount);
         }
 
@@ -370,7 +373,7 @@ namespace ManagementSimulator.Core.Services
 
             foreach (var request in leaveRequests)
             {
-                var requestDays = CalculateLeaveDays(request.StartDate, request.EndDate);
+                var requestDays = await CalculateLeaveDays(request.StartDate, request.EndDate);
                 daysUsed += requestDays;
 
                 usedLeaveRequests.Add(new LeaveRequestSummaryDto
@@ -428,7 +431,7 @@ namespace ManagementSimulator.Core.Services
 
             foreach (var request in existingLeaveRequests)
             {
-                var requestDays = CalculateLeaveDays(request.StartDate, request.EndDate);
+                var requestDays = await CalculateLeaveDays(request.StartDate, request.EndDate);
                 daysUsed += requestDays;
 
                 usedLeaveRequests.Add(new LeaveRequestSummaryDto
@@ -441,7 +444,7 @@ namespace ManagementSimulator.Core.Services
                 });
             }
 
-            var requestedDays = CalculateLeaveDays(startDate, endDate);
+            var requestedDays = await CalculateLeaveDays(startDate, endDate);
 
             int? remainingDays = null;
             int? maxDaysAllowedForUser = leaveRequestType.Title == "Vacation" ? user.Vacation : leaveRequestType.MaxDays;
@@ -465,14 +468,21 @@ namespace ManagementSimulator.Core.Services
             };
         }
 
-        private int CalculateLeaveDays(DateTime startDate, DateTime endDate)
+        private async Task<int> CalculateLeaveDays(DateTime startDate, DateTime endDate)
         {
             int workingDays = 0;
             DateTime currentDate = startDate;
 
+            // Get public holidays in the date range
+            var publicHolidays = await _publicHolidayService.GetHolidaysInRangeAsync(startDate, endDate);
+            var holidayDates = publicHolidays.Select(h => h.Date.Date).ToHashSet();
+
             while (currentDate <= endDate)
             {
-                if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                // Exclude weekends and public holidays
+                if (currentDate.DayOfWeek != DayOfWeek.Saturday &&
+                    currentDate.DayOfWeek != DayOfWeek.Sunday &&
+                    !holidayDates.Contains(currentDate.Date))
                 {
                     workingDays++;
                 }
@@ -505,7 +515,7 @@ namespace ManagementSimulator.Core.Services
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(leaveRequest.LeaveRequestTypeId);
             if (leaveRequestType == null) return;
 
-            var numberOfDays = CalculateLeaveDays(leaveRequest.StartDate, leaveRequest.EndDate);
+            var numberOfDays = await CalculateLeaveDays(leaveRequest.StartDate, leaveRequest.EndDate);
 
             foreach (var manager in managers)
             {
@@ -539,7 +549,7 @@ namespace ManagementSimulator.Core.Services
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(leaveRequest.LeaveRequestTypeId);
             if (leaveRequestType == null) return;
 
-            var numberOfDays = CalculateLeaveDays(leaveRequest.StartDate, leaveRequest.EndDate);
+            var numberOfDays = await CalculateLeaveDays(leaveRequest.StartDate, leaveRequest.EndDate);
 
             if (reviewDto.RequestStatus == RequestStatus.Approved)
             {

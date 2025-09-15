@@ -35,7 +35,10 @@ export class ProjectDetails implements OnInit, OnDestroy {
   
   // View modes
   viewMode: 'cards' | 'table' = 'table';
-  activeTab: 'view' | 'edit' | 'assign' = 'view';
+  activeTab: 'view' | 'edit' | 'assign' | 'statistics' = 'view';
+  
+  // Statistics subtabs
+  activeStatisticsSubTab: 'kanban' | 'bugs' | 'activity' | 'overview' = 'kanban';
   
   // Edit state
   showEditForm = false;
@@ -81,6 +84,145 @@ export class ProjectDetails implements OnInit, OnDestroy {
   pendingAssignments: IPendingAssignment[] = [];
   pendingRemovals: IPendingRemoval[] = [];
   selectedAllocation: { [userId: number]: number } = {};
+
+  // Statistics mock data
+  mockStatistics = {
+    tasks: {
+      todo: [
+        {
+          id: 1,
+          title: 'Implement user authentication',
+          assignee: 'John Doe',
+          priority: 'High',
+          estimatedHours: 16,
+          type: 'Feature'
+        },
+        {
+          id: 2,
+          title: 'Design database schema',
+          assignee: 'Jane Smith',
+          priority: 'Medium',
+          estimatedHours: 8,
+          type: 'Task'
+        },
+        {
+          id: 3,
+          title: 'Set up CI/CD pipeline',
+          assignee: 'Mike Johnson',
+          priority: 'High',
+          estimatedHours: 12,
+          type: 'DevOps'
+        }
+      ],
+      inProgress: [
+        {
+          id: 4,
+          title: 'Create responsive UI components',
+          assignee: 'Sarah Wilson',
+          priority: 'Medium',
+          estimatedHours: 20,
+          type: 'Feature'
+        },
+        {
+          id: 5,
+          title: 'Optimize database queries',
+          assignee: 'Tom Brown',
+          priority: 'Low',
+          estimatedHours: 6,
+          type: 'Optimization'
+        }
+      ],
+      done: [
+        {
+          id: 6,
+          title: 'Project setup and configuration',
+          assignee: 'John Doe',
+          priority: 'High',
+          estimatedHours: 4,
+          type: 'Setup'
+        },
+        {
+          id: 7,
+          title: 'Initial wireframes',
+          assignee: 'Jane Smith',
+          priority: 'Medium',
+          estimatedHours: 10,
+          type: 'Design'
+        },
+        {
+          id: 8,
+          title: 'Code review guidelines',
+          assignee: 'Mike Johnson',
+          priority: 'Low',
+          estimatedHours: 2,
+          type: 'Documentation'
+        }
+      ]
+    },
+    bugs: [
+      {
+        id: 101,
+        title: 'Login form validation not working',
+        reporter: 'QA Team',
+        assignee: 'John Doe',
+        severity: 'Critical',
+        status: 'Open'
+      },
+      {
+        id: 102,
+        title: 'Mobile navigation menu overlapping',
+        reporter: 'Sarah Wilson',
+        assignee: 'Sarah Wilson',
+        severity: 'Medium',
+        status: 'In Progress'
+      },
+      {
+        id: 103,
+        title: 'Performance issue on large datasets',
+        reporter: 'Tom Brown',
+        assignee: 'Tom Brown',
+        severity: 'High',
+        status: 'Fixed'
+      }
+    ],
+    employeeActivity: [
+      {
+        name: 'John Doe',
+        tasksCompleted: 8,
+        tasksInProgress: 2,
+        hoursThisWeek: 38,
+        efficiency: 95
+      },
+      {
+        name: 'Jane Smith',
+        tasksCompleted: 6,
+        tasksInProgress: 1,
+        hoursThisWeek: 32,
+        efficiency: 87
+      },
+      {
+        name: 'Sarah Wilson',
+        tasksCompleted: 5,
+        tasksInProgress: 3,
+        hoursThisWeek: 40,
+        efficiency: 92
+      },
+      {
+        name: 'Mike Johnson',
+        tasksCompleted: 4,
+        tasksInProgress: 2,
+        hoursThisWeek: 35,
+        efficiency: 89
+      },
+      {
+        name: 'Tom Brown',
+        tasksCompleted: 3,
+        tasksInProgress: 1,
+        hoursThisWeek: 28,
+        efficiency: 78
+      }
+    ]
+  };
 
   // Math reference for template
   Math = Math;
@@ -318,7 +460,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
     this.viewMode = mode;
   }
 
-  setActiveTab(tab: 'view' | 'edit' | 'assign') {
+  setActiveTab(tab: 'view' | 'edit' | 'assign' | 'statistics') {
     // Prevent switching to assign tab if project would be inactive
     if (tab === 'assign' && !this.canAssign) {
       return;
@@ -341,6 +483,10 @@ export class ProjectDetails implements OnInit, OnDestroy {
       this.resetAssignmentState();
       this.loadAvailableUsers();
     }
+  }
+
+  setActiveStatisticsSubTab(subTab: 'kanban' | 'bugs' | 'activity' | 'overview') {
+    this.activeStatisticsSubTab = subTab;
   }
 
   // Edit functionality
@@ -950,5 +1096,13 @@ export class ProjectDetails implements OnInit, OnDestroy {
     if (!this.project || this.editBudgetedFTEs === 0) return 0;
     const currentAssignedFTEs = this.getCurrentAssignedFTEs();
     return Math.min(100, parseFloat(((currentAssignedFTEs / this.editBudgetedFTEs) * 100).toFixed(1)));
+  }
+
+  getCurrentDateString(): string {
+    return new Date().toLocaleDateString();
+  }
+
+  getEmployeeInitials(name: string): string {
+    return name.split(' ').map(n => n[0]).join('');
   }
 }

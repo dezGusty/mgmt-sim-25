@@ -1,11 +1,21 @@
 <div class="min-h-screen bg-gradient-to-br from-[#88F8BF] via-[#7EE3DB] to-[#5FB3D4] flex items-center justify-center relative overflow-hidden">
+  <animated-background theme="login"></animated-background>
 
   <!-- Principal container -->
-  <div class="w-full max-w-5xl flex flex-col lg:flex-row rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md bg-white/10 border border-white/20">
+  <div class="w-full max-w-5xl flex flex-col lg:flex-row rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md bg-white/10 border border-white/20 relative z-10 login-container"
+       [class.sweeping]="welcomeAnimate">
 
     <!-- Left Section - Company Logo -->
     <div
-      class="w-full lg:w-2/5 bg-gradient-to-br from-[#020126] to-[#1a1a3e] text-white p-12 flex flex-col justify-center items-center relative overflow-hidden">
+      class="w-full lg:w-2/5 bg-gradient-to-br from-[#020126] to-[#1a1a3e] text-white p-12 flex flex-col justify-center items-center relative overflow-hidden"
+      [class.left-sweep]="welcomeAnimate">
+      <!-- Welcome text while sweeping -->
+      <div *ngIf="welcomeAnimate" class="welcome-panel-overlay absolute inset-0 flex items-center justify-center">
+        <div class="welcome-content text-center">
+          <h3 class="welcome-title">Welcome</h3>
+          <p class="welcome-name">{{ welcomeName }}</p>
+        </div>
+      </div>
       <!-- Background patterns with animations -->
       <div class="absolute top-0 left-0 w-full h-full opacity-15">
         <div class="absolute top-8 left-8 w-24 h-24 rounded-full bg-[#7EE3DB] animate-pulse-slow"></div>
@@ -23,14 +33,14 @@
             <img src="/FTD.png" alt="FTD Logo" class="relative w-40 h-40 mx-auto object-contain filter drop-shadow-2xl brightness-110 contrast-110">
           </div>
         </div>
-        <div class="h-1 w-16 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] mx-auto mb-6 rounded-full"></div>
-        <h2 class="text-2xl font-light mb-8 tracking-wide">Management App</h2>
-        <p class="text-gray-300 text-sm font-light">Organize projects and manage time off</p>
+        <div class="h-1 w-16 bg-gradient-to-r from-[#7EE3DB] to-[#88F8BF] mx-auto mb-6 rounded-full left-separator"></div>
+        <h2 class="text-2xl font-light mb-8 tracking-wide left-title">Management App</h2>
+        <p class="text-gray-300 text-sm font-light left-subtitle">Organize projects and manage time off</p>
       </div>
     </div>
 
     <!-- Right Section - Login Form -->
-    <div class="w-full lg:w-3/5 backdrop-blur-md bg-white/20 p-8 md:p-12 border-l border-white/30">
+    <div class="w-full lg:w-3/5 backdrop-blur-md bg-white/20 p-8 md:p-12 border-l border-white/30 right-pane">
       <div class="max-w-md mx-auto">
         <!-- Error message display -->
         <div *ngIf="errorMessage" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded-lg bg-red-50 border border-red-200 animate-in fade-in duration-300 shadow-xl max-w-md w-full mx-4">
@@ -38,7 +48,7 @@
         </div>
         
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-800 drop-shadow-lg mb-2">Login</h1>
+          <h1 class="text-3xl font-bold text-gray-800 drop-shadow-lg mb-2 login-title">Login</h1>
           <p class="text-gray-700 drop-shadow-md">Access your account</p>
         </div>
 

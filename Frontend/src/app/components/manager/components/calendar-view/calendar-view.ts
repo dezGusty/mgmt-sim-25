@@ -15,6 +15,7 @@ import { RequestUtils } from '../../../../utils/request.utils';
 import { ColorUtils } from '../../../../utils/color.utils';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { RequestDetail } from '../request-detail/request-detail';
+import { PublicHolidaysService, PublicHoliday } from '../../../../services/public-holidays/public-holidays.service';
 
 @Component({
   selector: 'app-calendar-view',
@@ -51,7 +52,7 @@ export class CalendarView implements OnInit, OnChanges {
   monthHeaders: { month: string; year: number; daysInMonth: number }[] = [];
   tableData: {
     employee: string;
-    dates: { date: Date; hasLeave: boolean; requests: ILeaveRequest[] }[];
+    dates: { date: Date; hasLeave: boolean; requests: ILeaveRequest[]; isHoliday?: boolean; holidayName?: string }[];
   }[] = [];
 
   displayMonths = 3;
@@ -62,7 +63,13 @@ export class CalendarView implements OnInit, OnChanges {
   legendItems: { title: string; color: string }[] = [];
   isFullscreen = false;
 
-  constructor(private leaveRequests: LeaveRequests) {}
+  // Public holidays
+  publicHolidays: PublicHoliday[] = [];
+
+  constructor(
+    private leaveRequests: LeaveRequests,
+    private publicHolidaysService: PublicHolidaysService
+  ) {}
 
   ngOnInit() {
     this.employeeSearchSubject.pipe(
@@ -77,6 +84,7 @@ export class CalendarView implements OnInit, OnChanges {
       }
     });
     this.fetchRequestsByManager('');
+    this.loadPublicHolidays();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -99,6 +107,12 @@ export class CalendarView implements OnInit, OnChanges {
       title: type,
       color: ColorUtils.generateColorForLeaveType(type),
     }));
+
+    // Add holiday legend item
+    this.legendItems.push({
+      title: 'Public Holiday',
+      color: '#fee2e2' // Light red background for holidays
+    });
 
     console.log('Legend items created:', this.legendItems);
   }
@@ -132,15 +146,20 @@ export class CalendarView implements OnInit, OnChanges {
     this.updateLegend();
     this.tableData = this.filteredEmployees.map((employee: string) => ({
       employee,
-      dates: this.calendarDates.map((date) => ({
-        date,
-        hasLeave: this.hasLeaveOnDate(employee, date, filteredRequests),
-        requests: this.getRequestsForEmployeeAndDate(
-          employee,
+      dates: this.calendarDates.map((date) => {
+        const holiday = this.publicHolidaysService.getHolidayForDate(date, this.publicHolidays);
+        return {
           date,
-          filteredRequests
-        ),
-      })),
+          hasLeave: this.hasLeaveOnDate(employee, date, filteredRequests),
+          requests: this.getRequestsForEmployeeAndDate(
+            employee,
+            date,
+            filteredRequests
+          ),
+          isHoliday: holiday !== null,
+          holidayName: holiday?.name
+        };
+      }),
     }));
   }
 
@@ -192,6 +211,21 @@ export class CalendarView implements OnInit, OnChanges {
       default:
         return 'Pending';
     }
+  }
+
+  loadPublicHolidays() {
+    // Get holidays for the current year and next year to cover the date range
+    const currentYear = new Date().getFullYear();
+    this.publicHolidaysService.getPublicHolidaysForYears([currentYear, currentYear + 1])
+      .subscribe({
+        next: (holidays) => {
+          this.publicHolidays = holidays;
+          this.generateTableData(); // Regenerate table data with holiday information
+        },
+        error: (error) => {
+          console.error('Error loading public holidays:', error);
+        }
+      });
   }
 
   generateCalendarDates() {
@@ -424,5 +458,19 @@ export class CalendarView implements OnInit, OnChanges {
         req.employeeName === employee &&
         this.isDateInRange(date, new Date(req.from), new Date(req.to))
     );
+  }
+
+  getDateTitle(dateData: any): string {
+    const titles: string[] = [];
+    
+    if (dateData.isHoliday) {
+      titles.push(`Public Holiday: ${dateData.holidayName}`);
+    }
+    
+    if (dateData.hasLeave && dateData.requests.length > 0) {
+      titles.push(dateData.requests[0].reason || 'Leave Request');
+    }
+    
+    return titles.join(' | ') || '';
   }
 }

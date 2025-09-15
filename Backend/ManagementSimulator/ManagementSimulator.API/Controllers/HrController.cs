@@ -1,4 +1,5 @@
 using ManagementSimulator.Core.Dtos.Requests.Users;
+using ManagementSimulator.Core.Dtos.Requests.PublicHolidays;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
 using ManagementSimulator.Core.Services.Interfaces;
@@ -14,11 +15,13 @@ namespace ManagementSimulator.API.Controllers
     public class HrController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IPublicHolidayService _publicHolidayService;
         private readonly ILogger<HrController> _logger;
 
-        public HrController(IUserService userService, ILogger<HrController> logger)
+        public HrController(IUserService userService, IPublicHolidayService publicHolidayService, ILogger<HrController> logger)
         {
             _userService = userService;
+            _publicHolidayService = publicHolidayService;
             _logger = logger;
         }
 
@@ -188,6 +191,257 @@ namespace ManagementSimulator.API.Controllers
                 return StatusCode(500, new
                 {
                     Message = "An error occurred while adjusting vacation days.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        // Public Holidays Endpoints
+
+        [HttpGet("public-holidays")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetPublicHolidaysAsync([FromQuery] int? year = null)
+        {
+            try
+            {
+                var currentYear = year ?? DateTime.Now.Year;
+                var holidays = await _publicHolidayService.GetHolidaysByYearAsync(currentYear);
+
+                return Ok(new
+                {
+                    Message = "Public holidays retrieved successfully.",
+                    Data = holidays,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving public holidays for year {Year}", year);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while retrieving public holidays.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPost("public-holidays")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreatePublicHolidayAsync([FromBody] CreatePublicHolidayRequestDto request)
+        {
+            try
+            {
+                var holiday = await _publicHolidayService.CreateHolidayAsync(request);
+
+                return Created($"/api/hr/public-holidays/{holiday.Id}", new
+                {
+                    Message = "Public holiday created successfully.",
+                    Data = holiday,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (UniqueConstraintViolationException)
+            {
+                return Conflict(new
+                {
+                    Message = "A public holiday with this name and date already exists.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while creating public holiday");
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while creating the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpGet("public-holidays/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetPublicHolidayByIdAsync(int id)
+        {
+            try
+            {
+                var holiday = await _publicHolidayService.GetHolidayByIdAsync(id);
+
+                return Ok(new
+                {
+                    Message = "Public holiday retrieved successfully.",
+                    Data = holiday,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"Public holiday with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving public holiday {HolidayId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while retrieving the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPut("public-holidays/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdatePublicHolidayAsync(int id, [FromBody] UpdatePublicHolidayRequestDto request)
+        {
+            try
+            {
+                var holiday = await _publicHolidayService.UpdateHolidayAsync(id, request);
+
+                return Ok(new
+                {
+                    Message = "Public holiday updated successfully.",
+                    Data = holiday,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"Public holiday with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (UniqueConstraintViolationException)
+            {
+                return Conflict(new
+                {
+                    Message = "A public holiday with this name and date already exists.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating public holiday {HolidayId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while updating the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpDelete("public-holidays/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeletePublicHolidayAsync(int id)
+        {
+            try
+            {
+                var result = await _publicHolidayService.DeleteHolidayAsync(id);
+
+                return Ok(new
+                {
+                    Message = "Public holiday deleted successfully.",
+                    Data = new { Id = id, Deleted = result },
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"Public holiday with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting public holiday {HolidayId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while deleting the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpDelete("public-holidays/{id}/hard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> HardDeletePublicHolidayAsync(int id)
+        {
+            try
+            {
+                var result = await _publicHolidayService.HardDeleteHolidayAsync(id);
+
+                return Ok(new
+                {
+                    Message = "Public holiday permanently deleted successfully.",
+                    Data = new { Id = id, Deleted = result },
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (EntryNotFoundException)
+            {
+                return NotFound(new
+                {
+                    Message = $"Public holiday with ID {id} not found.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while hard deleting public holiday {HolidayId}", id);
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while permanently deleting the public holiday.",
                     Data = (object?)null,
                     Success = false,
                     Timestamp = DateTime.UtcNow

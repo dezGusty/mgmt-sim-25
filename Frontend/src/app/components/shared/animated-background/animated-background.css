@@ -1,0 +1,278 @@
+.bg-container {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.gradient-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background: radial-gradient(1200px 800px at 10% 10%, rgba(255, 255, 255, 0.06), transparent 60%),
+		radial-gradient(900px 700px at 80% 20%, rgba(255, 255, 255, 0.04), transparent 60%),
+		radial-gradient(1000px 800px at 30% 80%, rgba(255, 255, 255, 0.04), transparent 60%);
+	animation: overlayFade 8s ease-in-out infinite;
+}
+
+/* Diffuse glows */
+.glows {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.glow {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 820px;
+	height: 820px;
+	transform: translate(-50%, -50%);
+	border-radius: 50%;
+	filter: blur(110px);
+	opacity: 1;
+	/* fallback then stronger additive blend where supported */
+	mix-blend-mode: screen;
+	mix-blend-mode: plus-lighter;
+}
+
+.glow::before {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 300px;
+	height: 300px;
+	border-radius: 50%;
+	filter: blur(32px);
+	opacity: 0.95;
+	animation: corePulse 6s ease-in-out infinite;
+}
+
+.g1 {
+	background: radial-gradient(circle, rgba(34, 211, 238, 0.95), rgba(34, 211, 238, 0.0) 55%);
+	left: 50%;
+	top: 50%;
+	animation: orbit1 9s ease-in-out infinite;
+	animation-delay: 0s;
+	animation-fill-mode: both;
+}
+
+.g2 {
+	background: radial-gradient(circle, rgba(196, 55, 218), rgba(232, 121, 249, 0.0) 55%);
+	left: 50%;
+	top: 50%;
+	animation: orbit2 11s ease-in-out infinite;
+	animation-delay: 0.6s;
+	animation-fill-mode: both;
+}
+
+.g3 {
+	background: radial-gradient(circle, rgba(251, 191, 36, 0.95), rgba(251, 191, 36, 0.0) 55%);
+	left: 50%;
+	top: 50%;
+	animation: orbit3 13s ease-in-out infinite;
+	animation-delay: 1.2s;
+	animation-fill-mode: both;
+}
+
+.g4 {
+	background: radial-gradient(circle, rgba(0, 255, 98, 0.95), rgba(52, 211, 153, 0.0) 55%);
+	left: 50%;
+	top: 50%;
+	animation: orbit4 12s ease-in-out infinite;
+	animation-delay: 0.9s;
+	animation-fill-mode: both;
+}
+
+.g1::before {
+	background: radial-gradient(circle, rgb(8, 142, 219), rgba(34, 211, 238, 0) 70%);
+	animation-delay: 0s;
+}
+
+.g2::before {
+	background: radial-gradient(circle, rgb(196, 55, 218), rgba(232, 121, 249, 0) 70%);
+	animation-delay: 1.2s;
+}
+
+.g3::before {
+	background: radial-gradient(circle, rgba(251, 191, 36, 1), rgba(251, 191, 36, 0) 70%);
+	animation-delay: 2.4s;
+}
+
+.g4::before {
+	background: radial-gradient(circle, rgba(52, 211, 153, 1), rgba(52, 211, 153, 0) 70%);
+	animation-delay: 0.9s;
+}
+
+/* Login theme overrides */
+.bg-container[data-theme="login"] .g1 {
+	background: radial-gradient(circle, rgba(136, 248, 191, 0.95), rgba(136, 248, 191, 0.0) 55%);
+}
+
+.bg-container[data-theme="login"] .g1::before {
+	background: radial-gradient(circle, rgb(136, 248, 191), rgba(136, 248, 191, 0) 70%);
+}
+
+.bg-container[data-theme="login"] .g2 {
+	background: radial-gradient(circle, rgba(2, 6, 53, 0.95), rgba(126, 227, 219, 0.0) 55%);
+}
+
+.bg-container[data-theme="login"] .g2::before {
+	background: radial-gradient(circle, rgb(2, 6, 53, 0.95), rgba(126, 227, 219, 0) 70%);
+}
+
+.bg-container[data-theme="login"] .g3 {
+	background: radial-gradient(circle, rgba(3, 51, 114, 0.95), rgba(95, 179, 212, 0.0) 55%);
+}
+
+.bg-container[data-theme="login"] .g3::before {
+	background: radial-gradient(circle, rgb(3, 51, 114, 0.95), rgba(95, 179, 212, 0) 70%);
+}
+
+.bg-container[data-theme="login"] .g4 {
+	background: radial-gradient(circle, rgba(38, 166, 154, 0.95), rgba(38, 166, 154, 0.0) 55%);
+}
+
+.bg-container[data-theme="login"] .g4::before {
+	background: radial-gradient(circle, rgb(38, 166, 154), rgba(38, 166, 154, 0) 70%);
+}
+
+@keyframes glowDrift {
+	0% {
+		transform: translate(-50%, -50%) translate(0, 0) scale(1);
+	}
+
+	25% {
+		transform: translate(-50%, -50%) translate(20px, -10px) scale(1.05);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translate(-12px, 14px) scale(0.98);
+	}
+
+	75% {
+		transform: translate(-50%, -50%) translate(-18px, -12px) scale(1.02);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) translate(0, 0) scale(1);
+	}
+}
+
+@keyframes corePulse {
+
+	0%,
+	100% {
+		opacity: 0.85;
+		transform: translate(-50%, -50%) scale(0.98);
+	}
+
+	50% {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1.05);
+	}
+}
+
+@keyframes overlayFade {
+
+	0%,
+	100% {
+		opacity: 0.55;
+	}
+
+	50% {
+		opacity: 1;
+	}
+}
+
+@keyframes orbit1 {
+	0% {
+		transform: translate(-50%, -50%) translate(260px, 0px) scale(1.00);
+	}
+
+	25% {
+		transform: translate(-50%, -50%) translate(0px, 260px) scale(1.04);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translate(-260px, 0px) scale(0.98);
+	}
+
+	75% {
+		transform: translate(-50%, -50%) translate(0px, -260px) scale(1.02);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) translate(260px, 0px) scale(1.00);
+	}
+}
+
+@keyframes orbit2 {
+	0% {
+		transform: translate(-50%, -50%) translate(-220px, -50px) scale(1.00);
+	}
+
+	25% {
+		transform: translate(-50%, -50%) translate(-50px, 220px) scale(1.03);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translate(220px, 50px) scale(0.99);
+	}
+
+	75% {
+		transform: translate(-50%, -50%) translate(50px, -220px) scale(1.02);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) translate(-220px, -50px) scale(1.00);
+	}
+}
+
+@keyframes orbit3 {
+	0% {
+		transform: translate(-50%, -50%) translate(180px, -260px) scale(1.00);
+	}
+
+	25% {
+		transform: translate(-50%, -50%) translate(-180px, -100px) scale(1.04);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translate(-100px, 260px) scale(0.98);
+	}
+
+	75% {
+		transform: translate(-50%, -50%) translate(260px, 100px) scale(1.02);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) translate(180px, -260px) scale(1.00);
+	}
+}
+
+@keyframes orbit4 {
+	0% {
+		transform: translate(-50%, -50%) translate(-240px, 140px) scale(1.00);
+	}
+
+	25% {
+		transform: translate(-50%, -50%) translate(-140px, -240px) scale(1.03);
+	}
+
+	50% {
+		transform: translate(-50%, -50%) translate(240px, -140px) scale(0.99);
+	}
+
+	75% {
+		transform: translate(-50%, -50%) translate(140px, 240px) scale(1.02);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) translate(-240px, 140px) scale(1.00);
+	}
+}
