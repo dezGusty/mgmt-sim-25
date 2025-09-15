@@ -126,7 +126,7 @@ Backend/ManagementSimulator/
 <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
 ```
 
-### ⚙️ ManagementSimulator.Infrastructure (Cross-cutting Concerns)
+### ⚙️ ManagementSimulator.Infrastructure
 
 **Responsibilities**: Configuration, middleware, exceptions, utilities
 
@@ -256,11 +256,6 @@ dotnet test ManagementSimulator.Tests
 - **Session Duration**: 12 hours with sliding expiration
 - **Security**: HttpOnly, Secure, SameSite=None for CORS
 
-### JWT Bearer (Optional)
-- **Secondary**: JWT tokens for API access
-- **Claims**: User ID, roles, permissions
-- **Expiration**: Configurable token lifetime
-
 ### Role-Based Authorization
 - **Admin**: Full system access
 - **Manager**: Team and project management
@@ -314,11 +309,6 @@ dotnet test ManagementSimulator.Tests
 }
 ```
 
-### Environment Variables
-- `ASPNETCORE_ENVIRONMENT` - Development/Production
-- `ASPNETCORE_URLS` - Binding URLs
-- `ConnectionStrings__MGMTSimulatorDb` - Database connection
-
 ## 🧪 Testing Strategy
 
 ### Unit Tests
@@ -335,52 +325,15 @@ dotnet test ManagementSimulator.Tests
 
 ### Test Tools
 - **xUnit**: Test framework
-- **Moq**: Mocking framework
+- **NSubstitute**: Mocking framework
 - **EF Core InMemory**: Database testing
 - **FluentAssertions**: Assertion library
-
-## 📊 Performance Features
-
-### Caching
-- **Memory Cache**: Frequently accessed data
-- **Query Optimization**: EF Core query tuning
-- **Pagination**: Large dataset handling
-
-### Database Optimization
-- **Indexes**: Strategic index placement
-- **Lazy Loading**: On-demand data loading
-- **Connection Pooling**: Efficient connection management
-
-## 🔍 Monitoring & Logging
-
-### Logging
-- **Structured Logging**: JSON-formatted logs
-- **Log Levels**: Information, Warning, Error
-- **Request Logging**: HTTP request/response tracking
-
-### Error Handling
-- **Global Exception Handling**: Centralized error processing
-- **Custom Exceptions**: Domain-specific error types
-- **Error Responses**: Consistent error format
 
 ## 🚀 Deployment
 
 ### Development
 ```bash
 dotnet run --project ManagementSimulator.API
-```
-
-### Production
-```bash
-dotnet publish -c Release -o ./publish
-dotnet ManagementSimulator.API.dll
-```
-
-### Docker (Optional)
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
-COPY publish/ .
-ENTRYPOINT ["dotnet", "ManagementSimulator.API.dll"]
 ```
 
 ## 🤝 Contributing
