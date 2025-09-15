@@ -221,7 +221,7 @@
               *ngFor="let dateData of employeeData.dates"
               class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
               [ngClass]="{
-                'hover:bg-gray-100': !dateData.hasLeave,
+                'hover:bg-gray-100': !dateData.hasLeave && !dateData.isHoliday,
                 'cursor-pointer':
                   dateData.hasLeave && dateData.requests.length > 0,
                 'cursor-default':
@@ -233,11 +233,17 @@
                 'opacity-100 ring-2 ring-gray-400':
                   dateData.hasLeave &&
                   dateData.requests.length > 0 &&
-                  isDateInHoveredRequest(dateData.date, employeeData.employee)
+                  isDateInHoveredRequest(dateData.date, employeeData.employee),
+                'bg-red-100 border-red-200': dateData.isHoliday && !dateData.hasLeave,
+                'bg-red-200 border-red-300': dateData.isHoliday && dateData.hasLeave
               }"
               [style.background-color]="
-                dateData.hasLeave && dateData.requests.length > 0
+                dateData.hasLeave && dateData.requests.length > 0 && !dateData.isHoliday
                   ? getLeaveTypeColor(dateData.requests[0])
+                  : dateData.isHoliday && dateData.hasLeave
+                  ? '#fecaca'
+                  : dateData.isHoliday
+                  ? '#fee2e2'
                   : ''
               "
               (click)="onCellClick(employeeData.employee, dateData.date)"
@@ -247,17 +253,29 @@
                   : null
               "
               (mouseleave)="onRequestLeave()"
-              [title]="
-                dateData.hasLeave && dateData.requests.length > 0
-                  ? dateData.requests[0].reason || 'Concediu'
-                  : ''
-              "
+              [title]="getDateTitle(dateData)"
             >
+              <!-- Holiday indicator -->
+              <span
+                *ngIf="dateData.isHoliday && (!dateData.hasLeave || dateData.requests.length === 0)"
+                class="text-red-600 font-bold text-lg"
+                title="Public Holiday: {{ dateData.holidayName }}"
+              >
+                🏛️
+              </span>
+              <!-- Leave indicator -->
               <span
                 *ngIf="dateData.hasLeave && dateData.requests.length > 0"
                 class="text-lg font-bold text-white text-shadow"
               >
                 {{ getStatusIcon(dateData.requests[0].status || 'pending') }}
+              </span>
+              <!-- Holiday + Leave indicator -->
+              <span
+                *ngIf="dateData.isHoliday && dateData.hasLeave && dateData.requests.length > 0"
+                class="text-xs font-bold text-red-800"
+              >
+                🏛️
               </span>
             </td>
           </tr>

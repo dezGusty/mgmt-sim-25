@@ -182,5 +182,21 @@ namespace ManagementSimulator.Core.Services
                 TotalPages = (int)Math.Ceiling((double)holidays.Count / pageSize)
             };
         }
+
+        public async Task<List<PublicHolidayResponseDto>> GetHolidaysInRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            var holidays = await _repository.GetHolidaysInRangeAsync(startDate, endDate);
+
+            return holidays.Select(h => new PublicHolidayResponseDto
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Date = h.Date,
+                IsRecurring = h.IsRecurring,
+                CreatedAt = h.CreatedAt,
+                ModifiedAt = h.ModifiedAt,
+                DeletedAt = h.DeletedAt
+            }).ToList();
+        }
     }
 }

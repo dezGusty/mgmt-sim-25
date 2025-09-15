@@ -22,8 +22,16 @@ namespace ManagementSimulator.Database.Repositories
         public async Task<PublicHoliday?> GetHolidayByNameAndDateAsync(string name, DateTime date, bool includeDeleted = false)
         {
             return await GetRecords(includeDeleted)
-                .FirstOrDefaultAsync(h => h.Name.ToLower() == name.ToLower() && 
+                .FirstOrDefaultAsync(h => h.Name.ToLower() == name.ToLower() &&
                                          h.Date.Date == date.Date);
+        }
+
+        public async Task<List<PublicHoliday>> GetHolidaysInRangeAsync(DateTime startDate, DateTime endDate, bool includeDeleted = false)
+        {
+            return await GetRecords(includeDeleted)
+                .Where(h => h.Date.Date >= startDate.Date && h.Date.Date <= endDate.Date)
+                .OrderBy(h => h.Date)
+                .ToListAsync();
         }
     }
 }

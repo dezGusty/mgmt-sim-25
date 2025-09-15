@@ -99,9 +99,16 @@
             type="date"
             class="w-full px-3 py-2 border rounded bg-gray-50"
             [class.border-red-500]="!startDate && showValidationErrors"
+            [class.border-red-300]="isDateAHoliday(startDate)"
             [min]="today"
             (change)="onStartDateChange()"
           />
+          <div *ngIf="isDateAHoliday(startDate)" class="mt-1 p-2 bg-red-50 border border-red-200 rounded-md">
+            <div class="flex items-center gap-2 text-red-700">
+              <span class="text-lg">🏛️</span>
+              <span class="text-sm font-medium">Public Holiday: {{ getHolidayForDate(startDate)?.name }}</span>
+            </div>
+          </div>
           <div
             *ngIf="!startDate && showValidationErrors"
             class="text-red-500 text-sm mt-1"
@@ -119,9 +126,16 @@
             type="date"
             class="w-full px-3 py-2 border rounded bg-gray-50"
             [class.border-red-500]="!endDate && showValidationErrors"
+            [class.border-red-300]="isDateAHoliday(endDate)"
             [min]="startDate ? startDate : today"
             (change)="onEndDateChange()"
           />
+          <div *ngIf="isDateAHoliday(endDate)" class="mt-1 p-2 bg-red-50 border border-red-200 rounded-md">
+            <div class="flex items-center gap-2 text-red-700">
+              <span class="text-lg">🏛️</span>
+              <span class="text-sm font-medium">Public Holiday: {{ getHolidayForDate(endDate)?.name }}</span>
+            </div>
+          </div>
           <div
             *ngIf="!endDate && showValidationErrors"
             class="text-red-500 text-sm mt-1"
@@ -129,6 +143,22 @@
             Please select an end date
           </div>
         </div>
+      </div>
+
+      <!-- Holidays in Range -->
+      <div *ngIf="holidaysInRange.length > 0" class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-lg">🏛️</span>
+          <span class="font-medium text-amber-800">Public Holidays in Selected Range</span>
+        </div>
+        <div class="space-y-1">
+          <div *ngFor="let holiday of holidaysInRange" class="text-sm text-amber-700">
+            • {{ holiday.name }} - {{ holiday.date | date:'mediumDate' }}
+          </div>
+        </div>
+        <p class="text-xs text-amber-600 mt-2">
+          Note: Public holidays are automatically excluded from leave calculations where applicable.
+        </p>
       </div>
 
       <div
