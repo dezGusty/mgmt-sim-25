@@ -475,7 +475,7 @@ namespace ManagementSimulator.Core.Services
 
             // Get public holidays in the date range
             var publicHolidays = await _publicHolidayService.GetHolidaysInRangeAsync(startDate, endDate);
-            var holidayDates = publicHolidays.Select(h => h.Date.Date).ToHashSet();
+            var holidayDates = publicHolidays?.Select(h => h.Date.Date).ToHashSet() ?? new HashSet<DateTime>();
 
             while (currentDate <= endDate)
             {
