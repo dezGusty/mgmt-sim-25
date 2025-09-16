@@ -33,6 +33,18 @@ export class RoleSelector implements OnInit {
   isLoading = true;
   errorMessage = '';
 
+  // Carousel properties
+  currentSlide = 0;
+  slideWidth = 320;
+  showCarouselControls = false;
+  maxSlide = 0;
+  slides: number[] = [];
+
+  // Touch/swipe properties
+  private touchStartX = 0;
+  private touchEndX = 0;
+  private isDragging = false;
+
   constructor(
     private router: Router,
     private auth: Auth
@@ -40,16 +52,7 @@ export class RoleSelector implements OnInit {
 
   ngOnInit() {
     this.loadUserRoles();
-    this.auth.impersonation$.subscribe(info => {
-      this.impersonatedUserName = info?.name || '';
-      this.isImpersonating = !!info;
-      if (info?.roles) {
-        this.impersonatedRoles = info.roles.map(role => this.mapRoleToInterface(role))
-          .filter((role): role is UserRole => role !== null);
-      } else {
-        this.impersonatedRoles = [];
-      }
-    });
+    this.setupKeyboardNavigation();
   }
 
   loadUserRoles() {
@@ -88,8 +91,8 @@ export class RoleSelector implements OnInit {
         // Handle cases where there are no roles
         if (this.userRoles.length === 0 && !isImpersonating) {
           this.errorMessage = 'No accessible roles found for your account. Please contact your administrator.';
-        } else if (this.userRoles.length === 0 && isImpersonating && this.adminOriginalRoles.length === 0) {
-          this.errorMessage = 'The impersonated user has no roles and admin roles could not be loaded. Please contact your administrator.';
+        } else {
+          this.initializeCarousel();
         }
         // If impersonating user has no roles but admin has roles, that's fine - admin roles will be shown
       },
@@ -198,27 +201,117 @@ export class RoleSelector implements OnInit {
     });
   }
 
-  stopImpersonation(): void {
-    if (confirm('Are you sure you want to stop impersonating this user? You will return to your admin account.')) {
-      this.auth.stopImpersonation().subscribe({
-        next: () => {
-          this.auth.clearImpersonation();
-          this.isImpersonating = false;
-          this.impersonatedUserName = '';
-          this.impersonatedRoles = [];
-          // Reload the user roles to get back the admin's roles
-          this.loadUserRoles();
-        },
-        error: (err) => {
-          console.error('Error stopping impersonation:', err);
-          // Still clear local state even if backend call fails
-          this.auth.clearImpersonation();
-          this.isImpersonating = false;
-          this.impersonatedUserName = '';
-          this.impersonatedRoles = [];
-          this.loadUserRoles();
-        }
-      });
+  // Carousel initialization and control methods
+  private initializeCarousel() {
+    if (this.userRoles.length >= 3) {
+      this.showCarouselControls = true;
+      this.maxSlide = Math.max(0, this.userRoles.length - 1);
+      this.slides = Array.from({ length: this.userRoles.length }, (_, i) => i);
+      this.currentSlide = 0;
+    } else {
+      this.showCarouselControls = false;
     }
+  }
+
+  nextSlide() {
+    if (this.currentSlide < this.maxSlide) {
+      this.currentSlide++;
+    }
+  }
+
+  previousSlide() {
+    if (this.currentSlide > 0) {
+      this.currentSlide--;
+    }
+  }
+
+  goToSlide(slideIndex: number) {
+    if (slideIndex >= 0 && slideIndex <= this.maxSlide) {
+      this.currentSlide = slideIndex;
+    }
+  }
+
+  onCardClick(role: UserRole, index: number) {
+    if (index === this.currentSlide) {
+      // If clicking the active card, select the role
+      this.selectRole(role);
+    } else {
+      // If clicking a side card, navigate to it
+      this.goToSlide(index);
+    }
+  }
+
+  // Utility methods for carousel display
+  getCardZIndex(index: number): number {
+    if (index === this.currentSlide) {
+      return 10; // Active card on top
+    } else if (Math.abs(index - this.currentSlide) === 1) {
+      return 5; // Adjacent cards
+    } else {
+      return 1; // Hidden cards
+    }
+  }
+
+  isCardVisible(index: number): boolean {
+    return Math.abs(index - this.currentSlide) <= 1;
+  }
+
+  // Touch/swipe event handlers
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.touches[0].clientX;
+    this.isDragging = true;
+  }
+
+  onTouchMove(event: TouchEvent) {
+    if (!this.isDragging) return;
+    
+    this.touchEndX = event.touches[0].clientX;
+    // Prevent scrolling while swiping
+    event.preventDefault();
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    const swipeThreshold = 50; // Minimum swipe distance
+    const swipeDistance = this.touchStartX - this.touchEndX;
+
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0) {
+        // Swiped left, go to next slide
+        this.nextSlide();
+      } else {
+        // Swiped right, go to previous slide
+        this.previousSlide();
+      }
+    }
+
+    this.touchStartX = 0;
+    this.touchEndX = 0;
+  }
+
+  // Keyboard navigation setup
+  private setupKeyboardNavigation() {
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (this.userRoles.length >= 3 && this.showCarouselControls) {
+        switch (event.key) {
+          case 'ArrowLeft':
+            event.preventDefault();
+            this.previousSlide();
+            break;
+          case 'ArrowRight':
+            event.preventDefault();
+            this.nextSlide();
+            break;
+          case 'Enter':
+            event.preventDefault();
+            if (this.userRoles[this.currentSlide]) {
+              this.selectRole(this.userRoles[this.currentSlide]);
+            }
+            break;
+        }
+      }
+    });
   }
 }
