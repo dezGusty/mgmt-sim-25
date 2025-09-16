@@ -346,5 +346,4 @@ export class UsersService {
 
     return this.http.get<IApiResponse<any>>(`${this.baseUrl}/globalSearch`, { params: paramsToSend });
   }
-  }
 }
