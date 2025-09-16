@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RequestDetail } from '../request-detail/request-detail';
 import { CalendarView } from '../calendar-view/calendar-view';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
+import { UsersService } from '../../../../services/users/users-service';
 import { ILeaveRequest } from '../../../../models/leave-request';
 import { StatusUtils } from '../../../../utils/status.utils';
 import { DateUtils } from '../../../../utils/date.utils';
@@ -25,6 +26,10 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
   @Output() dataRefreshed = new EventEmitter<void>();
 
+  get currentFilter(): 'All' | 'Pending' | 'Approved' | 'Rejected' {
+    return this.filter;
+  }
+
   private searchSubscription?: Subscription;
   searchTerm: string = '';
 
@@ -41,7 +46,22 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   totalCount: number = 0;
   isLoading: boolean = false;
 
-  constructor(private leaveRequests: LeaveRequests, private authService: Auth) {}
+  constructor(private leaveRequests: LeaveRequests, private authService: Auth, private usersService: UsersService) {}
+
+  // Debug information
+  debugInfo = {
+    currentUserId: '',
+    currentUserEmail: '',
+    isImpersonating: false,
+    impersonatedUserName: '',
+    originalUserRoles: [] as string[],
+    effectiveRoles: [] as string[],
+    subordinatesCount: 0,
+    isAdminImpersonating: false
+  };
+
+  // Admin override for impersonation
+  adminOverrideMode = false;
 
   get isViewOnly(): boolean {
     return this.authService.isTemporarilyReplaced();
@@ -53,18 +73,29 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
 
   Math = Math;
 
+  private hasInitialized = false;
+
   ngOnInit() {
-    this.loadRequests();
-    
     if (this.debouncedSearchTerm$) {
       this.searchSubscription = this.debouncedSearchTerm$.subscribe(searchTerm => {
-        this.searchTerm = searchTerm;
-        this.currentPage = 1;
-        this.totalPages = 0;
-        this.totalCount = 0;
-        this.loadRequests();
+        if (this.hasInitialized && this.searchTerm !== searchTerm) {
+          this.searchTerm = searchTerm;
+          this.currentPage = 1;
+          this.totalPages = 0;
+          this.totalCount = 0;
+          this.loadRequests();
+        } else {
+          this.searchTerm = searchTerm;
+        }
       });
     }
+    
+    setTimeout(() => {
+      if (!this.hasInitialized) {
+        this.loadRequests();
+        this.hasInitialized = true;
+      }
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -74,7 +105,7 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filter'] || changes['searchCriteria']) {
+    if (this.hasInitialized && (changes['filter'] || changes['searchCriteria'])) {
       this.currentPage = 1;
       this.totalPages = 0;
       this.totalCount = 0;
@@ -85,11 +116,45 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
     this.requests = [newRequest, ...this.requests];
   }
 
+  private loadDebugInfo() {
+    this.authService.me().subscribe({
+      next: (user: any) => {
+        this.debugInfo.currentUserId = user.userId || user.UserId || '';
+        this.debugInfo.currentUserEmail = user.email || user.Email || '';
+        this.debugInfo.originalUserRoles = user.originalRoles || user.OriginalRoles || [];
+        this.debugInfo.effectiveRoles = user.roles || user.Roles || [];
+        this.debugInfo.isAdminImpersonating = this.debugInfo.originalUserRoles.includes('Admin') && this.debugInfo.isImpersonating;
+        
+        console.log('Debug Info - Current Session:', this.debugInfo);
+        console.log('Debug Info - Raw User Data:', user);
+
+        // Check subordinates count for the current user
+        this.usersService.getSubordinatesCount().subscribe({
+          next: (response: any) => {
+            if (response.success) {
+              this.debugInfo.subordinatesCount = response.data || 0;
+              console.log('Debug Info - Subordinates Count:', this.debugInfo.subordinatesCount);
+            }
+          },
+          error: (err) => {
+            console.error('Failed to load subordinates count:', err);
+            this.debugInfo.subordinatesCount = -1; // -1 indicates error
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to load debug info:', err);
+      }
+    });
+  }
+
   public loadRequests() {
     if (this.isLoading) return;
     
     this.isLoading = true;
     this.errorMessage = null;
+    
+    console.log('Loading requests with debug info:', this.debugInfo);
     
     if (this.searchTerm && this.searchTerm.trim()) {
       this.loadRequestsWithSearch();
@@ -101,16 +166,30 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   private loadRequestsPaginated() {
     const statusFilter = this.filter === 'All' ? 'ALL' : this.filter;
     
+    console.log(`[Manager Debug] Calling fetchByManagerPaginated with:`, {
+      statusFilter,
+      itemsPerPage: this.itemsPerPage,
+      currentPage: this.currentPage,
+      currentUserId: this.debugInfo.currentUserId,
+      isImpersonating: this.debugInfo.isImpersonating,
+      impersonatedUserName: this.debugInfo.impersonatedUserName
+    });
+    
     this.leaveRequests.fetchByManagerPaginated(statusFilter, this.itemsPerPage, this.currentPage).subscribe({
       next: (apiData) => {
+        console.log('[Manager Debug] API Response:', apiData);
+        
         if (apiData.success && apiData.data) {
           const requestsRaw = apiData.data.items || [];
           this.totalCount = apiData.data.totalCount;
           this.totalPages = apiData.data.totalPages;
 
+          console.log(`[Manager Debug] Found ${requestsRaw.length} requests, Total: ${this.totalCount}`);
+          
           this.requests = this.mapRequests(requestsRaw);
           this.errorMessage = null;
         } else {
+          console.log('[Manager Debug] API returned no data or failed:', apiData.message);
           this.requests = [];
           this.totalCount = 0;
           this.totalPages = 0;
@@ -118,7 +197,8 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
         }
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('[Manager Debug] API call failed:', err);
         this.requests = [];
         this.totalCount = 0;
         this.totalPages = 0;
@@ -130,11 +210,25 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
 
   private loadRequestsWithSearch() {
     const nameParam = this.searchCriteria === 'employee' && this.searchTerm?.trim() ? this.searchTerm : undefined;
+    
+    console.log(`[Manager Debug] Calling fetchByManager with search:`, {
+      nameParam,
+      searchCriteria: this.searchCriteria,
+      searchTerm: this.searchTerm,
+      currentUserId: this.debugInfo.currentUserId,
+      isImpersonating: this.debugInfo.isImpersonating,
+      impersonatedUserName: this.debugInfo.impersonatedUserName
+    });
+    
     this.leaveRequests.fetchByManager(nameParam).subscribe({
       next: (apiData) => {
+        console.log('[Manager Debug] Search API Response:', apiData);
+        
         if (apiData.success && Array.isArray(apiData.data)) {
           const requestsRaw = apiData.data;
           let filteredRequests = this.mapRequests(requestsRaw);
+          
+          console.log(`[Manager Debug] Search found ${requestsRaw.length} raw requests, mapped to ${filteredRequests.length} filtered`);
           
           filteredRequests = RequestUtils.filterRequests(filteredRequests, this.filter);
           
@@ -407,5 +501,9 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
       this.totalCount = 0;
       this.loadRequests();
     }
+  }
+
+  trackByRequestId(index: number, req: ILeaveRequest): string {
+    return req.id;
   }
 }

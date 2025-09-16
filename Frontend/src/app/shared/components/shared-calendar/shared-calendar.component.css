@@ -1,0 +1,293 @@
+.shared-calendar {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nav-button {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+  color: #6b7280;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.nav-button:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.month-year-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.month-year {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.today-button {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.today-button:hover {
+  background-color: #bfdbfe;
+}
+
+.calendar-grid {
+  border-top: 1px solid #e5e7eb;
+}
+
+.day-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #f9fafb;
+}
+
+.week-number-header {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+}
+
+.day-header {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-align: center;
+}
+
+.weekend-header {
+  color: #ef4444;
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.week-number {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background-color: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-cell {
+  position: relative;
+  min-height: 80px;
+  padding: 0.25rem;
+  border-right: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+.day-cell.compact {
+  min-height: 40px;
+}
+
+.day-cell.clickable {
+  cursor: pointer;
+}
+
+.day-cell.clickable:hover {
+  background-color: #f9fafb;
+}
+
+.day-cell.current-month {
+  background-color: white;
+}
+
+.day-cell.other-month {
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.day-cell.today {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.day-cell.weekend {
+  background-color: #fef2f2;
+}
+
+.day-cell.selected {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.day-cell.disabled {
+  background-color: #f3f4f6;
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.day-cell.has-holidays {
+  border-color: #fecaca;
+}
+
+.day-number {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.today .day-number {
+  background-color: #2563eb;
+  color: white;
+  border-radius: 50%;
+}
+
+.selected .day-number {
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+}
+
+.holiday-indicators {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.holiday-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #b91c1c;
+  cursor: pointer;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.holiday-indicator:hover {
+  background-color: #fee2e2;
+}
+
+.holiday-icon {
+  font-size: 0.875rem;
+}
+
+.holiday-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.event-indicators {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.event-indicator {
+  font-size: 0.75rem;
+  color: white;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.event-indicator:hover {
+  opacity: 0.8;
+}
+
+.event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.event-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Compact mode adjustments */
+.shared-calendar.compact .day-cell {
+  min-height: 40px;
+  padding: 0.125rem;
+}
+
+.shared-calendar.compact .day-number {
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.75rem;
+}
+
+.shared-calendar.compact .holiday-indicators {
+  margin-top: 1rem;
+}
+
+.shared-calendar.compact .event-indicators {
+  margin-top: 1rem;
+}
+
+.shared-calendar.compact .holiday-indicator {
+  justify-content: center;
+  padding: 0;
+}
+
+.shared-calendar.compact .event-indicator {
+  justify-content: center;
+  padding: 0;
+}
+
+/* Grid adjustments when week numbers are shown */
+.calendar-body.with-week-numbers {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.day-headers.with-week-numbers {
+  grid-template-columns: repeat(8, 1fr);
+}

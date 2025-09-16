@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +23,7 @@ import { ISecondManagerResponse, ISecondManagerViewModel } from '../../../../mod
   styleUrl: './admin-user-relationships.css',
 })
 export class AdminUserRelationships implements OnInit {
+  private searchTermSubject = new Subject<string>();
   managersIds: Set<number> = new Set<number>();
   adminsIds: Set<number> = new Set<number>();
   managers: IUserViewModel[] = [];
@@ -72,9 +75,10 @@ export class AdminUserRelationships implements OnInit {
 
   UserSearchType = UserSearchType;
 
-  allAdmins: IUserViewModel[] = [];   // full dataset   // current page slice
+  allAdmins: IUserViewModel[] = [];
   originalAdmins: IUserViewModel[] = []; 
   totalAdminsCount: number = 0;
+  searchResultsAdminsCount: number = 0;
   totalPagesAdmins: number = 0;
   currentPageAdmins: number = 1;
   pageSizeAdmins: number = 3;
@@ -82,11 +86,13 @@ export class AdminUserRelationships implements OnInit {
   currentPageManagers: number = 1;
   totalPagesManagers: number = 0;
   totalManagersCount: number = 0;
+  searchResultsManagersCount: number = 0;
 
   pageSizeUnassignedUsers: number = 3;
   currentPageUnassignedUsers: number = 1;
   totalPagesUnassignedUsers: number = 0;
   totalUnassignedUsersCount: number = 0;
+  searchResultsUnassignedCount: number = 0;
 
   showAssignRelationShipComponent: boolean = false;
   selectedEmployee!: {
@@ -128,12 +134,23 @@ export class AdminUserRelationships implements OnInit {
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.searchTermSubject.pipe(debounceTime(400)).subscribe(term => {
+      this.searchTerm = term;
+      this.onSearch();
+    });
+  }
+  onSearchTermChange(term: string): void {
+    this.searchTermSubject.next(term);
   }
 
   private loadInitialData(): void {
     this.managersIds.clear();
     this.adminsIds.clear();
     this.managerEmployeesCollapsed.clear();
+    
+    this.searchResultsAdminsCount = 0;
+    this.searchResultsManagersCount = 0;
+    this.searchResultsUnassignedCount = 0;
     
     this.loadManagersWithRelationships();
     this.loadAdmins();
@@ -186,26 +203,48 @@ export class AdminUserRelationships implements OnInit {
     this.isLoadingAdmins = true;
     this.adminsErrorMessage = '';
 
-    this.userService.getAllAdmins().subscribe({
+    let searchParams: any = {};
+
+    if (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Admins) {
+      if (this.currentSearchTerm.trim()) {
+        searchParams.globalSearch = this.currentSearchTerm;
+      }
+    } else {
+      this.isLoadingAdmins = false;
+      this.admins = [];
+      this.allAdmins = [];
+      this.totalPagesAdmins = 0;
+      this.checkIfInitialDataLoaded();
+      return;
+    }
+
+    const params: IFilteredUsersRequest = {
+      ...searchParams,
+      params: {
+        sortBy: 'lastName',
+        sortDescending: this.sortDescending,
+        page: this.currentPageAdmins,
+        pageSize: this.pageSizeAdmins,
+      },
+    };
+
+    this.userService.getAllAdminsFiltered(params).subscribe({
       next: (response) => {
         this.isLoadingAdmins = false;
-        const rawAdmins: IUser[] = response.data;
+        console.log('Admins API response:', response);
+        const rawAdmins: IUser[] = response.data.data;
 
         if (!rawAdmins || rawAdmins.length === 0) {
-          this.adminsErrorMessage = 'No admins were found.';
+          this.adminsErrorMessage = this.getAdminsEmptyMessage();
           this.admins = [];
           this.allAdmins = [];
           this.totalPagesAdmins = 0;
         } else {
-          this.originalAdmins = rawAdmins.map(a => this.mapToUserViewModel(a));
-          this.allAdmins = [...this.originalAdmins];
-          
-          if (this.currentSearchBy === UserSearchType.Admins && this.currentSearchTerm.trim()) {
-            this.filterAdmins();
-          } else {
-            this.currentPageAdmins = 1;
-            this.sliceAdmins();
-          }
+          this.admins = rawAdmins.map(a => this.mapToUserViewModel(a));
+          this.allAdmins = [...this.admins]; // For compatibility with existing code
+          this.originalAdmins = [...this.admins]; // For compatibility with existing code
+          this.totalPagesAdmins = response.data.totalPages;
+          this.adminsErrorMessage = '';
         }
 
         this.checkIfInitialDataLoaded();
@@ -366,6 +405,20 @@ export class AdminUserRelationships implements OnInit {
     return 'No managers found.';
   }
 
+  getAdminsEmptyMessage(): string {
+    if (this.currentSearchTerm.trim()) {
+      switch (this.currentSearchBy) {
+        case UserSearchType.Global:
+          return 'No admins found for the global search term.';
+        case UserSearchType.Admins:
+          return `No admins found for "${this.currentSearchTerm}".`;
+        default:
+          return `No admins found for "${this.currentSearchTerm}".`;
+      }
+    }
+    return 'No admins found.';
+  }
+
   getUnassignedUsersEmptyMessage(): string {
     if (this.currentSearchTerm.trim()) {
       return `No unassigned users found for "${this.currentSearchTerm}".`;
@@ -488,35 +541,55 @@ export class AdminUserRelationships implements OnInit {
       page !== this.currentPageManagers
     ) {
       this.currentPageManagers = page;
-      this.loadManagersWithRelationships();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadManagersWithRelationships();
+      }
     }
   }
 
   goToNextPageManagers(): void {
     if (this.currentPageManagers < this.totalPagesManagers) {
       this.currentPageManagers++;
-      this.loadManagersWithRelationships();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadManagersWithRelationships();
+      }
     }
   }
 
   goToPreviousPageManagers(): void {
     if (this.currentPageManagers > 1) {
       this.currentPageManagers--;
-      this.loadManagersWithRelationships();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadManagersWithRelationships();
+      }
     }
   }
 
   goToFirstPageManagers(): void {
     if (this.currentPageManagers !== 1) {
       this.currentPageManagers = 1;
-      this.loadManagersWithRelationships();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadManagersWithRelationships();
+      }
     }
   }
 
   goToLastPageManagers(): void {
     if (this.currentPageManagers !== this.totalPagesManagers) {
       this.currentPageManagers = this.totalPagesManagers;
-      this.loadManagersWithRelationships();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadManagersWithRelationships();
+      }
     }
   }
 
@@ -546,35 +619,55 @@ export class AdminUserRelationships implements OnInit {
       page !== this.currentPageUnassignedUsers
     ) {
       this.currentPageUnassignedUsers = page;
-      this.loadUnassignedUsers();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadUnassignedUsers();
+      }
     }
   }
 
   goToNextPageUnassignedUsers(): void {
     if (this.currentPageUnassignedUsers < this.totalPagesUnassignedUsers) {
       this.currentPageUnassignedUsers++;
-      this.loadUnassignedUsers();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadUnassignedUsers();
+      }
     }
   }
 
   goToPreviousPageUnassignedUsers(): void {
     if (this.currentPageUnassignedUsers > 1) {
       this.currentPageUnassignedUsers--;
-      this.loadUnassignedUsers();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadUnassignedUsers();
+      }
     }
   }
 
   goToFirstPageUnassignedUsers(): void {
     if (this.currentPageUnassignedUsers !== 1) {
       this.currentPageUnassignedUsers = 1;
-      this.loadUnassignedUsers();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadUnassignedUsers();
+      }
     }
   }
 
   goToLastPageUnassignedUsers(): void {
     if (this.currentPageUnassignedUsers !== this.totalPagesUnassignedUsers) {
       this.currentPageUnassignedUsers = this.totalPagesUnassignedUsers;
-      this.loadUnassignedUsers();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadUnassignedUsers();
+      }
     }
   }
 
@@ -626,24 +719,14 @@ export class AdminUserRelationships implements OnInit {
   }
 
   filterAdmins(): void {
-    if (!this.currentSearchTerm.trim()) {
-      this.allAdmins = [...this.originalAdmins];
-      this.currentPageAdmins = 1;
-      this.sliceAdmins();
-      return;
+    // This method is now deprecated since we're using backend filtering
+    // But keeping it for backward compatibility - it will trigger a backend search instead
+    if (this.currentSearchBy === UserSearchType.Admins) {
+      this.loadAdmins();
+    } else {
+      // For non-admin specific searches, use global search
+      this.performGlobalSearch();
     }
-
-    const searchTerm = this.currentSearchTerm.toLowerCase();
-    this.allAdmins = this.originalAdmins.filter(admin => 
-      admin.name.toLowerCase().includes(searchTerm) ||
-      admin.email.toLowerCase().includes(searchTerm) ||
-      (admin.jobTitle?.name || '').toLowerCase().includes(searchTerm) ||
-      (admin.department?.name || '').toLowerCase().includes(searchTerm)
-    );
-
-    this.currentPageAdmins = 1;
-    this.sliceAdmins();
-    this.autoExpandSectionsWithResults();
   }
 
   onSearchCategoryChange(): void {
@@ -662,11 +745,6 @@ export class AdminUserRelationships implements OnInit {
 
     this.managerEmployeesCollapsed.clear();
 
-    if (this.currentSearchBy !== UserSearchType.Admins) {
-      this.allAdmins = [...this.originalAdmins];
-      this.currentPageAdmins = 1;
-      this.sliceAdmins();
-    }
     if (this.currentSearchTerm.trim()) {
       switch (this.currentSearchBy) {
         case UserSearchType.Admins:
@@ -683,34 +761,148 @@ export class AdminUserRelationships implements OnInit {
       }
     }
 
-    switch (this.currentSearchBy) {
-      case UserSearchType.Global:
-        if (this.currentSearchTerm.trim()) {
-          this.filterAdmins();
-        } else {
-          this.allAdmins = [...this.originalAdmins];
-          this.currentPageAdmins = 1;
-          this.sliceAdmins();
-        }
-        this.loadManagersWithRelationships();
-        this.loadUnassignedUsers();
-        break;
-      case UserSearchType.Managers:
-        this.loadManagersWithRelationships();
-        break;
-      case UserSearchType.Admins:
-        this.filterAdmins();
-        break;
-      case UserSearchType.Unassigned:
-        this.loadUnassignedUsers();
-        break;
+    this.performGlobalSearch();
+  }
+
+  private performGlobalSearch(): void {
+    this.isLoadingManagers = true;
+    this.isLoadingAdmins = true;
+    this.isLoadingUnassignedUsers = true;
+
+    const searchCategoryMap = {
+      [UserSearchType.Global]: 'Global',
+      [UserSearchType.Managers]: 'Managers', 
+      [UserSearchType.Admins]: 'Admins',
+      [UserSearchType.Unassigned]: 'Unassigned'
+    };
+
+    this.userService.globalSearchOptimized(
+      this.currentSearchTerm,
+      searchCategoryMap[this.currentSearchBy],
+      this.currentPageManagers,
+      this.pageSizeManagers,
+      this.currentPageUnassignedUsers,
+      this.pageSizeUnassignedUsers,
+      'lastName',
+      this.sortDescending,
+      this.currentPageAdmins,
+      this.pageSizeAdmins
+    ).subscribe({
+      next: (response) => {
+        this.handleGlobalSearchResponse(response);
+        this.checkIfInitialDataLoaded();
+        this.autoExpandSectionsWithResults();
+      },
+      error: (err) => {
+        this.handleGlobalSearchError(err);
+        this.checkIfInitialDataLoaded();
+      }
+    });
+  }
+
+  private handleGlobalSearchResponse(response: any): void {
+    const data = response.data;
+    
+    if (data.managers && (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Managers)) {
+      this.isLoadingManagers = false;
+      const rawUsers: IUser[] = data.managers.data || [];
+      
+      if (rawUsers.length === 0) {
+        this.managersErrorMessage = this.getManagersEmptyMessage();
+        this.managers = [];
+        this.totalPagesManagers = 0;
+        this.searchResultsManagersCount = 0;
+      } else {
+        this.managers = rawUsers.map((user) => this.mapToUserViewModel(user));
+        this.totalPagesManagers = data.managers.totalPages || 0;
+        this.searchResultsManagersCount = data.managers.totalCount || 0; // Total search results across all pages
+        this.managersErrorMessage = '';
+      }
     }
+
+    if (data.admins && (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Admins)) {
+      this.isLoadingAdmins = false;
+      
+      const rawAdmins: IUser[] = data.admins.data || [];
+      
+      if (rawAdmins.length === 0) {
+        this.adminsErrorMessage = this.getAdminsEmptyMessage();
+        this.admins = [];
+        this.allAdmins = [];
+        this.totalPagesAdmins = 0;
+        this.searchResultsAdminsCount = 0;
+      } else {
+        this.admins = rawAdmins.map(a => this.mapToUserViewModel(a));
+        this.allAdmins = [...this.admins]; 
+        this.originalAdmins = [...this.admins]; 
+        this.totalPagesAdmins = data.admins.totalPages || 0;
+        this.searchResultsAdminsCount = data.admins.totalCount || 0;
+        this.adminsErrorMessage = '';
+      }
+    }
+
+    if (data.unassignedUsers && (this.currentSearchBy === UserSearchType.Global || this.currentSearchBy === UserSearchType.Unassigned)) {
+      this.isLoadingUnassignedUsers = false;
+      const rawUnassignedUsers: IUser[] = data.unassignedUsers.data || [];
+      
+      if (rawUnassignedUsers.length === 0) {
+        this.unassignedUsersErrorMessage = this.getUnassignedUsersEmptyMessage();
+        this.unassignedUsers = [];
+        this.totalPagesUnassignedUsers = 0;
+        this.searchResultsUnassignedCount = 0;
+      } else {
+        this.unassignedUsers = rawUnassignedUsers.map((user) => this.mapToUserViewModel(user));
+        this.totalPagesUnassignedUsers = data.unassignedUsers.totalPages || 0;
+        this.searchResultsUnassignedCount = data.unassignedUsers.totalCount || 0;
+        this.unassignedUsersErrorMessage = '';
+      }
+    }
+
+    if (data.totalCounts) {
+      this.totalAdminsCount = data.totalCounts.totalAdmins || 0;
+      this.totalManagersCount = data.totalCounts.totalManagers || 0;
+      this.totalUnassignedUsersCount = data.totalCounts.totalUnassignedUsers || 0;
+    }
+
+    if (this.currentSearchBy === UserSearchType.Managers) {
+      this.isLoadingAdmins = false;
+      this.isLoadingUnassignedUsers = false;
+    } else if (this.currentSearchBy === UserSearchType.Admins) {
+      this.isLoadingManagers = false;
+      this.isLoadingUnassignedUsers = false;
+    } else if (this.currentSearchBy === UserSearchType.Unassigned) {
+      this.isLoadingManagers = false;
+      this.isLoadingAdmins = false;
+    }
+  }
+
+  private handleGlobalSearchError(err: any): void {
+    console.error('Global search failed:', err);
+    
+    this.isLoadingManagers = false;
+    this.isLoadingAdmins = false;
+    this.isLoadingUnassignedUsers = false;
+    
+    this.managersErrorMessage = 'Error retrieving the managers.';
+    this.adminsErrorMessage = 'Error during retrieving admins.';
+    this.unassignedUsersErrorMessage = 'Error loading the unassigned users.';
+    
+    this.managers = [];
+    this.admins = [];
+    this.unassignedUsers = [];
+    this.totalPagesManagers = 0;
+    this.totalPagesAdmins = 0;
+    this.totalPagesUnassignedUsers = 0;
   }
 
   toggleSortOrder(): void {
     this.sortDescending = !this.sortDescending;
     this.currentPageManagers = 1;
-    this.loadManagersWithRelationships();
+    if (this.currentSearchTerm.trim()) {
+      this.performGlobalSearch();
+    } else {
+      this.loadManagersWithRelationships();
+    }
   }
 
   clearSearch(): void {
@@ -721,6 +913,10 @@ export class AdminUserRelationships implements OnInit {
     this.currentHighlightTerm = '';
     this.currentPageManagers = 1;
     this.currentPageUnassignedUsers = 1;
+    
+    this.searchResultsAdminsCount = 0;
+    this.searchResultsManagersCount = 0;
+    this.searchResultsUnassignedCount = 0;
     
     this.managersIds.clear();
     this.adminsIds.clear();
@@ -733,9 +929,8 @@ export class AdminUserRelationships implements OnInit {
     this.isUnassignedUsersSectionCollapsed = true;
     
 
-    this.allAdmins = [...this.originalAdmins];
     this.currentPageAdmins = 1;
-    this.sliceAdmins();
+    this.loadAdmins();
     
     this.loadManagersWithRelationships();
     this.loadUnassignedUsers();
@@ -762,7 +957,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getUnassignedUsersCount(): number {
-    return this.unassignedUsers.length;
+    return this.searchResultsUnassignedCount > 0 ? this.searchResultsUnassignedCount : this.unassignedUsers.length;
   }
 
   getSubordinateCount(manager: any): number {
@@ -770,7 +965,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getAdminCount(): number {
-    return this.admins.length;
+    return this.searchResultsAdminsCount > 0 ? this.searchResultsAdminsCount : this.admins.length;
   }
 
   getTotalAdminCount(): number {
@@ -778,7 +973,7 @@ export class AdminUserRelationships implements OnInit {
   }
 
   getManagerCount(): number {
-    return this.managers.length;
+    return this.searchResultsManagersCount > 0 ? this.searchResultsManagersCount : this.managers.length;
   }
 
   getTotalManagerCount(): number {
@@ -855,46 +1050,74 @@ export class AdminUserRelationships implements OnInit {
 
   onItemsPerPageChangeManagers(): void {
     this.currentPageManagers = 1;
-    this.loadManagersWithRelationships();
+    if (this.currentSearchTerm.trim()) {
+      this.performGlobalSearch();
+    } else {
+      this.loadManagersWithRelationships();
+    }
   }
 
   onItemsPerPageChangeUnassignedUsers(): void {
     this.currentPageUnassignedUsers = 1;
-    this.loadUnassignedUsers();
+    if (this.currentSearchTerm.trim()) {
+      this.performGlobalSearch();
+    } else {
+      this.loadUnassignedUsers();
+    }
   }
 
   goToPageAdmins(page: number): void {
     if (page >= 1 && page <= this.totalPagesAdmins && page !== this.currentPageAdmins) {
       this.currentPageAdmins = page;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToNextPageAdmins(): void {
     if (this.currentPageAdmins < this.totalPagesAdmins) {
       this.currentPageAdmins++;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToPreviousPageAdmins(): void {
     if (this.currentPageAdmins > 1) {
       this.currentPageAdmins--;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToFirstPageAdmins(): void {
     if (this.currentPageAdmins !== 1) {
       this.currentPageAdmins = 1;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
   goToLastPageAdmins(): void {
     if (this.currentPageAdmins !== this.totalPagesAdmins) {
       this.currentPageAdmins = this.totalPagesAdmins;
-      this.sliceAdmins();
+      if (this.currentSearchTerm.trim()) {
+        this.performGlobalSearch();
+      } else {
+        this.loadAdmins();
+      }
     }
   }
 
@@ -927,8 +1150,11 @@ export class AdminUserRelationships implements OnInit {
 
   onItemsPerPageChangeAdmins(): void {
     this.currentPageAdmins = 1;
-    this.totalPagesAdmins = Math.ceil(this.allAdmins.length / this.pageSizeAdmins);
-    this.sliceAdmins();
+    if (this.currentSearchTerm.trim()) {
+      this.performGlobalSearch();
+    } else {
+      this.loadAdmins();
+    }
   }
 
   Math = Math;

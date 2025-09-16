@@ -102,4 +102,16 @@ export class LeaveManagementView implements OnDestroy, AfterViewInit {
       setTimeout(() => this.searchTermSubject.next(this.searchTerm), 0);
     }
   }
+
+  getPendingCount(): number {
+    return this.addRequestsComponent?.requests?.filter(req => req.status === 'Pending').length || 0;
+  }
+
+  getApprovedCount(): number {
+    return this.addRequestsComponent?.requests?.filter(req => req.status === 'Approved').length || 0;
+  }
+
+  getRejectedCount(): number {
+    return this.addRequestsComponent?.requests?.filter(req => req.status === 'Rejected').length || 0;
+  }
 }

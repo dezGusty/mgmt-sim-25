@@ -1,59 +1,179 @@
-# Frontend
+# Frontend - Management Simulator 2025
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+Management Simulator frontend application developed with Angular 20.1.0.
 
-## Development server
+## 📂 Navigation
+- [🏠 Main Project](../README.md) - Return to main project documentation  
+- [⚙️ Backend](../Backend/README.md) - Backend ASP.NET Core API documentation
 
-To start a local development server, run:
+## 🛠️ Technologies Used
+
+- ![Angular](https://img.shields.io/badge/Framework-Angular%2020.1.0-red?logo=angular)
+- ![TypeScript](https://img.shields.io/badge/Language-TypeScript%205.8.2-blue?logo=typescript)
+- ![TailwindCSS](https://img.shields.io/badge/Styling-TailwindCSS%204.1.11-38B2AC?logo=tailwindcss)
+- ![SignalR](https://img.shields.io/badge/Real--time%20Communication-Microsoft%20SignalR%208.0.7-blue?logo=microsoft)
+- ![PapaParse](https://img.shields.io/badge/CSV%20File%20Processing-PapaParse%205.5.3-lightgrey)
+
+## 🚀 Development Commands
+
+### Starting Development Server
+
+To start the local development server:
 
 ```bash
+npm start
+# or
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The application will be available at `http://localhost:4200/`. The application will automatically reload when you modify source files.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Installing Dependencies
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Production Build
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+To compile the project for production:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The compiled files will be stored in the `dist/` directory. The production build optimizes the application for performance and speed.
 
-## Running unit tests
+## 📁 Project Structure
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```
+src/app/
+├── components/           # UI components organized by roles
+│   ├── admin/           # Administration panel
+│   │   ├── admin-add-form/          # Forms for adding entities
+│   │   ├── admin-departments-list/   # Departments list
+│   │   ├── admin-job-titles-list/    # Job titles list
+│   │   ├── admin-users-list/         # Users list
+│   │   └── admin-user-relationships/ # Manager-employee relationship management
+│   ├── manager/         # Manager panel
+│   │   ├── leave-management-view/    # Leave request management
+│   │   ├── project-management-view/  # Project management
+│   │   └── project-details/          # Project details
+│   ├── hr/              # HR panel
+│   │   ├── calendar/                 # Calendar with leaves
+│   │   └── leave-days-overview/      # Leave overview
+│   ├── user/            # User panel
+│   ├── shared/          # Reusable components
+│   ├── login/           # Login page
+│   ├── forgot-password/ # Password reset
+│   └── reset-password/  # Password reset confirmation
+├── services/            # Angular services for API
+│   ├── authService/     # Authentication service
+│   ├── departments/     # Departments service
+│   ├── users/           # Users service
+│   ├── leave-requests/  # Leave requests service
+│   └── projects/        # Projects service
+├── models/              # TypeScript interfaces
+│   ├── entities/        # Entity models
+│   ├── requests/        # API request models
+│   └── responses/       # API response models
+├── guards/              # Route guards for authentication
+├── interceptors/        # HTTP interceptors
+├── pipes/               # Custom pipes
+└── utils/               # Utility functions
 ```
 
-## Running end-to-end tests
+## 🔐 Authentication System
 
-For end-to-end (e2e) testing, run:
+### Authentication Components
 
-```bash
-ng e2e
-```
+#### Login Component (`/login`)
+- Authentication with email and password
+- Frontend and backend validation
+- Automatic redirection based on user roles
+- "Remember Me" functionality
+- Integration with password reset flow
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+#### Reset Password Component (`/reset-password`)
+- Password reset request via email
+- 6-character verification code
+- Strong password policy validation
+- Code expiration after 15 minutes
+- Rate limiting for security
 
-## Additional Resources
+### Authentication Flows
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. **Standard Login**:
+   - User → Email/Password → Validation → JWT Token → Role-based redirection
+
+2. **Password Reset**:
+   - Email → Verification code → New password → Confirmation → Login
+
+### Roles and Redirections
+
+- **Admin** → `/admin` - Full access to all functionalities
+- **Manager** → `/manager` - Team and project management  
+- **HR** → `/hr` - Leave management and calendar
+- **User** → `/user` - View profile and own requests
+- **Multiple roles** → `/role-selector` - Active role selection
+
+## 🎨 Styling and UI
+
+### TailwindCSS
+The project uses TailwindCSS 4.1.11 for styling:
+- Configuration in `tailwind.config.js`
+- Utility classes for responsive design
+- Custom components for UI consistency
+
+### Shared Components
+- Custom navbar with role-based navigation
+- Reusable forms with validation
+- Tables with pagination, sorting, and filtering
+- Modals for confirmations and details
+
+## 📡 API Integration
+
+### HTTP Services
+All services extend a BaseService and use:
+- Interceptors for automatic authentication
+- Centralized error handling
+- Type-safe API calls with TypeScript interfaces
+
+
+## 🔍 Advanced Features
+
+### Filtering and Search
+- Global search in all lists
+- Multi-criteria filtering
+- Column sorting
+- Server-side pagination
+
+### Export/Import
+- Data export to CSV format
+- User import from CSV
+- Data validation on import
+
+### Responsive Design
+- Optimized for desktop.
+- Adaptive navigation on small screens
+
+### Debugging
+- Use Chrome DevTools for debugging
+- Angular DevTools extension for component inspection
+- Console logs for data flow tracking
+
+## 📚 Additional Resources
+
+- [Angular Documentation](https://angular.dev/)
+- [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [SignalR for JavaScript](https://docs.microsoft.com/en-us/aspnet/core/signalr/javascript-client)
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Port occupied**: Change port with `ng serve --port 4201`
+2. **Corrupted node modules**: Delete `node_modules` and run `npm install`
+3. **TypeScript errors**: Check versions in `package.json`
+4. **API connection failed**: Verify backend is running on correct port

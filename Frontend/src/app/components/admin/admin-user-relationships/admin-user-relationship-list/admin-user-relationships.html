@@ -15,7 +15,7 @@
     <div class="flex flex-wrap items-center gap-3">
       <!-- Search Input -->
       <div class="flex-1 min-w-60">
-        <input type="text" [(ngModel)]="searchTerm" (keypress)="onSearchKeypress($event)"
+  <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchTermChange($event)"
           class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
           [placeholder]="getSearchPlaceholder()" />
       </div>
@@ -39,15 +39,6 @@
         </select>
       </div>
 
-      <!-- Search Button -->
-      <button (click)="onSearch()"
-        class="px-4 py-2 bg-[#20B486] hover:bg-[#1a9c75] text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        Search
-      </button>
 
       <!-- Clear Button -->
       <button *ngIf="searchTerm || searchBy !== UserSearchType.Global" (click)="clearSearch()"

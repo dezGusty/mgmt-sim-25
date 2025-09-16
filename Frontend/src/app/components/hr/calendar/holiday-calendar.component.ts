@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PublicHoliday } from '../../../services/hr/hr.service';
+import { PublicHoliday } from '../../../services/public-holidays/public-holidays.service';
 
 interface CalendarDay {
   date: Date;

@@ -10,6 +10,11 @@ export interface UserInfo {
   originalRoles: string[];
   isActingAsSecondManager: boolean;
   isTemporarilyReplaced: boolean;
+  isImpersonating?: boolean;
+  impersonatedUserId?: string;
+  originalUserId?: string;
+  hasValidImpersonationToken?: boolean;
+  shouldUseImpersonationToken?: boolean;
 }
 
 export interface ImpersonationInfo {
@@ -42,9 +47,17 @@ export class Auth {
   }
 
   me() {
-    return this.http.get<UserInfo>(`${this.apiUrl}/me`,
-      { withCredentials: true }
-    );
+    // Add cache busting for impersonation scenarios
+    const headers = {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+    
+    return this.http.get<UserInfo>(`${this.apiUrl}/me`, { 
+      withCredentials: true,
+      headers: headers
+    });
   }
 
   getCurrentUser(): UserInfo | null {
@@ -75,6 +88,12 @@ export class Auth {
     this.impersonationSubject.next(null);
   }
 
+  stopImpersonation() {
+    return this.http.post(`${this.apiUrl}/stop-impersonation`, {},
+      { withCredentials: true }
+    );
+  }
+
   getImpersonation(): ImpersonationInfo | null {
     return this.impersonationSubject.value;
   }
@@ -91,5 +110,61 @@ export class Auth {
       newPassword,
       confirmPassword
     }, { withCredentials: true });
+  }
+
+  impersonate(userId: number) {
+    return this.http.post(`${this.apiUrl}/impersonate`, { userId },
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Determines whether to use the impersonated user's token/context or fall back to admin's token
+   * Returns true if impersonated user's token should be used, false if admin's token should be used
+   */
+  shouldUseImpersonationContext(): boolean {
+    const user = this.getCurrentUser();
+    
+    // Use impersonated user's token if:
+    // 1. User is currently impersonating
+    // 2. The impersonated user has a valid token
+    return user?.shouldUseImpersonationToken === true;
+  }
+
+  /**
+   * Gets the effective user ID that should be used for authentication
+   * Returns impersonated user ID if impersonation token should be used, otherwise returns admin ID
+   */
+  getEffectiveUserId(): string | null {
+    const user = this.getCurrentUser();
+    
+    if (!user) return null;
+    
+    // If we should use impersonation context and we have an impersonated user ID, use it
+    if (this.shouldUseImpersonationContext() && user.impersonatedUserId) {
+      return user.impersonatedUserId;
+    }
+    
+    // Otherwise, use the original user ID (admin's ID when impersonating, or current user ID normally)
+    return user.originalUserId || user.userId;
+  }
+
+  /**
+   * Checks if impersonation token is available and valid
+   */
+  hasValidImpersonationToken(): boolean {
+    return this.getCurrentUser()?.hasValidImpersonationToken === true;
+  }
+
+  /**
+   * Gets the current authentication context information for debugging/logging
+   */
+  getAuthenticationContext(): { isImpersonating: boolean; effectiveUserId: string | null; useImpersonationToken: boolean } {
+    const user = this.getCurrentUser();
+    return {
+      isImpersonating: user?.isImpersonating === true,
+      effectiveUserId: this.getEffectiveUserId(),
+      useImpersonationToken: this.shouldUseImpersonationContext()
+    };
   }
 }

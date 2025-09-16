@@ -1,58 +1,49 @@
 <div class="space-y-6">
-  <!-- Loading indicator -->
-  <div *ngIf="isLoading" class="flex justify-center items-center py-8">
-    <div
-      class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#20B486]"
-    ></div>
-    <span class="ml-2 text-gray-600">Loading leave types...</span>
-  </div>
-
-  <!-- Search Bar -->
-  <div class="flex flex-col sm:flex-row gap-4" *ngIf="!isLoading">
-    <div class="flex-1">
-      <div class="relative">
+  <!-- Search Bar Section - Single Row -->
+  <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Search Input -->
+      <div class="flex-1 min-w-60">
         <input
           type="text"
-          placeholder="Search leave types..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#20B486] focus:border-transparent"
           [(ngModel)]="searchTerm"
-          (keyup.enter)="onSearch()"
+          (input)="onSearchTermChange()"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#20B486] focus:border-[#20B486] text-sm"
+          placeholder="Search leave types..."
         />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-5 h-5 text-gray-400 absolute left-3 top-2.5"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
-            clip-rule="evenodd"
-          />
-        </svg>
       </div>
-    </div>
-    <div class="flex gap-2">
+
+      <!-- Clear Button -->
       <button
-        (click)="onSearch()"
-        class="bg-[#20B486] hover:bg-[#1a9c75] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
-        [disabled]="isLoading"
+        *ngIf="searchTerm"
+        (click)="clearSearch()"
+        class="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg text-sm transition-colors"
+        title="Clear search"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          fill="none"
           viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-4 h-4 mr-2"
+          stroke="currentColor"
         >
           <path
-            fill-rule="evenodd"
-            d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
-            clip-rule="evenodd"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
           />
         </svg>
-        Search
       </button>
     </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-12">
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#20B486] mx-auto"
+    ></div>
+    <p class="mt-4 text-gray-500">Loading leave types...</p>
   </div>
 
   <!-- Error message -->

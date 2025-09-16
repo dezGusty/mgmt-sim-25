@@ -16,7 +16,10 @@ import { IEmployeeRole } from '../../../models/entities/iemployee-role';
 import { IDepartment } from '../../../models/entities/idepartment';
 import { DepartmentService } from '../../../services/departments/department-service';
 import { UserActivityStatus } from '../../../models/enums/user-activity-status';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -29,8 +32,9 @@ export class AdminUsersList implements OnInit {
   searchTerm: string = '';
   searchBy: string = 'globalSearch';
   searchByActivityStatus: 'activeStatus' | 'inactiveStatus' | 'global' = 'global';
-  sortDescending: boolean = false;
   userRoles: Map<string, number> = new Map();
+
+  private searchTermSubject = new Subject<string>();
 
   currentPage: number = 1;
   itemsPerPage: number = 5;
@@ -73,13 +77,22 @@ export class AdminUsersList implements OnInit {
     private jobTitlesService: JobTitlesService,
     private employeeRoleService: EmployeeRolesService,
     private departmentService: DepartmentService,
-    private authService: Auth) {
+    private authService: Auth,
+    private router: Router) {
 
   }
 
   ngOnInit(): void {
     this.loadUsers();
     this.loadUserRoles();
+    
+    // Set up debounced search
+    this.searchTermSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe((searchTerm: string) => {
+      this.loadUsersWithTerm(searchTerm);
+    });
   }
 
   loadUsers(): void {
@@ -97,7 +110,7 @@ export class AdminUsersList implements OnInit {
         ? UserActivityStatus.INACTIVE : UserActivityStatus.ALL,
       params: {
         sortBy: this.getSortField(),
-        sortDescending: this.sortDescending,
+        sortDescending: false,
         page: this.currentPage,
         pageSize: this.itemsPerPage
       }
@@ -240,24 +253,27 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  onSearch(): void {
+  onSearchTermChange(): void {
+    this.searchTermSubject.next(this.searchTerm);
+  }
+
+  loadUsersWithTerm(searchTerm: string): void {
+    const originalSearchTerm = this.searchTerm;
+    this.searchTerm = searchTerm;
     this.currentPage = 1;
     this.hasSearched = true;
     this.loadUsers();
+    // Don't restore the original search term to prevent focus issues
   }
 
   clearSearch(): void {
     this.searchTerm = '';
+    this.searchBy = 'globalSearch';
+    this.searchByActivityStatus = 'global';
     this.currentPage = 1;
     this.hasSearched = false;
     this.hasError = false;
     this.errorMessage = '';
-    this.loadUsers();
-  }
-
-  toggleSortOrder(): void {
-    this.sortDescending = !this.sortDescending;
-    this.currentPage = 1;
     this.loadUsers();
   }
 
@@ -497,12 +513,6 @@ export class AdminUsersList implements OnInit {
     }
   }
 
-  onSearchKeypress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSearch();
-    }
-  }
-
   trackByUserId(index: number, user: IUserViewModel): number {
     return user.id;
   }
@@ -536,8 +546,38 @@ export class AdminUsersList implements OnInit {
   }
 
   impersonateUser(user: IUserViewModel): void {
-    console.log('Impersonate clicked for user:', user);
-    this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
-    this.showToast(`Impersonating ${user.name}`);
+    if (confirm(`Are you sure you want to impersonate ${user.name}? This will switch your session to act on behalf of this user.`)) {
+      console.log('Impersonate clicked for user:', user);
+      
+      this.authService.impersonate(user.id).subscribe({
+        next: (response: any) => {
+          this.authService.setImpersonation({ name: user.name, roles: user.roles || [] });
+          this.showToast(`Now impersonating ${user.name}. You can switch to their available roles.`);
+          console.log('Impersonation successful:', response);
+          
+          // Force navigation to role selector to trigger auth guard refresh
+          setTimeout(() => {
+            console.log('Navigating to role selector to refresh session...');
+            this.router.navigate(['/role-selector']);
+          }, 1000);
+        },
+        error: (err) => {
+          console.error('Failed to impersonate user:', err);
+          let errorMessage = 'Failed to impersonate user. ';
+          
+          if (err.status === 400) {
+            errorMessage += 'User may not exist or requires password change.';
+          } else if (err.status === 403) {
+            errorMessage += 'You do not have permission to impersonate users.';
+          } else if (err.status === 500) {
+            errorMessage += 'Server error occurred. Please try again later.';
+          } else {
+            errorMessage += 'Please try again.';
+          }
+          
+          alert(errorMessage);
+        }
+      });
+    }
   }
 }

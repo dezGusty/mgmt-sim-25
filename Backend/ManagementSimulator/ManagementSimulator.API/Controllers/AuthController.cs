@@ -2,6 +2,7 @@
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Services.Interfaces;
 using ManagementSimulator.Core.Dtos.Requests.ResetPassword;
+using ManagementSimulator.Core.Dtos.Requests.Impersonation;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -54,8 +55,26 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             return Unauthorized(new { message = "Invalid user ID." });
 
-        var originalRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
-        var effectiveRoles = new List<string>(originalRoles);
+        // Check if user is currently impersonating
+        var isImpersonatingClaim = User.FindFirst("IsImpersonating");
+        var isImpersonating = isImpersonatingClaim?.Value == "true";
+
+        List<string> originalRoles;
+        List<string> effectiveRoles;
+
+        if (isImpersonating)
+        {
+            // When impersonating, current roles are the impersonated user's roles
+            effectiveRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            // Original roles are the admin's roles stored in custom claims
+            originalRoles = User.FindAll("OriginalRole").Select(r => r.Value).ToList();
+        }
+        else
+        {
+            // Normal case - not impersonating
+            originalRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            effectiveRoles = new List<string>(originalRoles);
+        }
 
         var isActingAsSecondManager = await _authorizationService.IsUserActingAsSecondManagerAsync(userId);
         if (isActingAsSecondManager && !effectiveRoles.Contains("Manager"))
@@ -65,6 +84,9 @@ public class AuthController : ControllerBase
 
         var isTemporarilyReplaced = await _authorizationService.IsManagerTemporarilyReplacedAsync(userId);
 
+        // Check if impersonated user token is available
+        var hasValidImpersonationToken = User.FindFirst("HasValidImpersonationToken")?.Value == "true";
+
         return Ok(new
         {
             UserId = userIdClaim,
@@ -72,7 +94,13 @@ public class AuthController : ControllerBase
             Roles = effectiveRoles,
             OriginalRoles = originalRoles,
             IsActingAsSecondManager = isActingAsSecondManager,
-            IsTemporarilyReplaced = isTemporarilyReplaced
+            IsTemporarilyReplaced = isTemporarilyReplaced,
+            IsImpersonating = isImpersonating,
+            ImpersonatedUserId = isImpersonating ? User.FindFirst("ImpersonatedUserId")?.Value : null,
+            OriginalUserId = isImpersonating ? User.FindFirst("OriginalUserId")?.Value : null,
+            HasValidImpersonationToken = hasValidImpersonationToken,
+            // Indicate which authentication context should be used
+            ShouldUseImpersonationToken = isImpersonating && hasValidImpersonationToken
         });
     }
 
@@ -133,6 +161,44 @@ public class AuthController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error resetting password");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("impersonate")]
+    public async Task<IActionResult> Impersonate([FromBody] ImpersonateUserRequestDto request)
+    {
+        try
+        {
+            var success = await _authService.ImpersonateUserAsync(HttpContext, request.UserId);
+            if (!success)
+                return BadRequest(new { error = "Unable to impersonate user. User may not exist or requires password change." });
+
+            return Ok(new { message = "Successfully impersonating user." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error impersonating user {UserId}", request.UserId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("stop-impersonation")]
+    public async Task<IActionResult> StopImpersonation()
+    {
+        try
+        {
+            var success = await _authService.StopImpersonationAsync(HttpContext);
+            if (!success)
+                return BadRequest(new { error = "Not currently impersonating or unable to stop impersonation." });
+
+            return Ok(new { message = "Successfully stopped impersonation." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping impersonation");
             return StatusCode(500, new { error = "Internal server error" });
         }
     }
