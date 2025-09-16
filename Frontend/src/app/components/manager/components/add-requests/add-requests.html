@@ -535,18 +535,15 @@
       (reject)="onReject($event)"
       (actionCompleted)="onActionCompleted()"
     ></app-request-detail>
-    <button
-      class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"
-      (click)="closeDetails()"
-    >
-      Close
-    </button>
   </div>
 </div>
 <button
   *ngIf="selectedRequest"
-  class="fixed top-4 right-4 bg-gray-200 px-3 py-1 rounded transition-all duration-200 transform hover:scale-105"
+  class="fixed top-4 right-4 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-300 text-gray-600 hover:text-red-600 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110 z-50"
   (click)="closeDetails()"
+  title="Close details"
 >
-  Close
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+  </svg>
 </button>
