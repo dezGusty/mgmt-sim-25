@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { Auth } from '../services/authService/auth';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class LoginGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: Auth) {}
 
   async canActivate(): Promise<boolean | UrlTree> {
     const hasAuthCookies = this.hasAuthenticationCookies();
@@ -14,21 +15,17 @@ export class LoginGuard implements CanActivate {
     }
 
     try {
-      const response = await fetch(`${environment.apiUrl}/Auth/me`, {
-        credentials: 'include',
-      });
+      // Use the Auth service instead of direct fetch for consistency
+      const data = await firstValueFrom(this.authService.me());
 
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data && data.userId && data.email && data.roles) {
-          return this.router.parseUrl('/role-selector');
-        }
+      if (data && data.userId && data.email && data.roles) {
+        return this.router.parseUrl('/role-selector');
       }
 
       // User is not authenticated, allow access to login page
       return true;
-    } catch {
+    } catch (error) {
+      console.error('LoginGuard error:', error);
       // If there's an error, allow access to login page
       return true;
     }

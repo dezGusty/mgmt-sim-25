@@ -12,6 +12,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
     {
 
         Task<bool> LoginAsync(HttpContext httpContext, string email, string password);
+        Task<bool> ImpersonateUserAsync(HttpContext httpContext, int targetUserId);
+        Task<bool> StopImpersonationAsync(HttpContext httpContext);
         Task LogoutAsync(HttpContext httpContext);
     }
 

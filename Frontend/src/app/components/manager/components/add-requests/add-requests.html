@@ -1,6 +1,35 @@
 <div *ngIf="viewMode === 'card'">
   <div *ngIf="filteredRequests.length === 0" class="text-center text-gray-500 font-semibold py-8">
-    No results found
+    <div>No results found</div>
+    <div *ngIf="debugInfo.isImpersonating" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+      <div class="font-bold text-yellow-800 mb-2">🔍 Debug Info (Impersonation Mode)</div>
+      <div class="text-left text-xs text-yellow-700 space-y-1">
+        <div><strong>Impersonating:</strong> {{ debugInfo.impersonatedUserName }}</div>
+        <div><strong>Current Session User ID:</strong> {{ debugInfo.currentUserId }}</div>
+        <div><strong>Session Email:</strong> {{ debugInfo.currentUserEmail }}</div>
+        <div><strong>Effective Roles:</strong> {{ debugInfo.effectiveRoles.join(', ') }}</div>
+        <div><strong>Subordinates Count:</strong> 
+          <span *ngIf="debugInfo.subordinatesCount >= 0">{{ debugInfo.subordinatesCount }}</span>
+          <span *ngIf="debugInfo.subordinatesCount === -1" class="text-red-600">Error loading count</span>
+        </div>
+        <div class="mt-2 text-yellow-600">
+          <strong *ngIf="debugInfo.subordinatesCount === 0">Issue:</strong>
+          <strong *ngIf="debugInfo.subordinatesCount > 0">Note:</strong>
+          <span *ngIf="debugInfo.subordinatesCount === 0">This manager has 0 subordinates! That's why no leave requests appear.</span>
+          <span *ngIf="debugInfo.subordinatesCount > 0">This manager has {{ debugInfo.subordinatesCount }} subordinate(s) but no leave requests are showing.</span>
+        </div>
+        <div *ngIf="debugInfo.isAdminImpersonating" class="mt-3 pt-3 border-t border-yellow-300">
+          <button 
+            (click)="toggleAdminOverride()" 
+            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition-colors">
+            {{ getAdminOverrideButtonText() }}
+          </button>
+          <div *ngIf="adminOverrideMode" class="mt-2 text-blue-700 text-xs">
+            <strong>Admin Override Active:</strong> Viewing with admin perspective
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" *ngIf="filteredRequests.length > 0">
     <div
@@ -381,12 +410,43 @@
 <!-- Table view empty state messages -->
 <div *ngIf="viewMode === 'table'">
   <div *ngIf="filteredRequests.length === 0" class="text-center text-gray-500 font-semibold py-8">
-    <ng-container [ngSwitch]="searchCriteria">
-      <span *ngSwitchCase="'employee'">No employee found</span>
-      <span *ngSwitchCase="'department'">No department found</span>
-      <span *ngSwitchCase="'type'">No leave type found</span>
-      <span *ngSwitchDefault>No results found</span>
-    </ng-container>
+    <div>
+      <ng-container [ngSwitch]="searchCriteria">
+        <span *ngSwitchCase="'employee'">No employee found</span>
+        <span *ngSwitchCase="'department'">No department found</span>
+        <span *ngSwitchCase="'type'">No leave type found</span>
+        <span *ngSwitchDefault>No results found</span>
+      </ng-container>
+    </div>
+    <div *ngIf="debugInfo.isImpersonating" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+      <div class="font-bold text-yellow-800 mb-2">🔍 Debug Info (Impersonation Mode)</div>
+      <div class="text-left text-xs text-yellow-700 space-y-1">
+        <div><strong>Impersonating:</strong> {{ debugInfo.impersonatedUserName }}</div>
+        <div><strong>Current Session User ID:</strong> {{ debugInfo.currentUserId }}</div>
+        <div><strong>Session Email:</strong> {{ debugInfo.currentUserEmail }}</div>
+        <div><strong>Effective Roles:</strong> {{ debugInfo.effectiveRoles.join(', ') }}</div>
+        <div><strong>Subordinates Count:</strong> 
+          <span *ngIf="debugInfo.subordinatesCount >= 0">{{ debugInfo.subordinatesCount }}</span>
+          <span *ngIf="debugInfo.subordinatesCount === -1" class="text-red-600">Error loading count</span>
+        </div>
+        <div class="mt-2 text-yellow-600">
+          <strong *ngIf="debugInfo.subordinatesCount === 0">Issue:</strong>
+          <strong *ngIf="debugInfo.subordinatesCount > 0">Note:</strong>
+          <span *ngIf="debugInfo.subordinatesCount === 0">This manager has 0 subordinates! That's why no leave requests appear.</span>
+          <span *ngIf="debugInfo.subordinatesCount > 0">This manager has {{ debugInfo.subordinatesCount }} subordinate(s) but no leave requests are showing.</span>
+        </div>
+        <div *ngIf="debugInfo.isAdminImpersonating" class="mt-3 pt-3 border-t border-yellow-300">
+          <button 
+            (click)="toggleAdminOverride()" 
+            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition-colors">
+            {{ getAdminOverrideButtonText() }}
+          </button>
+          <div *ngIf="adminOverrideMode" class="mt-2 text-blue-700 text-xs">
+            <strong>Admin Override Active:</strong> Viewing with admin perspective
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- ...existing table rendering code... -->
 </div>

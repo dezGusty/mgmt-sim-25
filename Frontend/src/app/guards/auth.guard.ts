@@ -7,23 +7,21 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Auth } from '../services/authService/auth';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: Auth) { }
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean | UrlTree> {
     try {
-      const response = await fetch(`${environment.apiUrl}/Auth/me`, {
-        credentials: 'include',
-      });
+      // Use the Auth service instead of direct fetch to ensure consistency
+      const data = await firstValueFrom(this.authService.me());
 
-      if (!response.ok) {
+      if (!data) {
         return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
       }
-
-      const data = await response.json();
 
       if (data && data.userId && data.email && data.roles) {
         const effectiveRoles: string[] = data.roles;
@@ -51,7 +49,8 @@ export class AuthGuard implements CanActivate {
       }
 
       return this.router.parseUrl('/role-selector');
-    } catch {
+    } catch (error) {
+      console.error('AuthGuard error:', error);
       return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
     }
   }
