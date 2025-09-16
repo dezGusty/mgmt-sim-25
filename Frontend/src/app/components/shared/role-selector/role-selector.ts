@@ -158,7 +158,7 @@ export class RoleSelector implements OnInit {
 
   selectAdminRole(role: UserRole) {
     console.log(`Admin selected original role while impersonating: ${role.name}`);
-    
+
     // First stop impersonation, then navigate to admin role
     this.auth.stopImpersonation().subscribe({
       next: () => {
@@ -167,7 +167,7 @@ export class RoleSelector implements OnInit {
         this.impersonatedUserName = '';
         this.impersonatedRoles = [];
         this.adminOriginalRoles = [];
-        
+
         // Navigate to the admin role
         console.log(`Impersonation stopped, navigating to admin role: ${role.route}`);
         this.router.navigate([role.route]);
@@ -181,6 +181,33 @@ export class RoleSelector implements OnInit {
         this.impersonatedRoles = [];
         this.adminOriginalRoles = [];
         this.router.navigate([role.route]);
+      }
+    });
+  }
+
+  stopImpersonation() {
+    console.log('Stopping impersonation...');
+
+    this.auth.stopImpersonation().subscribe({
+      next: () => {
+        this.auth.clearImpersonation();
+        this.isImpersonating = false;
+        this.impersonatedUserName = '';
+        this.impersonatedRoles = [];
+        this.adminOriginalRoles = [];
+
+        // Reload the page to refresh the role selector with normal roles
+        this.loadUserRoles();
+      },
+      error: (err) => {
+        console.error('Error stopping impersonation:', err);
+        // Still try to clear local state and reload
+        this.auth.clearImpersonation();
+        this.isImpersonating = false;
+        this.impersonatedUserName = '';
+        this.impersonatedRoles = [];
+        this.adminOriginalRoles = [];
+        this.loadUserRoles();
       }
     });
   }
