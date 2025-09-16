@@ -26,6 +26,10 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   @Input() searchCriteria: 'all' | 'employee' | 'department' | 'type' = 'all';
   @Output() dataRefreshed = new EventEmitter<void>();
 
+  get currentFilter(): 'All' | 'Pending' | 'Approved' | 'Rejected' {
+    return this.filter;
+  }
+
   private searchSubscription?: Subscription;
   searchTerm: string = '';
 
@@ -69,26 +73,29 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
 
   Math = Math;
 
+  private hasInitialized = false;
+
   ngOnInit() {
-    this.loadDebugInfo();
-    this.loadRequests();
-    
     if (this.debouncedSearchTerm$) {
       this.searchSubscription = this.debouncedSearchTerm$.subscribe(searchTerm => {
-        this.searchTerm = searchTerm;
-        this.currentPage = 1;
-        this.totalPages = 0;
-        this.totalCount = 0;
-        this.loadRequests();
+        if (this.hasInitialized && this.searchTerm !== searchTerm) {
+          this.searchTerm = searchTerm;
+          this.currentPage = 1;
+          this.totalPages = 0;
+          this.totalCount = 0;
+          this.loadRequests();
+        } else {
+          this.searchTerm = searchTerm;
+        }
       });
     }
-
-    // Subscribe to impersonation changes
-    this.authService.impersonation$.subscribe(info => {
-      this.debugInfo.isImpersonating = !!info;
-      this.debugInfo.impersonatedUserName = info?.name || '';
-      console.log('Impersonation changed:', this.debugInfo);
-    });
+    
+    setTimeout(() => {
+      if (!this.hasInitialized) {
+        this.loadRequests();
+        this.hasInitialized = true;
+      }
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -98,7 +105,7 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filter'] || changes['searchCriteria']) {
+    if (this.hasInitialized && (changes['filter'] || changes['searchCriteria'])) {
       this.currentPage = 1;
       this.totalPages = 0;
       this.totalCount = 0;
@@ -496,24 +503,7 @@ export class AddRequests implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  toggleAdminOverride(): void {
-    if (this.debugInfo.isAdminImpersonating) {
-      this.adminOverrideMode = !this.adminOverrideMode;
-      console.log('Admin override mode:', this.adminOverrideMode);
-      
-      if (this.adminOverrideMode) {
-        // When admin override is enabled, show a message and potentially load all data
-        console.log('Admin override enabled - could show all leave requests or different data');
-        // For now, just reload with current approach
-        this.loadRequests();
-      } else {
-        // When disabled, reload with normal impersonation behavior
-        this.loadRequests();
-      }
-    }
-  }
-
-  getAdminOverrideButtonText(): string {
-    return this.adminOverrideMode ? 'View as Impersonated Manager' : 'View as Admin';
+  trackByRequestId(index: number, req: ILeaveRequest): string {
+    return req.id;
   }
 }
