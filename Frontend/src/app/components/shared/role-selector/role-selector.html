@@ -139,9 +139,7 @@
             <!-- Left Navigation Button -->
             <button *ngIf="showCarouselControls" 
                     (click)="previousSlide()"
-                    class="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    [class.opacity-50]="currentSlide === 0"
-                    [disabled]="currentSlide === 0">
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110">
               <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
@@ -152,8 +150,8 @@
               <div *ngFor="let role of userRoles; let i = index" 
                    class="absolute carousel-card transition-all duration-500 ease-out"
                    [class.active]="i === currentSlide"
-                   [class.prev]="i === currentSlide - 1"
-                   [class.next]="i === currentSlide + 1"
+                   [class.prev]="isPrevCard(i)"
+                   [class.next]="isNextCard(i)"
                    [class.hidden]="!isCardVisible(i)"
                    [style.z-index]="getCardZIndex(i)"
                    (click)="onCardClick(role, i)"
@@ -192,9 +190,7 @@
             <!-- Right Navigation Button -->
             <button *ngIf="showCarouselControls" 
                     (click)="nextSlide()"
-                    class="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    [class.opacity-50]="currentSlide >= maxSlide"
-                    [disabled]="currentSlide >= maxSlide">
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110">
               <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>

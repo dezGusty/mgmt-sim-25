@@ -243,12 +243,18 @@ export class RoleSelector implements OnInit {
   nextSlide() {
     if (this.currentSlide < this.maxSlide) {
       this.currentSlide++;
+    } else {
+      // Infinite scroll: go back to first slide
+      this.currentSlide = 0;
     }
   }
 
   previousSlide() {
     if (this.currentSlide > 0) {
       this.currentSlide--;
+    } else {
+      // Infinite scroll: go to last slide
+      this.currentSlide = this.maxSlide;
     }
   }
 
@@ -280,7 +286,30 @@ export class RoleSelector implements OnInit {
   }
 
   isCardVisible(index: number): boolean {
-    return Math.abs(index - this.currentSlide) <= 1;
+    // Always show 3 cards: previous, current, and next (with infinite scroll)
+    const totalCards = this.userRoles.length;
+    if (totalCards <= 3) {
+      // If 3 or fewer cards, show all
+      return true;
+    }
+    
+    // For more than 3 cards, show current, previous, and next with infinite wrapping
+    const prevIndex = this.currentSlide === 0 ? totalCards - 1 : this.currentSlide - 1;
+    const nextIndex = this.currentSlide === totalCards - 1 ? 0 : this.currentSlide + 1;
+    
+    return index === this.currentSlide || index === prevIndex || index === nextIndex;
+  }
+
+  isPrevCard(index: number): boolean {
+    const totalCards = this.userRoles.length;
+    const prevIndex = this.currentSlide === 0 ? totalCards - 1 : this.currentSlide - 1;
+    return index === prevIndex;
+  }
+
+  isNextCard(index: number): boolean {
+    const totalCards = this.userRoles.length;
+    const nextIndex = this.currentSlide === totalCards - 1 ? 0 : this.currentSlide + 1;
+    return index === nextIndex;
   }
 
   // Touch/swipe event handlers
