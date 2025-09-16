@@ -13,6 +13,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
         Task<T> AddAsync(T entity);
         Task<T?> UpdateAsync(T entity);
         Task<bool> DeleteAsync(int primaryKey);
+        Task<bool> HardDeleteAsync(int primaryKey);
         Task SaveChangesAsync();
     }
 }

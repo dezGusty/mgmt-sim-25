@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface IHrUserDto {
@@ -48,7 +49,7 @@ export interface ImportedPublicHoliday {
 
 export interface OpenHolidaysAPIResponse {
   id: string;
-  name: any; // Can be string, array, or object depending on the API response
+  name: any;
   startDate: string;
   endDate: string;
   type: string;
@@ -83,7 +84,71 @@ export class HrService {
 
   getPublicHolidays(year: number): Observable<PublicHoliday[]> {
     const params = new HttpParams().set('year', year.toString());
-    return this.http.get<PublicHoliday[]>(`${this.baseUrl}/public-holidays`, { params });
+    return this.http.get<any>(`${this.baseUrl}/public-holidays`, { params }).pipe(
+      map((response: any) => {
+        if (Array.isArray(response)) {
+          return response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          return response.data;
+        } else if (response?.Data && Array.isArray(response.Data)) {
+          return response.Data;
+        }
+        return [];
+      })
+    );
+  }
+
+  getPublicHolidaysPaginated(year: number, page: number, pageSize: number): Observable<IPagedResponse<PublicHoliday>> {
+    let params = new HttpParams()
+      .set('year', year.toString())
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<any>(`${this.baseUrl}/public-holidays`, { params }).pipe(
+      map((response: any) => {
+        let holidays: PublicHoliday[] = [];
+        let totalCount = 0;
+        
+        // Extract holidays from different response formats
+        if (Array.isArray(response)) {
+          holidays = response;
+          totalCount = response.length;
+        } else if (response?.data && Array.isArray(response.data)) {
+          holidays = response.data;
+          totalCount = response.totalCount || response.TotalCount || response.data.length;
+        } else if (response?.Data && Array.isArray(response.Data)) {
+          holidays = response.Data;
+          totalCount = response.TotalCount || response.totalCount || response.Data.length;
+        }
+
+        // Check if backend provided pagination info
+        const hasServerPagination = response?.totalCount !== undefined || response?.TotalCount !== undefined;
+        
+        if (hasServerPagination) {
+          // Backend supports pagination, use server-side data
+          return {
+            data: holidays,
+            totalCount: totalCount,
+            page: response.page || response.Page || page,
+            pageSize: response.pageSize || response.PageSize || pageSize,
+            totalPages: response.totalPages || response.TotalPages || Math.ceil(totalCount / pageSize)
+          };
+        } else {
+          // Backend doesn't support pagination, implement client-side pagination
+          const startIndex = (page - 1) * pageSize;
+          const endIndex = startIndex + pageSize;
+          const paginatedData = holidays.slice(startIndex, endIndex);
+          
+          return {
+            data: paginatedData,
+            totalCount: holidays.length,
+            page: page,
+            pageSize: pageSize,
+            totalPages: Math.ceil(holidays.length / pageSize)
+          };
+        }
+      })
+    );
   }
 
   createPublicHoliday(holiday: Omit<PublicHoliday, 'id'>): Observable<PublicHoliday> {
@@ -196,5 +261,85 @@ export class HrService {
 
       return imported;
     });
+  }
+
+  importValidHolidays(importedHolidays: ImportedPublicHoliday[], year: number): Observable<{
+    successful: PublicHoliday[];
+    duplicates: string[];
+    errors: { holiday: ImportedPublicHoliday; error: any }[];
+  }> {
+    const validHolidays = importedHolidays
+      .filter(imported => imported.isValid)
+      .map(imported => this.convertImportedToPublicHoliday(imported));
+
+    const successful: PublicHoliday[] = [];
+    const duplicates: string[] = [];
+    const errors: { holiday: ImportedPublicHoliday; error: any }[] = [];
+
+    return this.getPublicHolidays(year).pipe(
+      switchMap((response: any) => {
+        let currentHolidays: PublicHoliday[] = [];
+        if (Array.isArray(response)) {
+          currentHolidays = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          currentHolidays = response.data;
+        } else if (response?.Data && Array.isArray(response.Data)) {
+          currentHolidays = response.Data;
+        }
+
+        const createPromises = validHolidays.map((holiday, index) => {
+          const isDuplicate = currentHolidays.some(existing => 
+            existing.name.toLowerCase() === holiday.name.toLowerCase() && 
+            existing.date === holiday.date
+          );
+
+          if (isDuplicate) {
+            duplicates.push(holiday.name);
+            return Promise.resolve(null);
+          }
+
+          return this.createPublicHoliday(holiday).toPromise()
+            .then((createdHoliday: PublicHoliday | undefined) => {
+              if (!createdHoliday) return null;
+              
+              let result: PublicHoliday;
+              if ((createdHoliday as any)?.data) {
+                result = (createdHoliday as any).data;
+              } else if ((createdHoliday as any)?.Data) {
+                result = (createdHoliday as any).Data;
+              } else {
+                result = createdHoliday;
+              }
+              successful.push(result);
+              return result;
+            })
+            .catch((error: any) => {
+              // Check if it's a 409 Conflict error (duplicate)
+              if (error.status === 409) {
+                duplicates.push(holiday.name);
+              } else {
+                errors.push({ 
+                  holiday: importedHolidays.filter(imported => imported.isValid)[index], 
+                  error 
+                });
+              }
+              return null;
+            });
+        });
+
+        return new Observable<{
+          successful: PublicHoliday[];
+          duplicates: string[];
+          errors: { holiday: ImportedPublicHoliday; error: any }[];
+        }>(observer => {
+          Promise.all(createPromises).then(() => {
+            observer.next({ successful, duplicates, errors });
+            observer.complete();
+          }).catch(error => {
+            observer.error(error);
+          });
+        });
+      })
+    );
   }
 }

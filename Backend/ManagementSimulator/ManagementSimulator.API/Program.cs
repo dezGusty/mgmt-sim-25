@@ -5,6 +5,7 @@ using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Infrastructure;
 using ManagementSimulator.Infrastructure.Config;
 using ManagementSimulator.Infrastructure.Middleware;
+using ManagementSimulator.API.Middleware;
 using ManagementSimulator.Infrastructure.Seeding;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -94,6 +95,8 @@ app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.UseMiddleware<DebounceMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();

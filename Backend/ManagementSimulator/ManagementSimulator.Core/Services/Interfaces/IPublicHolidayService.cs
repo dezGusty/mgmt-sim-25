@@ -11,6 +11,8 @@ namespace ManagementSimulator.Core.Services.Interfaces
         Task<PublicHolidayResponseDto> CreateHolidayAsync(CreatePublicHolidayRequestDto request);
         Task<PublicHolidayResponseDto?> UpdateHolidayAsync(int id, UpdatePublicHolidayRequestDto request);
         Task<bool> DeleteHolidayAsync(int id);
+        Task<bool> HardDeleteHolidayAsync(int id);
         Task<PagedResponseDto<PublicHolidayResponseDto>> GetAllHolidaysFilteredAsync(QueriedPublicHolidayRequestDto request);
+        Task<List<PublicHolidayResponseDto>> GetHolidaysInRangeAsync(DateTime startDate, DateTime endDate);
     }
 }

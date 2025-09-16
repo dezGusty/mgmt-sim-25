@@ -1,6 +1,7 @@
 ﻿using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
+using ManagementSimulator.Core.Dtos.Responses.Users;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -135,7 +136,7 @@ namespace ManagementSimulator.API.Controllers
             });
         }
 
-        /*[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("admins/queried")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -161,7 +162,7 @@ namespace ManagementSimulator.API.Controllers
                 Success = true,
                 Timestamp = DateTime.UtcNow
             });
-        }*/
+        }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("queried")]
@@ -414,5 +415,38 @@ namespace ManagementSimulator.API.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("globalSearch")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GlobalSearchAsync([FromQuery] GlobalSearchRequestDto request)
+        {
+            var result = await _userService.GlobalSearchAsync(request);
+
+            var hasData = (result.Managers?.Data?.Any() == true) ||
+                         (result.Admins?.Data?.Any() == true) ||
+                             (result.UnassignedUsers?.Data?.Any() == true);
+
+                if (!hasData && !string.IsNullOrEmpty(request.GlobalSearch))
+                {
+                    return NotFound(new
+                    {
+                        Message = $"No results found for search term '{request.GlobalSearch}'.",
+                        Data = result,
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                return Ok(new
+                {
+                    Message = "Global search completed successfully.",
+                    Data = result,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+       }
     }
-}

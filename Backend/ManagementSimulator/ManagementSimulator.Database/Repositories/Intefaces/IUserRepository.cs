@@ -12,7 +12,7 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
     {
         Task<(List<User>? Data, int TotalCount)> GetAllUnassignedUsersFilteredAsync(QueryParams parameters, string? globalSearch = null, string? unassignedName = null, string? jobTitle = null, bool includeDeleted = false, bool tracking = false);
         Task<List<User>> GetAllAdminsAsync(string? name, string? email, bool includeDeleted = false, bool tracking = false);
-        //Task<(List<User>? Data, int TotalCount)> GetAllAdminsFilteredAsync(string? name, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool includeDeleted = false, bool tracking = false);
+        Task<(List<User> Data, int TotalCount)> GetAllAdminsFilteredAsync(string? globalSearch, string? name, string? email, string? jobTitle, string? department, QueryParams parameters, bool includeDeleted = false, bool tracking = false);
         Task<List<User>> GetAllUsersIncludeRelationshipsAsync(bool includeDeleted = false, bool tracking = false);
         Task<User?> GetUserByEmail(string email, bool includeDeleted = false, bool tracking = false);
         Task<(List<User>? Data, int TotalCount)> GetAllUsersWithReferencesFilteredAsync(string? name, string? email, string? department, string? jobTitle, string? globalSearch, QueryParams parameters, bool includeDeleted = false, bool tracking = false);

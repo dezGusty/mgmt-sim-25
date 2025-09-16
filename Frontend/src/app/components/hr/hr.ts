@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
-import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday } from '../../services/hr/hr.service';
+import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday, IPagedResponse } from '../../services/hr/hr.service';
 import { HolidayCalendarComponent } from './calendar/holiday-calendar.component';
 import * as Papa from 'papaparse';
 
@@ -27,6 +27,7 @@ export class Hr {
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
+  isLoading = false;
 
   editingIndex: number | null = null;
   editModel: Partial<HrRecord> | null = null;
@@ -36,13 +37,24 @@ export class Hr {
   editHolidayModel: Partial<PublicHoliday> | null = null;
   isAddingNewHoliday = false;
   
+  // Pagination for public holidays
+  holidaysCurrentPage = 1;
+  holidaysPageSize = 10;
+  holidaysTotalCount = 0;
+  
   importedHolidays: ImportedPublicHoliday[] = [];
   showImportPreview = false;
   
   currentView: 'table' | 'calendar' = 'table';
+  
+  activeTab: 'vacation' | 'holidays' = 'vacation';
 
   get validImportedHolidaysCount(): number {
     return this.importedHolidays.filter(h => h.isValid).length;
+  }
+
+  setActiveTab(tab: 'vacation' | 'holidays') {
+    this.activeTab = tab;
   }
 
   constructor(private hrService: HrService) {}
@@ -54,6 +66,7 @@ export class Hr {
   }
 
   loadPage(year: number, page: number, pageSize: number) {
+    this.isLoading = true;
     this.hrService.getUsers(year, page, pageSize).subscribe({
       next: (res: any) => {
         const paged = res?.data || res; 
@@ -68,11 +81,24 @@ export class Hr {
         }));
 
         this.totalCount = paged?.totalCount || paged?.TotalCount || this.records.length;
+        this.isLoading = false;
       },
       error: (err: any) => {
         console.error('Failed to load HR users', err);
+        this.isLoading = false;
       }
     });
+  }
+
+  createEmptyRecords() {
+    this.records = Array(this.pageSize).fill(null).map((_, index) => ({
+      id: -1,
+      name: '...',
+      department: '...',
+      totalVacationDays: 0,
+      usedVacationDays: 0,
+      remainingVacationDays: 0
+    }));
   }
 
   getDisplayId(index: number): number {
@@ -121,35 +147,63 @@ export class Hr {
   }
 
   prevPage() {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 1 && !this.isLoading) {
       this.currentPage--;
+      this.createEmptyRecords();
       this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
     }
   }
 
   nextPage() {
-    this.currentPage++;
-    this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
+    if (!this.isLoading) {
+      this.currentPage++;
+      this.createEmptyRecords(); // Show empty rows while loading new page
+      this.loadPage(new Date().getFullYear(), this.currentPage, this.pageSize);
+    }
   }
 
 
+  prevHolidaysPage() {
+    if (this.holidaysCurrentPage > 1) {
+      this.holidaysCurrentPage--;
+      this.loadPublicHolidaysPage(new Date().getFullYear(), this.holidaysCurrentPage, this.holidaysPageSize);
+    }
+  }
+
+  nextHolidaysPage() {
+    this.holidaysCurrentPage++;
+    this.loadPublicHolidaysPage(new Date().getFullYear(), this.holidaysCurrentPage, this.holidaysPageSize);
+  }
+
+  getHolidaysDisplayId(index: number): number {
+    return (this.holidaysCurrentPage - 1) * this.holidaysPageSize + index + 1;
+  }
+
+  getActualHolidayCount(): number {
+    return this.publicHolidays.filter(h => h.id).length;
+  }
+
+  getDisplayedHolidays(): PublicHoliday[] {
+    return this.publicHolidays.filter(h => h.id !== undefined);
+  }
+
   loadPublicHolidays(year: number) {
-    this.hrService.getPublicHolidays(year).subscribe({
-      next: (response: any) => {
-        // Handle different response formats
-        if (Array.isArray(response)) {
-          this.publicHolidays = response;
-        } else if (response?.data && Array.isArray(response.data)) {
-          this.publicHolidays = response.data;
-        } else if (response?.Data && Array.isArray(response.Data)) {
-          this.publicHolidays = response.Data;
-        } else {
-          this.publicHolidays = [];
-        }
+    this.loadPublicHolidaysPage(year, this.holidaysCurrentPage, this.holidaysPageSize);
+  }
+
+  loadPublicHolidaysPage(year: number, page: number, pageSize: number) {
+    this.hrService.getPublicHolidaysPaginated(year, page, pageSize).subscribe({
+      next: (response: IPagedResponse<PublicHoliday>) => {
+        this.publicHolidays = response.data || [];
+        this.holidaysTotalCount = response.totalCount || 0;
+        this.holidaysCurrentPage = response.page || page;
+        
+
       },
       error: (err: any) => {
         console.error('Failed to load public holidays', err);
         this.publicHolidays = [];
+        this.holidaysTotalCount = 0;
       }
     });
   }
@@ -183,18 +237,8 @@ export class Hr {
     if (holiday.id) {
       this.hrService.updatePublicHoliday(holiday).subscribe({
         next: (response: any) => {
-          // Handle different response formats
-          let updatedHoliday: PublicHoliday;
-          if (response?.data) {
-            updatedHoliday = response.data;
-          } else if (response?.Data) {
-            updatedHoliday = response.Data;
-          } else {
-            updatedHoliday = response;
-          }
-          
-          this.publicHolidays[index] = updatedHoliday;
           this.cancelHolidayEdit();
+          this.loadPublicHolidaysPage(new Date().getFullYear(), this.holidaysCurrentPage, this.holidaysPageSize);
         },
         error: (err: any) => {
           console.error('Failed to update public holiday', err);
@@ -204,23 +248,8 @@ export class Hr {
     } else {
       this.hrService.createPublicHoliday(holiday).subscribe({
         next: (response: any) => {
-          // Handle different response formats
-          let newHoliday: PublicHoliday;
-          if (response?.data) {
-            newHoliday = response.data;
-          } else if (response?.Data) {
-            newHoliday = response.Data;
-          } else {
-            newHoliday = response;
-          }
-          
-          if (this.isAddingNewHoliday) {
-            this.publicHolidays.splice(index, 1);
-            this.publicHolidays.push(newHoliday);
-          } else {
-            this.publicHolidays[index] = newHoliday;
-          }
           this.cancelHolidayEdit();
+          this.loadPublicHolidaysPage(new Date().getFullYear(), this.holidaysCurrentPage, this.holidaysPageSize);
         },
         error: (err: any) => {
           console.error('Failed to create public holiday', err);
@@ -262,40 +291,19 @@ export class Hr {
   }
 
   cancelHolidayEdit() {
-    if (this.isAddingNewHoliday && this.editingHolidayIndex !== null) {
-      this.publicHolidays.splice(this.editingHolidayIndex, 1);
-    }
+    // Reset editing state
     this.editingHolidayIndex = null;
     this.editHolidayModel = null;
     this.isAddingNewHoliday = false;
   }
 
   addNewHoliday() {
-    console.log('Adding new holiday...'); // Debug log
-    console.log('Current publicHolidays:', this.publicHolidays); // Debug log
-
-    // Ensure publicHolidays is an array
-    if (!Array.isArray(this.publicHolidays)) {
-      this.publicHolidays = [];
-    }
-
     // Cancel any existing editing
     if (this.editingHolidayIndex !== null) {
       this.cancelHolidayEdit();
     }
 
-    // Remove any existing unsaved holidays (those without IDs)
-    this.publicHolidays = this.publicHolidays.filter(h => h.id);
-
-    const newHoliday: PublicHoliday = {
-      name: '',
-      date: '',
-      isRecurring: false
-    } as PublicHoliday;
-    
-    this.publicHolidays.push(newHoliday);
-    const newIndex = this.publicHolidays.length - 1;
-    this.editingHolidayIndex = newIndex;
+    this.editingHolidayIndex = -1; 
     this.editHolidayModel = {
       name: '',
       date: '',
@@ -303,8 +311,30 @@ export class Hr {
     };
     this.isAddingNewHoliday = true;
 
-    console.log('New holiday added at index:', newIndex); // Debug log
-    console.log('Updated publicHolidays:', this.publicHolidays); // Debug log
+  }
+
+  saveNewHoliday() {
+    if (!this.editHolidayModel || !this.validateHoliday(this.editHolidayModel)) {
+      return;
+    }
+
+    const holiday: Omit<PublicHoliday, 'id'> = {
+      name: this.editHolidayModel.name!.trim(),
+      date: this.editHolidayModel.date!,
+      isRecurring: this.editHolidayModel.isRecurring || false
+    };
+
+    this.hrService.createPublicHoliday(holiday).subscribe({
+      next: (response: any) => {
+        console.log('Holiday created successfully:', response);
+        this.cancelHolidayEdit();
+        const year = new Date().getFullYear();
+        this.loadPublicHolidaysPage(year, this.holidaysCurrentPage, this.holidaysPageSize);
+      },
+      error: (err: any) => {
+        console.error('Failed to create holiday', err);
+      }
+    });
   }
 
   deleteHoliday(index: number) {
@@ -317,7 +347,7 @@ export class Hr {
     if (confirm(`Are you sure you want to delete "${holiday.name}"?`)) {
       this.hrService.deletePublicHoliday(holiday.id).subscribe({
         next: () => {
-          this.publicHolidays.splice(index, 1);
+          this.loadPublicHolidaysPage(new Date().getFullYear(), this.holidaysCurrentPage, this.holidaysPageSize);
         },
         error: (err: any) => {
           console.error('Failed to delete public holiday', err);
@@ -415,28 +445,42 @@ export class Hr {
   }
 
   importValidHolidays() {
-    const validHolidays = this.importedHolidays
-      .filter(imported => imported.isValid)
-      .map(imported => this.hrService.convertImportedToPublicHoliday(imported));
+    if (this.importedHolidays.length === 0) {
+      return;
+    }
 
-    const existingHolidays = this.publicHolidays.filter(h => h.id);
+    const currentYear = new Date().getFullYear();
     
-    validHolidays.forEach(holiday => {
-      const isDuplicate = existingHolidays.some(existing => 
-        existing.name.toLowerCase() === holiday.name.toLowerCase() && 
-        existing.date === holiday.date
-      );
-
-      if (!isDuplicate) {
-        this.publicHolidays.push({
-          ...holiday,
-          id: undefined
-        } as PublicHoliday);
+    this.hrService.importValidHolidays(this.importedHolidays, currentYear).subscribe({
+      next: (result) => {
+        let message = '';
+        
+        if (result.successful.length > 0) {
+          message += `Successfully imported ${result.successful.length} holiday(s). `;
+          this.loadPublicHolidaysPage(currentYear, this.holidaysCurrentPage, this.holidaysPageSize);
+        }
+        
+        if (result.duplicates.length > 0) {
+          message += `Warning: ${result.duplicates.length} holiday(s) already exist and were skipped: ${result.duplicates.join(', ')}. `;
+        }
+        
+        if (result.errors.length > 0) {
+          message += `Failed to import ${result.errors.length} holiday(s) due to errors. `;
+          console.error('Import errors:', result.errors);
+        }
+        
+        if (message) {
+          alert(message.trim());
+        }
+        
+        this.showImportPreview = false;
+        this.importedHolidays = [];
+      },
+      error: (error) => {
+        console.error('Error during import:', error);
+        alert('An error occurred during import. Please try again.');
       }
     });
-
-    this.showImportPreview = false;
-    this.importedHolidays = [];
   }
 
   cancelImport() {
@@ -474,12 +518,10 @@ export class Hr {
   }
 
   onCalendarDateClick(date: Date) {
-    // Cancel any existing editing first
     if (this.editingHolidayIndex !== null) {
       this.cancelHolidayEdit();
     }
 
-    // Add new holiday for the clicked date
     const newHoliday: PublicHoliday = {
       name: '',
       date: this.formatDateForInput(date),
@@ -496,12 +538,10 @@ export class Hr {
     };
     this.isAddingNewHoliday = true;
 
-    // Switch to table view to show the editing interface
     this.currentView = 'table';
   }
 
   onCalendarHolidayClick(holiday: PublicHoliday) {
-    // Find the holiday in the array and start editing it
     const index = this.publicHolidays.findIndex(h => 
       h.id === holiday.id || 
       (h.name === holiday.name && h.date === holiday.date)
@@ -509,7 +549,6 @@ export class Hr {
     
     if (index !== -1) {
       this.startEditHoliday(index);
-      // Switch to table view to show the editing interface
       this.currentView = 'table';
     }
   }
