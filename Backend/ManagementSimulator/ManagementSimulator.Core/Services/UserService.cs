@@ -32,6 +32,7 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly MGMTSimulatorDbContext _dbContext;
         private readonly IAvailabilityService _availabilityService;
+        private readonly IWeekendService _weekendService;
 
         public UserService(
             IUserRepository userRepository,
@@ -44,7 +45,8 @@ namespace ManagementSimulator.Core.Services
             ILeaveRequestTypeRepository leaveRequestTypeRepository,
             ILeaveRequestRepository leaveRequestRepository,
             MGMTSimulatorDbContext dbContext,
-            IAvailabilityService availabilityService)
+            IAvailabilityService availabilityService,
+            IWeekendService weekendService)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -57,6 +59,7 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestRepository = leaveRequestRepository;
             _dbContext = dbContext;
             _availabilityService = availabilityService;
+            _weekendService = weekendService;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -349,17 +352,8 @@ namespace ManagementSimulator.Core.Services
 
             foreach (var request in leaveRequests)
             {
-                var current = request.StartDate.Date;
-                var end = request.EndDate.Date;
-
-                while (current <= end)
-                {
-                    if (current.DayOfWeek != DayOfWeek.Saturday && current.DayOfWeek != DayOfWeek.Sunday)
-                    {
-                        totalDays++;
-                    }
-                    current = current.AddDays(1);
-                }
+                var workingDays = _weekendService.CountWorkingDays(request.StartDate.Date, request.EndDate.Date, new HashSet<DateTime>());
+                totalDays += workingDays;
             }
 
             return totalDays;
