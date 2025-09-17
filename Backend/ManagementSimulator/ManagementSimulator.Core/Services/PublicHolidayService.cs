@@ -187,6 +187,11 @@ namespace ManagementSimulator.Core.Services
         {
             var holidays = await _repository.GetHolidaysInRangeAsync(startDate, endDate);
 
+            if (holidays == null)
+            {
+                return new List<PublicHolidayResponseDto>();
+            }
+
             return holidays.Select(h => new PublicHolidayResponseDto
             {
                 Id = h.Id,
