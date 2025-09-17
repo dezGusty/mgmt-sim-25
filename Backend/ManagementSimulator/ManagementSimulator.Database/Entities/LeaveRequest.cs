@@ -12,13 +12,13 @@ namespace ManagementSimulator.Database.Entities
     {
         // navigation properties
         public int UserId { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         public int? ReviewerId { get; set; }
         public User? Reviewer { get; set; }
 
         public int LeaveRequestTypeId { get; set; }
-        public LeaveRequestType LeaveRequestType { get; set; }
+        public LeaveRequestType LeaveRequestType { get; set; } = null!;
 
         // fields
         public DateTime StartDate { get; set; }
