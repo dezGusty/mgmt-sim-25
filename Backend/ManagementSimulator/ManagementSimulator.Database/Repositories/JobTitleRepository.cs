@@ -17,7 +17,7 @@ namespace ManagementSimulator.Database.Repositories
     {
 
         private readonly MGMTSimulatorDbContext _dbContext;
-        public JobTitleRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
+        public JobTitleRepository(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : base(databaseContext, auditService)
         {
             _dbContext = databaseContext;
         }
@@ -26,7 +26,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<JobTitle?> query = _dbContext.JobTitles;
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)

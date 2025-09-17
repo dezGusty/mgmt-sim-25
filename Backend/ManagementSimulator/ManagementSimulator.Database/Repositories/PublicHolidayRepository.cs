@@ -7,7 +7,7 @@ namespace ManagementSimulator.Database.Repositories
 {
     public class PublicHolidayRepository : BaseRepository<PublicHoliday>, IPublicHolidayRepository
     {
-        public PublicHolidayRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
+        public PublicHolidayRepository(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : base(databaseContext, auditService)
         {
         }
 

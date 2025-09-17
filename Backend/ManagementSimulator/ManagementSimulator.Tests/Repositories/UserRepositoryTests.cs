@@ -37,7 +37,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = adminRole, User = u3 });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var admins = await repo.GetAllAdminsAsync(name: "A", email: null);
 
 			admins.Should().HaveCount(2);

@@ -17,7 +17,7 @@ namespace ManagementSimulator.Database.Repositories
     internal class LeaveRequestTypeRepository : BaseRepository<LeaveRequestType>, ILeaveRequestTypeRepository
     {
         private readonly MGMTSimulatorDbContext _dbContext;
-        public LeaveRequestTypeRepository(MGMTSimulatorDbContext dbContext) : base(dbContext)
+        public LeaveRequestTypeRepository(MGMTSimulatorDbContext dbContext, IAuditService auditService) : base(dbContext, auditService)
         {
             _dbContext = dbContext;
         }
@@ -27,7 +27,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<LeaveRequestType> query = GetRecords(includeDeletedEntities: includeDeleted);
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!string.IsNullOrEmpty(title))

@@ -11,7 +11,7 @@ using ManagementSimulator.Infrastructure.Exceptions;
 
 namespace ManagementSimulator.Core.Services
 {
-    public class JobTitleService: IJobTitleService
+    public class JobTitleService : IJobTitleService
     {
         private readonly IJobTitleRepository _jobTitleRepository;
         private readonly IDeparmentRepository _departmentRepository;
@@ -53,7 +53,7 @@ namespace ManagementSimulator.Core.Services
             JobTitle? jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!, includeDeleted: true);
             if (jt != null)
             {
-                throw new UniqueConstraintViolationException(nameof(JobTitle),nameof(JobTitle.Name));
+                throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
             var newJobTitle = new JobTitle
@@ -62,7 +62,7 @@ namespace ManagementSimulator.Core.Services
             };
 
             await _jobTitleRepository.AddAsync(newJobTitle);
-            
+
             return new JobTitleResponseDto
             {
                 Id = newJobTitle.Id,
@@ -75,23 +75,22 @@ namespace ManagementSimulator.Core.Services
             if (request.Name != null && request.Name != string.Empty)
             {
                 var jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name);
-                if(jt != null)
+                if (jt != null)
                 {
-                    if(jt.Id != id)
+                    if (jt.Id != id)
                         throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));
                 }
                 else
                     throw new EntryNotFoundException(nameof(JobTitle), nameof(JobTitle.Name));
             }
 
-            var jobTitle = await _jobTitleRepository.GetJobTitleAsync(id, tracking:true);
+            var jobTitle = await _jobTitleRepository.GetJobTitleAsync(id, tracking: true);
             if (jobTitle == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), id);
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateJobTitleRequestDto, JobTitle>(jobTitle, request);
-            jobTitle.ModifiedAt = DateTime.UtcNow;
 
             await _jobTitleRepository.UpdateAsync(jobTitle);
             return new JobTitleResponseDto
@@ -108,7 +107,7 @@ namespace ManagementSimulator.Core.Services
             if (jobTitle == null)
             {
                 throw new EntryNotFoundException(nameof(JobTitle), id);
-            }    
+            }
 
             await _jobTitleRepository.DeleteAsync(jobTitle.Id);
             return true;
@@ -116,7 +115,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<PagedResponseDto<JobTitleResponseDto>> GetAllJobTitlesFilteredAsync(QueriedJobTitleRequestDto payload)
         {
-            if(payload.ActivityStatus != null && payload.ActivityStatus == Enums.JobTitleActivityStatus.INACTIVE)
+            if (payload.ActivityStatus != null && payload.ActivityStatus == Enums.JobTitleActivityStatus.INACTIVE)
             {
                 var (deletedResult, deletedTotalCount) = await _jobTitleRepository.GetAllInactiveJobTitlesFilteredAsync(payload.JobTitleName, payload.PagedQueryParams.ToQueryParams());
                 if (deletedResult == null || !deletedResult.Any())
@@ -170,7 +169,7 @@ namespace ManagementSimulator.Core.Services
                 Page = payload.PagedQueryParams.Page ?? 1,
                 PageSize = payload.PagedQueryParams.PageSize ?? 1,
                 TotalPages = payload.PagedQueryParams.PageSize != null ?
-                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1 
+                    (int)Math.Ceiling((double)totalCount / (int)payload.PagedQueryParams.PageSize) : 1
             };
         }
 

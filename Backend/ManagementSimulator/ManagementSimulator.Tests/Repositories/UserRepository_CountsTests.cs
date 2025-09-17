@@ -33,7 +33,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = userRole, User = u1 });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(2);
 		}
@@ -56,7 +56,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeManagers.Add(new EmployeeManager { Employee = e1, EmployeeId = e1.Id, Manager = m1, ManagerId = m1.Id });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(1);
 		}

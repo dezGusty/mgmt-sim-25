@@ -186,9 +186,8 @@ namespace ManagementSimulator.Core.Services
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateProjectRequestDto, Project>(existing, request);
-            existing.ModifiedAt = DateTime.UtcNow;
 
-            await _projectRepository.SaveChangesAsync();
+            await _projectRepository.UpdateAsync(existing);
 
             var projectUsers = await _projectRepository.GetProjectUsersAsync(id);
             var (totalFTEs, remainingFTEs) = await CalculateProjectFTEsAsync(id, existing.BudgetedFTEs);

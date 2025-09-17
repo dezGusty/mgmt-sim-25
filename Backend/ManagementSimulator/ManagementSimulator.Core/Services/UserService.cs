@@ -216,9 +216,8 @@ namespace ManagementSimulator.Core.Services
                 {
                     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
                     user.MustChangePassword = false;
-                    user.ModifiedAt = DateTime.UtcNow;
 
-                    await _userRepository.SaveChangesAsync();
+                    await _userRepository.UpdateAsync(user);
 
                     _cache.Remove(cacheKey);
 
@@ -473,9 +472,7 @@ namespace ManagementSimulator.Core.Services
                 existing.Vacation = dto.Vacation.Value;
             }
 
-            existing.ModifiedAt = DateTime.UtcNow;
-
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.UpdateAsync(existing);
 
             // Update availability if employment type changed or other relevant fields
             if (dto.EmploymentType.HasValue)
@@ -902,8 +899,7 @@ namespace ManagementSimulator.Core.Services
                 user.Vacation = 0;
             }
 
-            user.ModifiedAt = DateTime.UtcNow;
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.UpdateAsync(user);
             return user.Vacation;
         }
 
@@ -924,71 +920,71 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<GlobalSearchResponseDto> GlobalSearchAsync(GlobalSearchRequestDto request)
         {
-                var response = new GlobalSearchResponseDto();
-                
-                var shouldFetchManagers = string.IsNullOrEmpty(request.SearchCategory) || 
-                                         request.SearchCategory == "Global" || 
-                                         request.SearchCategory == "Managers";
-                                         
-                var shouldFetchAdmins = string.IsNullOrEmpty(request.SearchCategory) || 
-                                       request.SearchCategory == "Global" || 
-                                       request.SearchCategory == "Admins";
-                                       
-                var shouldFetchUnassigned = string.IsNullOrEmpty(request.SearchCategory) || 
-                                           request.SearchCategory == "Global" || 
-                                           request.SearchCategory == "Unassigned";
+            var response = new GlobalSearchResponseDto();
 
-                if (shouldFetchManagers)
+            var shouldFetchManagers = string.IsNullOrEmpty(request.SearchCategory) ||
+                                     request.SearchCategory == "Global" ||
+                                     request.SearchCategory == "Managers";
+
+            var shouldFetchAdmins = string.IsNullOrEmpty(request.SearchCategory) ||
+                                   request.SearchCategory == "Global" ||
+                                   request.SearchCategory == "Admins";
+
+            var shouldFetchUnassigned = string.IsNullOrEmpty(request.SearchCategory) ||
+                                       request.SearchCategory == "Global" ||
+                                       request.SearchCategory == "Unassigned";
+
+            if (shouldFetchManagers)
+            {
+                var managersRequest = new QueriedUserRequestDto
                 {
-                    var managersRequest = new QueriedUserRequestDto
-                    {
-                        GlobalSearch = request.GlobalSearch,
-                        PagedQueryParams = request.ManagersPagedParams
-                    };
-                    
-                    response.Managers = await GetAllUsersIncludeRelationshipsFilteredAsync(managersRequest);
-                }
+                    GlobalSearch = request.GlobalSearch,
+                    PagedQueryParams = request.ManagersPagedParams
+                };
 
-                if (shouldFetchAdmins)
-                {
-                    var adminsRequest = new QueriedUserRequestDto
-                    {
-                        GlobalSearch = request.GlobalSearch,
-                        PagedQueryParams = request.AdminsPagedParams
-                    };
-                    
-                    response.Admins = await GetAllAdminsFilteredAsync(adminsRequest);
-                }
-
-                if (shouldFetchUnassigned)
-                {
-                    var unassignedRequest = new QueriedUserRequestDto
-                    {
-                        GlobalSearch = request.GlobalSearch,
-                        PagedQueryParams = request.UnassignedUsersPagedParams
-                    };
-                    
-                    response.UnassignedUsers = await GetAllUnassignedUsersFilteredAsync(unassignedRequest);
-                }
-
-                if (request.IncludeTotalCounts)
-                {
-                    // Get system-wide totals (not affected by search)
-                    var systemTotalAdmins = await GetTotalAdminsCountAsync();
-                    var systemTotalManagers = await GetTotalManagersCountAsync(); 
-                    var systemTotalUnassigned = await GetTotalUnassignedUsersCountAsync();
-
-                    var totalCounts = new GlobalSearchCountsDto
-                    {
-                        TotalAdmins = systemTotalAdmins,
-                        TotalManagers = systemTotalManagers,
-                        TotalUnassignedUsers = systemTotalUnassigned
-                    };
-                    
-                    response.TotalCounts = totalCounts;
-                }
-
-                return response;
+                response.Managers = await GetAllUsersIncludeRelationshipsFilteredAsync(managersRequest);
             }
+
+            if (shouldFetchAdmins)
+            {
+                var adminsRequest = new QueriedUserRequestDto
+                {
+                    GlobalSearch = request.GlobalSearch,
+                    PagedQueryParams = request.AdminsPagedParams
+                };
+
+                response.Admins = await GetAllAdminsFilteredAsync(adminsRequest);
+            }
+
+            if (shouldFetchUnassigned)
+            {
+                var unassignedRequest = new QueriedUserRequestDto
+                {
+                    GlobalSearch = request.GlobalSearch,
+                    PagedQueryParams = request.UnassignedUsersPagedParams
+                };
+
+                response.UnassignedUsers = await GetAllUnassignedUsersFilteredAsync(unassignedRequest);
+            }
+
+            if (request.IncludeTotalCounts)
+            {
+                // Get system-wide totals (not affected by search)
+                var systemTotalAdmins = await GetTotalAdminsCountAsync();
+                var systemTotalManagers = await GetTotalManagersCountAsync();
+                var systemTotalUnassigned = await GetTotalUnassignedUsersCountAsync();
+
+                var totalCounts = new GlobalSearchCountsDto
+                {
+                    TotalAdmins = systemTotalAdmins,
+                    TotalManagers = systemTotalManagers,
+                    TotalUnassignedUsers = systemTotalUnassigned
+                };
+
+                response.TotalCounts = totalCounts;
+            }
+
+            return response;
         }
     }
+}

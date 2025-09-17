@@ -101,9 +101,8 @@ namespace ManagementSimulator.Core.Services
             existing.Name = request.Name.Trim();
             existing.Date = request.Date.Date; // Ensure we only store the date part
             existing.IsRecurring = request.IsRecurring;
-            existing.ModifiedAt = DateTime.UtcNow;
 
-            await _repository.SaveChangesAsync();
+            await _repository.UpdateAsync(existing);
 
             return new PublicHolidayResponseDto
             {

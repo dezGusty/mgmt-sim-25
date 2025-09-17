@@ -14,7 +14,7 @@ namespace ManagementSimulator.Database.Repositories
     {
         private readonly MGMTSimulatorDbContext _dbContext;
 
-        public EmployeeRoleRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
+        public EmployeeRoleRepository(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : base(databaseContext, auditService)
         {
             _dbContext = databaseContext;
         }
@@ -35,7 +35,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<EmployeeRole> query = _dbContext.EmployeeRoles;
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
@@ -82,7 +82,7 @@ namespace ManagementSimulator.Database.Repositories
 
             query = query.Where(eru => eru.UsersId == userId)
                 .Include(eru => eru.Role);
-            
+
             return await query.ToListAsync();
         }
 
