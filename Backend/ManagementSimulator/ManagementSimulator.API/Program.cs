@@ -81,7 +81,7 @@ using (var scope = app.Services.CreateScope())
     //SetupSeed.Seed(dbContext);
     //PopulateSeed.Seed(dbContext);
 }
-
+//Testing - Remove if i forget and is still here
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
