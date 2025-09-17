@@ -34,14 +34,14 @@
         <div class="flex justify-between items-start mb-5">
           <div class="flex items-start gap-3">
             <!-- Employee avatar placeholder -->
-            <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
-              <span class="text-indigo-600 font-semibold text-lg">{{ req.employeeName.charAt(0) }}</span>
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+              <span class="text-cyan-600 font-semibold text-lg">{{ req.employeeName.charAt(0) }}</span>
               </div>
             <div class="min-w-0 flex-1">
               <h3 class="text-lg font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors duration-200">
                   {{ req.employeeName }}
                 </h3>
-              <div class="flex items-center gap-2 mt-1">
+              <div class="flex items-center gap-2 mt  -1">
                 <span
                   *ngIf="req.departmentName"
                   class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200"
@@ -87,7 +87,7 @@
           <!-- Date range -->
           <div class="flex items-center gap-3 text-sm">
             <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             </div>
@@ -100,7 +100,7 @@
           <!-- Leave type -->
           <div class="flex items-center gap-3 text-sm" *ngIf="req.leaveType">
             <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
             </svg>
             </div>
@@ -122,9 +122,9 @@
           </div>
 
           <!-- Submission date -->
-          <div class="flex items-center gap-3 text-xs text-gray-500">
+          <div class="flex items-center gap-3 text-xs text-cyan-700">
             <div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-cer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             </div>
@@ -137,7 +137,7 @@
         <!-- Action button with modern styling -->
         <div class="mt-6 pt-4 border-t border-gray-100">
           <button
-            class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 group-hover:shadow-xl"
+            class="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-purple-cyan text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 group-hover:shadow-xl"
             (click)="openDetails(req)"
           >
             <span class="flex items-center justify-center gap-2">
@@ -185,7 +185,7 @@
           <th class="px-6 py-4 text-left">
             <button class="flex items-center gap-2 hover:text-indigo-600 transition-colors group" (click)="sortBy('employee')">
               <span class="text-sm font-bold text-gray-800">Employee</span>
-              <svg class="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" 
+              <svg class="w-4 h-4 text-gray-400 group-hover:text- -500 transition-colors" 
                    [ngClass]="sortColumn === 'employee' ? 'text-indigo-600' : ''" 
                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -266,11 +266,11 @@
           <!-- Employee -->
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span class="text-indigo-600 font-semibold text-sm">{{ req.employeeName.charAt(0) }}</span>
+              <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-cyan-600 font-semibold text-sm">{{ req.employeeName.charAt(0) }}</span>
               </div>
               <div>
-                <div class="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{{ req.employeeName }}</div>
+                <div class="font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ req.employeeName }}</div>
               </div>
             </div>
           </td>
@@ -353,7 +353,7 @@
           
           <!-- Actions -->
           <td class="px-6 py-4 whitespace-nowrap">
-            <button class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm"
+            <button class="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm"
                     (click)="openDetails(req)">
               <span class="flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
