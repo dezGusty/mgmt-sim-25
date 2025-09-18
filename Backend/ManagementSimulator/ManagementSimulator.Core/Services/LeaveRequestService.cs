@@ -21,13 +21,15 @@ namespace ManagementSimulator.Core.Services
         private readonly IEmployeeManagerService _employeeManagerService;
         private readonly IEmailService _emailService;
         private readonly IPublicHolidayService _publicHolidayService;
+        private readonly IWeekendService _weekendService;
 
         public LeaveRequestService(ILeaveRequestRepository leaveRequestRepository,
                                    IUserRepository userRepository,
                                    ILeaveRequestTypeRepository leaveRequestTypeRepository,
                                    IEmployeeManagerService employeeManagerService,
                                    IEmailService emailService,
-                                   IPublicHolidayService publicHolidayService)
+                                   IPublicHolidayService publicHolidayService,
+                                   IWeekendService weekendService)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _userRepository = userRepository;
@@ -35,6 +37,7 @@ namespace ManagementSimulator.Core.Services
             _employeeManagerService = employeeManagerService;
             _emailService = emailService;
             _publicHolidayService = publicHolidayService;
+            _weekendService = weekendService;
         }
 
         public async Task<CreateLeaveRequestResponseDto> AddLeaveRequestAsync(CreateLeaveRequestRequestDto dto)
@@ -467,26 +470,11 @@ namespace ManagementSimulator.Core.Services
 
         private async Task<int> CalculateLeaveDays(DateTime startDate, DateTime endDate)
         {
-            int workingDays = 0;
-            DateTime currentDate = startDate;
-
             // Get public holidays in the date range
             var publicHolidays = await _publicHolidayService.GetHolidaysInRangeAsync(startDate, endDate);
             var holidayDates = publicHolidays?.Select(h => h.Date.Date).ToHashSet() ?? new HashSet<DateTime>();
 
-            while (currentDate <= endDate)
-            {
-                // Exclude weekends and public holidays
-                if (currentDate.DayOfWeek != DayOfWeek.Saturday &&
-                    currentDate.DayOfWeek != DayOfWeek.Sunday &&
-                    !holidayDates.Contains(currentDate.Date))
-                {
-                    workingDays++;
-                }
-                currentDate = currentDate.AddDays(1);
-            }
-
-            return workingDays;
+            return _weekendService.CountWorkingDays(startDate, endDate, holidayDates);
         }
 
         public async Task<(List<LeaveRequestResponseDto> Items, int TotalCount)> GetFilteredLeaveRequestsAsync(int managerId, string status, int pageSize, int pageNumber)

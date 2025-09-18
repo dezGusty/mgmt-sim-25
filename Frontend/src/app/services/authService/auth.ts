@@ -32,6 +32,10 @@ export class Auth {
   private impersonationSubject = new BehaviorSubject<ImpersonationInfo | null>(null);
   impersonation$ = this.impersonationSubject.asObservable();
 
+  // Subject to track impersonation state changes for UI updates
+  private impersonationStateSubject = new BehaviorSubject<boolean>(false);
+  impersonationState$ = this.impersonationStateSubject.asObservable();
+
   constructor(private http: HttpClient) { }
 
   login(email: string, password: string) {
@@ -60,12 +64,34 @@ export class Auth {
     });
   }
 
+  // Get original admin user info when impersonating
+  getOriginalUser() {
+    const headers = {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+    
+    return this.http.get<UserInfo>(`${this.apiUrl}/me/original`, { 
+      withCredentials: true,
+      headers: headers
+    });
+  }
+
   getCurrentUser(): UserInfo | null {
     return this.currentUser;
   }
 
   updateCurrentUser(user: UserInfo): void {
+    const wasImpersonating = this.currentUser?.isImpersonating || false;
+    const isNowImpersonating = user.isImpersonating || false;
+    
     this.currentUser = user;
+    
+    // Emit state change if impersonation status changed
+    if (wasImpersonating !== isNowImpersonating) {
+      this.impersonationStateSubject.next(isNowImpersonating);
+    }
   }
 
   isActingAsSecondManager(): boolean {
@@ -82,10 +108,12 @@ export class Auth {
 
   setImpersonation(info: ImpersonationInfo): void {
     this.impersonationSubject.next(info);
+    this.impersonationStateSubject.next(true);
   }
 
   clearImpersonation(): void {
     this.impersonationSubject.next(null);
+    this.impersonationStateSubject.next(false);
   }
 
   stopImpersonation() {

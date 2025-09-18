@@ -12,9 +12,9 @@ namespace ManagementSimulator.Database.Entities
     public class User : BaseEntity
     {
         public int JobTitleId { get; set; }
-        public JobTitle Title { get; set; }
+        public JobTitle Title { get; set; } = null!;
         public int DepartmentId { get; set; }
-        public Department Department { get; set; }
+        public Department Department { get; set; } = null!;
 
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
         public ICollection<LeaveRequest> ReviewedRequests { get; set; } = new List<LeaveRequest>();
@@ -26,15 +26,15 @@ namespace ManagementSimulator.Database.Entities
         public ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
 
         [Required, MaxLength(50), EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
         [Required, MaxLength(50)]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = null!;
 
         [Required, MaxLength(50)]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = null!;
 
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = null!;
         public bool MustChangePassword { get; set; }
         public DateTime DateOfEmployment { get; set; }
         public string FullName => $"{FirstName} {LastName}";

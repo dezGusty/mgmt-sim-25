@@ -20,24 +20,38 @@ export class CustomNavbar implements OnInit {
   userRoles: string[] = [];
   showHomeButton = true;
   userEmail: string = '';
+  originalAdminEmail: string = ''; 
   showRoleDropdown = false;
   availableRoles: UserRole[] = [];
   isActingAsSecondManager = false;
   isTemporarilyReplaced = false;
   impersonatedUserName: string = '';
+  impersonatedUserEmail: string = '';
   impersonatedRoles: string[] = [];
   impersonatedRolesDetailed: UserRole[] = [];
+  
+  originalAdminRoles: string[] = [];
+  originalAdminRolesDetailed: UserRole[] = [];
+  isCurrentlyImpersonating = false;
 
   constructor(private router: Router, private authService: Auth) { }
 
   ngOnInit(): void {
     this.loadUserData();
+    
+    // Subscribe to impersonation info changes
     this.authService.impersonation$.subscribe(info => {
       this.impersonatedUserName = info?.name || '';
       this.impersonatedRoles = info?.roles || [];
       this.impersonatedRolesDetailed = this.impersonatedRoles
         .map(r => this.mapRoleToInterface(r))
         .filter((r): r is UserRole => r !== null);
+    });
+
+    // Subscribe to impersonation state changes to trigger data reload
+    this.authService.impersonationState$.subscribe(isImpersonating => {
+      this.isCurrentlyImpersonating = isImpersonating;
+      this.loadUserData(); // Reload data when impersonation state changes
     });
   }
 
@@ -50,7 +64,7 @@ export class CustomNavbar implements OnInit {
   }
 
   toggleRoleDropdown(): void {
-    if (this.userRoles.length > 1) {
+    if (this.userRoles.length > 1 || this.isCurrentlyImpersonating) {
       this.showRoleDropdown = !this.showRoleDropdown;
     }
   }
@@ -187,30 +201,55 @@ export class CustomNavbar implements OnInit {
 
   async loadUserData(): Promise<void> {
     try {
-      // Use Auth service for consistency with guards
+      // Load current user data (impersonated user when impersonating, normal user otherwise)
       this.authService.me().subscribe({
         next: (data) => {
           if (data) {
-            this.userEmail = data.email || '';
             this.isActingAsSecondManager = data.isActingAsSecondManager || false;
             this.isTemporarilyReplaced = data.isTemporarilyReplaced || false;
+            this.isCurrentlyImpersonating = data.isImpersonating || false;
 
             this.authService.updateCurrentUser(data);
 
-            if (data.roles) {
-              this.userRoles = data.roles;
-              this.showHomeButton = this.userRoles.length > 1;
+            if (this.isCurrentlyImpersonating) {
+              // When impersonating, the API returns impersonated user's email and data
+              this.impersonatedUserEmail = data.email || '';
+              this.userEmail = this.impersonatedUserEmail; // Show impersonated user email in main field
+              
+              // Load original admin email separately
+              this.loadOriginalAdminEmail();
+              
+              // Show impersonated user's roles
+              if (data.roles) {
+                this.userRoles = data.roles;
+                this.availableRoles = this.userRoles
+                  .map(role => this.mapRoleToInterface(role))
+                  .filter(role => role !== null) as UserRole[];
+                
+                this.showHomeButton = this.userRoles.length > 1;
+              }
+            } else {
+              // Normal user - use their email and roles
+              this.userEmail = data.email || '';
+              this.originalAdminEmail = '';
+              this.impersonatedUserEmail = '';
+              
+              if (data.roles) {
+                this.userRoles = data.roles;
+                this.showHomeButton = this.userRoles.length > 1;
 
-              this.availableRoles = this.userRoles
-                .map(role => this.mapRoleToInterface(role))
-                .filter(role => role !== null) as UserRole[];
+                this.availableRoles = this.userRoles
+                  .map(role => this.mapRoleToInterface(role))
+                  .filter(role => role !== null) as UserRole[];
+              }
             }
 
             console.log('[CustomNavbar] Loaded user data:', {
               email: this.userEmail,
+              originalAdminEmail: this.originalAdminEmail,
+              impersonatedEmail: this.impersonatedUserEmail,
               roles: this.userRoles,
-              isImpersonating: data.isImpersonating,
-              originalUserId: data.originalUserId
+              isImpersonating: this.isCurrentlyImpersonating
             });
           }
         },
@@ -225,6 +264,22 @@ export class CustomNavbar implements OnInit {
       this.showHomeButton = false;
       this.userEmail = '';
     }
+  }
+
+  private loadOriginalAdminEmail(): void {
+    // Load original admin email when impersonating
+    this.authService.getOriginalUser().subscribe({
+      next: (originalData) => {
+        if (originalData) {
+          this.originalAdminEmail = originalData.email || '';
+          console.log('[CustomNavbar] Loaded original admin email:', this.originalAdminEmail);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading original admin email:', error);
+        this.originalAdminEmail = '';
+      }
+    });
   }
 
   goBack() {
@@ -252,6 +307,17 @@ export class CustomNavbar implements OnInit {
       this.authService.stopImpersonation().subscribe({
         next: () => {
           this.authService.clearImpersonation();
+          
+          // Clear impersonation-related data
+          this.isCurrentlyImpersonating = false;
+          this.impersonatedUserName = '';
+          this.impersonatedUserEmail = '';
+          this.originalAdminEmail = '';
+          this.impersonatedRoles = [];
+          this.impersonatedRolesDetailed = [];
+          this.originalAdminRoles = [];
+          this.originalAdminRolesDetailed = [];
+          
           // Reload user data to get back to original user's session
           this.loadUserData();
           this.router.navigate(['/role-selector']);
@@ -260,6 +326,16 @@ export class CustomNavbar implements OnInit {
           console.error('Error stopping impersonation:', err);
           // Still clear local state even if backend call fails
           this.authService.clearImpersonation();
+          
+          this.isCurrentlyImpersonating = false;
+          this.impersonatedUserName = '';
+          this.impersonatedUserEmail = '';
+          this.originalAdminEmail = '';
+          this.impersonatedRoles = [];
+          this.impersonatedRolesDetailed = [];
+          this.originalAdminRoles = [];
+          this.originalAdminRolesDetailed = [];
+          
           this.loadUserData();
           this.router.navigate(['/role-selector']);
         }

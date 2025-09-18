@@ -12,10 +12,10 @@ namespace ManagementSimulator.Database.Entities
     public class SecondManager
     {
         public int SecondManagerEmployeeId { get; set; }
-        public User SecondManagerEmployee { get; set; }
+        public User SecondManagerEmployee { get; set; } = null!;
 
         public int ReplacedManagerId { get; set; }
-        public User ReplacedManager { get; set; }
+        public User ReplacedManager { get; set; } = null!;
 
         public DateTime StartDate { get; set; }
 

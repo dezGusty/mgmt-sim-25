@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
 import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday, IPagedResponse } from '../../services/hr/hr.service';
 import { HolidayCalendarComponent } from './calendar/holiday-calendar.component';
+import { WeekendManagementComponent } from './weekend-management/weekend-management.component';
 import * as Papa from 'papaparse';
 
 interface HrRecord {
@@ -19,7 +20,7 @@ interface HrRecord {
   selector: 'app-hr',
   templateUrl: './hr.html',
   styleUrl: './hr.css',
-  imports: [CommonModule, FormsModule, CustomNavbar, HolidayCalendarComponent]
+  imports: [CommonModule, FormsModule, CustomNavbar, HolidayCalendarComponent, WeekendManagementComponent]
 })
 export class Hr {
   records: HrRecord[] = [];
@@ -47,13 +48,13 @@ export class Hr {
   
   currentView: 'table' | 'calendar' = 'table';
   
-  activeTab: 'vacation' | 'holidays' = 'vacation';
+  activeTab: 'vacation' | 'holidays' | 'weekends' = 'vacation';
 
   get validImportedHolidaysCount(): number {
     return this.importedHolidays.filter(h => h.isValid).length;
   }
 
-  setActiveTab(tab: 'vacation' | 'holidays') {
+  setActiveTab(tab: 'vacation' | 'holidays' | 'weekends') {
     this.activeTab = tab;
   }
 

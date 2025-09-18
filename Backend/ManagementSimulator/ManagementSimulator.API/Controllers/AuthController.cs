@@ -104,6 +104,59 @@ public class AuthController : ControllerBase
         });
     }
 
+    [Authorize]
+    [HttpGet("me/original")]
+    public async Task<IActionResult> GetOriginalMe()
+    {
+        if (!User.Identity!.IsAuthenticated)
+            return Unauthorized(new { message = "User is not authenticated." });
+
+        // Check if user is currently impersonating
+        var isImpersonatingClaim = User.FindFirst("IsImpersonating");
+        var isImpersonating = isImpersonatingClaim?.Value == "true";
+
+        if (!isImpersonating)
+        {
+            // If not impersonating, just return regular user info
+            return await Me();
+        }
+
+        // Get original admin user ID
+        var originalUserIdClaim = User.FindFirst("OriginalUserId")?.Value;
+        if (string.IsNullOrEmpty(originalUserIdClaim) || !int.TryParse(originalUserIdClaim, out var originalUserId))
+            return BadRequest(new { message = "Invalid original user ID." });
+
+        // Get original admin roles
+        var originalRoles = User.FindAll("OriginalRole").Select(r => r.Value).ToList();
+
+        var originalEmail = User.FindFirst("OriginalEmail")?.Value;
+
+        // Check authorization services for the original admin user
+        var isActingAsSecondManager = await _authorizationService.IsUserActingAsSecondManagerAsync(originalUserId);
+        var isTemporarilyReplaced = await _authorizationService.IsManagerTemporarilyReplacedAsync(originalUserId);
+
+        var effectiveRoles = new List<string>(originalRoles);
+        if (isActingAsSecondManager && !effectiveRoles.Contains("Manager"))
+        {
+            effectiveRoles.Add("Manager");
+        }
+
+        return Ok(new
+        {
+            UserId = originalUserIdClaim,
+            Email = originalEmail,
+            Roles = effectiveRoles,
+            OriginalRoles = originalRoles,
+            IsActingAsSecondManager = isActingAsSecondManager,
+            IsTemporarilyReplaced = isTemporarilyReplaced,
+            IsImpersonating = false,
+            ImpersonatedUserId = (string?)null,
+            OriginalUserId = (string?)null,
+            HasValidImpersonationToken = false,
+            ShouldUseImpersonationToken = false
+        });
+    }
+
     [HttpPost("send-reset-code")]
     [AllowAnonymous]
     public async Task<IActionResult> SendResetCode([FromBody] SendResetCodeRequestDto request)

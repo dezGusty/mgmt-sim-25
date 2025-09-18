@@ -36,7 +36,7 @@
                 View Only
               </span>
               <!-- Dropdown arrow -->
-              <svg *ngIf="userRoles.length > 1" class="w-4 h-4 text-white/70 transition-transform duration-200"
+              <svg *ngIf="userRoles.length > 1 || isCurrentlyImpersonating" class="w-4 h-4 text-white/70 transition-transform duration-200"
                 [class.rotate-180]="showRoleDropdown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
@@ -46,21 +46,39 @@
               <span class="text-white/90 group-hover:text-white transition-colors duration-300 text-sm font-medium">
                 {{ userEmail }}
               </span>
-              <span *ngIf="impersonatedUserName" class="text-xs text-[#22e6bb]">
-                Impersonating: {{ impersonatedUserName }}
+              <span *ngIf="isCurrentlyImpersonating && originalAdminEmail" class="text-xs text-[#22e6bb]">
+                Admin: {{ originalAdminEmail }}
               </span>
             </div>
           </div>
 
           <!-- Role Dropdown -->
-          <div *ngIf="showRoleDropdown && userRoles.length > 1"
+          <div *ngIf="showRoleDropdown && (userRoles.length > 1 || isCurrentlyImpersonating)"
             class="absolute right-0 mt-2 w-[28rem] bg-white rounded-lg shadow-xl border border-gray-200 z-50">
             <div class="p-3 border-b border-gray-100">
               <p class="text-xs text-gray-500 font-medium">SWITCH ROLE</p>
             </div>
-            <div class="py-2 px-3 grid grid-cols-1 gap-2" [ngClass]="{ 'md:grid-cols-2': impersonatedRoles.length > 0 }">
-              <!-- Left: Your roles -->
-              <div>
+            <div class="py-2 px-3">
+              <!-- When impersonating: Show only impersonated user roles -->
+              <div *ngIf="isCurrentlyImpersonating">
+                <p class="text-xs font-semibold text-gray-500 mb-1">
+                  {{ availableRoles.length === 1 ? 'Current Role' : 'Available Roles' }}
+                </p>
+                <div *ngFor="let role of availableRoles" (click)="switchRole(role)"
+                  class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer rounded transition-colors duration-150"
+                  [class.cursor-default]="availableRoles.length === 1"
+                  [class.hover:bg-gray-50]="availableRoles.length > 1">
+                  <div class="w-2 h-2 rounded-full {{ getRoleColor(role.name) }}"></div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">{{ role.displayName }}</p>
+                    <p class="text-xs text-gray-500">{{ role.description }}</p>
+                  </div>
+                  <div *ngIf="getPageRole() === role.name" class="w-2 h-2 rounded-full bg-green-500"></div>
+                </div>
+              </div>
+              
+              <!-- When not impersonating: Show normal user roles -->
+              <div *ngIf="!isCurrentlyImpersonating">
                 <p class="text-xs font-semibold text-gray-500 mb-1">Your Roles</p>
                 <div *ngFor="let role of availableRoles" (click)="switchRole(role)"
                   class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer rounded transition-colors duration-150">
@@ -72,20 +90,9 @@
                   <div *ngIf="getPageRole() === role.name" class="w-2 h-2 rounded-full bg-green-500"></div>
                 </div>
               </div>
-              <!-- Right: Impersonated user roles -->
-              <div *ngIf="impersonatedRolesDetailed.length > 0">
-                <p class="text-xs font-semibold text-gray-500 mb-1">Impersonated Roles</p>
-                <div *ngFor="let role of impersonatedRolesDetailed" class="flex items-center gap-3 px-3 py-2 rounded">
-                  <div class="w-2 h-2 rounded-full {{ getRoleColor(role.name) }}"></div>
-                  <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900">{{ role.displayName }}</p>
-                    <p class="text-xs text-gray-500">{{ role.description }}</p>
-                  </div>
-                </div>
-              </div>
             </div>
             <div class="p-3 border-t border-gray-100">
-              <button *ngIf="impersonatedUserName" (click)="stopImpersonation()"
+              <button *ngIf="isCurrentlyImpersonating" (click)="stopImpersonation()"
                 class="w-full mb-2 px-3 py-2 text-center text-sm bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 font-medium rounded-lg border border-red-200 hover:border-red-300 transition-all duration-150">
                 Stop Impersonating
               </button>

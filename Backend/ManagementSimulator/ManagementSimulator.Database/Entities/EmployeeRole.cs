@@ -14,6 +14,6 @@ namespace ManagementSimulator.Database.Entities
 
         // fields
         [MaxLength(50)]
-        public string Rolename { get; set; }
+        public string Rolename { get; set; } = null!;
     }
 }

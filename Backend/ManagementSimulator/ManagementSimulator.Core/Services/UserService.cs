@@ -35,6 +35,7 @@ namespace ManagementSimulator.Core.Services
     private readonly IAvailabilityService _availabilityService;
     private readonly IAuditLogService _auditLogService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWeekendService _weekendService;
 
         public UserService(
             IUserRepository userRepository,
@@ -49,7 +50,8 @@ namespace ManagementSimulator.Core.Services
             MGMTSimulatorDbContext dbContext,
             IAvailabilityService availabilityService,
             IAuditLogService auditLogService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IWeekendService weekendService)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -64,6 +66,7 @@ namespace ManagementSimulator.Core.Services
             _availabilityService = availabilityService;
             _auditLogService = auditLogService;
             _httpContextAccessor = httpContextAccessor;
+            _weekendService = weekendService;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -356,17 +359,8 @@ namespace ManagementSimulator.Core.Services
 
             foreach (var request in leaveRequests)
             {
-                var current = request.StartDate.Date;
-                var end = request.EndDate.Date;
-
-                while (current <= end)
-                {
-                    if (current.DayOfWeek != DayOfWeek.Saturday && current.DayOfWeek != DayOfWeek.Sunday)
-                    {
-                        totalDays++;
-                    }
-                    current = current.AddDays(1);
-                }
+                var workingDays = _weekendService.CountWorkingDays(request.StartDate.Date, request.EndDate.Date, new HashSet<DateTime>());
+                totalDays += workingDays;
             }
 
             return totalDays;

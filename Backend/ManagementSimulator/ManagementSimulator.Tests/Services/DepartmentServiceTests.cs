@@ -141,12 +141,18 @@ namespace ManagementSimulator.Tests.Services
                 Description = "Updated IT Department"
             };
             _departmentRepo.GetFirstOrDefaultAsync(1).Returns(existingDepartment);
+            _departmentRepo.UpdateAsync(Arg.Any<Department>()).Returns(dept => Task.FromResult(dept.Arg<Department>()));
+            _departmentRepo.When(x => x.UpdateAsync(Arg.Any<Department>())).Do(async (callInfo) =>
+            {
+                await _departmentRepo.SaveChangesAsync();
+            });
 
             var result = await service.UpdateDepartmentAsync(1, updateDto);
 
             result.Should().NotBeNull();
             result!.Id.Should().Be(1);
-            existingDepartment.ModifiedAt.Should().NotBeNull();
+            result.Name.Should().Be("Information Technology");
+            result.Description.Should().Be("Updated IT Department");
             await _departmentRepo.Received(1).SaveChangesAsync();
         }
 
