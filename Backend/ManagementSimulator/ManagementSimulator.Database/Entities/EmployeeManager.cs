@@ -15,9 +15,9 @@ namespace ManagementSimulator.Database.Entities
         public DateTime? ModifiedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
         public int EmployeeId { get; set; }
-        public User Employee { get; set; }
+        public User Employee { get; set; } = null!;
 
         public int ManagerId { get; set; }
-        public User Manager { get; set; }
+        public User Manager { get; set; } = null!;
     }
 }

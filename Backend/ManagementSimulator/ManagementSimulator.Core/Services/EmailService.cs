@@ -28,15 +28,23 @@ namespace ManagementSimulator.Core.Services
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
 
-                using var client = new SmtpClient(smtpSettings["Host"], int.Parse(smtpSettings["Port"]))
+                var host = smtpSettings["Host"] ?? throw new InvalidOperationException("SMTP Host is not configured");
+                var portStr = smtpSettings["Port"] ?? throw new InvalidOperationException("SMTP Port is not configured");
+                var username = smtpSettings["Username"] ?? throw new InvalidOperationException("SMTP Username is not configured");
+                var password = smtpSettings["Password"] ?? throw new InvalidOperationException("SMTP Password is not configured");
+                var enableSslStr = smtpSettings["EnableSsl"] ?? throw new InvalidOperationException("SMTP EnableSsl is not configured");
+                var fromEmail = smtpSettings["FromEmail"] ?? throw new InvalidOperationException("SMTP FromEmail is not configured");
+                var fromName = smtpSettings["FromName"];
+
+                using var client = new SmtpClient(host, int.Parse(portStr))
                 {
-                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
-                    EnableSsl = bool.Parse(smtpSettings["EnableSsl"])
+                    Credentials = new NetworkCredential(username, password),
+                    EnableSsl = bool.Parse(enableSslStr)
                 };
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"]),
+                    From = new MailAddress(fromEmail, fromName),
                     Subject = subject,
                     Body = body,
                     IsBodyHtml = true

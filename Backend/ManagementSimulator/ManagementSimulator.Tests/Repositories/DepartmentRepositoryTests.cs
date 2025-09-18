@@ -42,8 +42,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("IT Department");
-            result.Description.Should().Be("Information Technology Department");
+            result!.Name.Should().Be("IT Department");
+            result!.Description.Should().Be("Information Technology Department");
         }
 
         [Fact]
