@@ -2,24 +2,24 @@ name: CI
 
 on:
   push:
-    branches: [ main, UnitTesting ]
+    branches: [main]
   pull_request:
-    branches: [ main, UnitTesting ]
+    branches: [main]
 
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
-        
-    - run: dotnet restore Backend/ManagementSimulator/ManagementSimulator.sln
-    
-    - name: Security scan - Check for vulnerable packages
-      run: dotnet list Backend/ManagementSimulator/ManagementSimulator.sln package --vulnerable --include-transitive
-    
-    - run: dotnet test Backend/ManagementSimulator/ManagementSimulator.sln --configuration Release --collect:"XPlat Code Coverage"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - run: dotnet restore Backend/ManagementSimulator/ManagementSimulator.sln
+
+      - name: Security scan - Check for vulnerable packages
+        run: dotnet list Backend/ManagementSimulator/ManagementSimulator.sln package --vulnerable --include-transitive
+
+      - run: dotnet test Backend/ManagementSimulator/ManagementSimulator.sln --configuration Release --collect:"XPlat Code Coverage"
