@@ -53,6 +53,13 @@ export class RoleSelector implements OnInit {
   ngOnInit() {
     this.loadUserRoles();
     this.setupKeyboardNavigation();
+    
+    // Subscribe to impersonation state changes to auto-reload when impersonation stops
+    this.auth.impersonationState$.subscribe(isImpersonating => {
+      console.log('[RoleSelector] Impersonation state changed:', isImpersonating);
+      // Reload user roles when impersonation state changes
+      this.loadUserRoles();
+    });
   }
 
   loadUserRoles() {
