@@ -75,13 +75,13 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<List<User>> GetUsersByManagerIdAsync(int managerId, bool includeDeleted = false)
         {
-            IQueryable<EmployeeManager> query = _dbContext.EmployeeManagers;
+            IQueryable<EmployeeManager> query = _dbContext.EmployeeManagers
+                .Include(em => em.Employee);
 
             if (!includeDeleted)
                 query = query.Where(u => u.DeletedAt == null);
 
             query = query.Where(em => em.ManagerId == managerId);
-
 
             return await query.Select(em => em.Employee).ToListAsync();
         }

@@ -1700,7 +1700,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     StartDate = startDate,
                     EndDate = endDate,
                     Reason = $"Auto-generated reason {leaveRequests.Count}",
-                    RequestStatus = (ManagementSimulator.Database.Enums.RequestStatus)leaveStatuses.GetValue(random2.Next(leaveStatuses.Length)),
+                    RequestStatus = (ManagementSimulator.Database.Enums.RequestStatus)(leaveStatuses.GetValue(random2.Next(leaveStatuses.Length)) ?? ManagementSimulator.Database.Enums.RequestStatus.Pending),
                     ReviewerComment = reviewer != null ? $"Reviewed by {reviewer.FirstName}" : null,
                     CreatedAt = startDate.AddDays(-random2.Next(0, 10))
                 });
