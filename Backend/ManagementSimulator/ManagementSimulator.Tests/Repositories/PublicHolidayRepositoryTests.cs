@@ -20,7 +20,7 @@ namespace ManagementSimulator.Tests.Repositories
                 .Options;
 
             _context = new MGMTSimulatorDbContext(options);
-            _repository = new PublicHolidayRepository(_context);
+            _repository = new PublicHolidayRepository(_context, new TestAuditService());
         }
 
         [Fact]

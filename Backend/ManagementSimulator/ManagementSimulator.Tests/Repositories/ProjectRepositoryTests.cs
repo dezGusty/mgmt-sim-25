@@ -21,7 +21,7 @@ namespace ManagementSimulator.Tests.Repositories
                 .Options;
 
             _context = new MGMTSimulatorDbContext(options);
-            _repository = new ProjectRepository(_context);
+            _repository = new ProjectRepository(_context, new TestAuditService());
         }
 
         [Fact]
