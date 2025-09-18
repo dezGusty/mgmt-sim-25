@@ -231,7 +231,7 @@ namespace ManagementSimulator.Core.Services
 
             List<int> managersToAdd = managersIds?.Except(currentManagerIds).ToList() ?? new List<int>();
 
-            var managersToRemove = currentManagerIds.Except(managersIds).ToList() ?? new List<int>();
+            var managersToRemove = currentManagerIds.Except(managersIds ?? new List<int>()).ToList();
 
             foreach (var managerId in managersToRemove)
             {

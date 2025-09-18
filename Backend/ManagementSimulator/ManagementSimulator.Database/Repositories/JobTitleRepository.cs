@@ -24,15 +24,15 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<JobTitle?> GetJobTitleByNameAsync(string name, bool includeDeleted = false, bool tracking = false)
         {
-            IQueryable<JobTitle?> query = _dbContext.JobTitles;
+            IQueryable<JobTitle> query = _dbContext.JobTitles;
 
             if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
-                query = query.Where(jt => jt.DeletedAt == null);
+                query = query.Where(jt => jt!.DeletedAt == null);
 
-            return await query.FirstOrDefaultAsync(jt => jt.Name == name);
+            return await query.FirstOrDefaultAsync(jt => jt!.Name == name);
         }
 
         public async Task<List<JobTitle>> GetAllJobTitlesAsync(bool includeDeleted = false, bool tracking = false)

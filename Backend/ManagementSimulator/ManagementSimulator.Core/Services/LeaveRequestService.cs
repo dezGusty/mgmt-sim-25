@@ -160,7 +160,7 @@ namespace ManagementSimulator.Core.Services
             {
                 await SendLeaveRequestNotificationToManagersAsync(userId, savedLeaveRequest);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -220,7 +220,7 @@ namespace ManagementSimulator.Core.Services
             {
                 await SendLeaveRequestReviewNotificationToEmployeeAsync(request, dto, managerId);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -470,7 +470,6 @@ namespace ManagementSimulator.Core.Services
 
         private async Task<int> CalculateLeaveDays(DateTime startDate, DateTime endDate)
         {
-            // Get public holidays in the date range
             var publicHolidays = await _publicHolidayService.GetHolidaysInRangeAsync(startDate, endDate);
             var holidayDates = publicHolidays?.Select(h => h.Date.Date).ToHashSet() ?? new HashSet<DateTime>();
 
@@ -506,18 +505,21 @@ namespace ManagementSimulator.Core.Services
             {
                 try
                 {
-                    await _emailService.SendLeaveRequestNotificationToManagerAsync(
-                        manager.Email,
-                        $"{manager.FirstName} {manager.LastName}",
-                        $"{employee.FirstName} {employee.LastName}",
-                        leaveRequestType.Title,
-                        leaveRequest.StartDate,
-                        leaveRequest.EndDate,
-                        numberOfDays,
-                        leaveRequest.Reason
-                    );
+                    if (!string.IsNullOrEmpty(manager.Email) && !string.IsNullOrEmpty(leaveRequest.Reason))
+                    {
+                        await _emailService.SendLeaveRequestNotificationToManagerAsync(
+                            manager.Email,
+                            $"{manager.FirstName} {manager.LastName}",
+                            $"{employee.FirstName} {employee.LastName}",
+                            leaveRequestType.Title,
+                            leaveRequest.StartDate,
+                            leaveRequest.EndDate,
+                            numberOfDays,
+                            leaveRequest.Reason
+                        );
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }

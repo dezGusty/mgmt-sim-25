@@ -30,7 +30,7 @@ namespace ManagementSimulator.Core.PatchHelper
                     continue;
 
                 var dtoValue = property.GetValue(dto);
-                if (!ShouldPatchValue(dtoValue, property.GetType()))
+                if (!ShouldPatchValue(dtoValue ?? new object(), property.PropertyType))
                     continue;
 
                 if (dtoValue != null)
@@ -39,7 +39,7 @@ namespace ManagementSimulator.Core.PatchHelper
 
                     if (IsNullableType(targetType))
                     {
-                        targetType = Nullable.GetUnderlyingType(targetType);
+                        targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
                     }
 
                     var convertedValue = Convert.ChangeType(dtoValue, targetType);

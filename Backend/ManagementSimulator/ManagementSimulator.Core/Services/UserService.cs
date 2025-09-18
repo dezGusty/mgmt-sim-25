@@ -219,7 +219,7 @@ namespace ManagementSimulator.Core.Services
         {
             var cacheKey = $"reset_code_{verificationCode}";
 
-            if (_cache.TryGetValue(cacheKey, out string email))
+            if (_cache.TryGetValue(cacheKey, out string? email) && !string.IsNullOrEmpty(email))
             {
                 var user = await _userRepository.GetUserByEmail(email, tracking: true);
                 if (user != null)

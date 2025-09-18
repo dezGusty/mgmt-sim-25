@@ -34,7 +34,7 @@ namespace ManagementSimulator.Database.Repositories
             {
                 query = query.Where(lrt =>
                     lrt.Title.Contains(title) ||
-                    lrt.Description.Contains(title)
+                    (lrt.Description != null && lrt.Description.Contains(title))
                 );
             }
 
@@ -69,15 +69,15 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<LeaveRequestType?> GetLeaveRequestTypesByTitleAsync(string title, bool includeDeleted = false, bool tracking = false)
         {
-            IQueryable<LeaveRequestType?> query = _dbContext.LeaveRequestTypes;
+            IQueryable<LeaveRequestType> query = _dbContext.LeaveRequestTypes;
 
             if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
-                query = query.Where(lrt => lrt.DeletedAt == null);
+                query = query.Where(lrt => lrt!.DeletedAt == null);
 
-            return await query.FirstOrDefaultAsync(lrt => lrt.Title == title);
+            return await query.FirstOrDefaultAsync(lrt => lrt!.Title == title);
         }
     }
 }

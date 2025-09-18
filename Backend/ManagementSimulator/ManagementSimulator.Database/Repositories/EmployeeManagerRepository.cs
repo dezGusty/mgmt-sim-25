@@ -95,15 +95,15 @@ namespace ManagementSimulator.Database.Repositories
 
         public async Task<EmployeeManager?> GetEmployeeManagersByIdAsync(int employeeId, int managerId, bool includeDeleted = false, bool tracking = false)
         {
-            IQueryable<EmployeeManager?> query = _context.EmployeeManagers;
+            IQueryable<EmployeeManager> query = _context.EmployeeManagers;
 
             if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
-                query = query.Where(em => em.DeletedAt == null);
+                query = query.Where(em => em!.DeletedAt == null);
 
-            query = query.Where(em => em.EmployeeId == employeeId && em.ManagerId == managerId);
+            query = query.Where(em => em!.EmployeeId == employeeId && em!.ManagerId == managerId);
 
             return await query.FirstOrDefaultAsync();
         }
