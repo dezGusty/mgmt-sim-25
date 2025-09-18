@@ -10,9 +10,9 @@ namespace ManagementSimulator.Database.Entities
     public class EmployeeRoleUser
     {
         public int RolesId { get; set; }
-        public EmployeeRole Role { get; set; }
+        public EmployeeRole Role { get; set; } = null!;
         public int UsersId { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ModifiedAt { get; set; }
