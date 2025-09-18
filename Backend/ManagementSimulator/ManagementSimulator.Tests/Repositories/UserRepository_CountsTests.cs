@@ -79,7 +79,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = userRole, User = user });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(0);
 		}
@@ -88,7 +88,7 @@ namespace ManagementSimulator.Tests.Repositories
 		public async Task GetTotalAdminsCountAsync_Should_Return_Zero_When_Database_Is_Empty()
 		{
 			var ctx = CreateContext();
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(0);
 		}
@@ -112,7 +112,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = adminRole, User = deletedAdmin });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(1);
 		}
@@ -136,7 +136,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = adminRole, User = deletedAdmin });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync(includeDeleted: true);
 			count.Should().Be(2);
 		}
@@ -158,7 +158,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = adminRole, User = user, DeletedAt = DateTime.UtcNow });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(0);
 		}
@@ -182,7 +182,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeRolesUsers.Add(new EmployeeRoleUser { Role = managerRole, User = user });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalAdminsCountAsync();
 			count.Should().Be(1);
 		}
@@ -200,7 +200,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.Users.Add(user);
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(0);
 		}
@@ -209,7 +209,7 @@ namespace ManagementSimulator.Tests.Repositories
 		public async Task GetTotalManagersCountAsync_Should_Return_Zero_When_Database_Is_Empty()
 		{
 			var ctx = CreateContext();
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(0);
 		}
@@ -233,7 +233,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeManagers.Add(new EmployeeManager { Employee = employee, EmployeeId = employee.Id, Manager = deletedManager, ManagerId = deletedManager.Id });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(1);
 		}
@@ -257,7 +257,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeManagers.Add(new EmployeeManager { Employee = employee, EmployeeId = employee.Id, Manager = deletedManager, ManagerId = deletedManager.Id });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync(includeDeleted: true);
 			count.Should().Be(2);
 		}
@@ -281,7 +281,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeManagers.Add(new EmployeeManager { Employee = employee2, EmployeeId = employee2.Id, Manager = manager, ManagerId = manager.Id });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(1);
 		}
@@ -306,7 +306,7 @@ namespace ManagementSimulator.Tests.Repositories
 			ctx.EmployeeManagers.Add(new EmployeeManager { Employee = employee2, EmployeeId = employee2.Id, Manager = manager2, ManagerId = manager2.Id });
 			await ctx.SaveChangesAsync();
 
-			var repo = new UserRepository(ctx);
+			var repo = new UserRepository(ctx, new TestAuditService());
 			var count = await repo.GetTotalManagersCountAsync();
 			count.Should().Be(2);
 		}
