@@ -16,6 +16,7 @@ using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Database.Enums;
 using ManagementSimulator.Database.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -31,7 +32,9 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly MGMTSimulatorDbContext _dbContext;
-        private readonly IAvailabilityService _availabilityService;
+    private readonly IAvailabilityService _availabilityService;
+    private readonly IAuditLogService _auditLogService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserService(
             IUserRepository userRepository,
@@ -44,7 +47,9 @@ namespace ManagementSimulator.Core.Services
             ILeaveRequestTypeRepository leaveRequestTypeRepository,
             ILeaveRequestRepository leaveRequestRepository,
             MGMTSimulatorDbContext dbContext,
-            IAvailabilityService availabilityService)
+            IAvailabilityService availabilityService,
+            IAuditLogService auditLogService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _employeeRoleRepository = employeeRoleRepository;
@@ -57,6 +62,8 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestRepository = leaveRequestRepository;
             _dbContext = dbContext;
             _availabilityService = availabilityService;
+            _auditLogService = auditLogService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<List<UserResponseDto>> GetAllUsersAsync()
@@ -308,13 +315,14 @@ namespace ManagementSimulator.Core.Services
                 .ToList();
 
             hrUserDto.TotalLeaveDays = user.Vacation;
-
             var approvedRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Approved);
             var pendingRequests = yearLeaveRequests.Where(lr => lr.RequestStatus == RequestStatus.Pending);
 
             hrUserDto.UsedLeaveDays = CalculateTotalDays(pendingRequests);
             hrUserDto.RemainingLeaveDays = hrUserDto.TotalLeaveDays - hrUserDto.UsedLeaveDays;
 
+
+            
             hrUserDto.LeaveTypeStatistics = new List<LeaveTypeStatDto>();
 
             foreach (var leaveType in leaveRequestTypes)
@@ -371,6 +379,20 @@ namespace ManagementSimulator.Core.Services
             {
                 throw new EntryNotFoundException(nameof(User), id);
             }
+
+            // Snapshot of the existing user state (old values) for audit logging
+            var oldSnapshot = new
+            {
+                Id = existing.Id,
+                Email = existing.Email,
+                FirstName = existing.FirstName,
+                LastName = existing.LastName,
+                Roles = existing.Roles?.Select(r => r.Role?.Rolename).ToList() ?? new List<string?>(),
+                JobTitleId = existing.JobTitleId,
+                DepartmentId = existing.DepartmentId,
+                Vacation = existing.Vacation,
+                EmploymentType = existing.EmploymentType
+            };
 
             if (dto.Email != null && dto.Email != string.Empty && dto.Email != existing.Email)
             {
@@ -478,6 +500,29 @@ namespace ManagementSimulator.Core.Services
             if (dto.EmploymentType.HasValue)
             {
                 await _availabilityService.UpdateUserAvailabilityAsync(existing.Id);
+            }
+
+            // Capture new state and log update to audit log service so OldValues/NewValues are stored
+            try
+            {
+                var newSnapshot = new
+                {
+                    Id = existing.Id,
+                    Email = existing.Email,
+                    FirstName = existing.FirstName,
+                    LastName = existing.LastName,
+                    Roles = existing.Roles?.Select(r => r.Role?.Rolename).ToList() ?? new List<string?>(),
+                    JobTitleId = existing.JobTitleId,
+                    DepartmentId = existing.DepartmentId,
+                    Vacation = existing.Vacation,
+                    EmploymentType = existing.EmploymentType
+                };
+
+                await _auditLogService.LogUpdateAsync(oldSnapshot, newSnapshot, _httpContextAccessor?.HttpContext?.User, _httpContextAccessor?.HttpContext);
+            }
+            catch
+            {
+                // Swallow audit logging exceptions to avoid impacting main flow
             }
 
             return existing.ToUserResponseDto();
@@ -640,8 +685,8 @@ namespace ManagementSimulator.Core.Services
                     Roles = roles.Select(r => r.Role.Rolename).ToList(),
                     JobTitleId = u.JobTitleId,
                     JobTitleName = jobTitle?.Name ?? string.Empty,
-                    DepartmentId = department.Id,
-                    DepartmentName = department.Name ?? string.Empty,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = department?.Name ?? string.Empty,
                     SubordinatesIds = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.EmployeeId)).ToList(),
                     SubordinatesNames = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => $"{s.Employee.FirstName} {s.Employee.LastName}")).ToList(),
                     SubordinatesEmails = subordinates.SelectMany(u => u.Subordinates.Where(s => s.DeletedAt == null).Select(s => s.Employee.Email ?? string.Empty)).ToList(),

@@ -330,11 +330,22 @@ export class AuditLogService {
       return meaningfulDescription;
     }
 
+    // If we have old/new values for updates, show a concise inline field-level summary
+    if (auditLog.action.toUpperCase() === 'UPDATE') {
+      const changeSummary = this.computeChangeSummary(auditLog.oldValues, auditLog.newValues, auditLog.additionalData);
+      if (changeSummary) {
+        const target = entityName ? `${entity.toLowerCase()} "${entityName}"` : entity.toLowerCase();
+        return `${action} ${target}: ${changeSummary}`;
+      }
+    }
+
     // Handle CRUD operations with entity names
     if (entityName && entityName !== 'HttpRequest' && !entityName.startsWith('HttpRequest')) {
       switch (auditLog.action.toUpperCase()) {
         case 'CREATE':
-          return `Created new ${entity.toLowerCase()}: "${entityName}"`;
+          // For creates, try to include key fields from newValues/additionalData
+          const createDetails = this.summarizeNewValues(auditLog.newValues, auditLog.additionalData);
+          return `Created new ${entity.toLowerCase()}: "${entityName}"${createDetails ? ' — ' + createDetails : ''}`;
         case 'UPDATE':
           return `Modified ${entity.toLowerCase()}: "${entityName}"`;
         case 'DELETE':
@@ -404,7 +415,10 @@ export class AuditLogService {
           const userEmail = requestBody.email || requestBody.Email;
           switch (action) {
             case 'CREATE': return `Created new user account for ${userEmail}`;
-            case 'UPDATE': return `Updated user account for ${userEmail}`;
+            case 'UPDATE': {
+              const summary = this.computeChangeSummary(auditLog.oldValues, auditLog.newValues, JSON.stringify(additionalData));
+              return summary ? `Updated user account for ${userEmail}: ${summary}` : `Updated user account for ${userEmail}`;
+            }
             case 'DELETE': return `Deleted user account for ${userEmail}`;
           }
         }
@@ -412,8 +426,14 @@ export class AuditLogService {
     }
 
     switch (action) {
-      case 'CREATE': return `Created a new user account`;
-      case 'UPDATE': return `Updated user account information`;
+      case 'CREATE': {
+        const details = this.summarizeNewValues(auditLog.newValues, JSON.stringify(additionalData));
+        return details ? `Created a new user account — ${details}` : `Created a new user account`;
+      }
+      case 'UPDATE': {
+        const summary = this.computeChangeSummary(auditLog.oldValues, auditLog.newValues, JSON.stringify(additionalData));
+        return summary ? `Updated user account: ${summary}` : `Updated user account information`;
+      }
       case 'DELETE': return `Deleted a user account`;
       default: return `Modified user information`;
     }
@@ -530,6 +550,147 @@ export class AuditLogService {
         return 'text-blue-600';
       default:
         return 'text-gray-600';
+    }
+  }
+
+  // Compute a concise one-line summary of changed fields from old/new JSON
+  private computeChangeSummary(oldValues?: string, newValues?: string, additionalData?: string): string | null {
+    try {
+      if (!oldValues && !newValues && !additionalData) return null;
+
+      const oldObj = oldValues ? JSON.parse(oldValues) : null;
+      const newObj = newValues ? JSON.parse(newValues) : null;
+
+      // If both old and new are objects, compute field diffs
+      if (oldObj && newObj && typeof oldObj === 'object' && typeof newObj === 'object') {
+        const diffs: string[] = [];
+        const keys = Array.from(new Set([...Object.keys(oldObj), ...Object.keys(newObj)]));
+
+        for (const key of keys) {
+          const oldVal = oldObj[key];
+          const newVal = newObj[key];
+          if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+            const shortOld = this.prettyValue(oldVal);
+            const shortNew = this.prettyValue(newVal);
+            diffs.push(`${this.humanizeKey(key)}: ${shortOld} → ${shortNew}`);
+          }
+        }
+
+        if (diffs.length === 0) return null;
+
+        // If the number of diffs is small, show them all inline; otherwise show first 3 with a +N indicator
+        if (diffs.length <= 5) {
+          return diffs.join(', ');
+        }
+
+        return diffs.slice(0, 3).join(', ') + (diffs.length > 3 ? ` (+${diffs.length - 3} more)` : '');
+      }
+
+      // Fallback to inspecting additionalData.RequestBody for key fields
+      if (additionalData) {
+        try {
+          const ad = JSON.parse(additionalData);
+          if (ad && ad.RequestBody) {
+            const req = typeof ad.RequestBody === 'string' ? JSON.parse(ad.RequestBody) : ad.RequestBody;
+            const keys = ['email', 'name', 'title', 'status'];
+            const parts: string[] = [];
+            for (const k of keys) {
+              if (req[k]) parts.push(`${this.humanizeKey(k)}: ${this.prettyValue(req[k])}`);
+            }
+            if (parts.length) return parts.slice(0, 3).join(', ');
+          }
+        } catch {}
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // For create actions, pick a couple of key fields to show inline
+  private summarizeNewValues(newValues?: string, additionalData?: string): string | null {
+    try {
+      const obj = newValues ? JSON.parse(newValues) : null;
+      if (obj && typeof obj === 'object') {
+        const keys = ['email', 'name', 'title', 'status', 'department', 'projectName'];
+        const parts: string[] = [];
+        for (const k of keys) {
+          if (obj[k]) parts.push(`${this.humanizeKey(k)}: ${this.prettyValue(obj[k])}`);
+          if (parts.length >= 3) break;
+        }
+        if (parts.length) return parts.join(', ');
+      }
+
+      if (additionalData) {
+        try {
+          const ad = JSON.parse(additionalData);
+          if (ad && ad.RequestBody) {
+            const req = typeof ad.RequestBody === 'string' ? JSON.parse(ad.RequestBody) : ad.RequestBody;
+            const keys = ['email', 'name', 'title', 'status'];
+            const parts: string[] = [];
+            for (const k of keys) {
+              if (req[k]) parts.push(`${this.humanizeKey(k)}: ${this.prettyValue(req[k])}`);
+            }
+            if (parts.length) return parts.join(', ');
+          }
+        } catch {}
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  private humanizeKey(key: string): string {
+    // Convert camelCase or snake_case to normal readable label
+    if (!key) return '';
+    const withSpaces = key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' ');
+    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+  }
+
+  private prettyValue(val: any, maxLength?: number | null): string {
+    if (val === null || val === undefined) return 'null';
+    if (typeof val === 'string') {
+      if (typeof maxLength === 'number' && maxLength > 0) {
+        return val.length > maxLength ? val.substring(0, maxLength - 3) + '...' : val;
+      }
+      return val;
+    }
+    if (typeof val === 'object') return JSON.stringify(val).replace(/\s+/g, ' ');
+    const s = String(val);
+    if (typeof maxLength === 'number' && maxLength > 0) {
+      return s.length > maxLength ? s.substring(0, maxLength - 3) + '...' : s;
+    }
+    return s;
+  }
+
+  // Public helper to compute a full human-readable diff (multiline) for display in details modal
+  computeFullDiffString(oldValues?: string, newValues?: string): string | null {
+    try {
+      if (!oldValues && !newValues) return null;
+
+      const oldObj = oldValues ? JSON.parse(oldValues) : {};
+      const newObj = newValues ? JSON.parse(newValues) : {};
+
+      if (typeof oldObj !== 'object' || typeof newObj !== 'object') return null;
+
+      const keys = Array.from(new Set([...Object.keys(oldObj), ...Object.keys(newObj)])).sort();
+      const lines: string[] = [];
+
+      for (const key of keys) {
+        const oldVal = oldObj[key];
+        const newVal = newObj[key];
+        if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+          lines.push(`${this.humanizeKey(key)}:\n  - old: ${this.prettyValue(oldVal, null)}\n  - new: ${this.prettyValue(newVal, null)}`);
+        }
+      }
+
+      if (lines.length === 0) return null;
+      return lines.join('\n\n');
+    } catch (e) {
+      return null;
     }
   }
 

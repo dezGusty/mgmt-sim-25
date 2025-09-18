@@ -166,8 +166,8 @@
 
         <!-- Activity Content -->
         <div class="flex-1 min-w-0">
-          <!-- Activity Description -->
-          <div class="text-base text-gray-900 mb-2">
+          <!-- Activity Description: allow wrapping and show full text on hover -->
+          <div class="text-base text-gray-900 mb-2 whitespace-normal break-words" [title]="auditLogService.getActionDescription(log)">
             {{ auditLogService.getActionDescription(log) }}
           </div>
 
@@ -283,6 +283,11 @@
           </svg>
         </button>
       </div>
+      <!-- Full action description -->
+      <div *ngIf="selectedLog" class="mb-4">
+        <div class="text-sm text-gray-700 font-medium mb-1">Summary</div>
+        <div class="text-sm text-gray-900 whitespace-pre-wrap break-words">{{ auditLogService.getActionDescription(selectedLog) }}</div>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Basic Information -->
@@ -335,7 +340,7 @@
       <div *ngIf="selectedLog.oldValues || selectedLog.newValues || selectedLog.additionalData" class="mt-6">
         <h4 class="font-medium text-gray-900 mb-3">Data Changes</h4>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <!-- Old Values -->
           <div *ngIf="selectedLog.oldValues">
             <h5 class="text-sm font-medium text-gray-700 mb-2">Previous Values</h5>
@@ -353,6 +358,12 @@
             <h5 class="text-sm font-medium text-gray-700 mb-2">Additional Data</h5>
             <pre class="bg-blue-50 p-3 rounded text-xs overflow-x-auto max-h-40">{{ formatJsonData(selectedLog.additionalData) }}</pre>
           </div>
+        </div>
+
+        <!-- Full field diff -->
+        <div *ngIf="auditLogService.computeFullDiffString(selectedLog.oldValues, selectedLog.newValues)" class="mt-4">
+          <h5 class="text-sm font-medium text-gray-700 mb-2">Field-level Changes</h5>
+          <pre class="bg-gray-50 p-3 rounded text-xs overflow-x-auto max-h-60 whitespace-pre-wrap">{{ auditLogService.computeFullDiffString(selectedLog.oldValues, selectedLog.newValues) }}</pre>
         </div>
       </div>
     </div>

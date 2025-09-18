@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Reflection;
+using System.Linq;
 
 namespace ManagementSimulator.Core.Services
 {
@@ -91,7 +92,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task LogCreateAsync<T>(T entity, ClaimsPrincipal? user = null, HttpContext? httpContext = null) where T : class
         {
-            var entityType = typeof(T).Name;
+            var entityType = GetFriendlyEntityType(entity);
             var entityId = GetEntityId(entity);
             var entityName = GetEntityName(entity);
 
@@ -110,7 +111,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task LogUpdateAsync<T>(T oldEntity, T newEntity, ClaimsPrincipal? user = null, HttpContext? httpContext = null) where T : class
         {
-            var entityType = typeof(T).Name;
+            var entityType = GetFriendlyEntityType(newEntity);
             var entityId = GetEntityId(newEntity);
             var entityName = GetEntityName(newEntity);
 
@@ -129,7 +130,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task LogDeleteAsync<T>(T entity, ClaimsPrincipal? user = null, HttpContext? httpContext = null) where T : class
         {
-            var entityType = typeof(T).Name;
+            var entityType = GetFriendlyEntityType(entity);
             var entityId = GetEntityId(entity);
             var entityName = GetEntityName(entity);
 
@@ -144,6 +145,40 @@ namespace ManagementSimulator.Core.Services
                 httpContext: httpContext,
                 description: $"Deleted {entityType} '{entityName}'"
             );
+        }
+
+        private string GetFriendlyEntityType(object entity)
+        {
+            if (entity == null) return string.Empty;
+
+            var type = entity.GetType();
+            var typeName = type.Name ?? string.Empty;
+
+            // If it's a compiler-generated anonymous type, try to infer a good entity type
+            if (typeName.Contains("AnonymousType", StringComparison.OrdinalIgnoreCase) || typeName.StartsWith("<>") || typeName.StartsWith("VB$AnonymousType"))
+            {
+                try
+                {
+                    // If it has Email, it's likely a User snapshot
+                    var emailProp = type.GetProperty("Email", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (emailProp != null) return "User";
+
+                    // If it has ProjectName or Name, prefer Project/Name
+                    var projectProp = type.GetProperty("ProjectName", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (projectProp != null) return "Project";
+
+                    var nameProp = type.GetProperty("Name", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    if (nameProp != null) return "Item";
+                }
+                catch
+                {
+                    // ignore and fall back
+                }
+
+                return "Item";
+            }
+
+            return typeName;
         }
 
         public async Task LogAuthenticationAsync(
@@ -399,22 +434,59 @@ namespace ManagementSimulator.Core.Services
 
         private string GetEntityName(object entity)
         {
-            // Try common name properties
-            var nameProperties = new[] { "Name", "Title", "Email", "Rolename" };
+            if (entity == null) return string.Empty;
 
-            foreach (var propName in nameProperties)
+            // Preferred property names (case-insensitive)
+            var preferredNames = new[] { "Name", "Title", "Email", "RoleName", "EmailAddress" };
+
+            foreach (var propName in preferredNames)
             {
-                var property = entity.GetType().GetProperty(propName);
-                if (property != null && property.PropertyType == typeof(string))
+                var property = entity.GetType().GetProperty(propName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (property != null)
                 {
-                    var value = property.GetValue(entity) as string;
-                    if (!string.IsNullOrEmpty(value))
+                    var val = property.GetValue(entity);
+                    if (val != null)
                     {
-                        return value;
+                        var s = val.ToString();
+                        if (!string.IsNullOrEmpty(s)) return s;
                     }
                 }
             }
 
+            // Fallback: pick the first public string property with a value
+            var stringProp = entity.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(p => p.PropertyType == typeof(string));
+
+            if (stringProp != null)
+            {
+                var s = stringProp.GetValue(entity) as string;
+                if (!string.IsNullOrEmpty(s)) return s;
+            }
+
+            // If it's an anonymous or compiler-generated type, build a short readable summary from up to 3 properties
+            var typeName = entity.GetType().Name ?? string.Empty;
+            if (typeName.Contains("AnonymousType", StringComparison.OrdinalIgnoreCase) || typeName.StartsWith("<>") || typeName.StartsWith("VB$AnonymousType"))
+            {
+                try
+                {
+                    var parts = entity.GetType()
+                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Select(p => new { p.Name, Value = p.GetValue(entity) })
+                        .Where(x => x.Value != null)
+                        .Take(3)
+                        .Select(x => $"{x.Name}: {x.Value}");
+
+                    var joined = string.Join(", ", parts);
+                    if (!string.IsNullOrEmpty(joined)) return joined;
+                }
+                catch
+                {
+                    // ignore and fall through to type name
+                }
+            }
+
+            // Last resort: return the CLR type name (may be compiler-generated for anonymous types)
             return entity.GetType().Name;
         }
     }
