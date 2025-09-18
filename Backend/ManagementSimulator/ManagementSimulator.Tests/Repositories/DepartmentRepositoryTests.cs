@@ -106,8 +106,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("IT Department");
-            result.DeletedAt.Should().NotBeNull();
+            result!.Name.Should().Be("IT Department");
+            result!.DeletedAt.Should().NotBeNull();
         }
 
         [Fact]
@@ -128,8 +128,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(department.Id);
-            result.Name.Should().Be("IT Department");
+            result!.Id.Should().Be(department.Id);
+            result!.Name.Should().Be("IT Department");
         }
 
         [Fact]

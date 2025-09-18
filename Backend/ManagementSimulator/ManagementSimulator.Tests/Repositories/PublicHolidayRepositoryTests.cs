@@ -122,8 +122,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("Test Holiday");
-            result.Date.Should().Be(new DateTime(2024, 6, 15));
+            result!.Name.Should().Be("Test Holiday");
+            result!.Date.Should().Be(new DateTime(2024, 6, 15));
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("Test Holiday");
+            result!.Name.Should().Be("Test Holiday");
         }
 
         [Fact]
