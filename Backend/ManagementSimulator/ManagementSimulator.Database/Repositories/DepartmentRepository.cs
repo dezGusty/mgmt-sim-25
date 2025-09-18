@@ -15,10 +15,10 @@ using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Database.Repositories
 {
-    public class DepartmentRepository: BaseRepository<Department>, IDeparmentRepository
+    public class DepartmentRepository : BaseRepository<Department>, IDeparmentRepository
     {
         private readonly MGMTSimulatorDbContext _dbContext;
-        public DepartmentRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
+        public DepartmentRepository(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : base(databaseContext, auditService)
         {
             _dbContext = databaseContext;
         }
@@ -27,7 +27,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<Department> query = _dbContext.Departments;
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
@@ -140,7 +140,7 @@ namespace ManagementSimulator.Database.Repositories
                     EmployeeCount = d.Users.Count,
                     DeletedAt = d.DeletedAt
                 }).ToListAsync(), totalCount);
-            
+
             // Sorting
             if (string.IsNullOrEmpty(parameters.SortBy))
                 query = query.OrderBy(d => d.Id);

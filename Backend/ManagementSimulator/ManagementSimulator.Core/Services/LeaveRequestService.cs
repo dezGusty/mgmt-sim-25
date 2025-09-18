@@ -210,7 +210,6 @@ namespace ManagementSimulator.Core.Services
             request.RequestStatus = dto.RequestStatus;
             request.ReviewerComment = dto.ReviewerComment;
             request.ReviewerId = managerId;
-            request.ModifiedAt = DateTime.UtcNow;
 
             await _leaveRequestRepository.UpdateAsync(request);
 
@@ -259,9 +258,8 @@ namespace ManagementSimulator.Core.Services
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestDto, LeaveRequest>(existing, dto);
-            existing.ModifiedAt = DateTime.UtcNow;
 
-            await _leaveRequestRepository.SaveChangesAsync();
+            await _leaveRequestRepository.UpdateAsync(existing);
             return existing.ToLeaveRequestResponseDto();
         }
 
@@ -347,7 +345,6 @@ namespace ManagementSimulator.Core.Services
                 throw new InvalidOperationException("Can only cancel pending requests");
 
             request.RequestStatus = RequestStatus.Canceled;
-            request.ModifiedAt = DateTime.UtcNow;
 
             await _leaveRequestRepository.UpdateAsync(request);
         }

@@ -19,5 +19,13 @@ namespace ManagementSimulator.Database.Entities
         public DateTime? ModifiedAt { get; set; }
 
         public DateTime? DeletedAt { get; set; }
+
+        // Audit properties for tracking who performed the action
+        // These are nullable to support existing data migration
+        public int? CreatedBy { get; set; }
+
+        public int? ModifiedBy { get; set; }
+
+        public int? DeletedBy { get; set; }
     }
 }

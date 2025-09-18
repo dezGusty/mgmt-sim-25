@@ -17,7 +17,7 @@ namespace ManagementSimulator.Database.Repositories
     {
         private readonly MGMTSimulatorDbContext _dbContext;
 
-        public ProjectRepository(MGMTSimulatorDbContext databaseContext) : base(databaseContext)
+        public ProjectRepository(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : base(databaseContext, auditService)
         {
             _dbContext = databaseContext;
         }

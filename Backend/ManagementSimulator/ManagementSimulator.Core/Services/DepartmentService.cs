@@ -57,7 +57,7 @@ namespace ManagementSimulator.Core.Services
             var newDepartment = new Department
             {
                 Name = request.Name,
-                Description = request.Description ?? string.Empty 
+                Description = request.Description ?? string.Empty
             };
 
             await _repository.AddAsync(newDepartment);
@@ -74,14 +74,13 @@ namespace ManagementSimulator.Core.Services
         {
             var existing = await _repository.GetFirstOrDefaultAsync(id);
             if (existing == null)
-            { 
-                throw new EntryNotFoundException(nameof(Department), id); 
+            {
+                throw new EntryNotFoundException(nameof(Department), id);
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateDepartmentRequestDto, Department>(existing, request);
-            existing.ModifiedAt = DateTime.UtcNow;
 
-            await _repository.SaveChangesAsync();
+            await _repository.UpdateAsync(existing);
 
             return new DepartmentResponseDto
             {
@@ -94,7 +93,7 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<bool> DeleteDepartmentAsync(int id)
         {
-            if(await _repository.GetFirstOrDefaultAsync(id) == null)
+            if (await _repository.GetFirstOrDefaultAsync(id) == null)
             {
                 throw new EntryNotFoundException(nameof(Department), id);
             }
@@ -174,7 +173,7 @@ namespace ManagementSimulator.Core.Services
         public async Task<bool> RestoreDepartmentAsync(int id)
         {
             Department? departmentToRestore = await _repository.GetDepartmentByIdAsync(id, includeDeleted: true, tracking: true);
-            if(departmentToRestore == null)
+            if (departmentToRestore == null)
             {
                 throw new EntryNotFoundException(nameof(Department), nameof(Department.Id));
             }

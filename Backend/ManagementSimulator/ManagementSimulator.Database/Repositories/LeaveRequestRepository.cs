@@ -18,7 +18,7 @@ namespace ManagementSimulator.Database.Repositories
     internal class LeaveRequestRepository : BaseRepository<LeaveRequest>, ILeaveRequestRepository
     {
         private readonly MGMTSimulatorDbContext _dbcontext;
-        public LeaveRequestRepository(MGMTSimulatorDbContext dbcontext) : base(dbcontext)
+        public LeaveRequestRepository(MGMTSimulatorDbContext dbcontext, IAuditService auditService) : base(dbcontext, auditService)
         {
             _dbcontext = dbcontext;
         }
