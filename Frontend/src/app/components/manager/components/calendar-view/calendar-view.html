@@ -198,10 +198,12 @@
               class="border border-gray-300 p-1 text-xs min-w-[40px]"
               [ngClass]="{
                 'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
-                'bg-gray-50 text-gray-600': !isToday(date)
+                'bg-blue-200 text-blue-800 border-blue-300': !isToday(date) && isWeekend(date),
+                'bg-gray-50 text-gray-600': !isToday(date) && !isWeekend(date)
               }"
             >
               {{ date.getDate() }}
+              <span *ngIf="isWeekend(date)"> 🏠</span>
             </th>
           </tr>
         </thead>

@@ -16,6 +16,16 @@ import { ColorUtils } from '../../../../utils/color.utils';
 import { LeaveRequests } from '../../../../services/leave-requests/leave-requests';
 import { RequestDetail } from '../request-detail/request-detail';
 import { PublicHolidaysService, PublicHoliday } from '../../../../services/public-holidays/public-holidays.service';
+import { WeekendConfigurationService, WeekendConfiguration } from '../../../../services/weekend-configuration/weekend-configuration.service';
+
+interface CalendarDateData {
+  date: Date;
+  hasLeave: boolean;
+  requests: ILeaveRequest[];
+  isHoliday?: boolean;
+  holidayName?: string;
+  isWeekend: boolean;
+}
 
 @Component({
   selector: 'app-calendar-view',
@@ -52,7 +62,7 @@ export class CalendarView implements OnInit, OnChanges {
   monthHeaders: { month: string; year: number; daysInMonth: number }[] = [];
   tableData: {
     employee: string;
-    dates: { date: Date; hasLeave: boolean; requests: ILeaveRequest[]; isHoliday?: boolean; holidayName?: string }[];
+    dates: CalendarDateData[];
   }[] = [];
 
   displayMonths = 3;
@@ -66,9 +76,13 @@ export class CalendarView implements OnInit, OnChanges {
   // Public holidays
   publicHolidays: PublicHoliday[] = [];
 
+  // Weekend configuration
+  weekendConfiguration: WeekendConfiguration | null = null;
+
   constructor(
     private leaveRequests: LeaveRequests,
-    private publicHolidaysService: PublicHolidaysService
+    private publicHolidaysService: PublicHolidaysService,
+    private weekendConfigurationService: WeekendConfigurationService
   ) {}
 
   ngOnInit() {
@@ -85,6 +99,7 @@ export class CalendarView implements OnInit, OnChanges {
     });
     this.fetchRequestsByManager('');
     this.loadPublicHolidays();
+    this.loadWeekendConfiguration();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -113,6 +128,13 @@ export class CalendarView implements OnInit, OnChanges {
       title: 'Public Holiday',
       color: '#fee2e2' // Light red background for holidays
     });
+
+    if (this.weekendConfiguration && this.weekendConfiguration.weekendDays.length > 0) {
+      this.legendItems.push({
+        title: `Weekend Days: ${this.weekendConfiguration.weekendDays.join(', ')}`,
+        color: '#dbeafe'
+      });
+    }
 
     console.log('Legend items created:', this.legendItems);
   }
@@ -157,7 +179,8 @@ export class CalendarView implements OnInit, OnChanges {
             filteredRequests
           ),
           isHoliday: holiday !== null,
-          holidayName: holiday?.name
+          holidayName: holiday?.name,
+          isWeekend: this.isWeekend(date)
         };
       }),
     }));
@@ -224,6 +247,21 @@ export class CalendarView implements OnInit, OnChanges {
         },
         error: (error) => {
           console.error('Error loading public holidays:', error);
+        }
+      });
+  }
+
+  loadWeekendConfiguration() {
+    this.weekendConfigurationService.getWeekendConfiguration()
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.weekendConfiguration = response.data;
+            this.generateTableData(); // Regenerate table data with weekend information
+          }
+        },
+        error: (error) => {
+          console.error('Error loading weekend configuration:', error);
         }
       });
   }
@@ -332,6 +370,29 @@ export class CalendarView implements OnInit, OnChanges {
 
   isToday(date: Date): boolean {
     return CalendarUtils.isToday(date);
+  }
+
+  isWeekend(date: Date): boolean {
+    if (!this.weekendConfiguration || !this.weekendConfiguration.weekendDays) {
+      return false;
+    }
+    
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = dayNames[date.getDay()];
+    
+    return this.weekendConfiguration.weekendDays.includes(dayName);
+  }
+
+  getHeaderClasses(date: Date): string {
+    const classes = [];
+    
+    if (this.isToday(date)) {
+      classes.push('today-header');
+    } else if (this.isWeekend(date)) {
+      classes.push('weekend-header');
+    }
+    
+    return classes.join(' ');
   }
 
   onRequestHover(request: ILeaveRequest) {

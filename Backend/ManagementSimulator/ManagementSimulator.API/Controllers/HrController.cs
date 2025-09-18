@@ -1,7 +1,9 @@
 using ManagementSimulator.Core.Dtos.Requests.Users;
 using ManagementSimulator.Core.Dtos.Requests.PublicHolidays;
+using ManagementSimulator.Core.Dtos.Requests.WeekendConfiguration;
 using ManagementSimulator.Core.Dtos.Responses.PagedResponse;
 using ManagementSimulator.Core.Dtos.Responses.User;
+using ManagementSimulator.Core.Dtos.Responses.WeekendConfiguration;
 using ManagementSimulator.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +18,21 @@ namespace ManagementSimulator.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IPublicHolidayService _publicHolidayService;
+        private readonly IWeekendService _weekendService;
+        private readonly IConfigurationWriterService _configurationWriterService;
         private readonly ILogger<HrController> _logger;
 
-        public HrController(IUserService userService, IPublicHolidayService publicHolidayService, ILogger<HrController> logger)
+        public HrController(
+            IUserService userService, 
+            IPublicHolidayService publicHolidayService, 
+            IWeekendService weekendService,
+            IConfigurationWriterService configurationWriterService, 
+            ILogger<HrController> logger)
         {
             _userService = userService;
             _publicHolidayService = publicHolidayService;
+            _weekendService = weekendService;
+            _configurationWriterService = configurationWriterService;
             _logger = logger;
         }
 
@@ -442,6 +453,121 @@ namespace ManagementSimulator.API.Controllers
                 return StatusCode(500, new
                 {
                     Message = "An error occurred while permanently deleting the public holiday.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpGet("weekend-configuration")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult GetWeekendConfiguration()
+        {
+            try
+            {
+                var config = _weekendService.GetWeekendConfiguration();
+
+                var response = new WeekendConfigurationResponseDto
+                {
+                    WeekendDays = config.WeekendDays,
+                    WeekendDaysCount = config.WeekendDaysCount,
+                    IsValid = config.IsValid(),
+                    LastUpdated = DateTime.UtcNow
+                };
+
+                return Ok(new
+                {
+                    Message = "Weekend configuration retrieved successfully.",
+                    Data = response,
+                    Success = true,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving weekend configuration");
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while retrieving weekend configuration.",
+                    Data = (object?)null,
+                    Success = false,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+
+        [HttpPut("weekend-configuration")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateWeekendConfiguration([FromBody] UpdateWeekendConfigurationRequestDto request)
+        {
+            try
+            {
+                if (!request.IsValid())
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Invalid weekend configuration. Please ensure weekend days are valid day names and count matches the list length.",
+                        Data = (object?)null,
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var updateResult = _weekendService.UpdateWeekendConfiguration(request.WeekendDays, request.WeekendDaysCount);
+
+                if (!updateResult)
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Failed to update weekend configuration. The provided configuration is invalid.",
+                        Data = (object?)null,
+                        Success = false,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
+
+                var newConfig = _weekendService.GetUpdatedConfiguration(request.WeekendDays, request.WeekendDaysCount);
+                var persistResult = await _configurationWriterService.UpdateWeekendSettingsAsync(newConfig);
+
+                if (!persistResult)
+                {
+                    _logger.LogWarning("Weekend configuration updated in runtime but failed to persist to configuration files");
+                }
+
+                await _configurationWriterService.ReloadConfigurationAsync();
+
+                var updatedConfig = _weekendService.GetWeekendConfiguration();
+                var response = new WeekendConfigurationResponseDto
+                {
+                    WeekendDays = updatedConfig.WeekendDays,
+                    WeekendDaysCount = updatedConfig.WeekendDaysCount,
+                    IsValid = updatedConfig.IsValid(),
+                    LastUpdated = DateTime.UtcNow
+                };
+
+                var message = persistResult 
+                    ? "Weekend configuration updated successfully and persisted to configuration files."
+                    : "Weekend configuration updated successfully (runtime only - configuration files may not have been updated).";
+
+                return Ok(new
+                {
+                    Message = message,
+                    Data = response,
+                    Success = true,
+                    Persisted = persistResult,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating weekend configuration");
+                return StatusCode(500, new
+                {
+                    Message = "An error occurred while updating weekend configuration.",
                     Data = (object?)null,
                     Success = false,
                     Timestamp = DateTime.UtcNow

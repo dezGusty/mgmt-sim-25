@@ -31,6 +31,8 @@ namespace ManagementSimulator.Core
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IPublicHolidayService, PublicHolidayService>();
             services.AddScoped<IAvailabilityService, AvailabilityService>();
+            services.AddScoped<IWeekendService, WeekendService>();
+            services.AddScoped<IConfigurationWriterService, ConfigurationWriterService>();
 
             return services;
         }
