@@ -9,6 +9,7 @@
             "args": ["run", "--project", "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator.API/ManagementSimulator.API.csproj"],
             "cwd": "${workspaceFolder}/Backend/ManagementSimulator/ManagementSimulator.API",
             "stopAtEntry": false,
+            "preLaunchTask": "kill-port-7275",
             "serverReadyAction": {
                 "action": "openExternally",
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
@@ -17,7 +18,8 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
-            "console": "integratedTerminal"
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "Launch Frontend (Angular)",

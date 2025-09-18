@@ -28,7 +28,6 @@ namespace ManagementSimulator.Tests.Services
 
 		private LeaveRequestService CreateServ()
 		{
-			// Setup default mocks for public holiday service
 			_publicHolidaySvc.GetHolidaysInRangeAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
 				.Returns(new List<PublicHolidayResponseDto>());
 
