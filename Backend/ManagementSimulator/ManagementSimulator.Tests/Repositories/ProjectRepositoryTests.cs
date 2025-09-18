@@ -45,10 +45,10 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(project.Id);
-            result.Name.Should().Be("Test Project");
-            result.BudgetedFTEs.Should().Be(5.0f);
-            result.IsActive.Should().BeTrue();
+            result!.Id.Should().Be(project.Id);
+            result!.Name.Should().Be("Test Project");
+            result!.BudgetedFTEs.Should().Be(5.0f);
+            result!.IsActive.Should().BeTrue();
         }
 
         [Fact]
@@ -107,8 +107,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Id.Should().Be(project.Id);
-            result.DeletedAt.Should().NotBeNull();
+            result!.Id.Should().Be(project.Id);
+            result!.DeletedAt.Should().NotBeNull();
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("Unique Project Name");
+            result!.Name.Should().Be("Unique Project Name");
         }
 
         [Fact]
@@ -215,9 +215,9 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.Name.Should().Be("Test Project");
-            result.UserProjects.Should().HaveCount(1);
-            result.UserProjects.First().User.FirstName.Should().Be("John");
+            result!.Name.Should().Be("Test Project");
+            result!.UserProjects.Should().HaveCount(1);
+            result!.UserProjects.First().User.FirstName.Should().Be("John");
         }
 
         [Fact]
@@ -495,9 +495,9 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Assert
             result.Should().NotBeNull();
-            result.UserId.Should().Be(user.Id);
-            result.ProjectId.Should().Be(project.Id);
-            result.TimePercentagePerProject.Should().Be(75.0f);
+            result!.UserId.Should().Be(user.Id);
+            result!.ProjectId.Should().Be(project.Id);
+            result!.TimePercentagePerProject.Should().Be(75.0f);
         }
 
         [Fact]
@@ -786,7 +786,7 @@ namespace ManagementSimulator.Tests.Repositories
             // Verify the update
             var updatedUserProject = await _repository.GetUserProjectAsync(user.Id, project.Id);
             updatedUserProject.Should().NotBeNull();
-            updatedUserProject.TimePercentagePerProject.Should().Be(75.0f);
+            updatedUserProject!.TimePercentagePerProject.Should().Be(75.0f);
         }
 
         [Fact]
