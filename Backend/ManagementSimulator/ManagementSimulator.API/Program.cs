@@ -97,7 +97,7 @@ app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+app.UseMiddleware<AuditMiddleware>();
 app.UseMiddleware<DebounceMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
