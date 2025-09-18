@@ -25,13 +25,17 @@ namespace ManagementSimulator.Tests.Services
 		private readonly IEmployeeManagerService _empMgrSvc = Substitute.For<IEmployeeManagerService>();
 		private readonly IEmailService _emailSvc = Substitute.For<IEmailService>();
 		private readonly IPublicHolidayService _publicHolidaySvc = Substitute.For<IPublicHolidayService>();
+		private readonly IWeekendService _weekendSvc = Substitute.For<IWeekendService>();
 
 		private LeaveRequestService CreateServ()
 		{
 			_publicHolidaySvc.GetHolidaysInRangeAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
 				.Returns(new List<PublicHolidayResponseDto>());
 
-			return new LeaveRequestService(_leaveRepo, _userRepo, _typeRepo, _empMgrSvc, _emailSvc, _publicHolidaySvc);
+			_weekendSvc.CountWorkingDays(Arg.Any<DateTime>(), Arg.Any<DateTime>(), Arg.Any<HashSet<DateTime>>())
+				.Returns(5);
+
+			return new LeaveRequestService(_leaveRepo, _userRepo, _typeRepo, _empMgrSvc, _emailSvc, _publicHolidaySvc, _weekendSvc);
 		}
 		[Fact]
 		public async Task AddLeaveRequestAsync_Should_Create_Pending_Request_When_Valid()
