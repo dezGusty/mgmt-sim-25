@@ -16,6 +16,7 @@ namespace ManagementSimulator.Database
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddDbContext<MGMTSimulatorDbContext>();
+
             services.AddScoped<IDeparmentRepository, DepartmentRepository>();
             services.AddScoped<IJobTitleRepository, JobTitleRepository>();
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();

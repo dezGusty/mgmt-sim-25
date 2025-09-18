@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Database.Repositories
 {
-    public class BaseRepository<T>(MGMTSimulatorDbContext databaseContext) : IBaseRepostory<T> where T : BaseEntity
+    public class BaseRepository<T>(MGMTSimulatorDbContext databaseContext, IAuditService auditService) : IBaseRepostory<T> where T : BaseEntity
     {
         private DbSet<T> DbSet { get; } = databaseContext.Set<T>();
+        protected readonly IAuditService _auditService = auditService;
 
         public async Task<List<T>> GetAllAsync(bool includeDeletedEntities = false)
         {
@@ -27,6 +28,10 @@ namespace ManagementSimulator.Database.Repositories
 
         public void Insert(params T[] records)
         {
+            foreach (var record in records)
+            {
+                _auditService.SetCreatedAudit(record);
+            }
             DbSet.AddRange(records);
         }
 
@@ -34,7 +39,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             foreach (var baseEntity in records)
             {
-                baseEntity.ModifiedAt = DateTime.UtcNow;
+                _auditService.SetModifiedAudit(baseEntity);
             }
             DbSet.UpdateRange(records);
         }
@@ -43,7 +48,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             foreach (var baseEntity in records)
             {
-                baseEntity.DeletedAt = DateTime.UtcNow;
+                _auditService.SetDeletedAudit(baseEntity);
             }
             Update(records);
         }

@@ -23,6 +23,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMemoryCache();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddServices();
 builder.Services.AddRepositories();
 

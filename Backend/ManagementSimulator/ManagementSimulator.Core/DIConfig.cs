@@ -16,6 +16,7 @@ namespace ManagementSimulator.Core
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
+            services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IJobTitleService, JobTitleService>();
             services.AddScoped<ILeaveRequestService, LeaveRequestService>();

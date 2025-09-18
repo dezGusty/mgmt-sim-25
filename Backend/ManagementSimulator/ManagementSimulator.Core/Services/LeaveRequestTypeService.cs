@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ManagementSimulator.Core.Services
 {
-    public class LeaveRequestTypeService: ILeaveRequestTypeService
+    public class LeaveRequestTypeService : ILeaveRequestTypeService
     {
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository;
 
@@ -40,7 +40,7 @@ namespace ManagementSimulator.Core.Services
         public async Task<LeaveRequestTypeResponseDto?> GetLeaveRequestTypeByIdAsync(int id)
         {
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
-            
+
             if (leaveRequestType == null)
             {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
@@ -76,9 +76,8 @@ namespace ManagementSimulator.Core.Services
             }
 
             PatchHelper.PatchRequestToEntity.PatchFrom<UpdateLeaveRequestTypeRequestDto, Database.Entities.LeaveRequestType>(leaveRequestType, dto);
-            leaveRequestType.ModifiedAt = DateTime.UtcNow;
 
-            await _leaveRequestTypeRepository.SaveChangesAsync();
+            await _leaveRequestTypeRepository.UpdateAsync(leaveRequestType);
 
             return new LeaveRequestTypeResponseDto
             {
@@ -95,7 +94,7 @@ namespace ManagementSimulator.Core.Services
             var leaveRequestType = await _leaveRequestTypeRepository.GetFirstOrDefaultAsync(id);
 
             if (leaveRequestType == null)
-            { 
+            {
                 throw new EntryNotFoundException(nameof(Database.Entities.LeaveRequestType), id);
             }
 
@@ -104,9 +103,9 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<LeaveRequestTypeResponseDto> AddLeaveRequestTypeAsync(CreateLeaveRequestTypeRequestDto dto)
         {
-            if(await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title) != null)
+            if (await _leaveRequestTypeRepository.GetLeaveRequestTypesByTitleAsync(dto.Title) != null)
             {
-                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType),nameof(Database.Entities.LeaveRequestType.Title));
+                throw new UniqueConstraintViolationException(nameof(Database.Entities.LeaveRequestType), nameof(Database.Entities.LeaveRequestType.Title));
             }
 
             var leaveRequestType = new Database.Entities.LeaveRequestType

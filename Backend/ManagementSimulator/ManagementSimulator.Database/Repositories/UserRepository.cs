@@ -17,7 +17,7 @@ namespace ManagementSimulator.Database.Repositories
     public class UserRepository : BaseRepository<User>, IUserRepository
     {
         private readonly MGMTSimulatorDbContext _dbContext;
-        public UserRepository(MGMTSimulatorDbContext dbContext) : base(dbContext)
+        public UserRepository(MGMTSimulatorDbContext dbContext, IAuditService auditService) : base(dbContext, auditService)
         {
             _dbContext = dbContext;
         }
@@ -26,7 +26,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<User> query = _dbContext.Users;
 
-            if(!tracking) 
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
@@ -81,7 +81,7 @@ namespace ManagementSimulator.Database.Repositories
                 query = query.Where(u => u.DeletedAt == null);
 
             query = query.Where(em => em.ManagerId == managerId);
-                                 
+
 
             return await query.Select(em => em.Employee).ToListAsync();
         }
@@ -440,7 +440,7 @@ namespace ManagementSimulator.Database.Repositories
         {
             IQueryable<User> query = _dbContext.Users;
 
-            if(!tracking)
+            if (!tracking)
                 query = query.AsNoTracking();
 
             if (!includeDeleted)
@@ -457,7 +457,7 @@ namespace ManagementSimulator.Database.Repositories
             if (!string.IsNullOrWhiteSpace(globalSearch))
             {
                 query = query.Where(u =>
-                    (u.FirstName + " " + u.LastName).Contains(globalSearch) || 
+                    (u.FirstName + " " + u.LastName).Contains(globalSearch) ||
                     u.Email.Contains(globalSearch) ||
                     (u.Title != null && u.Title.Name.Contains(globalSearch)) ||
                     (u.Department != null && u.Department.Name.Contains(globalSearch))
