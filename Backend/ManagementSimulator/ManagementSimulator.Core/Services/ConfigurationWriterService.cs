@@ -31,15 +31,11 @@ namespace ManagementSimulator.Core.Services
         {
             try
             {
-                var tasks = new[]
-                {
-                    UpdateAppSettingsFileAsync("appsettings.json", weekendConfiguration),
-                    UpdateAppSettingsFileAsync("appsettings.Development.json", weekendConfiguration)
-                };
-
-                var results = await Task.WhenAll(tasks);
+                // Only update the base configuration file
+                // Weekend settings will be inherited by all environments
+                var result = await UpdateAppSettingsFileAsync("appsettings.json", weekendConfiguration);
                 
-                return results[0] || results[1];
+                return result;
             }
             catch (Exception ex)
             {
