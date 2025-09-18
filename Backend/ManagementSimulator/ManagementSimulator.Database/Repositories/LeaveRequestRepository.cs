@@ -15,7 +15,7 @@ using ManagementSimulator.Database.Enums;
 
 namespace ManagementSimulator.Database.Repositories
 {
-    internal class LeaveRequestRepository : BaseRepository<LeaveRequest>, ILeaveRequestRepository
+    public class LeaveRequestRepository : BaseRepository<LeaveRequest>, ILeaveRequestRepository
     {
         private readonly MGMTSimulatorDbContext _dbcontext;
         public LeaveRequestRepository(MGMTSimulatorDbContext dbcontext, IAuditService auditService) : base(dbcontext, auditService)
