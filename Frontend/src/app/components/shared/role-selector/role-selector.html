@@ -208,14 +208,6 @@
           </div>
         </div>
 
-        <!-- Impersonation Controls -->
-        <div *ngIf="isImpersonating" class="mt-8 text-center">
-          <button (click)="stopImpersonation()" 
-                  class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200">
-            Stop Impersonating
-          </button>
-        </div>
-
         <!-- Show Admin Roles when Impersonating -->
         <div *ngIf="isImpersonating && adminOriginalRoles.length > 0" class="mt-12">
           <div class="border-t border-[#020126]/20 pt-8">
