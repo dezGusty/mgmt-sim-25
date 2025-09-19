@@ -107,6 +107,7 @@ namespace ManagementSimulator.Tests.Repositories
             // Assert
             result.Should().NotBeNull();
             result!.Name.Should().Be("Deleted Department");
+            result.Description.Should().Be("This department was deleted");
             result.DeletedAt.Should().NotBeNull();
         }
 
@@ -234,6 +235,33 @@ namespace ManagementSimulator.Tests.Repositories
             result.Should().HaveCount(1);
             result[0].Id.Should().Be(activeDepartment.Id);
             result[0].DeletedAt.Should().BeNull();
+        }
+
+        [Fact]
+
+        public async Task GetAllDepartmentsAsync_ShouldIncludeDeletedWhenRequested()
+        {
+            // Arrange
+            var activeDepartment = new Department { Name = "IT", Description = "Information Technology" };
+            var deletedDepartment = new Department 
+            { 
+                Name = "Closed Dept", 
+                Description = "This department was closed",
+                DeletedAt = DateTime.UtcNow
+            };
+
+            _context.Departments.AddRange(activeDepartment, deletedDepartment);
+            await _context.SaveChangesAsync();
+
+            var requestedIds = new List<int> { activeDepartment.Id, deletedDepartment.Id };
+
+            // Act
+            var result = await _repository.GetAllDepartmentsAsync(requestedIds, includeDeleted: true);
+
+            // Assert
+            result.Should().HaveCount(2);
+            result.Should().Contain(d => d.Id == activeDepartment.Id && d.DeletedAt == null);
+            result.Should().Contain(d => d.Id == deletedDepartment.Id && d.DeletedAt != null);
         }
 
         [Fact]
@@ -502,6 +530,8 @@ namespace ManagementSimulator.Tests.Repositories
             // Assert
             result.Data.Should().HaveCount(2);
             result.TotalCount.Should().Be(5);
+            result.Data[0].Name.Should().Be("Deleted Department 3");
+            result.Data[1].Name.Should().Be("Deleted Department 4");
         }
 
         [Fact]
@@ -569,8 +599,8 @@ namespace ManagementSimulator.Tests.Repositories
 
             var parameters = new QueryParams
             {
-                Page = 0, // Invalid
-                PageSize = -1 // Invalid
+                Page = 0,
+                PageSize = -1
             };
 
             // Act
@@ -597,6 +627,34 @@ namespace ManagementSimulator.Tests.Repositories
 
             // Act
             var result = await _repository.GetAllInactiveDepartmentsFilteredAsync(null, null!);
+
+            // Assert
+            result.Data.Should().HaveCount(1);
+            result.TotalCount.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetAllInactiveDepartmentsFilteredAsync_ShouldReturnWithoutPaginationWhenInvalidPageParameters()
+        {
+            // Arrange
+            var deletedDepartment = new Department 
+            { 
+                Name = "Deleted Department", 
+                Description = "This was deleted",
+                DeletedAt = DateTime.UtcNow
+            };
+
+            _context.Departments.Add(deletedDepartment);
+            await _context.SaveChangesAsync();
+
+            var parameters = new QueryParams
+            {
+                Page = -5,
+                PageSize = 0
+            };
+
+            // Act
+            var result = await _repository.GetAllInactiveDepartmentsFilteredAsync(null, parameters);
 
             // Assert
             result.Data.Should().HaveCount(1);
