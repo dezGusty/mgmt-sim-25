@@ -42,32 +42,51 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<FiscalYearDto> GetFiscalYearAsync(int year)
         {
+            var startDate = new DateTime(year, 10, 1);
+            var endDate = new DateTime(year + 1, 9, 30);
+            var currentDate = DateTime.UtcNow;
+
+            // Calculate days remaining until next fiscal year
+            var nextFiscalYearStart = endDate.AddDays(1); // October 1st of next year
+            var daysRemaining = (nextFiscalYearStart - currentDate).Days;
+
             return await Task.FromResult(new FiscalYearDto
             {
                 Year = year,
-                StartDate = new DateTime(year, 10, 1),
-                EndDate = new DateTime(year + 1, 9, 30),
-                Label = $"FY {year}-{year + 1}"
+                StartDate = startDate,
+                EndDate = endDate,
+                Label = $"FY {year}-{year + 1}",
+                DaysRemaining = Math.Max(0, daysRemaining),
+                IsCurrentFiscalYear = currentDate >= startDate && currentDate <= endDate
             });
         }
 
         public async Task<List<string>> GetAvailableMonthsForProjectAsync(int projectId, int fiscalYear)
         {
             var fiscalYearInfo = await GetFiscalYearAsync(fiscalYear);
+            var currentDate = DateTime.UtcNow;
+            var months = new List<string>();
 
-            // Get audit logs for the project within fiscal year
-            var auditLogs = await _auditRepository.GetAuditLogsByEntityAsync("Project", projectId,
-                fiscalYearInfo.StartDate, fiscalYearInfo.EndDate);
+            // Generate all months within the fiscal year period
+            var startDate = fiscalYearInfo.StartDate;
+            var endDate = fiscalYearInfo.EndDate;
 
-            var months = new HashSet<string>();
-
-            foreach (var log in auditLogs)
+            // If it's current fiscal year, only include months up to current month
+            if (fiscalYearInfo.IsCurrentFiscalYear && currentDate < endDate)
             {
-                var monthKey = log.Timestamp.ToString("yyyy-MM");
-                months.Add(monthKey);
+                endDate = new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month));
             }
 
-            return months.OrderBy(m => m).ToList();
+            var current = new DateTime(startDate.Year, startDate.Month, 1);
+            var end = new DateTime(endDate.Year, endDate.Month, 1);
+
+            while (current <= end)
+            {
+                months.Add(current.ToString("yyyy-MM"));
+                current = current.AddMonths(1);
+            }
+
+            return months;
         }
 
         public async Task<ProjectStatisticsResponseDto> GetProjectStatisticsAsync(ProjectStatisticsRequestDto request)

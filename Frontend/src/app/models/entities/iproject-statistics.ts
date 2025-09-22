@@ -71,6 +71,8 @@ export interface IFiscalYear {
   endDate: Date; // September 30th
   year: number; // The year when fiscal year starts (e.g., 2024 for FY 2024-2025)
   label: string; // "FY 2024-2025"
+  daysRemaining: number; // Days until next fiscal year starts
+  isCurrentFiscalYear: boolean; // Whether this is the current active fiscal year
 }
 
 export interface IProjectActivitySummary {

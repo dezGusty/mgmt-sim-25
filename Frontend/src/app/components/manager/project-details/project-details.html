@@ -885,48 +885,25 @@
 
                   <!-- Statistics Content -->
                   <div *ngIf="!isLoadingStatistics && !statisticsError && projectStatistics">
-                    <!-- Fiscal Year and Month Selection -->
+                    <!-- Fiscal Year Info -->
                     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-                      <div class="flex flex-wrap items-center gap-4">
-                        <!-- Fiscal Year Selection -->
-                        <div class="flex items-center gap-2">
-                          <label class="text-sm font-medium text-gray-700">Fiscal Year:</label>
-                          <select 
-                            [(ngModel)]="selectedFiscalYear" 
-                            (ngModelChange)="onFiscalYearChange()"
-                            class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option [value]="currentFiscalYear.year" *ngIf="currentFiscalYear">
-                              FY {{ currentFiscalYear.year }}
-                            </option>
-                            <option [value]="currentFiscalYear!.year - 1" *ngIf="currentFiscalYear">
-                              FY {{ currentFiscalYear.year - 1 }}
-                            </option>
-                            <option [value]="currentFiscalYear!.year + 1" *ngIf="currentFiscalYear">
-                              FY {{ currentFiscalYear.year + 1 }}
-                            </option>
-                          </select>
-                        </div>
-
-                        <!-- Month Selection for Chart Views -->
-                        <div 
-                          *ngIf="activeStatisticsSubTab === 'allocation' || activeStatisticsSubTab === 'budget'" 
-                          class="flex items-center gap-2"
-                        >
-                          <label class="text-sm font-medium text-gray-700">Month:</label>
-                          <select 
-                            [(ngModel)]="selectedMonth" 
-                            (ngModelChange)="onMonthChange()"
-                            class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="">All Months</option>
-                            <option *ngFor="let month of availableMonths" [value]="month">{{ month }}</option>
-                          </select>
-                        </div>
-
-                        <!-- Fiscal Year Info -->
-                        <div class="ml-auto text-xs text-gray-500" *ngIf="currentFiscalYear">
-                          ({{ currentFiscalYear.startDate | date:'MMM d, y' }} - {{ currentFiscalYear.endDate | date:'MMM d, y' }})
+                      <div class="flex items-center justify-between">
+                        <!-- Current Fiscal Year Info -->
+                        <div class="flex items-center gap-4" *ngIf="currentFiscalYear">
+                          <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-lg font-semibold text-gray-900">{{ currentFiscalYear.label }}</span>
+                          </div>
+                          <div class="text-sm text-gray-600">
+                            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                              {{ currentFiscalYear.daysRemaining }} days remaining
+                            </span>
+                          </div>
+                          <div class="text-xs text-gray-500">
+                            {{ currentFiscalYear.startDate | date:'MMM d, y' }} - {{ currentFiscalYear.endDate | date:'MMM d, y' }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -945,7 +922,26 @@
 
                     <!-- Overview Content -->
                     <div *ngIf="activeStatisticsSubTab === 'overview'">
-                      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <!-- Month Selection for Overview -->
+                      <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                          <h5 class="text-lg font-semibold text-gray-900">Overview Statistics</h5>
+                          <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">Month:</label>
+                            <select 
+                              [(ngModel)]="selectedMonth" 
+                              (ngModelChange)="onMonthChange()"
+                              class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-32"
+                            >
+                              <option value="">All Months</option>
+                              <option *ngFor="let month of availableMonths" [value]="month">{{ formatMonth(month) }}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Overview Statistics Grid -->
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                           <div class="flex items-center">
                             <div class="p-3 bg-blue-100 rounded-lg">
@@ -954,7 +950,7 @@
                               </svg>
                             </div>
                             <div class="ml-4">
-                              <p class="text-3xl font-bold text-gray-900">{{ projectStatistics.summary.totalEmployeesEver }}</p>
+                              <p class="text-3xl font-bold text-gray-900">{{ (projectStatistics && projectStatistics.summary) ? projectStatistics.summary.totalEmployeesEver : 0 }}</p>
                               <p class="text-sm text-gray-600">Total Employees Ever</p>
                             </div>
                           </div>
@@ -968,7 +964,7 @@
                               </svg>
                             </div>
                             <div class="ml-4">
-                              <p class="text-3xl font-bold text-gray-900">{{ projectStatistics.summary.currentEmployees }}</p>
+                              <p class="text-3xl font-bold text-gray-900">{{ (projectStatistics && projectStatistics.summary) ? projectStatistics.summary.currentEmployees : 0 }}</p>
                               <p class="text-sm text-gray-600">Current Employees</p>
                             </div>
                           </div>
@@ -982,7 +978,7 @@
                               </svg>
                             </div>
                             <div class="ml-4">
-                              <p class="text-3xl font-bold text-gray-900">{{ projectStatistics.summary.totalAllocationEvents }}</p>
+                              <p class="text-3xl font-bold text-gray-900">{{ (projectStatistics && projectStatistics.summary) ? projectStatistics.summary.totalAllocationEvents : 0 }}</p>
                               <p class="text-sm text-gray-600">Total Allocations</p>
                             </div>
                           </div>
@@ -996,9 +992,71 @@
                               </svg>
                             </div>
                             <div class="ml-4">
-                              <p class="text-3xl font-bold text-gray-900">{{ projectStatistics.summary.projectDuration }}</p>
+                              <p class="text-3xl font-bold text-gray-900">{{ (projectStatistics && projectStatistics.summary) ? projectStatistics.summary.projectDuration : 0 }}</p>
                               <p class="text-sm text-gray-600">Months Duration</p>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Month-Specific Overview Chart -->
+                      <div *ngIf="selectedMonth" class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4">
+                          Monthly Overview - {{ formatMonth(selectedMonth) }}
+                        </h5>
+                        
+                        <!-- Overview metrics for selected month -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                          <div class="text-center">
+                            <p class="text-2xl font-bold text-blue-600">
+                              {{ getMonthlyMetric('employees') }}
+                            </p>
+                            <p class="text-sm text-gray-600">Avg Employees</p>
+                          </div>
+                          <div class="text-center">
+                            <p class="text-2xl font-bold text-green-600">
+                              {{ getMonthlyMetric('allocations') }}
+                            </p>
+                            <p class="text-sm text-gray-600">New Allocations</p>
+                          </div>
+                          <div class="text-center">
+                            <p class="text-2xl font-bold text-purple-600">
+                              {{ getMonthlyMetric('utilization') }}%
+                            </p>
+                            <p class="text-sm text-gray-600">Avg Utilization</p>
+                          </div>
+                        </div>
+
+                        <!-- Overview Chart for Selected Month -->
+                        <div class="mt-6">
+                          <h6 class="text-md font-medium text-gray-800 mb-3">Daily Activity Overview</h6>
+                          <div class="h-64 bg-gray-50 rounded-lg p-4 relative overflow-x-auto">
+                            <div class="flex items-end justify-center h-full space-x-1 min-w-full">
+                              <div *ngFor="let data of getOverviewChartData(); trackBy: trackByIndex" 
+                                   class="flex flex-col items-center min-w-0 flex-shrink-0">
+                                <!-- Bar for activity level -->
+                                <div class="relative group cursor-pointer">
+                                  <div class="w-8 bg-gradient-to-t from-indigo-500 to-indigo-300 rounded-t transition-all duration-200 hover:from-indigo-600 hover:to-indigo-400"
+                                       [style.height.px]="getActivityBarHeight(data.value)"
+                                       [title]="'Activity: ' + data.value + ' events on ' + data.date">
+                                  </div>
+                                  <!-- Tooltip -->
+                                  <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                    {{ data.date }}<br>
+                                    Activity: {{ data.value }} events
+                                  </div>
+                                </div>
+                                <!-- Date label -->
+                                <span class="text-xs text-gray-600 mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
+                                  {{ formatChartDate(data.date) }}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Chart footer with stats -->
+                          <div class="mt-2 flex justify-between items-center text-xs text-gray-500">
+                            <span>{{ formatMonth(selectedMonth) }} Activity</span>
+                            <span>Days: {{ getOverviewChartData().length }} | Max: {{ getMaxActivityValue() }} | Avg: {{ getAvgActivityValue() }}</span>
                           </div>
                         </div>
                       </div>
@@ -1045,6 +1103,23 @@
 
                     <!-- Monthly Allocations Content -->
                     <div *ngIf="activeStatisticsSubTab === 'allocation'">
+                      <!-- Month Selection Header -->
+                      <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                          <h5 class="text-lg font-semibold text-gray-900">Monthly Allocations</h5>
+                          <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">Month:</label>
+                            <select 
+                              [(ngModel)]="selectedMonth" 
+                              (ngModelChange)="onMonthChange()"
+                              class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-32"
+                            >
+                              <option value="">All Months</option>
+                              <option *ngFor="let month of availableMonths" [value]="month">{{ formatMonth(month) }}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
                       <!-- Chart Section -->
                       <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6" *ngIf="selectedMonth">
                         <div class="flex items-center justify-between mb-4">
@@ -1063,13 +1138,67 @@
                         </div>
 
                         <!-- Chart Placeholder -->
-                        <div *ngIf="!isLoadingCharts && allocationChartData" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                          <div class="text-center">
-                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                            <p class="text-gray-600 text-sm">{{ allocationChartData.title }}</p>
-                            <p class="text-gray-500 text-xs mt-1">{{ allocationChartData.data.length || 0 }} data points</p>
+                        <div *ngIf="!isLoadingCharts && allocationChartData" class="h-80 bg-white rounded-lg border border-gray-200 p-4">
+                          <div class="mb-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-2">{{ allocationChartData.title }}</h6>
+                            <p class="text-xs text-gray-500">Daily allocation data for {{ formatMonth(selectedMonth || '') }}</p>
+                          </div>
+                          
+                          <!-- Chart Container -->
+                          <div class="h-64 flex items-end justify-around gap-1 bg-gray-50 rounded p-2">
+                            <!-- Bar Chart -->
+                            <div 
+                              *ngFor="let dataPoint of allocationChartData.data; let i = index" 
+                              class="flex flex-col items-center group cursor-pointer"
+                              [style.width.%]="Math.max(2, 95 / allocationChartData.data.length)"
+                            >
+                              <!-- Bar -->
+                              <div 
+                                class="bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all duration-300 hover:from-blue-700 hover:to-blue-500 relative"
+                                [style.height.px]="Math.max(8, (dataPoint.value / getMaxValue(allocationChartData.data)) * 200)"
+                                [style.width.%]="85"
+                              >
+                                <!-- Tooltip on hover -->
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                                  {{ dataPoint.value }} FTEs
+                                  <br>{{ dataPoint.date | date:'MMM d' }}
+                                </div>
+                              </div>
+                              
+                              <!-- Date Label -->
+                              <div class="text-xs text-gray-600 mt-1 text-center transform -rotate-45 origin-center w-8">
+                                {{ dataPoint.date | date:'d' }}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Chart Footer -->
+                          <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
+                            <span>Days in month: {{ allocationChartData.data.length }}</span>
+                            <span>Max: {{ getMaxValue(allocationChartData.data) }}</span>
+                            <span>Avg: {{ getAverageValue(allocationChartData.data).toFixed(1) }}</span>
+                          </div>
+                        </div>
+
+                        <!-- Trend Indicator -->
+                        <div *ngIf="!isLoadingCharts && allocationChartData && selectedMonth" class="bg-gray-50 rounded-lg border border-gray-200 p-3 mt-4">
+                          <div class="flex items-center justify-center gap-2">
+                            <span class="text-sm text-gray-600">Trend vs Previous Month:</span>
+                            <div class="flex items-center gap-1" [ngClass]="getTrendClass(allocationChartData)">
+                              <!-- Ascending Arrow -->
+                              <svg *ngIf="getTrendDirection(allocationChartData) === 'up'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              <!-- Descending Arrow -->
+                              <svg *ngIf="getTrendDirection(allocationChartData) === 'down'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              <!-- Stable Indicator -->
+                              <svg *ngIf="getTrendDirection(allocationChartData) === 'stable'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-sm font-medium">{{ getTrendText(allocationChartData) }}</span>
+                            </div>
                           </div>
                         </div>
 
@@ -1094,7 +1223,7 @@
                               </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                              <tr *ngFor="let monthData of projectStatistics.monthlyAllocationData" class="hover:bg-gray-50">
+                              <tr *ngFor="let monthData of projectStatistics?.monthlyAllocationData" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                   {{ formatMonth(monthData.month) }}
                                 </td>
@@ -1111,7 +1240,7 @@
                                   {{ monthData.totalFTEs }}
                                 </td>
                               </tr>
-                              <tr *ngIf="projectStatistics.monthlyAllocationData.length === 0">
+                              <tr *ngIf="!projectStatistics?.monthlyAllocationData?.length">
                                 <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 italic">
                                   No allocation data available
                                 </td>
@@ -1124,6 +1253,23 @@
 
                     <!-- Budget Utilization Content -->
                     <div *ngIf="activeStatisticsSubTab === 'budget'">
+                      <!-- Month Selection Header -->
+                      <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                          <h5 class="text-lg font-semibold text-gray-900">Budget Utilization</h5>
+                          <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">Month:</label>
+                            <select 
+                              [(ngModel)]="selectedMonth" 
+                              (ngModelChange)="onMonthChange()"
+                              class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-32"
+                            >
+                              <option value="">All Months</option>
+                              <option *ngFor="let month of availableMonths" [value]="month">{{ formatMonth(month) }}</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
                       <!-- Chart Section -->
                       <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6" *ngIf="selectedMonth">
                         <div class="flex items-center justify-between mb-4">
@@ -1142,13 +1288,67 @@
                         </div>
 
                         <!-- Chart Placeholder -->
-                        <div *ngIf="!isLoadingCharts && budgetChartData" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                          <div class="text-center">
-                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            <p class="text-gray-600 text-sm">{{ budgetChartData.title }}</p>
-                            <p class="text-gray-500 text-xs mt-1">{{ budgetChartData.data.length || 0 }} data points</p>
+                        <div *ngIf="!isLoadingCharts && budgetChartData" class="h-80 bg-white rounded-lg border border-gray-200 p-4">
+                          <div class="mb-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-2">{{ budgetChartData.title }}</h6>
+                            <p class="text-xs text-gray-500">Daily budget utilization for {{ formatMonth(selectedMonth || '') }}</p>
+                          </div>
+                          
+                          <!-- Chart Container -->
+                          <div class="h-64 flex items-end justify-around gap-1 bg-gray-50 rounded p-2">
+                            <!-- Bar Chart -->
+                            <div 
+                              *ngFor="let dataPoint of budgetChartData.data; let i = index" 
+                              class="flex flex-col items-center group cursor-pointer"
+                              [style.width.%]="Math.max(2, 95 / budgetChartData.data.length)"
+                            >
+                              <!-- Bar -->
+                              <div 
+                                class="bg-gradient-to-t from-green-600 to-green-400 rounded-t transition-all duration-300 hover:from-green-700 hover:to-green-500 relative"
+                                [style.height.px]="Math.max(8, (dataPoint.value / getMaxValue(budgetChartData.data)) * 200)"
+                                [style.width.%]="85"
+                              >
+                                <!-- Tooltip on hover -->
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">
+                                  {{ dataPoint.value }}% utilization
+                                  <br>{{ dataPoint.date | date:'MMM d' }}
+                                </div>
+                              </div>
+                              
+                              <!-- Date Label -->
+                              <div class="text-xs text-gray-600 mt-1 text-center transform -rotate-45 origin-center w-8">
+                                {{ dataPoint.date | date:'d' }}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Chart Footer -->
+                          <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
+                            <span>Days in month: {{ budgetChartData.data.length }}</span>
+                            <span>Max: {{ getMaxValue(budgetChartData.data) }}%</span>
+                            <span>Avg: {{ getAverageValue(budgetChartData.data).toFixed(1) }}%</span>
+                          </div>
+                        </div>
+
+                        <!-- Trend Indicator -->
+                        <div *ngIf="!isLoadingCharts && budgetChartData && selectedMonth" class="bg-gray-50 rounded-lg border border-gray-200 p-3 mt-4">
+                          <div class="flex items-center justify-center gap-2">
+                            <span class="text-sm text-gray-600">Trend vs Previous Month:</span>
+                            <div class="flex items-center gap-1" [ngClass]="getTrendClass(budgetChartData)">
+                              <!-- Ascending Arrow -->
+                              <svg *ngIf="getTrendDirection(budgetChartData) === 'up'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              <!-- Descending Arrow -->
+                              <svg *ngIf="getTrendDirection(budgetChartData) === 'down'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              <!-- Stable Indicator -->
+                              <svg *ngIf="getTrendDirection(budgetChartData) === 'stable'" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-sm font-medium">{{ getTrendText(budgetChartData) }}</span>
+                            </div>
                           </div>
                         </div>
 
@@ -1173,7 +1373,7 @@
                               </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                              <tr *ngFor="let budgetData of projectStatistics.budgetUtilization" class="hover:bg-gray-50">
+                              <tr *ngFor="let budgetData of projectStatistics?.budgetUtilization" class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                   {{ formatMonth(budgetData.month) }}
                                 </td>
@@ -1192,7 +1392,7 @@
                                   {{ budgetData.variance > 0 ? '+' : '' }}{{ budgetData.variance }}
                                 </td>
                               </tr>
-                              <tr *ngIf="projectStatistics.budgetUtilization.length === 0">
+                              <tr *ngIf="!projectStatistics?.budgetUtilization?.length">
                                 <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 italic">
                                   No budget utilization data available
                                 </td>
@@ -1208,7 +1408,7 @@
                       <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                         <h5 class="text-lg font-semibold text-gray-900 mb-4">Employee Activity Timeline</h5>
                         <div class="space-y-4">
-                          <div *ngFor="let employee of projectStatistics.employeeActivity" class="border border-gray-200 rounded-lg p-4">
+                          <div *ngFor="let employee of projectStatistics?.employeeActivity" class="border border-gray-200 rounded-lg p-4">
                             <div class="flex items-center justify-between mb-3">
                               <div class="flex items-center">
                                 <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -1244,7 +1444,7 @@
                               </div>
                             </div>
                           </div>
-                          <div *ngIf="projectStatistics.employeeActivity.length === 0" class="text-center py-8">
+                          <div *ngIf="!projectStatistics?.employeeActivity?.length" class="text-center py-8">
                             <p class="text-sm text-gray-500 italic">No employee activity data available</p>
                           </div>
                         </div>
@@ -1258,5 +1458,3 @@
         </div>
       </div>
     </div>
-  </div>
-</main>

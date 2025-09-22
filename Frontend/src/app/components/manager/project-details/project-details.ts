@@ -99,7 +99,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   // Fiscal year and filtering
   currentFiscalYear: IFiscalYear | null = null;
-  selectedFiscalYear: number | null = null;
   selectedMonth: string | null = null;
   availableMonths: string[] = [];
   statisticsOverview: IProjectStatisticsOverview | null = null;
@@ -399,26 +398,42 @@ export class ProjectDetails implements OnInit, OnDestroy {
       if (!this.currentFiscalYear) {
         const fiscalYear = await this.projectStatisticsService.getCurrentFiscalYear().toPromise();
         this.currentFiscalYear = fiscalYear || null;
-        this.selectedFiscalYear = this.currentFiscalYear?.year || null;
       }
 
       // Load available months
-      if (this.selectedFiscalYear) {
+      if (this.currentFiscalYear) {
         this.availableMonths = await this.projectStatisticsService.getAvailableMonths(
           this.projectId, 
-          this.selectedFiscalYear
+          this.currentFiscalYear.year
         ).toPromise() || [];
+        
+        // Set current month as default if not already set
+        if (!this.selectedMonth && this.availableMonths.length > 0) {
+          const currentMonth = this.projectStatisticsService.getCurrentMonth();
+          // Check if current month is available, otherwise use the latest available month
+          if (this.availableMonths.includes(currentMonth)) {
+            this.selectedMonth = currentMonth;
+          } else {
+            // Use the most recent available month
+            this.selectedMonth = this.availableMonths[this.availableMonths.length - 1];
+          }
+        }
       }
 
       // Load project statistics
       this.projectStatisticsService.getProjectStatistics(
         this.projectId, 
-        this.selectedFiscalYear || undefined, 
+        this.currentFiscalYear?.year || undefined, 
         this.selectedMonth || undefined
       ).subscribe({
         next: (statistics) => {
           this.projectStatistics = statistics;
           this.isLoadingStatistics = false;
+          
+          // Load charts after statistics are loaded
+          if (this.selectedMonth) {
+            this.loadChartsForCurrentTab();
+          }
         },
         error: (error) => {
           console.error('Error loading project statistics:', error);
@@ -434,13 +449,6 @@ export class ProjectDetails implements OnInit, OnDestroy {
     }
   }
 
-  onFiscalYearChange() {
-    if (this.selectedFiscalYear) {
-      this.selectedMonth = null; // Reset month selection
-      this.loadProjectStatistics();
-    }
-  }
-
   onMonthChange() {
     this.loadProjectStatistics();
     
@@ -452,14 +460,27 @@ export class ProjectDetails implements OnInit, OnDestroy {
     }
   }
 
+  loadChartsForCurrentTab() {
+    if (!this.selectedMonth) return;
+    
+    switch (this.activeStatisticsSubTab) {
+      case 'allocation':
+        this.loadAllocationChart();
+        break;
+      case 'budget':
+        this.loadBudgetChart();
+        break;
+    }
+  }
+
   loadAllocationChart() {
-    if (!this.projectId || !this.selectedMonth || !this.selectedFiscalYear) return;
+    if (!this.projectId || !this.selectedMonth || !this.currentFiscalYear) return;
 
     this.isLoadingCharts = true;
     this.projectStatisticsService.getProjectAllocationChart(
       this.projectId,
       this.selectedMonth,
-      this.selectedFiscalYear
+      this.currentFiscalYear.year
     ).subscribe({
       next: (chartData: IStatisticsChartData) => {
         this.allocationChartData = chartData;
@@ -473,13 +494,13 @@ export class ProjectDetails implements OnInit, OnDestroy {
   }
 
   loadBudgetChart() {
-    if (!this.projectId || !this.selectedMonth || !this.selectedFiscalYear) return;
+    if (!this.projectId || !this.selectedMonth || !this.currentFiscalYear) return;
 
     this.isLoadingCharts = true;
     this.projectStatisticsService.getProjectBudgetChart(
       this.projectId,
       this.selectedMonth,
-      this.selectedFiscalYear
+      this.currentFiscalYear.year
     ).subscribe({
       next: (chartData: IStatisticsChartData) => {
         this.budgetChartData = chartData;
@@ -490,6 +511,52 @@ export class ProjectDetails implements OnInit, OnDestroy {
         this.isLoadingCharts = false;
       }
     });
+  }
+
+  getMaxValue(dataPoints: any[]): number {
+    if (!dataPoints || dataPoints.length === 0) return 1;
+    return Math.max(...dataPoints.map(dp => dp.value));
+  }
+
+  getTrendDirection(chartData: IStatisticsChartData): 'up' | 'down' | 'stable' {
+    if (!chartData.data || chartData.data.length < 2) return 'stable';
+    
+    const currentAvg = this.getAverageValue(chartData.data);
+    const previousAvg = chartData.previousPeriodData ? this.getAverageValue(chartData.previousPeriodData) : currentAvg;
+    
+    const difference = currentAvg - previousAvg;
+    const threshold = previousAvg * 0.05; // 5% threshold
+    
+    if (difference > threshold) return 'up';
+    if (difference < -threshold) return 'down';
+    return 'stable';
+  }
+
+  getTrendClass(chartData: IStatisticsChartData): string {
+    const direction = this.getTrendDirection(chartData);
+    switch (direction) {
+      case 'up': return 'text-green-600';
+      case 'down': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  }
+
+  getTrendText(chartData: IStatisticsChartData): string {
+    if (!chartData.data || chartData.data.length < 2) return 'No comparison data';
+    
+    const currentAvg = this.getAverageValue(chartData.data);
+    const previousAvg = chartData.previousPeriodData ? this.getAverageValue(chartData.previousPeriodData) : currentAvg;
+    
+    if (previousAvg === 0) return 'No previous data';
+    
+    const percentChange = ((currentAvg - previousAvg) / previousAvg * 100);
+    const direction = this.getTrendDirection(chartData);
+    
+    switch (direction) {
+      case 'up': return `↗ ${Math.abs(percentChange).toFixed(1)}% increase`;
+      case 'down': return `↘ ${Math.abs(percentChange).toFixed(1)}% decrease`;
+      default: return '→ Stable (~0% change)';
+    }
   }
 
   // Edit functionality
@@ -1111,9 +1178,10 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   // Statistics helper methods
   formatMonth(monthString: string): string {
+    if (!monthString) return '';
     const [year, month] = monthString.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   getUtilizationColor(percentage: number): string {
@@ -1146,5 +1214,105 @@ export class ProjectDetails implements OnInit, OnDestroy {
       case 'negative': return 'text-red-600';
       default: return 'text-gray-600';
     }
+  }
+
+  getMonthlyMetric(type: string): number {
+    if (!this.selectedMonth || !this.projectStatistics?.monthlyAllocationData) {
+      return 0;
+    }
+
+    const monthData = this.projectStatistics.monthlyAllocationData.find((m: any) => m.month === this.selectedMonth);
+    if (!monthData) return 0;
+
+    switch (type) {
+      case 'employees':
+        // Use the total employees from monthly data
+        return monthData.totalEmployees || 0;
+      case 'allocations':
+        // Total allocation events in the month
+        return (monthData.allocations || 0) + (monthData.deallocations || 0);
+      case 'utilization':
+        // Get utilization from budget data for this month
+        if (this.projectStatistics.budgetUtilization) {
+          const budgetData = this.projectStatistics.budgetUtilization.find((b: any) => b.month === this.selectedMonth);
+          return Math.round(budgetData?.utilizationPercentage || 0);
+        }
+        return 0;
+      default:
+        return 0;
+    }
+  }
+
+  getOverviewChartData(): { date: string, value: number }[] {
+    if (!this.selectedMonth || !this.projectStatistics?.employeeActivity) {
+      return [];
+    }
+
+    // Filter employee activity data for the selected month
+    const monthStart = new Date(this.selectedMonth + '-01');
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+
+    const filteredActivity = this.projectStatistics.employeeActivity.filter((activity: any) => {
+      const activityDate = new Date(activity.date);
+      return activityDate >= monthStart && activityDate <= monthEnd;
+    });
+
+    // Group by date and count events
+    const dailyActivity = new Map<string, number>();
+    
+    filteredActivity.forEach((activity: any) => {
+      const date = activity.date;
+      dailyActivity.set(date, (dailyActivity.get(date) || 0) + 1);
+    });
+
+    // Convert to array format
+    const result: { date: string, value: number }[] = [];
+    for (let day = 1; day <= monthEnd.getDate(); day++) {
+      const dateStr = `${this.selectedMonth}-${day.toString().padStart(2, '0')}`;
+      result.push({
+        date: dateStr,
+        value: dailyActivity.get(dateStr) || 0
+      });
+    }
+
+    return result;
+  }
+
+  getActivityBarHeight(value: number): number {
+    const maxValue = this.getMaxActivityValue();
+    if (maxValue === 0) return 8; // Minimum height
+    
+    const minHeight = 8;
+    const maxHeight = 200;
+    const height = (value / maxValue) * maxHeight;
+    return Math.max(minHeight, height);
+  }
+
+  getMaxActivityValue(): number {
+    const data = this.getOverviewChartData();
+    return data.length > 0 ? Math.max(...data.map(d => d.value)) : 0;
+  }
+
+  trackByIndex(index: number, item: any): number {
+    return index;
+  }
+
+  formatChartDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return `${date.getDate()}/${date.getMonth() + 1}`;
+  }
+
+  public getAverageValue(data: any[]): number {
+    if (!data || data.length === 0) return 0;
+    const sum = data.reduce((total: number, item: any) => total + (item.value || 0), 0);
+    return sum / data.length;
+  }
+
+  getAvgActivityValue(): number {
+    const data = this.getOverviewChartData();
+    if (data.length === 0) return 0;
+    
+    const sum = data.reduce((total: number, d: any) => total + d.value, 0);
+    return Math.round(sum / data.length);
   }
 }

@@ -60,6 +60,8 @@ namespace ManagementSimulator.Core.Dtos.Responses.ProjectStatistics
         public DateTime EndDate { get; set; } // September 30th
         public int Year { get; set; } // The year when fiscal year starts
         public string Label { get; set; } = string.Empty; // "FY 2024-2025"
+        public int DaysRemaining { get; set; } // Days until next fiscal year starts
+        public bool IsCurrentFiscalYear { get; set; } // Whether this is the current active fiscal year
     }
 
     public class ProjectActivitySummaryDto

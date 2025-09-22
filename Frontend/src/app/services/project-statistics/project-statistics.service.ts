@@ -149,6 +149,18 @@ export class ProjectStatisticsService {
     return date >= range.startDate && date <= range.endDate;
   }
 
+  getCurrentMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+  }
+
+  formatMonthDisplay(monthString: string): string {
+    if (!monthString) return '';
+    const [year, month] = monthString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  }
+
   // Legacy methods maintained for backward compatibility
   getProjectStatisticsLegacy(projectId: number): Observable<IProjectStatistics> {
     return forkJoin({
@@ -515,7 +527,9 @@ export class ProjectStatisticsService {
         startDate: new Date(currentFiscalYear, 9, 1),
         endDate: new Date(currentFiscalYear + 1, 8, 30),
         year: currentFiscalYear,
-        label: this.formatFiscalYearLabel(currentFiscalYear)
+        label: this.formatFiscalYearLabel(currentFiscalYear),
+        daysRemaining: 0,
+        isCurrentFiscalYear: true
       },
       monthlyAllocationData: [],
       employeeActivity: [],
