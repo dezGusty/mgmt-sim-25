@@ -167,12 +167,12 @@ jobs:
           # Output version for later steps
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create Release
+      - name: Create Release - if applicable
         if: steps.version-type.outputs.create_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version-type.outputs.version }}
-          name: Release v${{ steps.version-type.outputs.version }}
+          tag_name: v${{ steps.version-type.outputs.version || github.ref_name }}
+          name: Release v${{ steps.version-type.outputs.version || github.ref_name }}
           body: |
             ## Management Simulator ${{ github.ref_name }}
 
