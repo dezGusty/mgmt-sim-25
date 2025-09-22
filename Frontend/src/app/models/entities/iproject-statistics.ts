@@ -4,6 +4,16 @@ export interface IMonthlyAllocationData {
   deallocations: number;
   totalEmployees: number;
   totalFTEs: number;
+  dailyData: IDailyAllocationData[];
+  trendComparison?: IMonthTrendComparison;
+}
+
+export interface IDailyAllocationData {
+  date: string; // YYYY-MM-DD format
+  totalEmployees: number;
+  totalFTEs: number;
+  cumulativeAllocations: number;
+  cumulativeDeallocations: number;
 }
 
 export interface IEmployeeActivityData {
@@ -34,6 +44,33 @@ export interface IBudgetUtilization {
   actualFTEs: number;
   utilizationPercentage: number;
   variance: number;
+  dailyData: IDailyBudgetData[];
+  trendComparison?: IMonthTrendComparison;
+}
+
+export interface IDailyBudgetData {
+  date: string; // YYYY-MM-DD format
+  budgetedFTEs: number;
+  actualFTEs: number;
+  utilizationPercentage: number;
+  variance: number;
+}
+
+export interface IMonthTrendComparison {
+  previousMonth: string;
+  currentMonth: string;
+  allocationsChange: number; // percentage change
+  budgetUtilizationChange: number; // percentage change
+  employeeCountChange: number; // absolute change
+  ftesChange: number; // absolute change
+  trend: 'improving' | 'declining' | 'stable';
+}
+
+export interface IFiscalYear {
+  startDate: Date; // October 1st
+  endDate: Date; // September 30th
+  year: number; // The year when fiscal year starts (e.g., 2024 for FY 2024-2025)
+  label: string; // "FY 2024-2025"
 }
 
 export interface IProjectActivitySummary {
@@ -50,6 +87,7 @@ export interface IProjectActivitySummary {
 export interface IProjectStatistics {
   projectId: number;
   projectName: string;
+  fiscalYear: IFiscalYear;
   monthlyAllocationData: IMonthlyAllocationData[];
   employeeActivity: IEmployeeActivityData[];
   budgetUtilization: IBudgetUtilization[];
@@ -68,4 +106,28 @@ export interface IAllocationEvent {
   newPercentage?: number;
   timestamp: Date;
   auditLogId?: number;
+}
+
+export interface IProjectStatisticsOverview {
+  fiscalYear: IFiscalYear;
+  selectedMonth?: string; // YYYY-MM format
+  availableMonths: string[]; // All months in fiscal year with data
+  totalProjects: number;
+  totalBudgetedFTEs: number;
+  totalAllocatedFTEs: number;
+  averageUtilization: number;
+}
+
+export interface IChartDataPoint {
+  date: string;
+  value: number;
+  label?: string;
+}
+
+export interface IStatisticsChartData {
+  title: string;
+  data: IChartDataPoint[];
+  type: 'line' | 'bar' | 'area';
+  color: string;
+  previousPeriodData?: IChartDataPoint[];
 }

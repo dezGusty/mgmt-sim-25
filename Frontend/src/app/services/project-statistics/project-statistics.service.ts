@@ -12,13 +12,17 @@ import {
   IBudgetUtilization,
   IProjectMilestone,
   IProjectActivitySummary,
-  IAllocationEvent
+  IAllocationEvent,
+  IFiscalYear,
+  IProjectStatisticsOverview,
+  IStatisticsChartData
 } from '../../models/entities/iproject-statistics';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectStatisticsService {
+  private readonly baseUrl = `${environment.apiUrl}/ProjectStatistics`;
 
   constructor(
     private http: HttpClient,
@@ -26,7 +30,127 @@ export class ProjectStatisticsService {
     private projectService: ProjectService
   ) {}
 
-  getProjectStatistics(projectId: number): Observable<IProjectStatistics> {
+  // New API-based methods for fiscal year statistics
+  getProjectStatistics(projectId: number, fiscalYear?: number, month?: string): Observable<IProjectStatistics> {
+    const request = {
+      projectId,
+      fiscalYear,
+      month
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/project`, request).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching project statistics:', error);
+        throw error;
+      })
+    );
+  }
+
+  getProjectStatisticsOverview(fiscalYear?: number, month?: string, projectIds?: number[]): Observable<IProjectStatisticsOverview> {
+    const request = {
+      fiscalYear,
+      month,
+      projectIds
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/overview`, request).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching project statistics overview:', error);
+        throw error;
+      })
+    );
+  }
+
+  getProjectAllocationChart(projectId: number, month: string, fiscalYear?: number, includeTrends = true): Observable<IStatisticsChartData> {
+    const request = {
+      projectId,
+      month,
+      fiscalYear,
+      includeTrends
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/allocations/chart`, request).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching allocation chart data:', error);
+        throw error;
+      })
+    );
+  }
+
+  getProjectBudgetChart(projectId: number, month: string, fiscalYear?: number, includeTrends = true): Observable<IStatisticsChartData> {
+    const request = {
+      projectId,
+      month,
+      fiscalYear,
+      includeTrends
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/budget/chart`, request).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching budget chart data:', error);
+        throw error;
+      })
+    );
+  }
+
+  getCurrentFiscalYear(): Observable<IFiscalYear> {
+    return this.http.get<any>(`${this.baseUrl}/fiscal-year/current`).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching current fiscal year:', error);
+        throw error;
+      })
+    );
+  }
+
+  getFiscalYear(year: number): Observable<IFiscalYear> {
+    return this.http.get<any>(`${this.baseUrl}/fiscal-year/${year}`).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching fiscal year:', error);
+        throw error;
+      })
+    );
+  }
+
+  getAvailableMonths(projectId: number, fiscalYear?: number): Observable<string[]> {
+    const params = fiscalYear ? `?fiscalYear=${fiscalYear}` : '';
+    return this.http.get<any>(`${this.baseUrl}/project/${projectId}/available-months${params}`).pipe(
+      map(response => response.data),
+      catchError(error => {
+        console.error('Error fetching available months:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Utility methods for fiscal year calculations
+  calculateFiscalYear(date: Date): number {
+    return date.getMonth() >= 9 ? date.getFullYear() : date.getFullYear() - 1; // October = month 9
+  }
+
+  getFiscalYearRange(year: number): { startDate: Date; endDate: Date } {
+    return {
+      startDate: new Date(year, 9, 1), // October 1st
+      endDate: new Date(year + 1, 8, 30) // September 30th
+    };
+  }
+
+  formatFiscalYearLabel(year: number): string {
+    return `FY ${year}-${year + 1}`;
+  }
+
+  isDateInFiscalYear(date: Date, fiscalYear: number): boolean {
+    const range = this.getFiscalYearRange(fiscalYear);
+    return date >= range.startDate && date <= range.endDate;
+  }
+
+  // Legacy methods maintained for backward compatibility
+  getProjectStatisticsLegacy(projectId: number): Observable<IProjectStatistics> {
     return forkJoin({
       projectDetails: this.projectService.getProjectWithUsers(projectId),
       auditLogs: this.getProjectAuditLogs(projectId)
@@ -38,10 +162,17 @@ export class ProjectStatisticsService {
 
         const project = projectDetails.data;
         const allocationEvents = this.extractAllocationEvents(auditLogs);
+        const currentFiscalYear = this.calculateFiscalYear(new Date());
 
         return {
           projectId: projectId,
           projectName: project.name || 'Unknown Project',
+          fiscalYear: {
+            startDate: new Date(currentFiscalYear, 9, 1),
+            endDate: new Date(currentFiscalYear + 1, 8, 30),
+            year: currentFiscalYear,
+            label: this.formatFiscalYearLabel(currentFiscalYear)
+          },
           monthlyAllocationData: this.generateMonthlyAllocationData(allocationEvents, project),
           employeeActivity: this.generateEmployeeActivity(allocationEvents, project),
           budgetUtilization: this.generateBudgetUtilization(allocationEvents, project),
@@ -176,7 +307,9 @@ export class ProjectStatisticsService {
         allocations: 0,
         deallocations: 0,
         totalEmployees: 0,
-        totalFTEs: 0
+        totalFTEs: 0,
+        dailyData: [],
+        trendComparison: undefined
       });
     }
 
@@ -290,7 +423,9 @@ export class ProjectStatisticsService {
       utilizationPercentage: project.budgetedFTEs > 0
         ? parseFloat(((data.totalFTEs / project.budgetedFTEs) * 100).toFixed(1))
         : 0,
-      variance: parseFloat((data.totalFTEs - (project.budgetedFTEs || 0)).toFixed(2))
+      variance: parseFloat((data.totalFTEs - (project.budgetedFTEs || 0)).toFixed(2)),
+      dailyData: [],
+      trendComparison: undefined
     }));
   }
 
@@ -371,9 +506,17 @@ export class ProjectStatisticsService {
   }
 
   private getEmptyStatistics(projectId: number): IProjectStatistics {
+    const currentFiscalYear = this.calculateFiscalYear(new Date());
+    
     return {
       projectId: projectId,
       projectName: 'Unknown Project',
+      fiscalYear: {
+        startDate: new Date(currentFiscalYear, 9, 1),
+        endDate: new Date(currentFiscalYear + 1, 8, 30),
+        year: currentFiscalYear,
+        label: this.formatFiscalYearLabel(currentFiscalYear)
+      },
       monthlyAllocationData: [],
       employeeActivity: [],
       budgetUtilization: [],

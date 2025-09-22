@@ -38,6 +38,21 @@ namespace ManagementSimulator.Database.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<List<Project>> GetProjectsByIdsAsync(int[] projectIds, bool includeDeleted = false, bool tracking = false)
+        {
+            IQueryable<Project> query = _dbContext.Projects;
+
+            if (!tracking)
+                query = query.AsNoTracking();
+
+            if (!includeDeleted)
+                query = query.Where(p => p.DeletedAt == null);
+
+            query = query.Where(p => projectIds.Contains(p.Id));
+
+            return await query.ToListAsync();
+        }
+
         public async Task<Project?> GetProjectByIdAsync(int id, bool includeDeleted = false, bool tracking = false)
         {
             IQueryable<Project> query = _dbContext.Projects;

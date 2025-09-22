@@ -16,7 +16,12 @@ import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
 import { ProjectStatisticsService } from '../../../services/project-statistics/project-statistics.service';
-import { IProjectStatistics } from '../../../models/entities/iproject-statistics';
+import { 
+  IProjectStatistics, 
+  IFiscalYear, 
+  IProjectStatisticsOverview,
+  IStatisticsChartData 
+} from '../../../models/entities/iproject-statistics';
 
 @Component({
   selector: 'app-project-details',
@@ -91,6 +96,20 @@ export class ProjectDetails implements OnInit, OnDestroy {
   projectStatistics: IProjectStatistics | null = null;
   isLoadingStatistics: boolean = false;
   statisticsError: string | null = null;
+
+  // Fiscal year and filtering
+  currentFiscalYear: IFiscalYear | null = null;
+  selectedFiscalYear: number | null = null;
+  selectedMonth: string | null = null;
+  availableMonths: string[] = [];
+  statisticsOverview: IProjectStatisticsOverview | null = null;
+
+  // Chart data
+  overviewChartData: IStatisticsChartData | null = null;
+  allocationsChartData: IStatisticsChartData | null = null;
+  budgetChartData: IStatisticsChartData | null = null;
+  allocationChartData: IStatisticsChartData | null = null;
+  isLoadingCharts: boolean = false;
 
   // Math reference for template
   Math = Math;
@@ -360,23 +379,115 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   setActiveStatisticsSubTab(subTab: 'allocation' | 'budget' | 'activity' | 'overview') {
     this.activeStatisticsSubTab = subTab;
+    
+    // Load chart data when switching to allocation or budget tabs
+    if (subTab === 'allocation' && this.selectedMonth) {
+      this.loadAllocationChart();
+    } else if (subTab === 'budget' && this.selectedMonth) {
+      this.loadBudgetChart();
+    }
   }
 
-  loadProjectStatistics() {
+  async loadProjectStatistics() {
     if (!this.projectId) return;
 
     this.isLoadingStatistics = true;
     this.statisticsError = null;
 
-    this.projectStatisticsService.getProjectStatistics(this.projectId).subscribe({
-      next: (statistics) => {
-        this.projectStatistics = statistics;
-        this.isLoadingStatistics = false;
+    try {
+      // Load fiscal year info first
+      if (!this.currentFiscalYear) {
+        const fiscalYear = await this.projectStatisticsService.getCurrentFiscalYear().toPromise();
+        this.currentFiscalYear = fiscalYear || null;
+        this.selectedFiscalYear = this.currentFiscalYear?.year || null;
+      }
+
+      // Load available months
+      if (this.selectedFiscalYear) {
+        this.availableMonths = await this.projectStatisticsService.getAvailableMonths(
+          this.projectId, 
+          this.selectedFiscalYear
+        ).toPromise() || [];
+      }
+
+      // Load project statistics
+      this.projectStatisticsService.getProjectStatistics(
+        this.projectId, 
+        this.selectedFiscalYear || undefined, 
+        this.selectedMonth || undefined
+      ).subscribe({
+        next: (statistics) => {
+          this.projectStatistics = statistics;
+          this.isLoadingStatistics = false;
+        },
+        error: (error) => {
+          console.error('Error loading project statistics:', error);
+          this.statisticsError = 'Failed to load project statistics';
+          this.isLoadingStatistics = false;
+        }
+      });
+
+    } catch (error) {
+      console.error('Error initializing statistics:', error);
+      this.statisticsError = 'Failed to initialize project statistics';
+      this.isLoadingStatistics = false;
+    }
+  }
+
+  onFiscalYearChange() {
+    if (this.selectedFiscalYear) {
+      this.selectedMonth = null; // Reset month selection
+      this.loadProjectStatistics();
+    }
+  }
+
+  onMonthChange() {
+    this.loadProjectStatistics();
+    
+    // Reload charts if we're on those tabs
+    if (this.activeStatisticsSubTab === 'allocation') {
+      this.loadAllocationChart();
+    } else if (this.activeStatisticsSubTab === 'budget') {
+      this.loadBudgetChart();
+    }
+  }
+
+  loadAllocationChart() {
+    if (!this.projectId || !this.selectedMonth || !this.selectedFiscalYear) return;
+
+    this.isLoadingCharts = true;
+    this.projectStatisticsService.getProjectAllocationChart(
+      this.projectId,
+      this.selectedMonth,
+      this.selectedFiscalYear
+    ).subscribe({
+      next: (chartData: IStatisticsChartData) => {
+        this.allocationChartData = chartData;
+        this.isLoadingCharts = false;
       },
-      error: (error) => {
-        console.error('Error loading project statistics:', error);
-        this.statisticsError = 'Failed to load project statistics';
-        this.isLoadingStatistics = false;
+      error: (error: any) => {
+        console.error('Error loading allocation chart:', error);
+        this.isLoadingCharts = false;
+      }
+    });
+  }
+
+  loadBudgetChart() {
+    if (!this.projectId || !this.selectedMonth || !this.selectedFiscalYear) return;
+
+    this.isLoadingCharts = true;
+    this.projectStatisticsService.getProjectBudgetChart(
+      this.projectId,
+      this.selectedMonth,
+      this.selectedFiscalYear
+    ).subscribe({
+      next: (chartData: IStatisticsChartData) => {
+        this.budgetChartData = chartData;
+        this.isLoadingCharts = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading budget chart:', error);
+        this.isLoadingCharts = false;
       }
     });
   }

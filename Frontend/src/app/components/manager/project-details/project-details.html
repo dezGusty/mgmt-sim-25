@@ -511,7 +511,7 @@
               <h4 class="font-semibold text-blue-900 mb-3 text-lg">Project Capacity Overview</h4>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div class="text-center">
-                  <p class="text-2xl font-bold text-blue-600">{{ project?.budgetedFTEs || 0 }}</p>
+                  <p class="text-2xl font-bold text-blue-600">{{ project.budgetedFTEs || 0 }}</p>
                   <p class="text-sm text-blue-800">Budgeted FTEs</p>
                 </div>
                 <div class="text-center">
@@ -726,7 +726,7 @@
                         <div class="flex justify-between items-start">
                           <div class="flex-1">
                             <p class="font-medium text-gray-900">{{ getUserFullName(assignment.user) }}</p>
-                            <p class="text-sm text-gray-500">{{ assignment.user?.jobTitleName || 'N/A' }}</p>
+                            <p class="text-sm text-gray-500">{{ assignment.user.jobTitleName || 'N/A' }}</p>
                             <p class="text-xs text-green-600 mt-1">
                               New: {{ assignment.percentage }}%
                             </p>
@@ -885,6 +885,51 @@
 
                   <!-- Statistics Content -->
                   <div *ngIf="!isLoadingStatistics && !statisticsError && projectStatistics">
+                    <!-- Fiscal Year and Month Selection -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                      <div class="flex flex-wrap items-center gap-4">
+                        <!-- Fiscal Year Selection -->
+                        <div class="flex items-center gap-2">
+                          <label class="text-sm font-medium text-gray-700">Fiscal Year:</label>
+                          <select 
+                            [(ngModel)]="selectedFiscalYear" 
+                            (ngModelChange)="onFiscalYearChange()"
+                            class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option [value]="currentFiscalYear.year" *ngIf="currentFiscalYear">
+                              FY {{ currentFiscalYear.year }}
+                            </option>
+                            <option [value]="currentFiscalYear!.year - 1" *ngIf="currentFiscalYear">
+                              FY {{ currentFiscalYear.year - 1 }}
+                            </option>
+                            <option [value]="currentFiscalYear!.year + 1" *ngIf="currentFiscalYear">
+                              FY {{ currentFiscalYear.year + 1 }}
+                            </option>
+                          </select>
+                        </div>
+
+                        <!-- Month Selection for Chart Views -->
+                        <div 
+                          *ngIf="activeStatisticsSubTab === 'allocation' || activeStatisticsSubTab === 'budget'" 
+                          class="flex items-center gap-2"
+                        >
+                          <label class="text-sm font-medium text-gray-700">Month:</label>
+                          <select 
+                            [(ngModel)]="selectedMonth" 
+                            (ngModelChange)="onMonthChange()"
+                            class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">All Months</option>
+                            <option *ngFor="let month of availableMonths" [value]="month">{{ month }}</option>
+                          </select>
+                        </div>
+
+                        <!-- Fiscal Year Info -->
+                        <div class="ml-auto text-xs text-gray-500" *ngIf="currentFiscalYear">
+                          ({{ currentFiscalYear.startDate | date:'MMM d, y' }} - {{ currentFiscalYear.endDate | date:'MMM d, y' }})
+                        </div>
+                      </div>
+                    </div>
                     <!-- Header with Date -->
                     <div class="flex items-center justify-between mb-6">
                       <h4 class="text-xl font-semibold text-gray-900">
@@ -1000,6 +1045,41 @@
 
                     <!-- Monthly Allocations Content -->
                     <div *ngIf="activeStatisticsSubTab === 'allocation'">
+                      <!-- Chart Section -->
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6" *ngIf="selectedMonth">
+                        <div class="flex items-center justify-between mb-4">
+                          <h5 class="text-lg font-semibold text-gray-900">
+                            Daily Allocation Evolution - {{ selectedMonth }}
+                          </h5>
+                          <div *ngIf="allocationChartData?.previousPeriodData" class="text-sm">
+                            <span class="text-gray-600">vs Previous Period</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Chart Loading -->
+                        <div *ngIf="isLoadingCharts" class="text-center py-8">
+                          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                          <p class="text-gray-600 text-sm">Loading chart...</p>
+                        </div>
+
+                        <!-- Chart Placeholder -->
+                        <div *ngIf="!isLoadingCharts && allocationChartData" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                          <div class="text-center">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <p class="text-gray-600 text-sm">{{ allocationChartData.title }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ allocationChartData.data.length || 0 }} data points</p>
+                          </div>
+                        </div>
+
+                        <!-- No month selected -->
+                        <div *ngIf="!selectedMonth" class="text-center py-8 text-gray-500">
+                          <p>Please select a month to view daily allocation evolution</p>
+                        </div>
+                      </div>
+
+                      <!-- Summary Table -->
                       <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
                         <h5 class="text-lg font-semibold text-gray-900 mb-4">Monthly Allocation Trends</h5>
                         <div class="overflow-x-auto">
@@ -1044,6 +1124,41 @@
 
                     <!-- Budget Utilization Content -->
                     <div *ngIf="activeStatisticsSubTab === 'budget'">
+                      <!-- Chart Section -->
+                      <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6" *ngIf="selectedMonth">
+                        <div class="flex items-center justify-between mb-4">
+                          <h5 class="text-lg font-semibold text-gray-900">
+                            Daily Budget Evolution - {{ selectedMonth }}
+                          </h5>
+                          <div *ngIf="budgetChartData?.previousPeriodData" class="text-sm">
+                            <span class="text-gray-600">vs Previous Period</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Chart Loading -->
+                        <div *ngIf="isLoadingCharts" class="text-center py-8">
+                          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+                          <p class="text-gray-600 text-sm">Loading chart...</p>
+                        </div>
+
+                        <!-- Chart Placeholder -->
+                        <div *ngIf="!isLoadingCharts && budgetChartData" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                          <div class="text-center">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                            <p class="text-gray-600 text-sm">{{ budgetChartData.title }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ budgetChartData.data.length || 0 }} data points</p>
+                          </div>
+                        </div>
+
+                        <!-- No month selected -->
+                        <div *ngIf="!selectedMonth" class="text-center py-8 text-gray-500">
+                          <p>Please select a month to view daily budget evolution</p>
+                        </div>
+                      </div>
+
+                      <!-- Summary Table -->
                       <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
                         <h5 class="text-lg font-semibold text-gray-900 mb-4">Budget Utilization Over Time</h5>
                         <div class="overflow-x-auto">

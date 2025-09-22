@@ -12,18 +12,19 @@ namespace ManagementSimulator.Database.Repositories.Intefaces
     public interface IProjectRepository : IBaseRepostory<Project>
     {
         Task<List<Project>> GetAllProjectsAsync(List<int> ids, bool includeDeleted = false, bool tracking = false);
+        Task<List<Project>> GetProjectsByIdsAsync(int[] projectIds, bool includeDeleted = false, bool tracking = false);
         Task<Project?> GetProjectByIdAsync(int id, bool includeDeleted = false, bool tracking = false);
         Task<Project?> GetProjectWithUsersAsync(int id, bool includeDeleted = false, bool tracking = false);
         Task<Project?> GetProjectByNameAsync(string name, bool includeDeleted = false, bool tracking = false);
         Task<(List<ProjectDto> Data, int TotalCount)> GetAllProjectsFilteredAsync(
-            string? projectName, 
+            string? projectName,
             bool? isActive,
             DateTime? startDateFrom,
             DateTime? startDateTo,
             DateTime? endDateFrom,
             DateTime? endDateTo,
-            QueryParams parameters, 
-            bool includeDeleted = false, 
+            QueryParams parameters,
+            bool includeDeleted = false,
             bool tracking = false);
         Task<UserProject?> GetUserProjectAsync(int userId, int projectId);
         Task<List<UserProject>> GetProjectUsersAsync(int projectId);
