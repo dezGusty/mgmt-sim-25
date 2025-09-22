@@ -1,0 +1,75 @@
+name: Simple Auto Version
+
+on:
+  push:
+    branches: [main, AutoVersioningTesting]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get current version and increment
+        id: version
+        run: |
+          CURRENT_VERSION=$(cat VERSION)
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Split version into parts
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment patch version
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update VERSION file
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          echo "$NEW_VERSION" > VERSION
+          git add VERSION
+          git commit -m "Version bump to $NEW_VERSION [skip ci]"
+          git push origin main
+
+      - name: Create and push tag
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          git tag "v$NEW_VERSION"
+          git push origin "v$NEW_VERSION"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          name: Release v${{ steps.version.outputs.new_version }}
+          body: |
+            ## Release v${{ steps.version.outputs.new_version }}
+            
+            🚀 **Docker Images:**
+            - Backend: `ghcr.io/${{ github.repository }}-backend:v${{ steps.version.outputs.new_version }}`
+            - Frontend: `ghcr.io/${{ github.repository }}-frontend:v${{ steps.version.outputs.new_version }}`
+            
+            📦 **Quick Deploy:**
+            ```bash
+            export VERSION=v${{ steps.version.outputs.new_version }}
+            docker-compose -f docker-compose.prod.yml up -d
+            ```
+          generate_release_notes: true

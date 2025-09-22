@@ -241,6 +241,12 @@ dotnet test --filter "TestClassName"
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
+## 🔄 Automatic Versioning
+
+This project uses simple automatic versioning - every push to main automatically increments the version and creates releases.
+
+**Just push and it's done!** No special rules to remember.
+
 ## 📝 API Documentation
 
 The API is documented using Swagger/OpenAPI:
