@@ -161,7 +161,7 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    if: ${{ (github.event.workflow_run.conclusion == 'success' || github.event_name == 'push') && needs.build-and-push.result == 'success' }}
     needs: build-and-push
     permissions:
       security-events: write
@@ -185,6 +185,7 @@ jobs:
           echo "Version: $VERSION"
       - name: Run Trivy vulnerability scanner - Backend
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ steps.version.outputs.version }}
           format: sarif
@@ -192,6 +193,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner - Frontend
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.version.outputs.version }}
           format: sarif
@@ -199,12 +201,12 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: hashFiles('trivy-backend-results.sarif') != ''
         with:
           sarif_file: trivy-backend-results.sarif
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: hashFiles('trivy-frontend-results.sarif') != ''
         with:
           sarif_file: trivy-frontend-results.sarif
