@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/mgmt-sim-backend:${VERSION:-latest}
+    container_name: mgmt-sim-backend-prod
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/MGMTSimulator.db
+    volumes:
+      - sqlite_data_prod:/app/data
+      - ./logs:/app/logs
+    networks:
+      - mgmt-sim-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/mgmt-sim-frontend:${VERSION:-latest}
+    container_name: mgmt-sim-frontend-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - API_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - mgmt-sim-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+volumes:
+  sqlite_data_prod:
+    driver: local
+
+networks:
+  mgmt-sim-network:
+    driver: bridge
