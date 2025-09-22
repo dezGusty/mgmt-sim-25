@@ -139,9 +139,10 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/v}
             echo "Triggered by tag push: $VERSION"
           else
-            # Workflow run - get version from VERSION file
-            VERSION=$(cat VERSION)
-            echo "Triggered by workflow_run, version from file: $VERSION"
+            # Workflow run - need to get latest tag
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+            VERSION=${LATEST_TAG#v}
+            echo "Triggered by workflow_run, latest tag version: $VERSION"
           fi
           
           echo "Processing version: $VERSION"
