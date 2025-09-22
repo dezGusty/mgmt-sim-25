@@ -6,7 +6,6 @@ on:
     paths-ignore:
       - 'VERSION'
       - '**.md'
-      - '.github/**'
 
 jobs:
   auto-version:
@@ -40,10 +39,10 @@ jobs:
           # Analyze commit message to determine increment type
           COMMIT_MSG="${{ github.event.head_commit.message }}"
           
-          if [[ "$COMMIT_MSG" =~ \[major\]|\[breaking\]|BREAKING.CHANGE ]]; then
+          if [[ "$COMMIT_MSG" =~ (\[major\]|\[MAJOR\]|\[breaking\]|\[BREAKING\]|BREAKING.CHANGE) ]]; then
             echo "increment=major" >> $GITHUB_OUTPUT
             echo "Version increment: MAJOR"
-          elif [[ "$COMMIT_MSG" =~ \[minor\]|\[feature\]|feat: ]]; then
+          elif [[ "$COMMIT_MSG" =~ (\[minor\]|\[MINOR\]|\[feature\]|\[FEATURE\]|feat:) ]]; then
             echo "increment=minor" >> $GITHUB_OUTPUT
             echo "Version increment: MINOR"
           else
