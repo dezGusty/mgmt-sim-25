@@ -1,0 +1,107 @@
+name: Auto Version Test
+
+on:
+  push:
+    branches: [test-versioning]  # Branch-ul tău de test
+    paths-ignore:
+      - 'VERSION'
+      - '**.md'
+      - '.github/**'
+
+jobs:
+  auto-version-test:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip version]')"
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get current version
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(cat VERSION)
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Determine version increment
+        id: version-type
+        run: |
+          # Analyze commit message to determine increment type
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [[ "$COMMIT_MSG" =~ \[major\]|\[breaking\]|BREAKING.CHANGE ]]; then
+            echo "increment=major" >> $GITHUB_OUTPUT
+            echo "Version increment: MAJOR"
+          elif [[ "$COMMIT_MSG" =~ \[minor\]|\[feature\]|feat: ]]; then
+            echo "increment=minor" >> $GITHUB_OUTPUT
+            echo "Version increment: MINOR"
+          else
+            echo "increment=patch" >> $GITHUB_OUTPUT
+            echo "Version increment: PATCH"
+          fi
+
+      - name: Increment version
+        id: new-version
+        run: |
+          CURRENT_VERSION="${{ steps.current-version.outputs.current }}"
+          INCREMENT_TYPE="${{ steps.version-type.outputs.increment }}"
+          
+          # Extract version components (major.minor.patch)
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment based on type
+          case $INCREMENT_TYPE in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      # DOAR SIMULARE - nu face commit/push în test
+      - name: Simulate version update
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          echo "🧪 TEST MODE: Would update VERSION file to: $NEW_VERSION"
+          echo "🧪 TEST MODE: Would create tag: v$NEW_VERSION"
+          echo "🧪 TEST MODE: Would trigger CD workflow"
+
+      - name: Test information
+        run: |
+          INCREMENT_TYPE="${{ steps.version-type.outputs.increment }}"
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          
+          echo "✅ Version would be updated to: v$NEW_VERSION"
+          echo "📦 Tag would be created: v$NEW_VERSION"
+          echo "🚀 CD workflow would be triggered by the tag"
+          
+          if [[ "$INCREMENT_TYPE" == "minor" || "$INCREMENT_TYPE" == "major" ]]; then
+            echo "🎉 GitHub Release would be created by CD workflow for $INCREMENT_TYPE version"
+          else
+            echo "ℹ️  No GitHub Release for patch versions (CD would still build Docker images)"
+          fi
