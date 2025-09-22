@@ -2,7 +2,7 @@ name: Auto Version Test
 
 on:
   push:
-    branches: [test-versioning]  # Branch-ul tău de test
+    branches: [AutoVers]
     paths-ignore:
       - 'VERSION'
       - '**.md'
