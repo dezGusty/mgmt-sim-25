@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'VERSION'
       - '**.md'
+      
 
 jobs:
   auto-version-test:
