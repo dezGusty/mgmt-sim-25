@@ -54,6 +54,20 @@ export class Hr {
     return this.importedHolidays.filter(h => h.isValid).length;
   }
 
+  // Method to get employee count (excluding loading placeholders)
+  get employeeCount(): number {
+    return this.records.filter(r => r.id !== -1).length;
+  }
+
+  // Method to get user initials safely
+  getUserInitials(name: string | undefined | null): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(n => n.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+
   setActiveTab(tab: 'vacation' | 'holidays' | 'weekends') {
     this.activeTab = tab;
   }

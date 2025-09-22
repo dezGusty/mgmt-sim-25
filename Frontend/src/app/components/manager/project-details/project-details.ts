@@ -15,6 +15,8 @@ import { IPendingRemoval } from '../../../models/entities/ipending-removal';
 import { Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Auth } from '../../../services/authService/auth';
+import { ProjectStatisticsService } from '../../../services/project-statistics/project-statistics.service';
+import { IProjectStatistics } from '../../../models/entities/iproject-statistics';
 
 @Component({
   selector: 'app-project-details',
@@ -38,7 +40,7 @@ export class ProjectDetails implements OnInit, OnDestroy {
   activeTab: 'view' | 'edit' | 'assign' | 'statistics' = 'view';
   
   // Statistics subtabs
-  activeStatisticsSubTab: 'kanban' | 'bugs' | 'activity' | 'overview' = 'kanban';
+  activeStatisticsSubTab: 'allocation' | 'budget' | 'activity' | 'overview' = 'overview';
   
   // Edit state
   showEditForm = false;
@@ -85,144 +87,10 @@ export class ProjectDetails implements OnInit, OnDestroy {
   pendingRemovals: IPendingRemoval[] = [];
   selectedAllocation: { [userId: number]: number } = {};
 
-  // Statistics mock data
-  mockStatistics = {
-    tasks: {
-      todo: [
-        {
-          id: 1,
-          title: 'Implement user authentication',
-          assignee: 'John Doe',
-          priority: 'High',
-          estimatedHours: 16,
-          type: 'Feature'
-        },
-        {
-          id: 2,
-          title: 'Design database schema',
-          assignee: 'Jane Smith',
-          priority: 'Medium',
-          estimatedHours: 8,
-          type: 'Task'
-        },
-        {
-          id: 3,
-          title: 'Set up CI/CD pipeline',
-          assignee: 'Mike Johnson',
-          priority: 'High',
-          estimatedHours: 12,
-          type: 'DevOps'
-        }
-      ],
-      inProgress: [
-        {
-          id: 4,
-          title: 'Create responsive UI components',
-          assignee: 'Sarah Wilson',
-          priority: 'Medium',
-          estimatedHours: 20,
-          type: 'Feature'
-        },
-        {
-          id: 5,
-          title: 'Optimize database queries',
-          assignee: 'Tom Brown',
-          priority: 'Low',
-          estimatedHours: 6,
-          type: 'Optimization'
-        }
-      ],
-      done: [
-        {
-          id: 6,
-          title: 'Project setup and configuration',
-          assignee: 'John Doe',
-          priority: 'High',
-          estimatedHours: 4,
-          type: 'Setup'
-        },
-        {
-          id: 7,
-          title: 'Initial wireframes',
-          assignee: 'Jane Smith',
-          priority: 'Medium',
-          estimatedHours: 10,
-          type: 'Design'
-        },
-        {
-          id: 8,
-          title: 'Code review guidelines',
-          assignee: 'Mike Johnson',
-          priority: 'Low',
-          estimatedHours: 2,
-          type: 'Documentation'
-        }
-      ]
-    },
-    bugs: [
-      {
-        id: 101,
-        title: 'Login form validation not working',
-        reporter: 'QA Team',
-        assignee: 'John Doe',
-        severity: 'Critical',
-        status: 'Open'
-      },
-      {
-        id: 102,
-        title: 'Mobile navigation menu overlapping',
-        reporter: 'Sarah Wilson',
-        assignee: 'Sarah Wilson',
-        severity: 'Medium',
-        status: 'In Progress'
-      },
-      {
-        id: 103,
-        title: 'Performance issue on large datasets',
-        reporter: 'Tom Brown',
-        assignee: 'Tom Brown',
-        severity: 'High',
-        status: 'Fixed'
-      }
-    ],
-    employeeActivity: [
-      {
-        name: 'John Doe',
-        tasksCompleted: 8,
-        tasksInProgress: 2,
-        hoursThisWeek: 38,
-        efficiency: 95
-      },
-      {
-        name: 'Jane Smith',
-        tasksCompleted: 6,
-        tasksInProgress: 1,
-        hoursThisWeek: 32,
-        efficiency: 87
-      },
-      {
-        name: 'Sarah Wilson',
-        tasksCompleted: 5,
-        tasksInProgress: 3,
-        hoursThisWeek: 40,
-        efficiency: 92
-      },
-      {
-        name: 'Mike Johnson',
-        tasksCompleted: 4,
-        tasksInProgress: 2,
-        hoursThisWeek: 35,
-        efficiency: 89
-      },
-      {
-        name: 'Tom Brown',
-        tasksCompleted: 3,
-        tasksInProgress: 1,
-        hoursThisWeek: 28,
-        efficiency: 78
-      }
-    ]
-  };
+  // Statistics data
+  projectStatistics: IProjectStatistics | null = null;
+  isLoadingStatistics: boolean = false;
+  statisticsError: string | null = null;
 
   // Math reference for template
   Math = Math;
@@ -232,7 +100,8 @@ export class ProjectDetails implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private usersService: UsersService,
-    private authService: Auth
+    private authService: Auth,
+    private projectStatisticsService: ProjectStatisticsService
   ) {}
 
   get isViewOnly(): boolean {
@@ -483,10 +352,33 @@ export class ProjectDetails implements OnInit, OnDestroy {
       this.resetAssignmentState();
       this.loadAvailableUsers();
     }
+
+    if (tab === 'statistics') {
+      this.loadProjectStatistics();
+    }
   }
 
-  setActiveStatisticsSubTab(subTab: 'kanban' | 'bugs' | 'activity' | 'overview') {
+  setActiveStatisticsSubTab(subTab: 'allocation' | 'budget' | 'activity' | 'overview') {
     this.activeStatisticsSubTab = subTab;
+  }
+
+  loadProjectStatistics() {
+    if (!this.projectId) return;
+
+    this.isLoadingStatistics = true;
+    this.statisticsError = null;
+
+    this.projectStatisticsService.getProjectStatistics(this.projectId).subscribe({
+      next: (statistics) => {
+        this.projectStatistics = statistics;
+        this.isLoadingStatistics = false;
+      },
+      error: (error) => {
+        console.error('Error loading project statistics:', error);
+        this.statisticsError = 'Failed to load project statistics';
+        this.isLoadingStatistics = false;
+      }
+    });
   }
 
   // Edit functionality
@@ -1104,5 +996,44 @@ export class ProjectDetails implements OnInit, OnDestroy {
 
   getEmployeeInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('');
+  }
+
+  // Statistics helper methods
+  formatMonth(monthString: string): string {
+    const [year, month] = monthString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+
+  getUtilizationColor(percentage: number): string {
+    if (percentage > 100) return 'text-red-600';
+    if (percentage > 90) return 'text-yellow-600';
+    if (percentage > 75) return 'text-green-600';
+    return 'text-blue-600';
+  }
+
+  getUtilizationBgColor(percentage: number): string {
+    if (percentage > 100) return 'bg-red-100';
+    if (percentage > 90) return 'bg-yellow-100';
+    if (percentage > 75) return 'bg-green-100';
+    return 'bg-blue-100';
+  }
+
+  getMilestoneIcon(type: string): string {
+    switch (type) {
+      case 'project_start': return '🚀';
+      case 'project_end': return '🏁';
+      case 'budget_change': return '💰';
+      case 'major_assignment': return '👥';
+      default: return '📌';
+    }
+  }
+
+  getMilestoneColor(impact: string): string {
+    switch (impact) {
+      case 'positive': return 'text-green-600';
+      case 'negative': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
   }
 }
