@@ -35,14 +35,14 @@ namespace ManagementSimulator.Infrastructure
                 dbContext.SaveChanges();
             }
 
-            var itAdminTitle = dbContext.JobTitles.FirstOrDefault(jt => jt.Name == "ITAdmin");
-            if (itAdminTitle == null)
+            var adminTitle = dbContext.JobTitles.FirstOrDefault(jt => jt.Name == "Administrator");
+            if (adminTitle == null)
             {
-                itAdminTitle = new JobTitle
+                adminTitle = new JobTitle
                 {
-                    Name = "ITAdmin",
+                    Name = "Administrator",
                 };
-                dbContext.JobTitles.Add(itAdminTitle);
+                dbContext.JobTitles.Add(adminTitle);
                 dbContext.SaveChanges();
             }
 
@@ -60,7 +60,7 @@ namespace ManagementSimulator.Infrastructure
                 roles.Add(role);
             }
 
-            if (!dbContext.Users.Any(u => u.Email == "admin@simulator.com"))
+            if (!dbContext.Users.Any(u => u.Email == "admin@ftd.com"))
             {
                 var adminRole = roles.First(r => r.Rolename == "Admin");
                 var managerRole = roles.First(r => r.Rolename == "Manager");
@@ -69,13 +69,13 @@ namespace ManagementSimulator.Infrastructure
 
                 var adminUser = new User
                 {
-                    FirstName = "Admin",
-                    LastName = "User",
-                    Email = "admin@simulator.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                    JobTitleId = itAdminTitle.Id,
+                    FirstName = "System",
+                    LastName = "Administrator",
+                    Email = "admin@ftd.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                    JobTitleId = adminTitle.Id,
                     DepartmentId = itDepartment.Id,
-                    Title = itAdminTitle,
+                    Title = adminTitle,
                     DateOfEmployment = DateTime.UtcNow,
                     EmploymentType = EmploymentType.FullTime
                 };
@@ -96,6 +96,28 @@ namespace ManagementSimulator.Infrastructure
 
                 dbContext.EmployeeRolesUsers.Add(adminRoleUser);
 
+                var adminManagerRoleUser = new EmployeeRoleUser
+                {
+                    UsersId = adminUser.Id,
+                    RolesId = managerRole.Id,
+                    Role = managerRole,
+                    User = adminUser,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                dbContext.EmployeeRolesUsers.Add(adminManagerRoleUser);
+
+                var adminEmployeeRoleUser = new EmployeeRoleUser
+                {
+                    UsersId = adminUser.Id,
+                    RolesId = employeeRole.Id,
+                    Role = employeeRole,
+                    User = adminUser,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                dbContext.EmployeeRolesUsers.Add(adminEmployeeRoleUser);
+
                 var adminHrRoleUser = new EmployeeRoleUser
                 {
                     UsersId = adminUser.Id,
@@ -106,62 +128,6 @@ namespace ManagementSimulator.Infrastructure
                 };
 
                 dbContext.EmployeeRolesUsers.Add(adminHrRoleUser);
-
-                var managerUser = new User
-                {
-                    FirstName = "Manager",
-                    LastName = "User",
-                    Email = "manager@simulator.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("manager123"),
-                    JobTitleId = itAdminTitle.Id,
-                    DepartmentId = itDepartment.Id,
-                    DateOfEmployment = DateTime.UtcNow,
-                    EmploymentType = EmploymentType.FullTime
-                };
-
-                SetAvailabilityForEmploymentType(managerUser);
-
-                dbContext.Users.Add(managerUser);
-                dbContext.SaveChanges();
-
-                var managerRoleUser = new EmployeeRoleUser
-                {
-                    UsersId = managerUser.Id,
-                    RolesId = managerRole.Id,
-                    Role = managerRole,
-                    User = managerUser,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                dbContext.EmployeeRolesUsers.Add(managerRoleUser);
-
-                var employeeUser = new User
-                {
-                    FirstName = "Employee",
-                    LastName = "User",
-                    Email = "employee@simulator.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("employee123"),
-                    JobTitleId = itAdminTitle.Id,
-                    DepartmentId = itDepartment.Id,
-                    DateOfEmployment = DateTime.UtcNow,
-                    EmploymentType = EmploymentType.PartTime
-                };
-
-                SetAvailabilityForEmploymentType(employeeUser);
-
-                dbContext.Users.Add(employeeUser);
-                dbContext.SaveChanges();
-
-                var employeeRoleUser = new EmployeeRoleUser
-                {
-                    UsersId = employeeUser.Id,
-                    RolesId = employeeRole.Id,
-                    Role = employeeRole,
-                    User = employeeUser,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                dbContext.EmployeeRolesUsers.Add(employeeRoleUser);
 
                 dbContext.SaveChanges();
             }
