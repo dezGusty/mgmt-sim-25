@@ -82,21 +82,6 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION"
 
-      - name: Update VERSION file
-        run: |
-          NEW_VERSION="${{ steps.new-version.outputs.version }}"
-          echo "$NEW_VERSION" > VERSION
-          
-          echo "Updated VERSION file to: $NEW_VERSION"
-
-      - name: Commit version update
-        run: |
-          NEW_VERSION="${{ steps.new-version.outputs.version }}"
-          
-          git add VERSION
-          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
-          git push origin main
-
       - name: Create and push tag
         run: |
           NEW_VERSION="${{ steps.new-version.outputs.version }}"
@@ -112,9 +97,9 @@ jobs:
           INCREMENT_TYPE="${{ steps.version-type.outputs.increment }}"
           NEW_VERSION="${{ steps.new-version.outputs.version }}"
           
-          echo "✅ Version updated to: v$NEW_VERSION"
-          echo "📦 Tag created: v$NEW_VERSION"
+          echo "✅ Tag created: v$NEW_VERSION"
           echo "🚀 CD workflow will be triggered automatically by the tag"
+          echo "ℹ️  VERSION file remains unchanged to avoid extra commits"
           
           if [[ "$INCREMENT_TYPE" == "minor" || "$INCREMENT_TYPE" == "major" ]]; then
             echo "🎉 GitHub Release will be created by CD workflow for $INCREMENT_TYPE version"
