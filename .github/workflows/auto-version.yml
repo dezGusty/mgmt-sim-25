@@ -1,0 +1,123 @@
+name: Auto Version
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'VERSION'
+      - '**.md'
+
+jobs:
+  auto-version:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip version]')"
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get current version
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(cat VERSION)
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Determine version increment
+        id: version-type
+        run: |
+          # Analyze commit message to determine increment type
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [[ "$COMMIT_MSG" =~ (\[major\]|\[MAJOR\]|\[breaking\]|\[BREAKING\]|BREAKING.CHANGE) ]]; then
+            echo "increment=major" >> $GITHUB_OUTPUT
+            echo "Version increment: MAJOR"
+          elif [[ "$COMMIT_MSG" =~ (\[minor\]|\[MINOR\]|\[feature\]|\[FEATURE\]|feat:) ]]; then
+            echo "increment=minor" >> $GITHUB_OUTPUT
+            echo "Version increment: MINOR"
+          else
+            echo "increment=patch" >> $GITHUB_OUTPUT
+            echo "Version increment: PATCH"
+          fi
+
+      - name: Increment version
+        id: new-version
+        run: |
+          CURRENT_VERSION="${{ steps.current-version.outputs.current }}"
+          INCREMENT_TYPE="${{ steps.version-type.outputs.increment }}"
+          
+          # Extract version components (major.minor.patch)
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment based on type
+          case $INCREMENT_TYPE in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Update VERSION file
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          echo "$NEW_VERSION" > VERSION
+          
+          echo "Updated VERSION file to: $NEW_VERSION"
+
+      - name: Commit version update
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          
+          git add VERSION
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git push origin main
+
+      - name: Create and push tag
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          TAG_NAME="v$NEW_VERSION"
+          
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          
+          echo "Created and pushed tag: $TAG_NAME"
+
+      - name: Release information
+        run: |
+          INCREMENT_TYPE="${{ steps.version-type.outputs.increment }}"
+          NEW_VERSION="${{ steps.new-version.outputs.version }}"
+          
+          echo "✅ Version updated to: v$NEW_VERSION"
+          echo "📦 Tag created: v$NEW_VERSION"
+          echo "🚀 CD workflow will be triggered automatically by the tag"
+          
+          if [[ "$INCREMENT_TYPE" == "minor" || "$INCREMENT_TYPE" == "major" ]]; then
+            echo "🎉 GitHub Release will be created by CD workflow for $INCREMENT_TYPE version"
+          else
+            echo "ℹ️  No GitHub Release for patch versions (CD will still build Docker images)"
+          fi

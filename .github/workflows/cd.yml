@@ -130,8 +130,31 @@ jobs:
 
           chmod +x artifacts/deploy.sh
 
-      - name: Create Release
+      - name: Determine version type
         if: startsWith(github.ref, 'refs/tags/')
+        id: version-type
+        run: |
+          # Extract version from tag (ex: v1.2.3 -> 1.2.3)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Check if it's a major or minor version (not patch)
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Create release only for minor or major versions
+          # (when patch = 0 it means it's minor or major)
+          if [[ "$PATCH" == "0" ]]; then
+            echo "create_release=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION is major/minor - release will be created"
+          else
+            echo "create_release=false" >> $GITHUB_OUTPUT
+            echo "Version $VERSION is patch - no release will be created"
+          fi
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/') && steps.version-type.outputs.create_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
