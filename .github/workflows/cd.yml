@@ -131,11 +131,20 @@ jobs:
           chmod +x artifacts/deploy.sh
 
       - name: Determine version type
-        if: startsWith(github.ref, 'refs/tags/')
         id: version-type
         run: |
-          # Extract version from tag (ex: v1.2.3 -> 1.2.3)
-          VERSION=${GITHUB_REF#refs/tags/v}
+          # Extract version - works for both tag push and workflow_run
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            # Direct tag push
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Triggered by tag push: $VERSION"
+          else
+            # Workflow run - get version from VERSION file
+            VERSION=$(cat VERSION)
+            echo "Triggered by workflow_run, version from file: $VERSION"
+          fi
+          
+          echo "Processing version: $VERSION"
           
           # Check if it's a major or minor version (not patch)
           IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
@@ -143,22 +152,27 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
           
+          echo "Parsed version - MAJOR: $MAJOR, MINOR: $MINOR, PATCH: $PATCH"
+          
           # Create release only for minor or major versions
           # (when patch = 0 it means it's minor or major)
           if [[ "$PATCH" == "0" ]]; then
             echo "create_release=true" >> $GITHUB_OUTPUT
-            echo "Version $VERSION is major/minor - release will be created"
+            echo "✅ Version $VERSION is major/minor - release will be created"
           else
             echo "create_release=false" >> $GITHUB_OUTPUT
-            echo "Version $VERSION is patch - no release will be created"
+            echo "ℹ️  Version $VERSION is patch - no release will be created"
           fi
+          
+          # Output version for later steps
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/') && steps.version-type.outputs.create_release == 'true'
+        if: steps.version-type.outputs.create_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: v${{ steps.version-type.outputs.version }}
+          name: Release v${{ steps.version-type.outputs.version }}
           body: |
             ## Management Simulator ${{ github.ref_name }}
 
