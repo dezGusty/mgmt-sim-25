@@ -34,42 +34,59 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
           
-          # Increment patch version
-          PATCH=$((PATCH + 1))
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          # Different versioning for different branches
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            # Main branch: increment patch version
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+            TAG_NAME="v$NEW_VERSION"
+          else
+            # Other branches: add branch name and build number
+            NEW_VERSION="$CURRENT_VERSION"
+            TAG_NAME="v$NEW_VERSION-${{ github.ref_name }}-${{ github.run_number }}"
+          fi
           
           echo "New version: $NEW_VERSION"
+          echo "Tag name: $TAG_NAME"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "is_main=${{ github.ref_name == 'main' }}" >> $GITHUB_OUTPUT
 
       - name: Update VERSION file
+        if: steps.version.outputs.is_main == 'true'
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           echo "$NEW_VERSION" > VERSION
           git add VERSION
           git commit -m "Version bump to $NEW_VERSION [skip ci]"
-          git push origin main
+          git push origin ${{ github.ref_name }}
 
       - name: Create and push tag
         run: |
-          NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          git tag "v$NEW_VERSION"
-          git push origin "v$NEW_VERSION"
+          TAG_NAME="${{ steps.version.outputs.tag_name }}"
+          git tag "$TAG_NAME"
+          git push origin "$TAG_NAME"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          name: Release v${{ steps.version.outputs.new_version }}
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: ${{ steps.version.outputs.is_main == 'true' && 'Release' || 'Test Build' }} ${{ steps.version.outputs.tag_name }}
           body: |
-            ## Release v${{ steps.version.outputs.new_version }}
+            ## ${{ steps.version.outputs.is_main == 'true' && 'Release' || 'Test Build' }} ${{ steps.version.outputs.tag_name }}
+            
+            📝 **Branch:** `${{ github.ref_name }}`
             
             🚀 **Docker Images:**
-            - Backend: `ghcr.io/${{ github.repository }}-backend:v${{ steps.version.outputs.new_version }}`
-            - Frontend: `ghcr.io/${{ github.repository }}-frontend:v${{ steps.version.outputs.new_version }}`
+            - Backend: `ghcr.io/${{ github.repository }}-backend:${{ steps.version.outputs.tag_name }}`
+            - Frontend: `ghcr.io/${{ github.repository }}-frontend:${{ steps.version.outputs.tag_name }}`
             
             📦 **Quick Deploy:**
             ```bash
-            export VERSION=v${{ steps.version.outputs.new_version }}
+            export VERSION=${{ steps.version.outputs.tag_name }}
             docker-compose -f docker-compose.prod.yml up -d
             ```
+            
+            ${{ steps.version.outputs.is_main != 'true' && '⚠️ **This is a test build from a development branch**' || '' }}
           generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.is_main != 'true' }}
