@@ -1,0 +1,62 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Database files
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# User-specific files
+**/*.user
+**/*.userosscache
+**/*.sln.docstates
+
+# IDE files
+.vs/
+.vscode/
+**/*.suo
+**/*.sln.ide
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Other
+*.swp
+*.swo
+*~
