@@ -69,8 +69,13 @@
         <div class="loading-spinner"></div>
         <span>Initializing AI Assistant...</span>
       </div>
-      <div class="status-error" *ngIf="chatbotState.error">
-        {{ chatbotState.error }}
+      <div class="status-error" *ngIf="hasInitializationError()">
+        <div class="error-message">{{ chatbotState.error }}</div>
+        <button class="retry-initialization-btn" 
+                (click)="forceReinitialize()"
+                [disabled]="!canRetryInitialization()">
+          Retry Initialization
+        </button>
       </div>
     </div>
 

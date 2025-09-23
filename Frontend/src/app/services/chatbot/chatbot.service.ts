@@ -50,7 +50,6 @@ export class ChatbotService {
     private authService: Auth
   ) {
     this.genAI = new GoogleGenAI({ apiKey: environment.geminiApiKey });
-    this.initializeService();
   }
 
   private async initializeService(): Promise<void> {
@@ -62,20 +61,92 @@ export class ChatbotService {
       this.chatStateSubject.next({
         ...this.chatStateSubject.value,
         isInitialized: true,
+        isLoading: false,
         userContext: this.userContext || undefined
       });
     } catch (error) {
       console.error('Failed to initialize chatbot service:', error);
       this.chatStateSubject.next({
         ...this.chatStateSubject.value,
+        isLoading: false,
         error: 'Failed to initialize chatbot service'
       });
     }
   }
 
+  public async ensureInitialized(): Promise<void> {
+    console.log('ensureInitialized called, current state:', this.chatStateSubject.value);
+    
+    if (this.chatStateSubject.value.isInitialized) {
+      console.log('Already initialized, returning');
+      return;
+    }
+
+    // Check if we're already initializing
+    if (this.chatStateSubject.value.isLoading) {
+      console.log('Already initializing, waiting...');
+      // Wait for current initialization to complete
+      return new Promise((resolve, reject) => {
+        const subscription = this.chatState$.subscribe(state => {
+          console.log('Waiting for initialization, state:', state);
+          if (state.isInitialized && !state.isLoading) {
+            subscription.unsubscribe();
+            resolve();
+          } else if (state.error && !state.isLoading) {
+            subscription.unsubscribe();
+            reject(new Error(state.error));
+          }
+        });
+        
+        // Add timeout to prevent hanging
+        setTimeout(() => {
+          subscription.unsubscribe();
+          reject(new Error('Initialization timeout'));
+        }, 10000);
+      });
+    }
+
+    // Start initialization
+    console.log('Starting initialization...');
+    this.chatStateSubject.next({
+      ...this.chatStateSubject.value,
+      isLoading: true,
+      error: undefined
+    });
+
+    try {
+      await this.initializeService();
+      console.log('Initialization completed');
+    } catch (error) {
+      console.error('Initialization failed:', error);
+      this.chatStateSubject.next({
+        ...this.chatStateSubject.value,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to initialize'
+      });
+      throw error;
+    }
+  }
+
   private async loadUserContext(): Promise<void> {
     try {
-      const currentUser = this.authService.getCurrentUser();
+      let currentUser = this.authService.getCurrentUser();
+      
+      // If no current user, try to fetch from server
+      if (!currentUser) {
+        console.log('No current user found in auth service, attempting to fetch from server...');
+        try {
+          const userInfo = await this.authService.me().toPromise();
+          if (userInfo) {
+            this.authService.updateCurrentUser(userInfo);
+            currentUser = userInfo;
+          }
+        } catch (authError) {
+          console.warn('Failed to fetch user from server:', authError);
+          throw new Error('No authenticated user found and unable to fetch from server');
+        }
+      }
+
       if (!currentUser) {
         throw new Error('No authenticated user found');
       }
@@ -327,25 +398,42 @@ export class ChatbotService {
   }
 
   private initializeChat(): void {
-    if (!this.userContext || this.functionDeclarations.length === 0) return;
+    if (!this.userContext) {
+      console.error('Cannot initialize chat: userContext is null');
+      return;
+    }
+    
+    if (this.functionDeclarations.length === 0) {
+      console.error('Cannot initialize chat: functionDeclarations is empty');
+      return;
+    }
 
-    const availableFunctions = this.functionDeclarations
-      .filter(func => func.roles.some(role => this.userContext!.roles.includes(role)))
-      .map(func => ({
-        name: func.name,
-        description: func.description,
-        parametersJsonSchema: func.parametersJsonSchema
-      }));
+    try {
+      const availableFunctions = this.functionDeclarations
+        .filter(func => func.roles.some(role => this.userContext!.roles.includes(role)))
+        .map(func => ({
+          name: func.name,
+          description: func.description,
+          parametersJsonSchema: func.parametersJsonSchema
+        }));
 
-    this.currentChat = this.genAI.chats.create({
-      model: 'gemini-2.0-flash-001',
-      config: {
-        tools: availableFunctions.length > 0 ? [{ functionDeclarations: availableFunctions }] : undefined,
-        systemInstruction: this.getSystemInstruction()
-      }
-    });
+      this.currentChat = this.genAI.chats.create({
+        model: 'gemini-2.0-flash-001',
+        config: {
+          tools: availableFunctions.length > 0 ? [{ functionDeclarations: availableFunctions }] : undefined,
+          systemInstruction: this.getSystemInstruction()
+        }
+      });
 
-    this.currentSessionId = this.generateSessionId();
+      this.currentSessionId = this.generateSessionId();
+      console.log('Chat initialized successfully with session ID:', this.currentSessionId);
+    } catch (error) {
+      console.error('Failed to initialize chat:', error);
+      this.chatStateSubject.next({
+        ...this.chatStateSubject.value,
+        error: 'Failed to initialize chat session'
+      });
+    }
   }
 
   private getSystemInstruction(): string {
@@ -371,6 +459,24 @@ Current user context:
   }
 
   public async sendMessage(message: string): Promise<void> {
+    // Ensure chatbot is initialized before sending
+    try {
+      await this.ensureInitialized();
+    } catch (error) {
+      throw new Error('Failed to initialize chatbot before sending message');
+    }
+
+    // Check session health before sending
+    const health = this.getChatSessionHealth();
+    if (!health.isHealthy) {
+      console.warn('Chat session unhealthy, attempting recovery:', health.issues);
+      try {
+        await this.forceReinitialize();
+      } catch (error) {
+        throw new Error('Chat session is broken and could not be recovered');
+      }
+    }
+
     if (!this.currentChat || !this.userContext) {
       throw new Error('Chatbot not initialized');
     }
@@ -1056,6 +1162,7 @@ Current user context:
   }
 
   private setLoading(isLoading: boolean): void {
+    console.log('Setting loading state to:', isLoading);
     this.chatStateSubject.next({
       ...this.chatStateSubject.value,
       isLoading
@@ -1073,11 +1180,68 @@ Current user context:
   // Public methods for component interaction
   public clearChat(): void {
     this.messagesSubject.next([]);
-    this.initializeChat();
+    
+    // Reset loading state
+    this.setLoading(false);
+    
+    // Only reinitialize chat if we're already initialized
+    if (this.chatStateSubject.value.isInitialized) {
+      // Ensure we have the necessary state before reinitializing
+      if (!this.userContext || this.functionDeclarations.length === 0) {
+        console.warn('Chat state incomplete during clearChat, forcing reinitialization...');
+        this.forceReinitialize().catch(error => {
+          console.error('Failed to reinitialize service during clearChat:', error);
+          this.chatStateSubject.next({
+            ...this.chatStateSubject.value,
+            error: 'Failed to reinitialize chat service'
+          });
+        });
+      } else {
+        this.initializeChat();
+      }
+    }
   }
 
   public getChatHistory(): ChatMessage[] {
     return this.messagesSubject.value;
+  }
+
+  public forceReinitialize(): Promise<void> {
+    console.log('Force reinitializing chatbot service...');
+    
+    // Reset state
+    this.chatStateSubject.next({
+      isInitialized: false,
+      isLoading: false,
+      error: undefined
+    });
+    this.userContext = null;
+    this.functionDeclarations = [];
+    this.currentChat = null;
+    
+    // Force reinitialization
+    return this.ensureInitialized();
+  }
+
+  public getChatSessionHealth(): { isHealthy: boolean; issues: string[] } {
+    const issues: string[] = [];
+    
+    if (!this.userContext) {
+      issues.push('User context is missing');
+    }
+    
+    if (this.functionDeclarations.length === 0) {
+      issues.push('Function declarations are empty');
+    }
+    
+    if (!this.currentChat) {
+      issues.push('Chat session is not initialized');
+    }
+    
+    return {
+      isHealthy: issues.length === 0,
+      issues
+    };
   }
 
   public getQuickActions(): QuickAction[] {
