@@ -837,21 +837,21 @@ Current user context:
 
       const leaveRequestTypeId = matchingType.id;
 
+      // Use employee-specific service to create request as pending
       const requestData = {
-        userId: this.userContext!.userId,
         leaveRequestTypeId: leaveRequestTypeId,
         startDate: startDate,
         endDate: endDate,
         reason: reason
       };
 
-      const response = await this.leaveRequestsService.addLeaveRequest(requestData).toPromise();
+      const response = await this.leaveRequestService.addLeaveRequestByEmployee(requestData).toPromise();
 
       if (response?.success) {
         return {
           success: true,
           data: response.data,
-          message: `Leave request created successfully for ${startDate} to ${endDate}`
+          message: `Leave request created successfully for ${startDate} to ${endDate}. Status: Pending approval.`
         };
       } else {
         return {
