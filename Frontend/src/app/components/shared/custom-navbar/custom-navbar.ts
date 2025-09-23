@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/authService/auth';
+import { HttpClient } from '@angular/common/http';
 
 interface UserRole {
   name: string;
@@ -29,15 +30,17 @@ export class CustomNavbar implements OnInit {
   impersonatedUserEmail: string = '';
   impersonatedRoles: string[] = [];
   impersonatedRolesDetailed: UserRole[] = [];
+  appVersion: string = 'v2.0.0'; // GitHub version - will be updated automatically
   
   originalAdminRoles: string[] = [];
   originalAdminRolesDetailed: UserRole[] = [];
   isCurrentlyImpersonating = false;
 
-  constructor(private router: Router, private authService: Auth) { }
+  constructor(private router: Router, private authService: Auth, private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadUserData();
+    this.loadGitHubVersion();
     
     // Subscribe to impersonation info changes
     this.authService.impersonation$.subscribe(info => {
@@ -264,6 +267,19 @@ export class CustomNavbar implements OnInit {
       this.showHomeButton = false;
       this.userEmail = '';
     }
+  }
+
+  private loadGitHubVersion(): void {
+    this.http.get<any>('https://api.github.com/repos/dezGusty/mgmt-sim-25/releases/latest').subscribe({
+      next: (release) => {
+        if (release && release.tag_name) {
+          this.appVersion = release.tag_name;
+        }
+      },
+      error: (error) => {
+        console.log('Could not fetch GitHub version, using default:', this.appVersion);
+      }
+    });
   }
 
   private loadOriginalAdminEmail(): void {
