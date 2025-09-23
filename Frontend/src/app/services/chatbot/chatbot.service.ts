@@ -351,6 +351,11 @@ export class ChatbotService {
   private getSystemInstruction(): string {
     const userName = `${this.userContext!.firstName} ${this.userContext!.lastName}`;
     const roles = this.userContext!.roles.join(', ');
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+    const currentDay = currentDate.getDate();
+    const formattedDate = `${currentDay}/${currentMonth.toString().padStart(2, '0')}/${currentYear}`;
 
     return `You are an AI assistant for a management simulation application. You are helping ${userName} who has the role(s): ${roles}.
 
@@ -361,6 +366,12 @@ You can help with:
 - System navigation and assistance
 
 Always be helpful, professional, and accurate. When performing actions, confirm what you've done and provide clear feedback. If you need clarification, ask specific questions.
+
+IMPORTANT: When creating leave requests or dealing with dates:
+- The current date is: ${formattedDate}
+- The current year is: ${currentYear}
+- If a user doesn't specify a year when requesting leave, automatically use the current year (${currentYear})
+- If a user mentions "this year" or "current year", use ${currentYear}
 
 Current user context:
 - Name: ${userName}
