@@ -1,4 +1,4 @@
-/* Project Management View Styles - Enhanced Modern Design */
+/* Project Management View Styles - Enhanced Modern Design Updated v3 - FORCE REFRESH */
 
 /* Enhanced card hover animations with glass morphism */
 .project-card {
@@ -587,21 +587,21 @@
 
 /* Simple Button Styling - Same as Leave Management Details Button */
 .dark-rainbow-button {
-  background: linear-gradient(to right, #10b981, #06b6d4); /* from-emerald-500 to-cyan-600 */
-  color: white;
-  border: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to right, #10b981, #06b6d4) !important; /* from-emerald-500 to-cyan-600 */
+  color: white !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
 .dark-rainbow-button:hover {
-  background: linear-gradient(to right, #4b5563, #0891b2); /* from-gray-600 to-cyan-700 */
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to right, #059669, #0891b2) !important; /* from-emerald-600 to-cyan-700 */
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
 }
 
 .dark-rainbow-button:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.98) !important;
 }
 
 .parallax-bg {
@@ -814,11 +814,15 @@
 
 .progress-bar-enhanced {
   background: linear-gradient(90deg, 
-    rgba(16, 185, 129, 0.1) 0%, 
-    rgba(6, 182, 212, 0.1) 100%);
+    rgba(226, 232, 240, 0.8) 0%, 
+    rgba(241, 245, 249, 0.6) 100%);
   border-radius: 9999px;
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 
+    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .progress-bar-enhanced::before {
@@ -830,26 +834,34 @@
   bottom: 0;
   background: linear-gradient(90deg, 
     transparent 0%,
-    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.3) 50%,
     transparent 100%);
-  animation: progressShine 2s ease-in-out infinite;
+  animation: progressShine 3s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .icon-container {
   background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.1) 0%, 
-    rgba(6, 182, 212, 0.1) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+    rgba(16, 185, 129, 0.15) 0%, 
+    rgba(6, 182, 212, 0.15) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .icon-container:hover {
   background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.2) 0%, 
-    rgba(6, 182, 212, 0.2) 100%);
-  transform: scale(1.1) rotate(5deg);
+    rgba(16, 185, 129, 0.25) 0%, 
+    rgba(6, 182, 212, 0.25) 100%);
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .status-badge-enhanced {
@@ -859,6 +871,9 @@
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .status-badge-enhanced::after {
@@ -868,9 +883,16 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: transform 0.6s ease;
   transform: rotate(-45deg) translateX(-100%);
+}
+
+.status-badge-enhanced:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .status-badge-enhanced:hover::after {
@@ -887,4 +909,31 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Enhanced number display in stats */
+.stats-number {
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.1) 0%, 
+    rgba(6, 182, 212, 0.05) 100%);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: all 0.2s ease;
+}
+
+.stats-number:hover {
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.15) 0%, 
+    rgba(6, 182, 212, 0.1) 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: scale(1.02);
+}
+
+/* Enhanced modal title */
+.modal-title-enhanced {
+  background: linear-gradient(135deg, #374151, #1f2937);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

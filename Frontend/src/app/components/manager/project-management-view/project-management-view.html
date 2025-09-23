@@ -522,7 +522,7 @@
             </svg>
           </div>
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ selectedProject.name || 'Unnamed Project' }}</h2>
+            <h2 class="modal-title-enhanced text-2xl font-bold">{{ selectedProject.name || 'Unnamed Project' }}</h2>
             <p class="text-sm text-gray-500">Project Details & Information</p>
           </div>
         </div>
@@ -566,7 +566,7 @@
             </svg>
             <span class="text-sm font-semibold text-gray-600">Start Date</span>
           </div>
-          <span class="text-lg font-bold text-gray-900">{{ formatDate(selectedProject.startDate) }}</span>
+          <span class="stats-number text-lg font-bold text-gray-900">{{ formatDate(selectedProject.startDate) }}</span>
         </div>
 
         <div class="stats-grid-item rounded-xl p-4">
@@ -576,7 +576,7 @@
             </svg>
             <span class="text-sm font-semibold text-gray-600">End Date</span>
           </div>
-          <span class="text-lg font-bold text-gray-900">{{ formatDate(selectedProject.endDate) }}</span>
+          <span class="stats-number text-lg font-bold text-gray-900">{{ formatDate(selectedProject.endDate) }}</span>
         </div>
 
         <div class="stats-grid-item rounded-xl p-4">
@@ -586,7 +586,7 @@
             </svg>
             <span class="text-sm font-semibold text-gray-600">Budget FTEs</span>
           </div>
-          <span class="text-lg font-bold text-amber-600">{{ selectedProject.budgetedFTEs }}</span>
+          <span class="stats-number text-lg font-bold text-amber-600">{{ selectedProject.budgetedFTEs }}</span>
         </div>
 
         <div class="stats-grid-item rounded-xl p-4">
@@ -596,7 +596,7 @@
             </svg>
             <span class="text-sm font-semibold text-gray-600">Assigned Users</span>
           </div>
-          <span class="text-lg font-bold text-emerald-600">{{ selectedProject.assignedUsersCount }}</span>
+          <span class="stats-number text-lg font-bold text-emerald-600">{{ selectedProject.assignedUsersCount }}</span>
         </div>
 
         <div class="stats-grid-item rounded-xl p-4">
@@ -606,7 +606,7 @@
             </svg>
             <span class="text-sm font-semibold text-gray-600">Total Allocation</span>
           </div>
-          <span class="text-lg font-bold text-cyan-600">{{ formatPercentage(selectedProject.totalAssignedPercentage) }}</span>
+          <span class="stats-number text-lg font-bold text-cyan-600">{{ formatPercentage(selectedProject.totalAssignedPercentage) }}</span>
         </div>
       </div>
 
