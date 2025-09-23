@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday, IPagedResponse } from '../../services/hr/hr.service';
 import { HolidayCalendarComponent } from './calendar/holiday-calendar.component';
 import { WeekendManagementComponent } from './weekend-management/weekend-management.component';
@@ -20,7 +21,7 @@ interface HrRecord {
   selector: 'app-hr',
   templateUrl: './hr.html',
   styleUrl: './hr.css',
-  imports: [CommonModule, FormsModule, CustomNavbar, HolidayCalendarComponent, WeekendManagementComponent]
+  imports: [CommonModule, FormsModule, CustomNavbar, ChatbotComponent, HolidayCalendarComponent, WeekendManagementComponent]
 })
 export class Hr {
   records: HrRecord[] = [];

@@ -1,0 +1,233 @@
+<!-- Chatbot Toggle Button -->
+<div class="chatbot-toggle"
+     [class.open]="isOpen"
+     (click)="toggleChatbot()"
+     *ngIf="!isOpen">
+  <svg class="chat-icon" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+  </svg>
+  <span class="tooltip">AI Assistant</span>
+</div>
+
+<!-- Chatbot Container -->
+<div class="chatbot-container"
+     [class.open]="isOpen"
+     [class.minimized]="isMinimized"
+     *ngIf="isOpen">
+
+  <!-- Header -->
+  <div class="chatbot-header">
+    <div class="header-content">
+      <div class="header-info">
+        <h3 class="header-title">AI Assistant</h3>
+        <div class="user-info" *ngIf="userContext">
+          <span class="user-name">{{ getUserDisplayName() }}</span>
+          <span class="user-role">{{ getRoleDisplayName() }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn"
+                (click)="minimizeChatbot()"
+                *ngIf="!isMinimized"
+                title="Minimize">
+          <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M19 13H5v-2h14v2z"/>
+          </svg>
+        </button>
+        <button class="header-btn"
+                (click)="maximizeChatbot()"
+                *ngIf="isMinimized"
+                title="Maximize">
+          <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M19 9h-4V5h-2v4H9v2h4v4h2v-4h4V9z"/>
+          </svg>
+        </button>
+        <button class="header-btn"
+                (click)="clearChat()"
+                title="Clear Chat">
+          <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+        <button class="header-btn close-btn"
+                (click)="closeChatbot()"
+                title="Close">
+          <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="chatbot-content" *ngIf="!isMinimized">
+
+    <!-- Initialization Status -->
+    <div class="initialization-status" *ngIf="!chatbotState.isInitialized">
+      <div class="status-message">
+        <div class="loading-spinner"></div>
+        <span>Initializing AI Assistant...</span>
+      </div>
+      <div class="status-error" *ngIf="chatbotState.error">
+        {{ chatbotState.error }}
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="messages-container"
+         #messagesContainer
+         *ngIf="chatbotState.isInitialized">
+
+      <!-- Welcome Message -->
+      <div class="welcome-message" *ngIf="messages.length === 0 && !chatbotState.isLoading">
+        <div class="welcome-content">
+          <h4>Welcome to your AI Assistant!</h4>
+          <p>I can help you with:</p>
+          <ul>
+            <li *ngIf="userContext?.roles?.includes('Manager')">Managing your team's leave requests</li>
+            <li *ngIf="userContext?.roles?.includes('Manager')">Checking team member vacation balances</li>
+            <li *ngIf="userContext?.roles?.includes('Employee')">Creating and tracking your leave requests</li>
+            <li *ngIf="userContext?.roles?.includes('Employee')">Checking your vacation balance</li>
+            <li *ngIf="userContext?.roles?.includes('Admin')">User statistics and system information</li>
+            <li>General information about the system</li>
+          </ul>
+          <p>Ask me anything or use the quick actions below!</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions" *ngIf="shouldShowQuickActions()">
+        <h5>Quick Actions</h5>
+        <div class="actions-grid">
+          <ng-container *ngFor="let category of getQuickActionsByCategory() | keyvalue">
+            <div class="action-category">
+              <h6>{{ getQuickActionCategoryLabel(category.key) }}</h6>
+              <div class="action-buttons">
+                <button class="quick-action-btn"
+                        *ngFor="let action of category.value"
+                        (click)="sendQuickAction(action)"
+                        [disabled]="chatbotState.isLoading">
+                  <span class="action-icon" *ngIf="action.icon">{{ action.icon }}</span>
+                  {{ action.label }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div class="chat-messages">
+        <div class="message-wrapper"
+             *ngFor="let message of messages; trackBy: trackByMessage">
+
+          <!-- User Message -->
+          <div class="message user-message" *ngIf="isUserMessage(message)">
+            <div class="message-content">
+              <div class="message-text">{{ message.content }}</div>
+              <div class="message-time">{{ getMessageTime(message) }}</div>
+            </div>
+            <div class="message-avatar user-avatar">
+              <span>{{ userContext?.firstName?.charAt(0) || 'U' }}</span>
+            </div>
+          </div>
+
+          <!-- Assistant Message -->
+          <div class="message assistant-message" *ngIf="isAssistantMessage(message)">
+            <div class="message-avatar assistant-avatar">
+              <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="message-content">
+
+              <!-- Loading Message -->
+              <div class="message-loading" *ngIf="isLoading(message)">
+                <div class="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <span>{{ message.content }}</span>
+              </div>
+
+              <!-- Regular Message -->
+              <div class="message-text" *ngIf="!isLoading(message) && !hasError(message)">
+                {{ message.content }}
+              </div>
+
+              <!-- Error Message -->
+              <div class="message-error" *ngIf="hasError(message)">
+                <div class="error-icon">⚠️</div>
+                <div class="error-content">
+                  <div class="error-message">{{ message.content }}</div>
+                  <div class="error-details" *ngIf="message.error">{{ message.error }}</div>
+                </div>
+              </div>
+
+              <!-- Function Call Info -->
+              <div class="function-info" *ngIf="hasFunctionCall(message)">
+                <div class="function-call">
+                  <span class="function-label">Executing:</span>
+                  <span class="function-name">{{ getFunctionCallName(message) }}</span>
+                </div>
+              </div>
+
+              <!-- Function Response Info -->
+              <div class="function-info" *ngIf="hasFunctionResponse(message)">
+                <div class="function-response">
+                  <span class="function-label">Completed:</span>
+                  <span class="function-name">{{ getFunctionResponseName(message) }}</span>
+                </div>
+              </div>
+
+              <div class="message-time">{{ getMessageTime(message) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retry Button -->
+      <div class="retry-section" *ngIf="showRetryButton()">
+        <button class="retry-btn" (click)="retryLastMessage()">
+          <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area" *ngIf="chatbotState.isInitialized">
+      <div class="input-container">
+        <textarea
+          #messageInput
+          class="message-input"
+          [(ngModel)]="currentMessage"
+          (keypress)="onKeyPress($event)"
+          placeholder="Ask me anything..."
+          rows="1"
+          [disabled]="chatbotState.isLoading"></textarea>
+        <button
+          class="send-btn"
+          (click)="sendMessage()"
+          [disabled]="!currentMessage.trim() || chatbotState.isLoading">
+          <svg class="send-icon" fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Input Status -->
+      <div class="input-status" *ngIf="chatbotState.isLoading">
+        <div class="status-indicator">
+          <div class="loading-spinner small"></div>
+          <span>AI is thinking...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

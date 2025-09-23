@@ -5,6 +5,7 @@ import { AddRequests } from './components/add-requests/add-requests';
 import { AddRequestForm } from './components/add-request-form/add-request-form';
 import { Router } from '@angular/router';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { ILeaveRequest } from '../../models/leave-request';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -18,6 +19,7 @@ import { Auth } from '../../services/authService/auth';
     AddRequests,
     AddRequestForm,
     CustomNavbar,
+    ChatbotComponent,
   ],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',

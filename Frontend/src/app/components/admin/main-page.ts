@@ -13,6 +13,7 @@ import { AdminLeaveTypesList } from './admin-leave-request-types-list/admin-leav
 import { AdminAuditLogsList } from './admin-audit-logs-list/admin-audit-logs-list';
 import { AddForm } from './admin-add-form/form/admin-add-form';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 
 @Component({
   selector: 'app-admin-main-page',
@@ -25,7 +26,8 @@ import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
     AdminUserRelationships,
     AdminLeaveTypesList,
     AdminAuditLogsList,
-    AddForm
+    AddForm,
+    ChatbotComponent
   ],
   templateUrl: './main-page.html',
 })
