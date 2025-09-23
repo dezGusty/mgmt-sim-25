@@ -172,24 +172,32 @@ jobs:
         if: steps.version-type.outputs.create_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version-type.outputs.version || github.ref_name }}
-          name: Release v${{ steps.version-type.outputs.version || github.ref_name }}
+          tag_name: v${{ steps.version-type.outputs.version }}
+          name: Release v${{ steps.version-type.outputs.version }}
           body: |
-            ## Management Simulator ${{ github.ref_name }}
+            ## Management Simulator v${{ steps.version-type.outputs.version }}
 
-            ### Docker Images
-            - Backend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ github.ref_name }}`
-            - Frontend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ github.ref_name }}`
+            ### 🚀 Automated Release
+            This release was automatically created for a **MINOR** or **MAJOR** version increment.
 
-            ### Quick Deploy
+            ### 📦 Docker Images
+            - Backend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:v${{ steps.version-type.outputs.version }}`
+            - Frontend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:v${{ steps.version-type.outputs.version }}`
+
+            ### 🚀 Quick Deploy
             ```bash
-            export VERSION=${{ github.ref_name }}
+            export VERSION=v${{ steps.version-type.outputs.version }}
             export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
             docker-compose -f docker-compose.prod.yml up -d
             ```
 
-            ### Changes
+            ### 📝 Changes
             See commit history for detailed changes.
+            
+            ---
+            **Version:** v${{ steps.version-type.outputs.version }}  
+            **Build:** ${{ github.run_number }}  
+            **Commit:** ${{ github.sha }}
           files: |
             artifacts/deploy.sh
             artifacts/docker-compose.prod.yml
