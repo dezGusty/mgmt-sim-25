@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/authService/auth';
+import { HttpClient } from '@angular/common/http';
 
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,16 +14,36 @@ import { AnimatedBackground } from '../shared/animated-background/animated-backg
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
-export class Login {
+export class Login implements OnInit {
 
   email = '';
   password = '';
   errorMessage = '';
+  appVersion: string = 'v2.0.0'; // GitHub version - will be updated automatically
 
   welcomeAnimate = false;
   welcomeName = '';
 
-  constructor(private auth: Auth, private router: Router) { }
+  constructor(private auth: Auth, private router: Router, private http: HttpClient) { }
+
+  ngOnInit(): void {
+    this.loadGitHubVersion();
+  }
+
+  private loadGitHubVersion(): void {
+    // Try to get the latest GitHub release version
+    this.http.get<any>('https://api.github.com/repos/dezGusty/mgmt-sim-25/releases/latest').subscribe({
+      next: (release) => {
+        if (release && release.tag_name) {
+          this.appVersion = release.tag_name;
+        }
+      },
+      error: (error) => {
+        console.log('Could not fetch GitHub version, using default:', this.appVersion);
+        // Keep the default version if GitHub API fails
+      }
+    });
+  }
 
   onLogin() {
     this.errorMessage = '';
