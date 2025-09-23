@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UserRequestForm } from './user-request-form/user-request-form';
 import { UserLeaveBalance } from './user-leave-balance/user-leave-balance';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { LeaveRequestService } from '../../services/leaveRequest/leaveRequest.service';
 import { LeaveRequest } from '../../models/entities/iLeave-request';
 import { ILeaveRequestType } from '../../models/entities/ileave-request-type';
@@ -16,7 +17,7 @@ import { RequestStatus } from '../../models/enums/RequestStatus';
   selector: 'app-user',
   templateUrl: './user.html',
   styleUrl: './user.css',
-  imports: [CommonModule,FormsModule,  UserRequestForm, UserLeaveBalance, CustomNavbar],
+  imports: [CommonModule, FormsModule, UserRequestForm, UserLeaveBalance, CustomNavbar, ChatbotComponent],
 })
 export class User {
   showRequestForm = false;

@@ -64,7 +64,7 @@ export class CustomNavbar implements OnInit {
   }
 
   toggleRoleDropdown(): void {
-    if (this.userRoles.length > 1) {
+    if (this.userRoles.length > 1 || this.isCurrentlyImpersonating) {
       this.showRoleDropdown = !this.showRoleDropdown;
     }
   }

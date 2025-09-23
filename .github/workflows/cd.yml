@@ -1,0 +1,266 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}-backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from file
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(cat VERSION)
+            VERSION="${VERSION}-build.${{ github.run_number }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Generate deployment artifacts
+        run: |
+          mkdir -p artifacts
+          cp docker-compose.prod.yml artifacts/
+          cp VERSION artifacts/
+
+          # Create deployment script
+          cat > artifacts/deploy.sh << 'EOF'
+          #!/bin/bash
+          set -e
+
+          VERSION=${1:-$(cat VERSION)}
+          export VERSION
+          export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+
+          echo "Deploying version: $VERSION"
+
+          # Pull latest images
+          docker-compose -f docker-compose.prod.yml pull
+
+          # Stop existing containers
+          docker-compose -f docker-compose.prod.yml down
+
+          # Start new containers
+          docker-compose -f docker-compose.prod.yml up -d
+
+          # Wait for health checks
+          echo "Waiting for services to be healthy..."
+          sleep 30
+
+          # Verify deployment
+          docker-compose -f docker-compose.prod.yml ps
+          EOF
+
+          chmod +x artifacts/deploy.sh
+
+      - name: Fetch latest tags
+        run: |
+          git fetch --tags --force
+          echo "Latest tags:"
+          git tag --sort=-version:refname | head -5
+
+      - name: Determine version type
+        id: version-type
+        run: |
+          # Extract version - works for both tag push and workflow_run
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            # Direct tag push
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Triggered by tag push: $VERSION"
+          else
+            # Workflow run - need to get latest tag
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+            VERSION=${LATEST_TAG#v}
+            echo "Triggered by workflow_run, latest tag version: $VERSION"
+          fi
+          
+          echo "Processing version: $VERSION"
+          
+          # Check if it's a major or minor version (not patch)
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          echo "Parsed version - MAJOR: $MAJOR, MINOR: $MINOR, PATCH: $PATCH"
+          
+          # Create release only for minor or major versions
+          # (when patch = 0 it means it's minor or major)
+          if [[ "$PATCH" == "0" ]]; then
+            echo "create_release=true" >> $GITHUB_OUTPUT
+            echo "✅ Version $VERSION is major/minor - release will be created"
+          else
+            echo "create_release=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  Version $VERSION is patch - no release will be created"
+          fi
+          
+          # Output version for later steps
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release - if applicable
+        if: steps.version-type.outputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version-type.outputs.version }}
+          name: Release v${{ steps.version-type.outputs.version }}
+          body: |
+            ## Management Simulator v${{ steps.version-type.outputs.version }}
+
+            ### 🚀 Automated Release
+            This release was automatically created for a **MINOR** or **MAJOR** version increment.
+
+            ### 📦 Docker Images
+            - Backend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:v${{ steps.version-type.outputs.version }}`
+            - Frontend: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:v${{ steps.version-type.outputs.version }}`
+
+            ### 🚀 Quick Deploy
+            ```bash
+            export VERSION=v${{ steps.version-type.outputs.version }}
+            export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+            docker-compose -f docker-compose.prod.yml up -d
+            ```
+
+            ### 📝 Changes
+            See commit history for detailed changes.
+            
+            ---
+            **Version:** v${{ steps.version-type.outputs.version }}  
+            **Build:** ${{ github.run_number }}  
+            **Commit:** ${{ github.sha }}
+          files: |
+            artifacts/deploy.sh
+            artifacts/docker-compose.prod.yml
+            artifacts/VERSION
+          draft: false
+          prerelease: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: ${{ (github.event.workflow_run.conclusion == 'success' || github.event_name == 'push') && needs.build-and-push.result == 'success' }}
+    needs: build-and-push
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from file
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(cat VERSION)
+            VERSION="${VERSION}-build.${{ github.run_number }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      - name: Run Trivy vulnerability scanner - Backend
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ steps.version.outputs.version }}
+          format: sarif
+          output: trivy-backend-results.sarif
+
+      - name: Run Trivy vulnerability scanner - Frontend
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.version.outputs.version }}
+          format: sarif
+          output: trivy-frontend-results.sarif
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: hashFiles('trivy-backend-results.sarif') != ''
+        with:
+          sarif_file: trivy-backend-results.sarif
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: hashFiles('trivy-frontend-results.sarif') != ''
+        with:
+          sarif_file: trivy-frontend-results.sarif

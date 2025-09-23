@@ -10,8 +10,10 @@ import { AdminDepartmentsList } from './admin-departments-list/admin-departments
 import { AdminJobTitlesList } from './admin-job-titles-list/admin-job-titles-list'; 
 import { AdminUserRelationships } from './admin-user-relationships/admin-user-relationship-list/admin-user-relationships'; 
 import { AdminLeaveTypesList } from './admin-leave-request-types-list/admin-leave-request-types-list';
+import { AdminAuditLogsList } from './admin-audit-logs-list/admin-audit-logs-list';
 import { AddForm } from './admin-add-form/form/admin-add-form';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 
 @Component({
   selector: 'app-admin-main-page',
@@ -19,11 +21,13 @@ import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
     HttpClientModule,
     CustomNavbar,
     AdminUsersList,
-    AdminDepartmentsList, 
+    AdminDepartmentsList,
     AdminJobTitlesList,
     AdminUserRelationships,
-    AdminLeaveTypesList, 
-    AddForm
+    AdminLeaveTypesList,
+    AdminAuditLogsList,
+    AddForm,
+    ChatbotComponent
   ],
   templateUrl: './main-page.html',
 })

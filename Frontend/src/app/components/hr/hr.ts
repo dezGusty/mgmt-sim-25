@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomNavbar } from '../shared/custom-navbar/custom-navbar';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { HrService, IHrUserDto, PublicHoliday, ImportedPublicHoliday, IPagedResponse } from '../../services/hr/hr.service';
 import { HolidayCalendarComponent } from './calendar/holiday-calendar.component';
 import { WeekendManagementComponent } from './weekend-management/weekend-management.component';
@@ -20,7 +21,7 @@ interface HrRecord {
   selector: 'app-hr',
   templateUrl: './hr.html',
   styleUrl: './hr.css',
-  imports: [CommonModule, FormsModule, CustomNavbar, HolidayCalendarComponent, WeekendManagementComponent]
+  imports: [CommonModule, FormsModule, CustomNavbar, ChatbotComponent, HolidayCalendarComponent, WeekendManagementComponent]
 })
 export class Hr {
   records: HrRecord[] = [];
@@ -52,6 +53,20 @@ export class Hr {
 
   get validImportedHolidaysCount(): number {
     return this.importedHolidays.filter(h => h.isValid).length;
+  }
+
+  // Method to get employee count (excluding loading placeholders)
+  get employeeCount(): number {
+    return this.records.filter(r => r.id !== -1).length;
+  }
+
+  // Method to get user initials safely
+  getUserInitials(name: string | undefined | null): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(n => n.charAt(0))
+      .join('')
+      .toUpperCase();
   }
 
   setActiveTab(tab: 'vacation' | 'holidays' | 'weekends') {

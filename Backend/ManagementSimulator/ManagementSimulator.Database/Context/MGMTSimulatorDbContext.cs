@@ -161,6 +161,30 @@ namespace ManagementSimulator.Database.Context
                 .HasIndex(ph => new { ph.Name, ph.Date })
                 .IsUnique();
 
+            // AuditLog configuration
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                // Indexes for efficient querying
+                entity.HasIndex(a => a.UserId);
+                entity.HasIndex(a => a.EntityType);
+                entity.HasIndex(a => a.EntityId);
+                entity.HasIndex(a => a.Action);
+                entity.HasIndex(a => a.Timestamp);
+                entity.HasIndex(a => new { a.EntityType, a.EntityId });
+                entity.HasIndex(a => new { a.UserId, a.Timestamp });
+
+                // Foreign key relationships
+                entity.HasOne(a => a.User)
+                      .WithMany()
+                      .HasForeignKey(a => a.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(a => a.OriginalUser)
+                      .WithMany()
+                      .HasForeignKey(a => a.OriginalUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -176,5 +200,6 @@ namespace ManagementSimulator.Database.Context
         public DbSet<Project> Projects { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
         public DbSet<PublicHoliday> PublicHolidays { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
     }
 }

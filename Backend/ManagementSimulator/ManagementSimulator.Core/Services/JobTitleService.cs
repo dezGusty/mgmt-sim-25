@@ -50,7 +50,12 @@ namespace ManagementSimulator.Core.Services
 
         public async Task<JobTitleResponseDto> AddJobTitleAsync(CreateJobTitleRequestDto request)
         {
-            JobTitle? jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name!, includeDeleted: true);
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                throw new ArgumentException("Job title name is required.", nameof(request));
+            }
+
+            JobTitle? jt = await _jobTitleRepository.GetJobTitleByNameAsync(request.Name, includeDeleted: true);
             if (jt != null)
             {
                 throw new UniqueConstraintViolationException(nameof(JobTitle), nameof(JobTitle.Name));

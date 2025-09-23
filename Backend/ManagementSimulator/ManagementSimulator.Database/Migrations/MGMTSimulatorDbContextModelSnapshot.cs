@@ -17,6 +17,115 @@ namespace ManagementSimulator.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
 
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AdditionalData")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HttpMethod")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsImpersonating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OriginalUserEmail")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("OriginalUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserRoles")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("EntityType");
+
+                    b.HasIndex("OriginalUserId");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.HasIndex("UserId", "Timestamp");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("ManagementSimulator.Database.Entities.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -495,6 +604,24 @@ namespace ManagementSimulator.Database.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("UserProjects");
+                });
+
+            modelBuilder.Entity("ManagementSimulator.Database.Entities.AuditLog", b =>
+                {
+                    b.HasOne("ManagementSimulator.Database.Entities.User", "OriginalUser")
+                        .WithMany()
+                        .HasForeignKey("OriginalUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ManagementSimulator.Database.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("OriginalUser");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ManagementSimulator.Database.Entities.EmployeeManager", b =>

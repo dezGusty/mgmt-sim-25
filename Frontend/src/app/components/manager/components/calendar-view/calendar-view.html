@@ -1,66 +1,72 @@
 <div
-  class="bg-white rounded-lg shadow-sm border h-full flex flex-col"
+  class="bg-white rounded-2xl shadow-xl border border-gray-100 h-full flex flex-col overflow-hidden"
   [ngClass]="{ 'fixed inset-0 z-50 rounded-none': isFullscreen }"
 >
+  <!-- Modern Header -->
   <div
-    class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#7EE3DB]/10 to-[#88F8BF]/10"
+    class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-emerald-50 via-cyan-50 to-emerald-50"
   >
-    <h2 class="text-2xl font-bold text-slate-900">Employee Calendar</h2>
+    <div class="flex items-center gap-4">
+      <div class="p-3 bg-gradient-to-r from-emerald-500 to-cyan-600 rounded-xl shadow-lg">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900">Employee Calendar</h2>
+        <p class="text-sm text-gray-600 mt-1">Track leave requests and holidays</p>
+      </div>
+    </div>
 
-    <div class="flex items-center gap-3">
-      <button
-        (click)="toggleFilter('pending')"
-        class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
-        [ngClass]="{
-          'bg-gray-200 border-2 border-gray-400 shadow-md':
-            calendarFilters.pending,
-          'bg-gray-100 border border-gray-300 opacity-50':
-            !calendarFilters.pending
-        }"
-      >
-        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
-        <span
+    <div class="flex items-center gap-4">
+      <!-- Modern Filter Buttons -->
+      <div class="flex items-center gap-3">
+        <button
+          (click)="toggleFilter('pending')"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-sm"
           [ngClass]="{
-            'font-semibold text-gray-800': calendarFilters.pending,
-            'text-gray-500': !calendarFilters.pending
+            'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg border-2 border-amber-400':
+              calendarFilters.pending,
+            'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200':
+              !calendarFilters.pending
           }"
-          >Pending</span
         >
-        <span class="text-lg font-bold text-gray-600">?</span>
-      </button>
+          <div class="w-3 h-3 rounded-full border-2" 
+               [ngClass]="{
+                 'bg-white border-white': calendarFilters.pending,
+                 'bg-gray-300 border-gray-400': !calendarFilters.pending
+               }"></div>
+          <span class="font-semibold">Pending</span>
+          <span class="text-lg">⏳</span>
+        </button>
 
-      <button
-        (click)="toggleFilter('approved')"
-        class="flex items-center gap-2 p-1 rounded-lg transition-all duration-200 transform hover:scale-105"
-        [ngClass]="{
-          'bg-gray-200 border-2 border-gray-400 shadow-md':
-            calendarFilters.approved,
-          'bg-gray-100 border border-gray-300 opacity-50':
-            !calendarFilters.approved
-        }"
-      >
-        <div class="w-3 h-3 bg-gray-100 border border-gray-200 rounded"></div>
-        <span
+        <button
+          (click)="toggleFilter('approved')"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-sm"
           [ngClass]="{
-            'font-semibold text-gray-800': calendarFilters.approved,
-            'text-gray-500': !calendarFilters.approved
+            'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg border-2 border-emerald-400':
+              calendarFilters.approved,
+            'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200':
+              !calendarFilters.approved
           }"
-          >Approved</span
         >
-        <span class="text-lg font-bold text-gray-600">✓</span>
-      </button>
+          <div class="w-3 h-3 rounded-full border-2" 
+               [ngClass]="{
+                 'bg-white border-white': calendarFilters.approved,
+                 'bg-gray-300 border-gray-400': !calendarFilters.approved
+               }"></div>
+          <span class="font-semibold">Approved</span>
+          <span class="text-lg">✅</span>
+        </button>
+      </div>
 
+      <!-- Fullscreen Toggle -->
       <button
         (click)="toggleFullscreen()"
-        class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-800"
+        class="p-3 hover:bg-white/50 rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-800 hover:shadow-md"
         [title]="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
       >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             *ngIf="!isFullscreen"
             stroke-linecap="round"
@@ -78,94 +84,109 @@
         </svg>
       </button>
     </div>
-    
-    <div class="flex items-center gap-2 ml-4">
-      <input
-        type="text"
-        [(ngModel)]="employeeSearchTerm"
-        (input)="onEmployeeSearchInput($event)"
-        placeholder="Search employee..."
-        class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-blue-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200"
-        style="min-width: 200px;"
-      />
-    </div>
+  </div>
 
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">Months:</label>
+  <!-- Modern Controls Section -->
+  <div class="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+    <div class="flex items-center justify-between gap-6">
+      <!-- Search -->
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="employeeSearchTerm"
+            (input)="onEmployeeSearchInput($event)"
+            placeholder="Search employee..."
+            class="pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 hover:border-emerald-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200 bg-white"
+            style="min-width: 250px;"
+          />
+        </div>
+      </div>
+
+      <!-- Months Selector -->
+      <div class="flex items-center gap-3">
+        <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Months:
+        </label>
         <select
           [(ngModel)]="displayMonths"
           (ngModelChange)="onMonthsChange($event)"
-          class="px-3 py-1 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-blue-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200"
+          class="px-4 py-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 hover:border-emerald-400 hover:shadow-sm focus:outline-none focus:shadow-md transition-all duration-200 bg-white"
         >
-          <option *ngFor="let months of monthsOptions" [value]="months">
-            {{ months }} {{ months === 1 ? "month" : "months" }}
-          </option>
+          <option value="1">1 Month</option>
+          <option value="2">2 Months</option>
+          <option value="3">3 Months</option>
+          <option value="6">6 Months</option>
+          <option value="12">12 Months</option>
         </select>
       </div>
 
-      <div class="flex items-center gap-1">
+      <!-- Navigation -->
+      <div class="flex items-center gap-2">
         <button
           (click)="previousMonth()"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-3 hover:bg-white/50 rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-800 hover:shadow-md"
+          title="Previous month"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            ></path>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
         </button>
         <button
           (click)="nextMonth()"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-3 hover:bg-white/50 rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-800 hover:shadow-md"
+          title="Next month"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            ></path>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
         </button>
       </div>
     </div>
   </div>
 
-  <div class="p-2 border-b bg-gray-50" *ngIf="legendItems.length > 0">
-    <div class="flex flex-wrap gap-3">
+  <!-- Modern Legend -->
+  <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-cyan-50 border-b border-gray-200">
+    <div class="flex items-center gap-6 flex-wrap">
+      <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Legend:
+      </span>
       <div *ngFor="let item of legendItems" class="flex items-center gap-2">
         <div
-          class="w-4 h-4 rounded border border-gray-300"
+          class="w-4 h-4 rounded-lg border-2 border-white shadow-sm"
           [style.background-color]="item.color"
         ></div>
-        <span class="text-sm text-gray-600">{{ item.title }}</span>
+        <span class="text-sm font-medium text-gray-700">{{ item.title }}</span>
       </div>
     </div>
   </div>
 
-
+  <!-- No Results -->
   <ng-container *ngIf="tableData.length === 0 && employeeSearchTerm.trim().length > 0; else showCalendarTable">
-    <div class="text-center text-gray-500 font-semibold py-8">
-      No employee found
+    <div class="flex flex-col items-center justify-center py-16 px-4">
+      <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6 shadow-inner">
+        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">No employee found</h3>
+      <p class="text-gray-500 text-center max-w-sm">Try adjusting your search criteria.</p>
     </div>
   </ng-container>
+
+  <!-- Modern Calendar Table -->
   <ng-template #showCalendarTable>
     <div
-      class="overflow-x-auto overflow-y-auto scroll-smooth border border-gray-200 rounded-lg select-none"
+      class="overflow-x-auto overflow-y-auto scroll-smooth border border-gray-200 rounded-2xl mx-6 my-4 shadow-inner"
       [ngClass]="{ 'max-h-[600px]': !isFullscreen, 'flex-1': isFullscreen }"
       (wheel)="onWheel($event)"
       style="scrollbar-color: #d1d5db #f9fafb"
@@ -174,78 +195,89 @@
         <thead class="sticky top-0 bg-white z-10">
           <tr>
             <th
-              class="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 font-semibold text-gray-700 min-w-[150px] z-20 text-left cursor-default"
+              class="sticky left-0 bg-gradient-to-r from-emerald-100 to-cyan-100 border border-gray-300 px-4 py-3 font-bold text-gray-800 min-w-[180px] z-20 text-left cursor-default shadow-lg"
             >
-              Employee
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Employee
+              </div>
             </th>
             <ng-container *ngFor="let monthHeader of monthHeaders">
               <th
-                class="border border-gray-300 px-2 py-1 font-semibold text-gray-700 text-center bg-blue-50"
+                class="border border-gray-300 px-4 py-3 font-bold text-gray-800 text-center bg-gradient-to-r from-cyan-100 to-emerald-100 shadow-sm"
                 [attr.colspan]="monthHeader.daysInMonth"
               >
-                {{ monthHeader.month }} {{ monthHeader.year }}
+                <div class="flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  {{ monthHeader.month }} {{ monthHeader.year }}
+                </div>
               </th>
             </ng-container>
           </tr>
           <tr>
             <th
-              class="sticky left-0 bg-gray-100 border border-gray-300 p-1 text-xs text-gray-600 z-20"
+              class="sticky left-0 bg-gradient-to-r from-emerald-50 to-cyan-50 border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-600 z-20 shadow-lg"
             >
               Name
             </th>
             <th
               *ngFor="let date of calendarDates"
-              class="border border-gray-300 p-1 text-xs min-w-[40px]"
+              class="border border-gray-300 p-2 text-xs min-w-[45px] font-semibold"
               [ngClass]="{
-                'bg-blue-400 text-white font-bold border-blue-500': isToday(date),
-                'bg-blue-200 text-blue-800 border-blue-300': !isToday(date) && isWeekend(date),
-                'bg-gray-50 text-gray-600': !isToday(date) && !isWeekend(date)
+                'bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold border-emerald-600 shadow-lg': isToday(date),
+                'bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700': !isToday(date) && !isWeekend(date),
+                'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 font-semibold': isWeekend(date) && !isToday(date)
               }"
             >
               {{ date.getDate() }}
-              <span *ngIf="isWeekend(date)"> 🏠</span>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr
             *ngFor="let employeeData of tableData; let i = index"
-            class="hover:bg-gray-50 text-sm"
+            class="hover:bg-gradient-to-r hover:from-emerald-50 hover:to-cyan-50 text-sm transition-all duration-200"
             [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
           >
             <td
-              class="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium text-gray-800 z-10 text-left cursor-default min-w-[150px]"
+              class="sticky left-0 bg-white border border-gray-300 px-4 py-3 font-semibold text-gray-800 z-10 text-left cursor-default min-w-[180px] shadow-lg"
               [ngClass]="{ 'bg-gray-25': i % 2 === 0 }"
             >
-              {{ employeeData.employee }}
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-r from-emerald-500 to-cyan-600 rounded-full flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">{{ employeeData.employee.charAt(0) }}</span>
+                </div>
+                <span class="font-semibold">{{ employeeData.employee }}</span>
+              </div>
             </td>
             <td
               *ngFor="let dateData of employeeData.dates"
-              class="border border-gray-300 p-1 text-center transition-colors min-w-[40px] h-8 w-10"
+              class="border border-gray-300 p-2 text-center transition-all duration-200 min-w-[45px] h-10 cursor-pointer relative group"
               [ngClass]="{
-                'hover:bg-gray-100': !dateData.hasLeave && !dateData.isHoliday,
-                'cursor-pointer':
-                  dateData.hasLeave && dateData.requests.length > 0,
-                'cursor-default':
-                  !dateData.hasLeave || dateData.requests.length === 0,
-                'opacity-75':
-                  dateData.hasLeave &&
-                  dateData.requests.length > 0 &&
-                  !isDateInHoveredRequest(dateData.date, employeeData.employee),
-                'opacity-100 ring-2 ring-gray-400':
-                  dateData.hasLeave &&
-                  dateData.requests.length > 0 &&
-                  isDateInHoveredRequest(dateData.date, employeeData.employee),
-                'bg-red-100 border-red-200': dateData.isHoliday && !dateData.hasLeave,
-                'bg-red-200 border-red-300': dateData.isHoliday && dateData.hasLeave
+                'hover:bg-gradient-to-r hover:from-emerald-100 hover:to-cyan-100 hover:shadow-md': !dateData.hasLeave && !dateData.isHoliday && !dateData.isWeekend,
+                'hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 hover:shadow-md': !dateData.hasLeave && !dateData.isHoliday && dateData.isWeekend,
+                'cursor-pointer': dateData.hasLeave && dateData.requests.length > 0,
+                'cursor-default': !dateData.hasLeave || dateData.requests.length === 0,
+                'opacity-75': dateData.hasLeave && dateData.requests.length > 0 && !isDateInHoveredRequest(dateData.date, employeeData.employee),
+                'opacity-100 ring-2 ring-emerald-400 shadow-lg': dateData.hasLeave && dateData.requests.length > 0 && isDateInHoveredRequest(dateData.date, employeeData.employee),
+                'bg-gradient-to-r from-red-100 to-rose-100 border-red-200': dateData.isHoliday && !dateData.hasLeave,
+                'bg-gradient-to-r from-red-200 to-rose-200 border-red-300': dateData.isHoliday && dateData.hasLeave,
+                'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200': dateData.isWeekend && !dateData.hasLeave && !dateData.isHoliday,
+                'bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-300': dateData.isWeekend && dateData.hasLeave && !dateData.isHoliday
               }"
               [style.background-color]="
-                dateData.hasLeave && dateData.requests.length > 0 && !dateData.isHoliday
+                dateData.hasLeave && dateData.requests.length > 0 && !dateData.isHoliday && !dateData.isWeekend
                   ? getLeaveTypeColor(dateData.requests[0])
                   : dateData.isHoliday && dateData.hasLeave
                   ? '#fecaca'
                   : dateData.isHoliday
                   ? '#fee2e2'
+                  : dateData.isWeekend && dateData.hasLeave
+                  ? '#dbeafe'
                   : ''
               "
               (click)="onCellClick(employeeData.employee, dateData.date)"
@@ -260,24 +292,39 @@
               <!-- Holiday indicator -->
               <span
                 *ngIf="dateData.isHoliday && (!dateData.hasLeave || dateData.requests.length === 0)"
-                class="text-red-600 font-bold text-lg"
+                class="text-red-600 font-bold text-lg drop-shadow-sm"
                 title="Public Holiday: {{ dateData.holidayName }}"
               >
                 🏛️
               </span>
+              <!-- Weekend indicator -->
+              <span
+                *ngIf="dateData.isWeekend && !dateData.hasLeave && !dateData.isHoliday"
+                class="text-blue-600 font-bold text-sm drop-shadow-sm"
+                title="Weekend Day"
+              >
+                🏠
+              </span>
               <!-- Leave indicator -->
               <span
                 *ngIf="dateData.hasLeave && dateData.requests.length > 0"
-                class="text-lg font-bold text-white text-shadow"
+                class="text-lg font-bold text-white drop-shadow-lg"
               >
                 {{ getStatusIcon(dateData.requests[0].status || 'pending') }}
               </span>
               <!-- Holiday + Leave indicator -->
               <span
                 *ngIf="dateData.isHoliday && dateData.hasLeave && dateData.requests.length > 0"
-                class="text-xs font-bold text-red-800"
+                class="text-xs font-bold text-red-800 drop-shadow-sm"
               >
                 🏛️
+              </span>
+              <!-- Weekend + Leave indicator -->
+              <span
+                *ngIf="dateData.isWeekend && dateData.hasLeave && dateData.requests.length > 0 && !dateData.isHoliday"
+                class="text-xs font-bold text-blue-800 drop-shadow-sm"
+              >
+                🏠
               </span>
             </td>
           </tr>
@@ -286,21 +333,24 @@
     </div>
   </ng-template>
 
+  <!-- Modern Modal -->
   <div
     *ngIf="selectedRequest"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
   >
-    <div class="relative w-full max-w-xl mx-auto">
+    <div class="relative w-full max-w-2xl mx-auto">
       <app-request-detail
         [request]="selectedRequest"
         (approve)="onApprove($event)"
         (reject)="onReject($event)"
       ></app-request-detail>
       <button
-        class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded hover:cursor-pointer transition-all duration-200 transform hover:scale-105"
+        class="absolute top-4 right-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl hover:cursor-pointer transition-all duration-200 transform hover:scale-105 shadow-lg border border-gray-200"
         (click)="closeDetails()"
       >
-        ✕
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
       </button>
     </div>
   </div>

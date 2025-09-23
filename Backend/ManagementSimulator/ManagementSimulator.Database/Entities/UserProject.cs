@@ -9,10 +9,10 @@ namespace ManagementSimulator.Database.Entities
     public class UserProject
     {
         public int UserId { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         public int ProjectId { get; set; }
-        public Project Project { get; set; }
+        public Project Project { get; set; } = null!;
 
         public float TimePercentagePerProject { get; set; }
     }

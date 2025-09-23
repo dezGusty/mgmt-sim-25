@@ -78,6 +78,16 @@ export class RoleSelector implements OnInit {
         const originalRoles = user.OriginalRoles || user.originalRoles || [];
         const isImpersonating = user.IsImpersonating || user.isImpersonating;
         
+        // Set the component's impersonation state
+        this.isImpersonating = isImpersonating;
+        
+        console.log('[RoleSelector] User data loaded:', {
+          isImpersonating: this.isImpersonating,
+          userRoles: userRoles.length,
+          originalRoles: originalRoles.length,
+          userName: this.userName
+        });
+        
         if (isImpersonating) {
           // When impersonating, userRoles should only contain the impersonated user's roles
           this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
@@ -86,11 +96,15 @@ export class RoleSelector implements OnInit {
           // Admin's original roles are shown separately and require stopping impersonation
           this.adminOriginalRoles = originalRoles.map((role: string) => this.mapRoleToInterface(role))
             .filter((role: UserRole | null) => role !== null);
+            
+          // Set impersonated user name for display
+          this.impersonatedUserName = this.userName;
         } else {
           // When not impersonating, show the user's normal roles
           this.userRoles = userRoles.map((role: string) => this.mapRoleToInterface(role))
             .filter((role: UserRole | null) => role !== null);
           this.adminOriginalRoles = [];
+          this.impersonatedUserName = '';
         }
 
         this.isLoading = false;

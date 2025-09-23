@@ -478,9 +478,11 @@ export class CalendarView implements OnInit, OnChanges {
 
     switch (status.toLowerCase()) {
       case 'approved':
-        return '✓';
+        return '✅';
       case 'pending':
-        return '?';
+        return '⏳';
+      case 'rejected':
+        return '❌';
       default:
         return '•';
     }

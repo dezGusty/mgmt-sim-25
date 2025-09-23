@@ -1,0 +1,52 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: mgmt-sim-backend
+    ports:
+      - "5001:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/MGMTSimulator.db
+    volumes:
+      - sqlite_data:/app/data
+    networks:
+      - mgmt-sim-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: mgmt-sim-frontend
+    ports:
+      - "80:80"
+    environment:
+      - API_URL=http://localhost:5001
+    depends_on:
+      - backend
+    networks:
+      - mgmt-sim-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  sqlite_data:
+    driver: local
+
+networks:
+  mgmt-sim-network:
+    driver: bridge
