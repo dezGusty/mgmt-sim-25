@@ -30,7 +30,7 @@ export class CustomNavbar implements OnInit {
   impersonatedUserEmail: string = '';
   impersonatedRoles: string[] = [];
   impersonatedRolesDetailed: UserRole[] = [];
-  appVersion: string = 'v2.0.0'; // GitHub version - will be updated automatically
+  appVersion: string = 'v?.?.?';
   
   originalAdminRoles: string[] = [];
   originalAdminRolesDetailed: UserRole[] = [];
