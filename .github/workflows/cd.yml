@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -129,6 +131,12 @@ jobs:
           EOF
 
           chmod +x artifacts/deploy.sh
+
+      - name: Fetch latest tags
+        run: |
+          git fetch --tags --force
+          echo "Latest tags:"
+          git tag --sort=-version:refname | head -5
 
       - name: Determine version type
         id: version-type
