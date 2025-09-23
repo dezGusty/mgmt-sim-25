@@ -608,4 +608,12 @@ export class ProjectManagementView implements OnInit, OnDestroy {
       return 'text-green-600 font-medium'; // Good capacity - green
     }
   }
+
+  getActiveCount(): number {
+    return this.projects?.filter(project => project.isActive).length || 0;
+  }
+
+  getInactiveCount(): number {
+    return this.projects?.filter(project => !project.isActive).length || 0;
+  }
 }
