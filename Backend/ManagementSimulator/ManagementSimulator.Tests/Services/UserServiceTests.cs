@@ -14,6 +14,7 @@ using ManagementSimulator.Database.Entities;
 using ManagementSimulator.Database.Enums;
 using ManagementSimulator.Database.Repositories.Intefaces;
 using ManagementSimulator.Infrastructure.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
@@ -32,6 +33,8 @@ namespace ManagementSimulator.Tests.Services
         private readonly ILeaveRequestTypeRepository _leaveRequestTypeRepository = Substitute.For<ILeaveRequestTypeRepository>();
         private readonly ILeaveRequestRepository _leaveRequestRepository = Substitute.For<ILeaveRequestRepository>();
         private readonly IAvailabilityService _availabilityService = Substitute.For<IAvailabilityService>();
+        private readonly IAuditService _auditService = Substitute.For<IAuditService>();
+        private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         private readonly IWeekendService _weekendService = Substitute.For<IWeekendService>();
 
         private UserService CreateService()
@@ -49,6 +52,8 @@ namespace ManagementSimulator.Tests.Services
                 _leaveRequestRepository,
                 dbContext,
                 _availabilityService,
+                _auditService,
+                _httpContextAccessor,
                 _weekendService);
         }
 

@@ -15,6 +15,7 @@ using System.Data;
 using ManagementSimulator.Core.Dtos.Responses.LeaveRequest;
 using ManagementSimulator.Database.Enums;
 using ManagementSimulator.Database.Context;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSimulator.Core.Services
@@ -32,6 +33,8 @@ namespace ManagementSimulator.Core.Services
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly MGMTSimulatorDbContext _dbContext;
         private readonly IAvailabilityService _availabilityService;
+        private readonly IAuditService _auditService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWeekendService _weekendService;
 
         public UserService(
@@ -46,6 +49,8 @@ namespace ManagementSimulator.Core.Services
             ILeaveRequestRepository leaveRequestRepository,
             MGMTSimulatorDbContext dbContext,
             IAvailabilityService availabilityService,
+            IAuditService auditService,
+            IHttpContextAccessor httpContextAccessor,
             IWeekendService weekendService)
         {
             _userRepository = userRepository;
@@ -59,6 +64,8 @@ namespace ManagementSimulator.Core.Services
             _leaveRequestRepository = leaveRequestRepository;
             _dbContext = dbContext;
             _availabilityService = availabilityService;
+            _auditService = auditService;
+            _httpContextAccessor = httpContextAccessor;
             _weekendService = weekendService;
         }
 
