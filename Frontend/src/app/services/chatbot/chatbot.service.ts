@@ -19,6 +19,7 @@ import { LeaveRequestService } from '../leaveRequest/leaveRequest.service';
 import { LeaveRequestTypeService } from '../leaveRequestType/leave-request-type-service';
 import { HrService } from '../hr/hr.service';
 import { Auth } from '../authService/auth';
+import { RequestStatus } from '../../models/enums/RequestStatus';
 
 @Injectable({
   providedIn: 'root'
@@ -301,6 +302,23 @@ export class ChatbotService {
       roles: ['Employee'],
       handler: this.handleGetMyLeaveRequests.bind(this)
     });
+
+    this.functionDeclarations.push({
+      name: 'cancelMyLeaveRequest',
+      description: 'Cancel one of my own pending leave requests',
+      parametersJsonSchema: {
+        type: 'object',
+        properties: {
+          requestId: {
+            type: 'number',
+            description: 'The ID of the leave request to cancel'
+          }
+        },
+        required: ['requestId']
+      },
+      roles: ['Employee'],
+      handler: this.handleCancelMyLeaveRequest.bind(this)
+    });
   }
 
   private addAdminFunctions(): void {
@@ -351,6 +369,11 @@ export class ChatbotService {
   private getSystemInstruction(): string {
     const userName = `${this.userContext!.firstName} ${this.userContext!.lastName}`;
     const roles = this.userContext!.roles.join(', ');
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+    const currentDay = currentDate.getDate();
+    const formattedDate = `${currentDay}/${currentMonth.toString().padStart(2, '0')}/${currentYear}`;
 
     return `You are an AI assistant for a management simulation application. You are helping ${userName} who has the role(s): ${roles}.
 
@@ -361,6 +384,12 @@ You can help with:
 - System navigation and assistance
 
 Always be helpful, professional, and accurate. When performing actions, confirm what you've done and provide clear feedback. If you need clarification, ask specific questions.
+
+IMPORTANT: When creating leave requests or dealing with dates:
+- The current date is: ${formattedDate}
+- The current year is: ${currentYear}
+- If a user doesn't specify a year when requesting leave, automatically use the current year (${currentYear})
+- If a user mentions "this year" or "current year", use ${currentYear}
 
 Current user context:
 - Name: ${userName}
@@ -1002,6 +1031,68 @@ Current user context:
     }
   }
 
+  private async handleCancelMyLeaveRequest(args: Record<string, unknown>): Promise<FunctionExecutionResult> {
+    try {
+      const requestId = args['requestId'] as number;
+
+      if (!requestId) {
+        return {
+          success: false,
+          error: 'Request ID is required'
+        };
+      }
+
+      // First, get the user's leave requests to verify ownership and status
+      const userRequestsResponse = await this.leaveRequestService.getCurrentUserLeaveRequests().toPromise();
+
+      if (!userRequestsResponse?.success) {
+        return {
+          success: false,
+          error: 'Failed to retrieve your leave requests for verification'
+        };
+      }
+
+      // Find the specific request
+      const targetRequest = userRequestsResponse.data?.find((request: any) => request.id === requestId);
+
+      if (!targetRequest) {
+        return {
+          success: false,
+          error: 'Leave request not found. Please check the request ID.'
+        };
+      }
+
+      // Check if the request is pending (only pending requests can be cancelled)
+      if (targetRequest.requestStatus !== RequestStatus.PENDING) {
+        const statusName = this.getRequestStatusName(targetRequest.requestStatus);
+        return {
+          success: false,
+          error: `Cannot cancel a ${statusName.toLowerCase()} request. Only pending requests can be cancelled.`
+        };
+      }
+
+      // Cancel the request
+      const cancelResponse = await this.leaveRequestService.cancelLeaveRequestByEmployee(requestId).toPromise();
+
+      return {
+        success: true,
+        data: {
+          cancelledRequestId: requestId,
+          startDate: targetRequest.startDate,
+          endDate: targetRequest.endDate,
+          leaveType: targetRequest.leaveRequestTypeId
+        },
+        message: `Leave request #${requestId} has been successfully cancelled. The request for ${targetRequest.startDate} to ${targetRequest.endDate} is now cancelled.`
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to cancel leave request'
+      };
+    }
+  }
+
   private async handleGetUserStatistics(args: Record<string, unknown>): Promise<FunctionExecutionResult> {
     try {
       const category = args['category'] as string;
@@ -1130,11 +1221,13 @@ Current user context:
 
   private getRequestStatusName(status: number): string {
     switch (status) {
-      case 1: return 'Draft';
-      case 2: return 'Pending';
-      case 3: return 'Denied';
-      case 4: return 'Approved';
-      case 5: return 'Cancelled';
+      case RequestStatus.INVALID_REQUEST_STATUS: return 'Invalid';
+      case RequestStatus.ARRIVED: return 'Arrived';
+      case RequestStatus.PENDING: return 'Pending';
+      case RequestStatus.APPROVED: return 'Approved';
+      case RequestStatus.REJECTED: return 'Rejected';
+      case RequestStatus.EXPIRED: return 'Expired';
+      case RequestStatus.CANCELED: return 'Cancelled';
       default: return 'Unknown';
     }
   }
