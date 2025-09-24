@@ -34,17 +34,17 @@
         <!-- Quick Stats -->
         <div class="hidden lg:flex items-center gap-6">
           <div class="text-center">
-            <div class="text-2xl font-bold text-emerald-600">{{ getActiveCount() }}</div>
+            <div class="text-2xl font-bold text-emerald-600">{{ globalActiveCount }}</div>
             <div class="text-xs text-gray-500 uppercase tracking-wider">Active</div>
           </div>
           <div class="w-px h-10 bg-gray-200"></div>
           <div class="text-center">
-            <div class="text-2xl font-bold text-rose-600">{{ getInactiveCount() }}</div>
+            <div class="text-2xl font-bold text-rose-600">{{ globalInactiveCount }}</div>
             <div class="text-xs text-gray-500 uppercase tracking-wider">Inactive</div>
           </div>
           <div class="w-px h-10 bg-gray-200"></div>
           <div class="text-center">
-            <div class="text-2xl font-bold text-amber-600">{{ totalCount }}</div>
+            <div class="text-2xl font-bold text-amber-600">{{ globalTotalCount }}</div>
             <div class="text-xs text-gray-500 uppercase tracking-wider">Total</div>
           </div>
         </div>

@@ -21,7 +21,39 @@ export class ProjectService {
   constructor(private http: HttpClient) {}
 
   getAllProjects(): Observable<IApiResponse<IProject[]>> {
-    return this.http.get<IApiResponse<IProject[]>>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(response => {
+        // Check if the response is already in IApiResponse format
+        if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+          return response as IApiResponse<IProject[]>;
+        }
+        // If it's a raw array, wrap it in IApiResponse format
+        if (Array.isArray(response)) {
+          return {
+            data: response as IProject[],
+            success: true,
+            message: 'Projects loaded successfully',
+            timestamp: new Date()
+          } as IApiResponse<IProject[]>;
+        }
+        // Fallback case
+        return {
+          data: [],
+          success: false,
+          message: 'Invalid response format',
+          timestamp: new Date()
+        } as IApiResponse<IProject[]>;
+      }),
+      catchError(err => {
+        console.error('getAllProjects error', err);
+        return of({
+          data: [],
+          success: false,
+          message: err?.message || 'Error loading projects',
+          timestamp: new Date()
+        } as IApiResponse<IProject[]>);
+      })
+    );
   }
 
   getFilteredProjects(request: IFilteredProjectsRequest): Observable<IApiResponse<IFilteredApiResponse<IProject>>> {
