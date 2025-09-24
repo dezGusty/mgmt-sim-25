@@ -1721,7 +1721,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     Name = "Digital Transformation Initiative",
                     StartDate = DateTime.UtcNow.AddMonths(-18),
                     EndDate = DateTime.UtcNow.AddMonths(6),
-                    BudgetedFTEs = 12.5f,
+                    BudgetedFTEs = 12.0f,
                     IsActive = true
                 },
                 new() {
@@ -1735,7 +1735,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     Name = "Employee Portal Redesign",
                     StartDate = DateTime.UtcNow.AddMonths(-6),
                     EndDate = DateTime.UtcNow.AddMonths(2),
-                    BudgetedFTEs = 5.5f,
+                    BudgetedFTEs = 5.0f,
                     IsActive = true
                 },
                 new() {
@@ -1777,7 +1777,7 @@ namespace ManagementSimulator.Infrastructure.Seeding
                     Name = "Artificial Intelligence Research Initiative",
                     StartDate = DateTime.UtcNow.AddMonths(-3),
                     EndDate = DateTime.UtcNow.AddMonths(15),
-                    BudgetedFTEs = 4.5f,
+                    BudgetedFTEs = 4.0f,
                     IsActive = true
                 },
                 new() {
@@ -1859,27 +1859,57 @@ namespace ManagementSimulator.Infrastructure.Seeding
             var allUsersForProjects = dbContext.Users.Where(u => !u.Email.StartsWith("test")).ToList();
             var adminUser = allUsersForProjects.FirstOrDefault(u => u.Email == "admin@simulator.com");
 
-            // Create user-project assignments
+            // Create user-project assignments with manually assigned realistic FTE allocations
             var userProjectAssignments = new List<UserProject>();
             var randomAssignment = new Random();
 
-            foreach (var project in allProjects.Where(p => p.IsActive))
+            // Get a list of active projects and available users
+            var activeProjects = allProjects.Where(p => p.IsActive).ToList();
+            var availableUsers = allUsersForProjects.ToList();
+
+            // Manually assign users to projects with realistic FTE allocations
+            // Using 50% and 100% allocations (stored as 50.0f and 100.0f, not 0.5f and 1.0f)
+            var projectAssignments = new Dictionary<string, List<(int userIndex, float allocation)>>
             {
-                var teamSize = randomAssignment.Next(3, Math.Min(8, allUsersForProjects.Count));
-                var projectTeam = allUsersForProjects.OrderBy(x => randomAssignment.Next()).Take(teamSize).ToList();
+                ["Digital Transformation Initiative"] = new() { (0, 100.0f), (1, 100.0f), (2, 100.0f), (3, 100.0f), (4, 50.0f), (5, 50.0f) }, // ~5 FTEs
+                ["Cloud Migration Project"] = new() { (6, 100.0f), (7, 100.0f), (8, 100.0f), (9, 100.0f), (10, 50.0f) }, // ~4.5 FTEs
+                ["Employee Portal Redesign"] = new() { (11, 100.0f), (12, 100.0f), (13, 50.0f), (14, 50.0f) }, // ~3 FTEs
+                ["Customer Data Analytics Platform"] = new() { (15, 100.0f), (16, 100.0f), (17, 100.0f), (18, 100.0f), (19, 100.0f) }, // ~5 FTEs
+                ["Supply Chain Optimization"] = new() { (20, 100.0f), (21, 100.0f), (22, 100.0f), (0, 50.0f) }, // ~3.5 FTEs (reusing user 0)
+                ["Mobile App Development"] = new() { (23, 100.0f), (24, 100.0f), (25, 100.0f), (26, 50.0f) }, // ~3.5 FTEs
+                ["Artificial Intelligence Research Initiative"] = new() { (27, 100.0f), (28, 100.0f), (1, 50.0f) }, // ~2.5 FTEs (reusing user 1)
+                ["Compliance Management System"] = new() { (29, 100.0f), (30, 50.0f), (2, 50.0f) }, // ~2 FTEs (reusing user 2)
+                ["Marketing Automation Platform"] = new() { (31, 100.0f), (32, 100.0f), (3, 50.0f) }, // ~2.5 FTEs (reusing user 3)
+                ["Customer Support Chatbot"] = new() { (33, 100.0f), (34, 50.0f) }, // ~1.5 FTEs
+                ["IoT Sensor Network Implementation"] = new() { (35, 100.0f), (36, 100.0f), (37, 100.0f), (4, 50.0f) }, // ~3.5 FTEs (reusing user 4)
+                ["Blockchain Integration Pilot"] = new() { (38, 100.0f), (39, 50.0f) }, // ~1.5 FTEs
+                ["Legacy System Decommissioning"] = new() { (40, 100.0f), (41, 100.0f), (5, 50.0f) } // ~2.5 FTEs (reusing user 5)
+            };
 
-                foreach (var user in projectTeam)
+            // Apply the manual assignments
+            foreach (var project in activeProjects)
+            {
+                if (projectAssignments.ContainsKey(project.Name))
                 {
-                    var timePercentage = randomAssignment.Next(10, 60) / 100.0f; // 10% to 60%
-
-                    if (!dbContext.UserProjects.Any(up => up.UserId == user.Id && up.ProjectId == project.Id))
+                    var assignments = projectAssignments[project.Name];
+                    
+                    foreach (var (userIndex, allocation) in assignments)
                     {
-                        userProjectAssignments.Add(new UserProject
+                        // Ensure we don't go out of bounds
+                        if (userIndex < availableUsers.Count)
                         {
-                            UserId = user.Id,
-                            ProjectId = project.Id,
-                            TimePercentagePerProject = timePercentage
-                        });
+                            var user = availableUsers[userIndex];
+                            
+                            if (!dbContext.UserProjects.Any(up => up.UserId == user.Id && up.ProjectId == project.Id))
+                            {
+                                userProjectAssignments.Add(new UserProject
+                                {
+                                    UserId = user.Id,
+                                    ProjectId = project.Id,
+                                    TimePercentagePerProject = allocation
+                                });
+                            }
+                        }
                     }
                 }
             }
