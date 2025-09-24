@@ -19,7 +19,7 @@ export class Login implements OnInit {
   email = '';
   password = '';
   errorMessage = '';
-  appVersion: string = 'v2.0.0'; // GitHub version - will be updated automatically
+  appVersion: string = 'v?.?.?'; // GitHub version - will be updated automatically
 
   welcomeAnimate = false;
   welcomeName = '';
