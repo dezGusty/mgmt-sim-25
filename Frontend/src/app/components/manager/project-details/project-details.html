@@ -1,4 +1,4 @@
-<main class="min-h-screen bg-gray-50">
+<main class="project-details-container min-h-screen">
   <custom-navbar></custom-navbar>
 
   <div class="p-6 container mx-auto">
@@ -39,31 +39,31 @@
     <!-- Main Content -->
     <div *ngIf="!isLoading && project" class="space-y-6">
       <!-- Project Information Card -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Project Information</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          <div>
-            <label class="text-sm font-medium text-gray-500">Start Date</label>
-            <p class="text-gray-900">{{ formatDate(project.startDate) }}</p>
+      <div class="project-info-card enhanced-modal rounded-2xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Project Information</h2>
+        <div class="project-info-grid">
+          <div class="project-info-item">
+            <div class="project-info-label">Start Date</div>
+            <div class="project-info-value">{{ formatDate(project.startDate) }}</div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">End Date</label>
-            <p class="text-gray-900">{{ formatDate(project.endDate) }}</p>
+          <div class="project-info-item">
+            <div class="project-info-label">End Date</div>
+            <div class="project-info-value">{{ formatDate(project.endDate) }}</div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Budgeted FTEs</label>
-            <p class="text-gray-900">{{ project.budgetedFTEs }}</p>
+          <div class="project-info-item">
+            <div class="project-info-label">Budgeted FTEs</div>
+            <div class="project-info-value amber">{{ project.budgetedFTEs }}</div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Remaining FTEs</label>
-            <p class="text-gray-900 font-semibold" [ngClass]="calculateRemainingFTEs() <= 0 ? 'text-red-600' : 'text-green-600'">
+          <div class="project-info-item">
+            <div class="project-info-label">Remaining FTEs</div>
+            <div class="project-info-value" [ngClass]="calculateRemainingFTEs() <= 0 ? 'red' : 'emerald'">
               {{ calculateRemainingFTEs().toFixed(2) }}
-            </p>
+            </div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500 block mb-1">Status</label>
-            <span [ngClass]="project.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
-                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+          <div class="project-info-item">
+            <div class="project-info-label">Status</div>
+            <span [ngClass]="project.isActive ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-800 border-slate-200'" 
+                  class="status-badge inline-flex px-4 py-2 text-sm font-bold rounded-xl border">
               {{ project.isActive ? 'Active' : 'Inactive' }}
             </span>
           </div>
@@ -71,46 +71,42 @@
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="bg-white rounded-lg shadow-md">
+      <div class="enhanced-modal rounded-2xl">
         <div class="border-b border-gray-200">
           <nav class="-mb-px flex">
             <button
               (click)="setActiveTab('view')"
-              [class]="activeTab === 'view' 
-                ? 'border-blue-500 text-blue-600 bg-blue-50' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [ngClass]="activeTab === 'view' ? 'vibrant-tab-view' : ''"
+              class="tab-button w-1/4 py-4 px-4 text-center font-bold text-sm"
             >
+              <i class="fas fa-eye mr-2"></i>
               View Employees
             </button>
             <button
               (click)="setActiveTab('edit')"
-              [class]="activeTab === 'edit' 
-                ? 'border-indigo-500 text-indigo-600 bg-indigo-50' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [ngClass]="activeTab === 'edit' ? 'vibrant-tab-edit' : ''"
+              class="tab-button w-1/4 py-4 px-4 text-center font-bold text-sm"
               [disabled]="!canModify"
             >
+              <i class="fas fa-edit mr-2"></i>
               Edit Project
             </button>
             <button
               (click)="setActiveTab('assign')"
-              [class]="activeTab === 'assign' 
-                ? 'border-green-500 text-green-600 bg-green-50' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [ngClass]="activeTab === 'assign' ? 'vibrant-tab-assign' : ''"
+              class="tab-button w-1/4 py-4 px-4 text-center font-bold text-sm"
               [disabled]="!canAssign"
               [title]="!canAssign ? 'Cannot assign employees to inactive projects' : ''"
             >
+              <i class="fas fa-user-plus mr-2"></i>
               Assign Employees
             </button>
             <button
               (click)="setActiveTab('statistics')"
-              [class]="activeTab === 'statistics' 
-                ? 'border-purple-500 text-purple-600 bg-purple-50' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm transition-all duration-200"
+              [ngClass]="activeTab === 'statistics' ? 'vibrant-tab-statistics' : ''"
+              class="tab-button w-1/4 py-4 px-4 text-center font-bold text-sm"
             >
+              <i class="fas fa-chart-bar mr-2"></i>
               Statistics
             </button>
           </nav>
@@ -122,23 +118,31 @@
           <div *ngIf="activeTab === 'view'">
             <!-- View Mode Toggle -->
             <div class="flex items-center justify-between mb-6">
-              <div class="flex gap-2">
+              <div class="flex items-center bg-gray-100 rounded-xl p-1">
                 <button
+                  class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1.5"
+                  [ngClass]="{
+                    'bg-white text-emerald-600 shadow-sm': viewMode === 'table',
+                    'text-gray-600 hover:text-gray-800': viewMode !== 'table'
+                  }"
                   (click)="setViewMode('table')"
-                  [class]="viewMode === 'table' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
-                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
                 >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18m-9 8h9m-9 4h9m-9-8h9m-9 4h9"></path>
+                  </svg>
                   Table View
                 </button>
                 <button
+                  class="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1.5"
+                  [ngClass]="{
+                    'bg-white text-emerald-600 shadow-sm': viewMode === 'cards',
+                    'text-gray-600 hover:text-gray-800': viewMode !== 'cards'
+                  }"
                   (click)="setViewMode('cards')"
-                  [class]="viewMode === 'cards' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-blue-100 text-blue-800 border border-blue-200'"
-                  class="px-3 py-1 rounded font-medium text-sm transition-all duration-200"
                 >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
                   Cards View
                 </button>
               </div>
@@ -163,7 +167,7 @@
                   [value]="searchTerm"
                   (input)="onSearchTermChange($any($event.target).value || '')"
                   placeholder="Search by name or job title..."
-                  class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                  class="enhanced-form-input pl-10 pr-4 py-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full"
                 />
               </div>
             </div>
