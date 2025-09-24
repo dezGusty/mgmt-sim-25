@@ -1713,6 +1713,299 @@ namespace ManagementSimulator.Infrastructure.Seeding
 
             dbContext.LeaveRequests.AddRange(leaveRequests);
             dbContext.SaveChanges();
+
+            // Seed Projects
+            var projects = new List<Project>
+            {
+                new() {
+                    Name = "Digital Transformation Initiative",
+                    StartDate = DateTime.UtcNow.AddMonths(-18),
+                    EndDate = DateTime.UtcNow.AddMonths(6),
+                    BudgetedFTEs = 12.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Cloud Migration Project",
+                    StartDate = DateTime.UtcNow.AddMonths(-12),
+                    EndDate = DateTime.UtcNow.AddMonths(3),
+                    BudgetedFTEs = 8.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Employee Portal Redesign",
+                    StartDate = DateTime.UtcNow.AddMonths(-6),
+                    EndDate = DateTime.UtcNow.AddMonths(2),
+                    BudgetedFTEs = 5.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Cybersecurity Enhancement Program",
+                    StartDate = DateTime.UtcNow.AddMonths(-24),
+                    EndDate = DateTime.UtcNow.AddMonths(-6),
+                    BudgetedFTEs = 6.0f,
+                    IsActive = false
+                },
+                new() {
+                    Name = "Customer Data Analytics Platform",
+                    StartDate = DateTime.UtcNow.AddMonths(-15),
+                    EndDate = DateTime.UtcNow.AddMonths(9),
+                    BudgetedFTEs = 10.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Supply Chain Optimization",
+                    StartDate = DateTime.UtcNow.AddMonths(-8),
+                    EndDate = DateTime.UtcNow.AddMonths(4),
+                    BudgetedFTEs = 7.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Mobile App Development",
+                    StartDate = DateTime.UtcNow.AddMonths(-10),
+                    EndDate = DateTime.UtcNow.AddMonths(1),
+                    BudgetedFTEs = 9.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Enterprise Resource Planning Upgrade",
+                    StartDate = DateTime.UtcNow.AddMonths(-36),
+                    EndDate = DateTime.UtcNow.AddMonths(-18),
+                    BudgetedFTEs = 15.0f,
+                    IsActive = false
+                },
+                new() {
+                    Name = "Artificial Intelligence Research Initiative",
+                    StartDate = DateTime.UtcNow.AddMonths(-3),
+                    EndDate = DateTime.UtcNow.AddMonths(15),
+                    BudgetedFTEs = 4.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Remote Work Infrastructure",
+                    StartDate = DateTime.UtcNow.AddMonths(-30),
+                    EndDate = DateTime.UtcNow.AddMonths(-12),
+                    BudgetedFTEs = 11.0f,
+                    IsActive = false
+                },
+                new() {
+                    Name = "Compliance Management System",
+                    StartDate = DateTime.UtcNow.AddMonths(-4),
+                    EndDate = DateTime.UtcNow.AddMonths(8),
+                    BudgetedFTEs = 3.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Business Intelligence Dashboard",
+                    StartDate = DateTime.UtcNow.AddMonths(-14),
+                    EndDate = DateTime.UtcNow.AddMonths(-2),
+                    BudgetedFTEs = 6.5f,
+                    IsActive = false
+                },
+                new() {
+                    Name = "Marketing Automation Platform",
+                    StartDate = DateTime.UtcNow.AddMonths(-7),
+                    EndDate = DateTime.UtcNow.AddMonths(5),
+                    BudgetedFTEs = 4.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Financial Reporting Modernization",
+                    StartDate = DateTime.UtcNow.AddMonths(-20),
+                    EndDate = DateTime.UtcNow.AddMonths(-8),
+                    BudgetedFTEs = 8.5f,
+                    IsActive = false
+                },
+                new() {
+                    Name = "Customer Support Chatbot",
+                    StartDate = DateTime.UtcNow.AddMonths(-2),
+                    EndDate = DateTime.UtcNow.AddMonths(6),
+                    BudgetedFTEs = 2.5f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "IoT Sensor Network Implementation",
+                    StartDate = DateTime.UtcNow.AddMonths(1),
+                    EndDate = DateTime.UtcNow.AddMonths(18),
+                    BudgetedFTEs = 7.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Blockchain Integration Pilot",
+                    StartDate = DateTime.UtcNow.AddMonths(2),
+                    EndDate = DateTime.UtcNow.AddMonths(14),
+                    BudgetedFTEs = 3.0f,
+                    IsActive = true
+                },
+                new() {
+                    Name = "Legacy System Decommissioning",
+                    StartDate = DateTime.UtcNow.AddMonths(-5),
+                    EndDate = DateTime.UtcNow.AddMonths(3),
+                    BudgetedFTEs = 5.0f,
+                    IsActive = true
+                }
+            };
+
+            foreach (var project in projects)
+            {
+                if (!dbContext.Projects.Any(p => p.Name == project.Name))
+                {
+                    dbContext.Projects.Add(project);
+                }
+            }
+            dbContext.SaveChanges();
+
+            // Get all projects and users for assignments
+            var allProjects = dbContext.Projects.ToList();
+            var allUsersForProjects = dbContext.Users.Where(u => !u.Email.StartsWith("test")).ToList();
+            var adminUser = allUsersForProjects.FirstOrDefault(u => u.Email == "admin@simulator.com");
+
+            // Create user-project assignments
+            var userProjectAssignments = new List<UserProject>();
+            var randomAssignment = new Random();
+
+            foreach (var project in allProjects.Where(p => p.IsActive))
+            {
+                var teamSize = randomAssignment.Next(3, Math.Min(8, allUsersForProjects.Count));
+                var projectTeam = allUsersForProjects.OrderBy(x => randomAssignment.Next()).Take(teamSize).ToList();
+
+                foreach (var user in projectTeam)
+                {
+                    var timePercentage = randomAssignment.Next(10, 60) / 100.0f; // 10% to 60%
+
+                    if (!dbContext.UserProjects.Any(up => up.UserId == user.Id && up.ProjectId == project.Id))
+                    {
+                        userProjectAssignments.Add(new UserProject
+                        {
+                            UserId = user.Id,
+                            ProjectId = project.Id,
+                            TimePercentagePerProject = timePercentage
+                        });
+                    }
+                }
+            }
+
+            dbContext.UserProjects.AddRange(userProjectAssignments);
+            dbContext.SaveChanges();
+
+            // Generate extensive audit logs for admin activities
+            if (adminUser != null)
+            {
+                var auditLogs = new List<AuditLog>();
+                var randomAudit = new Random();
+                var startDate = DateTime.UtcNow.AddMonths(-12);
+                var endDate = DateTime.UtcNow;
+
+                var actions = new[] { "CREATE", "UPDATE", "DELETE", "ASSIGN", "UNASSIGN", "APPROVE", "REJECT", "LOGIN", "LOGOUT", "EXPORT", "IMPORT" };
+                var entityTypes = new[] { "Project", "User", "Department", "LeaveRequest", "UserProject", "Role", "Report", "Settings" };
+                var httpMethods = new[] { "GET", "POST", "PUT", "DELETE", "PATCH" };
+                var endpoints = new[] {
+                    "/api/projects", "/api/users", "/api/departments", "/api/leaverequests",
+                    "/api/userprojects", "/api/roles", "/api/reports", "/api/settings",
+                    "/api/admin/dashboard", "/api/admin/users", "/api/admin/projects"
+                };
+
+                for (int i = 0; i < 800; i++)
+                {
+                    var timestamp = startDate.AddDays(randomAudit.Next(0, (int)(endDate - startDate).TotalDays))
+                                             .AddHours(randomAudit.Next(8, 20)) // Business hours mostly
+                                             .AddMinutes(randomAudit.Next(0, 60));
+
+                    var action = actions[randomAudit.Next(actions.Length)];
+                    var entityType = entityTypes[randomAudit.Next(entityTypes.Length)];
+                    var httpMethod = httpMethods[randomAudit.Next(httpMethods.Length)];
+                    var endpoint = endpoints[randomAudit.Next(endpoints.Length)];
+
+                    var entityId = randomAudit.Next(1, 100);
+                    var entityName = entityType switch
+                    {
+                        "Project" => allProjects.Count > 0 ? allProjects[randomAudit.Next(allProjects.Count)].Name : $"Project {entityId}",
+                        "User" => allUsersForProjects.Count > 0 ? $"{allUsersForProjects[randomAudit.Next(allUsersForProjects.Count)].FirstName} {allUsersForProjects[randomAudit.Next(allUsersForProjects.Count)].LastName}" : $"User {entityId}",
+                        "Department" => departmentsList.Count > 0 ? departmentsList[randomAudit.Next(departmentsList.Count)].Name : $"Department {entityId}",
+                        _ => $"{entityType} {entityId}"
+                    };
+
+                    var description = action switch
+                    {
+                        "CREATE" => $"Created new {entityType.ToLower()}: {entityName}",
+                        "UPDATE" => $"Updated {entityType.ToLower()}: {entityName}",
+                        "DELETE" => $"Deleted {entityType.ToLower()}: {entityName}",
+                        "ASSIGN" => $"Assigned user to {entityType.ToLower()}: {entityName}",
+                        "UNASSIGN" => $"Unassigned user from {entityType.ToLower()}: {entityName}",
+                        "APPROVE" => $"Approved {entityType.ToLower()}: {entityName}",
+                        "REJECT" => $"Rejected {entityType.ToLower()}: {entityName}",
+                        "LOGIN" => "Administrator logged into system",
+                        "LOGOUT" => "Administrator logged out of system",
+                        "EXPORT" => $"Exported {entityType.ToLower()} data",
+                        "IMPORT" => $"Imported {entityType.ToLower()} data",
+                        _ => $"Performed {action.ToLower()} on {entityType.ToLower()}: {entityName}"
+                    };
+
+                    var oldValues = action == "UPDATE" ? $"{{\"name\":\"{entityName}_old\",\"status\":\"active\"}}" : null;
+                    var newValues = action == "CREATE" || action == "UPDATE" ? $"{{\"name\":\"{entityName}\",\"status\":\"active\",\"modifiedBy\":\"admin\"}}" : null;
+
+                    auditLogs.Add(new AuditLog
+                    {
+                        Action = action,
+                        EntityType = entityType,
+                        EntityId = entityId,
+                        EntityName = entityName,
+                        UserId = adminUser.Id,
+                        UserEmail = adminUser.Email,
+                        UserRoles = "Admin,Manager,Employee",
+                        IsImpersonating = false,
+                        HttpMethod = httpMethod,
+                        Endpoint = endpoint,
+                        IpAddress = $"192.168.1.{randomAudit.Next(100, 255)}",
+                        UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                        OldValues = oldValues,
+                        NewValues = newValues,
+                        AdditionalData = $"{{\"sessionId\":\"{Guid.NewGuid()}\",\"requestId\":\"{randomAudit.Next(10000, 99999)}\"}}",
+                        Timestamp = timestamp,
+                        Success = randomAudit.Next(1, 101) <= 95, // 95% success rate
+                        ErrorMessage = randomAudit.Next(1, 101) <= 5 ? "Operation failed due to validation error" : null,
+                        Description = description
+                    });
+                }
+
+                // Add some weekend and after-hours activities for thorough admin coverage
+                for (int i = 0; i < 100; i++)
+                {
+                    var timestamp = startDate.AddDays(randomAudit.Next(0, (int)(endDate - startDate).TotalDays));
+
+                    // Weekend work
+                    if (timestamp.DayOfWeek == DayOfWeek.Saturday || timestamp.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        timestamp = timestamp.AddHours(randomAudit.Next(10, 18));
+                    }
+                    else
+                    {
+                        // After hours work
+                        timestamp = timestamp.AddHours(randomAudit.Next(20, 24));
+                    }
+
+                    auditLogs.Add(new AuditLog
+                    {
+                        Action = "LOGIN",
+                        EntityType = "System",
+                        EntityId = null,
+                        EntityName = "Management Simulator",
+                        UserId = adminUser.Id,
+                        UserEmail = adminUser.Email,
+                        UserRoles = "Admin,Manager,Employee",
+                        IsImpersonating = false,
+                        HttpMethod = "POST",
+                        Endpoint = "/api/auth/login",
+                        IpAddress = $"192.168.1.{randomAudit.Next(100, 255)}",
+                        UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                        Timestamp = timestamp,
+                        Success = true,
+                        Description = "Administrator after-hours system access"
+                    });
+                }
+
+                dbContext.AuditLogs.AddRange(auditLogs);
+                dbContext.SaveChanges();
+            }
         }
     }
 }
