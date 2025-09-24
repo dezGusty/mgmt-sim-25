@@ -80,6 +80,8 @@ AppConfig.Init(app.Configuration);
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MGMTSimulatorDbContext>();
+    dbContext.Database.EnsureCreated();
+    
     //SetupSeed.Seed(dbContext);
     //PopulateSeed.Seed(dbContext);
 }
