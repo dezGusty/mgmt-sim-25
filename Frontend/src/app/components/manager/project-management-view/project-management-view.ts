@@ -71,6 +71,11 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   totalPages: number = 0;
   totalCount: number = 0;
 
+  // Global counts (independent of filters)
+  globalActiveCount: number = 0;
+  globalInactiveCount: number = 0;
+  globalTotalCount: number = 0;
+
   // Sorting
   sortColumn: string = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -94,6 +99,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadGlobalCounts();
     this.loadProjects();
     this.setupSearchSubscription();
   }
@@ -164,6 +170,32 @@ export class ProjectManagementView implements OnInit, OnDestroy {
         this.errorMessage = 'Failed to load projects. Please try again.';
         this.projects = [];
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadGlobalCounts() {
+    // Load all projects to calculate global counts
+    this.projectService.getAllProjects().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const allProjects = response.data;
+          this.globalActiveCount = allProjects.filter(project => project.isActive).length;
+          this.globalInactiveCount = allProjects.filter(project => !project.isActive).length;
+          this.globalTotalCount = allProjects.length;
+        } else {
+          // Fallback to 0 if there's an issue loading global counts
+          this.globalActiveCount = 0;
+          this.globalInactiveCount = 0;
+          this.globalTotalCount = 0;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading global project counts:', error);
+        // Fallback to 0 if there's an error loading global counts
+        this.globalActiveCount = 0;
+        this.globalInactiveCount = 0;
+        this.globalTotalCount = 0;
       }
     });
   }
@@ -243,6 +275,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
 
   onProjectAdded() {
     this.showAddProjectForm = false;
+    this.loadGlobalCounts(); // Reload global counts
     this.loadProjects();
   }
 
@@ -302,6 +335,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
         if (res.success) {
           this.showAddProjectForm = false;
           this.currentPage = 1;
+          this.loadGlobalCounts(); // Reload global counts
           this.loadProjects();
         } else {
           this.errorMessage = res.message || 'Failed to create project';
@@ -388,9 +422,11 @@ export class ProjectManagementView implements OnInit, OnDestroy {
               this.projects[idx] = updated;
             } else {
               this.currentPage = 1;
+              this.loadGlobalCounts(); // Reload global counts
               this.loadProjects();
             }
           } else {
+            this.loadGlobalCounts(); // Reload global counts
             this.loadProjects();
           }
         } else {
@@ -472,6 +508,7 @@ export class ProjectManagementView implements OnInit, OnDestroy {
           this.errorMessage = null;
           this.assignmentWarning = null;
           this.closeAssignForm();
+          this.loadGlobalCounts(); // Reload global counts in case project status changed
           this.loadProjects();
         } else {
           // Check if this is a duplicate assignment error (409 conflict)
@@ -607,13 +644,5 @@ export class ProjectManagementView implements OnInit, OnDestroy {
     } else {
       return 'text-green-600 font-medium'; // Good capacity - green
     }
-  }
-
-  getActiveCount(): number {
-    return this.projects?.filter(project => project.isActive).length || 0;
-  }
-
-  getInactiveCount(): number {
-    return this.projects?.filter(project => !project.isActive).length || 0;
   }
 }
