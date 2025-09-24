@@ -73,9 +73,7 @@ export class HrService {
       params = params.set('department', department);
     }
 
-    return this.http.get<any>(`${this.baseUrl}/users`, { params }).pipe(
-
-    ) as Observable<IPagedResponse<IHrUserDto>>;
+    return this.http.get<IPagedResponse<IHrUserDto>>(`${this.baseUrl}/users`, { params });
   }
 
   adjustVacation(userId: number, days: number): Observable<any> {

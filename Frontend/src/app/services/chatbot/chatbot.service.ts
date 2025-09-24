@@ -638,31 +638,40 @@ Current user context:
     }
   }
 
-  // Function handlers
   private async handleGetUserInfo(args: Record<string, unknown>): Promise<FunctionExecutionResult> {
     try {
       const userName = args['userName'] as string;
+      console.log('getUserInfo called with userName:', userName);
 
       if (!userName) {
-        // Return current user info
         return {
           success: true,
           data: this.userContext,
           message: 'Current user information retrieved successfully'
         };
       }
+      const usersResponse = await this.usersService.getAllUsersIncludeRelationships().toPromise();
+      console.log('All users response:', usersResponse);
 
-      // Search for user by name using HR service
-      const currentYear = new Date().getFullYear();
-      const usersResponse = await this.hrService.getUsers(currentYear, 1, 100).toPromise();
-
-      if (usersResponse?.data) {
-        const matchingUsers = usersResponse.data.filter(user =>
-          user.fullName.toLowerCase().includes(userName.toLowerCase()) ||
-          user.firstName.toLowerCase().includes(userName.toLowerCase()) ||
-          user.lastName.toLowerCase().includes(userName.toLowerCase()) ||
-          user.email.toLowerCase().includes(userName.toLowerCase())
-        );
+      if (usersResponse?.success && usersResponse.data) {
+        const allUsers = usersResponse.data;
+        
+        const matchingUsers = allUsers.filter(user => {
+          const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+          const searchTerm = userName.toLowerCase();
+          
+          return (
+            fullName === searchTerm ||
+            fullName.includes(searchTerm) ||
+            searchTerm.includes(fullName) ||
+            user.firstName.toLowerCase().includes(searchTerm) ||
+            user.lastName.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm) ||
+            `${user.lastName} ${user.firstName}`.toLowerCase().includes(searchTerm)
+          );
+        });
+        
+        console.log(`Found ${matchingUsers.length} matching users for "${userName}"`);
 
         if (matchingUsers.length === 0) {
           return {
@@ -677,7 +686,7 @@ Current user context:
             success: true,
             data: {
               id: user.id,
-              fullName: user.fullName,
+              fullName: `${user.firstName} ${user.lastName}`,
               firstName: user.firstName,
               lastName: user.lastName,
               email: user.email,
@@ -685,12 +694,9 @@ Current user context:
               jobTitle: user.jobTitleName,
               department: user.departmentName,
               isActive: user.isActive,
-              dateOfEmployment: user.dateOfEmployment,
-              totalLeaveDays: user.totalLeaveDays,
-              usedLeaveDays: user.usedLeaveDays,
-              remainingLeaveDays: user.remainingLeaveDays
+              dateOfEmployment: user.dateOfEmployment
             },
-            message: `Found user: ${user.fullName}`
+            message: `Found user: ${user.firstName} ${user.lastName}`
           };
         }
 
@@ -698,9 +704,9 @@ Current user context:
         return {
           success: true,
           data: {
-            matches: matchingUsers.map(user => ({
+            matches: matchingUsers.map((user: any) => ({
               id: user.id,
-              fullName: user.fullName,
+              fullName: `${user.firstName} ${user.lastName}`,
               email: user.email,
               jobTitle: user.jobTitleName,
               department: user.departmentName
@@ -715,9 +721,10 @@ Current user context:
         error: 'Failed to retrieve user data'
       };
     } catch (error) {
+      console.error('Error in getUserInfo:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error occurred while searching for user'
       };
     }
   }
