@@ -55,6 +55,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.chatbotService.chatState$
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
+        console.log('Component received state change:', state);
         this.chatbotState = state;
         this.userContext = state.userContext || null;
         this.cdr.detectChanges();
@@ -90,6 +91,20 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     if (this.isOpen) {
       this.isMinimized = false;
       this.focusMessageInput();
+      // Ensure chatbot is initialized when opened
+      this.ensureInitialized();
+    }
+  }
+
+  private ensureInitialized(): void {
+    if (!this.chatbotState.isInitialized && !this.chatbotState.isLoading) {
+      this.chatbotService.ensureInitialized().then(() => {
+        console.log('Chatbot initialized successfully');
+        this.cdr.detectChanges();
+      }).catch(error => {
+        console.error('Failed to initialize chatbot:', error);
+        this.cdr.detectChanges();
+      });
     }
   }
 
@@ -150,6 +165,19 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   clearChat(): void {
     this.chatbotService.clearChat();
     this.showQuickActions = true;
+  }
+
+  forceReinitialize(): void {
+    // Reset the state first
+    this.chatbotService.clearChat();
+    
+    // Then force reinitialize
+    this.chatbotService.forceReinitialize().then(() => {
+      this.showQuickActions = true;
+      console.log('Chatbot reinitialized successfully');
+    }).catch(error => {
+      console.error('Failed to reinitialize chatbot:', error);
+    });
   }
 
   getMessageTime(message: ChatMessage): string {
@@ -287,5 +315,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   trackByMessage(index: number, message: ChatMessage): string {
     return message.id;
+  }
+
+  hasInitializationError(): boolean {
+    return !!this.chatbotState.error && !this.chatbotState.isInitialized;
+  }
+
+  canRetryInitialization(): boolean {
+    return this.hasInitializationError() && !this.chatbotState.isLoading;
   }
 }
