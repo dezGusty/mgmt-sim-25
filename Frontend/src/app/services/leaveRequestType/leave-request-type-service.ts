@@ -6,12 +6,13 @@ import { IFilteredLeaveRequestTypeRequest } from '../../models/requests/ifiltere
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { HttpParams } from '@angular/common/http';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LeaveRequestTypeService {
-  private baseUrl: string = 'https://localhost:7275/api/leaverequesttype';
+  private baseUrl: string = `${environment.apiUrl}/leaverequesttype`;
 
   constructor(private httpClient: HttpClient) {}
 

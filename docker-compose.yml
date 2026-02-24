@@ -30,7 +30,7 @@ services:
     ports:
       - "80:80"
     environment:
-      - API_URL=http://localhost:5001
+      - API_URL=http://localhost
     depends_on:
       - backend
     networks:

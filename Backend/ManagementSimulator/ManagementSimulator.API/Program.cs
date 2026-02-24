@@ -32,7 +32,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+        policy.WithOrigins(
+                  "http://localhost:4200", "https://localhost:4200",
+                  "http://localhost", "https://localhost",
+                  "http://localhost:80", "https://localhost:443")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -45,8 +48,12 @@ builder.Services.AddAuthentication("Cookies")
         options.LoginPath = "/api/auth/login";
         options.Cookie.Name = "ManagementSimulator.Auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.Always
+            : CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SameSite = builder.Environment.IsDevelopment()
+            ? SameSiteMode.None
+            : SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromHours(12);
         options.SlidingExpiration = true;
         options.Events = new CookieAuthenticationEvents
@@ -82,8 +89,11 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<MGMTSimulatorDbContext>();
     dbContext.Database.EnsureCreated();
     
-    //SetupSeed.Seed(dbContext);
-    //PopulateSeed.Seed(dbContext);
+    SetupSeed.Seed(dbContext);
+    if (dbContext.Departments.Count() <= 1)
+    {
+        PopulateSeed.Seed(dbContext);
+    }
 }
 //Testing - Remove if i forget and is still here
 if (app.Environment.IsDevelopment())
@@ -92,7 +102,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAngular");
 

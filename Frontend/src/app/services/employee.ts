@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable()
 export class EmployeeService {
@@ -9,7 +10,7 @@ export class EmployeeService {
   getEmployees(): Observable<{ id: number; name: string }[]> {
     return this.http
       .get<any>(
-        'https://localhost:7275/api/EmployeeManager/employeesByManager',
+        `${environment.apiUrl}/EmployeeManager/employeesByManager`,
         {
           withCredentials: true,
         }
