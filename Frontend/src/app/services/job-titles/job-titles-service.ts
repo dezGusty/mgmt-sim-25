@@ -6,12 +6,13 @@ import { IFilteredJobTitlesRequest } from '../../models/requests/ifiltered-job-t
 import { HttpParams } from '@angular/common/http';
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { IApiResponse } from '../../models/responses/iapi-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JobTitlesService {
-  private baseUrl: string = 'https://localhost:7275/api/jobtitles';
+  private baseUrl: string = `${environment.apiUrl}/jobtitles`;
 
   constructor(private http: HttpClient) {
 

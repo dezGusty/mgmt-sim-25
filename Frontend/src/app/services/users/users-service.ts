@@ -7,12 +7,13 @@ import { IFilteredUsersRequest } from '../../models/requests/ifiltered-users-req
 import { IFilteredApiResponse } from '../../models/responses/ifiltered-api-response';
 import { HttpParams } from '@angular/common/http';
 import { IApiResponse } from '../../models/responses/iapi-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  private baseUrl: string = 'https://localhost:7275/api/users';
+  private baseUrl: string = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
 

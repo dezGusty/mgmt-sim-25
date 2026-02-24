@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { IApiResponse } from '../../models/responses/iapi-response';
 import { IEmployeeRole } from '../../models/entities/iemployee-role';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeeRolesService {
-  private baseUrl = 'https://localhost:7275/api/employeeRole'
+  private baseUrl = `${environment.apiUrl}/employeeRole`
 
   constructor(private httpClient: HttpClient) {
 

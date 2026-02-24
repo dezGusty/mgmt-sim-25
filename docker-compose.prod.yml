@@ -36,7 +36,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - API_URL=http://backend:5000
+      - API_URL=http://localhost
     depends_on:
       - backend
     networks:
